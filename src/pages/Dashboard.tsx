@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Profile {
   id: string;
@@ -18,6 +19,7 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -120,20 +122,28 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Welcome Message */}
+          {/* AI Assistant Card */}
           <Card className="shadow-lg">
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <h2 className="text-2xl font-bold text-foreground mb-4">
-                  🎉 Welcome to StepUp!
+                  🚀 Ready to Get Started?
                 </h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Your account has been successfully created and you're now logged in. 
-                  This is your dashboard where you'll be able to access all your features and manage your account.
+                <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
+                  Let's personalize your internship journey! Our AI assistant will ask you a few questions 
+                  to understand your profile and help you discover opportunities that match your passions.
                 </p>
-                <div className="mt-6 p-4 bg-primary/10 rounded-lg">
-                  <p className="text-sm text-primary font-medium">
-                    🔧 Dashboard features are coming soon! Stay tuned for updates.
+                <Button 
+                  onClick={() => navigate('/chatbot')}
+                  size="lg"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full font-medium"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Start AI Assistant
+                </Button>
+                <div className="mt-4 p-4 bg-secondary/20 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    ✨ Get personalized internship recommendations in just a few minutes
                   </p>
                 </div>
               </div>
