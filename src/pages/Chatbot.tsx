@@ -23,7 +23,39 @@ const Chatbot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [showProfessionalTransition, setShowProfessionalTransition] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const continueToProfessional = () => {
+    setShowProfessionalTransition(false);
+    setShowChat(true);
+    setIsTyping(true);
+    
+    // Add the professional transition message to chat history
+    const transitionMessage: Message = {
+      id: Date.now().toString(),
+      content: "Thanks! Now let's know you professionally. Help me with all your professional details here",
+      role: 'assistant',
+      timestamp: new Date()
+    };
+    
+    setTimeout(() => {
+      setMessages(prev => [...prev, transitionMessage]);
+      
+      // Ask the first professional question
+      const professionalQuestion: Message = {
+        id: (Date.now() + 1).toString(),
+        content: "To know the best opportunities, which area of interest excites you the most?",
+        role: 'assistant',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, professionalQuestion]);
+      setIsTyping(false);
+    }, 1000);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -84,6 +116,24 @@ const Chatbot = () => {
       }
 
       if (data?.success && data?.response) {
+        // Check if this is the professional transition
+        if (data.response.includes("Now let's know you professionally")) {
+          setTimeout(() => {
+            setShowProfessionalTransition(true);
+            setIsTyping(false);
+          }, 1500);
+          return;
+        }
+
+        // Check if conversation is complete
+        if (data.response.includes("Perfect! You're all set!") || data.response.includes("find the best matches")) {
+          setTimeout(() => {
+            setIsCompleted(true);
+            setIsTyping(false);
+          }, 1500);
+          return;
+        }
+
         setTimeout(() => {
           const botMessage: Message = {
             id: (Date.now() + 1).toString(),
@@ -135,6 +185,27 @@ const Chatbot = () => {
     }
     if (lastBotMessage.includes('Language')) {
       return ['English', 'Tamil', 'Hindi', 'French'];
+    }
+    if (lastBotMessage.includes('area of interest')) {
+      return ['Technology & Digital', 'Creative & Design', 'Marketing & Communication', 'Business & Entrepreneurship', 'Research & Emerging Fields', 'Personal Growth & Soft Skills', 'No Ideas, I want to explore'];
+    }
+    if (lastBotMessage.includes('Technology & Digital')) {
+      return ['Web Dev', 'App Dev', 'Programming', 'Data Science', 'AI/ML', 'UI/UX', 'Cybersecurity', 'Not sure / Add Skills'];
+    }
+    if (lastBotMessage.includes('Creative & Design')) {
+      return ['Graphic Design', 'Video Editing', 'Content Creation', 'Animation', 'Blogging', 'Photography', 'Not sure / Add Skills'];
+    }
+    if (lastBotMessage.includes('Marketing & Communication')) {
+      return ['Digital Marketing', 'Social Media', 'SEO', 'Public Speaking', 'Event Management', 'Not sure / Add Skills'];
+    }
+    if (lastBotMessage.includes('Business & Entrepreneurship')) {
+      return ['Entrepreneurship', 'Sales', 'Teamwork', 'Financial Literacy', 'Project Management', 'Not sure / Add Skills'];
+    }
+    if (lastBotMessage.includes('Personal Growth & Soft Skills')) {
+      return ['Critical Thinking', 'Problem Solving', 'Time Management', 'Creativity', 'Adaptability', 'Teamwork', 'Not sure / Add Skills'];
+    }
+    if (lastBotMessage.includes('looking for right now')) {
+      return ['Courses', 'Internships', 'Job Opportunities', 'Just Exploring'];
     }
     return null;
   };
@@ -196,6 +267,161 @@ const Chatbot = () => {
             <Sparkles className="w-4 h-4 mr-2" />
             Get Started
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (showProfessionalTransition) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-muted flex flex-col items-center justify-center p-6">
+        <div className="text-center max-w-md mx-auto space-y-8">
+          {/* Logo */}
+          <div className="flex justify-center">
+            <div className="grid grid-cols-3 gap-2">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-4 h-4 rounded-full ${
+                    [0, 3, 6].includes(i) ? 'bg-primary' : 'bg-primary/60'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Header */}
+          <div className="space-y-4">
+            <h1 className="text-2xl font-bold text-foreground">
+              Welcome to STEP-UP Internships
+            </h1>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Let's have a quick chat to personalize your internship journey! Our AI assistant
+              will help you discover opportunities that match your passions.
+            </p>
+          </div>
+
+          {/* Bot Avatar */}
+          <div className="relative">
+            <div className="w-32 h-32 mx-auto mb-4 relative">
+              <img 
+                src={chatbotAvatar} 
+                alt="AI Assistant" 
+                className="w-full h-full rounded-full object-cover"
+              />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold text-foreground">
+                Thanks Suresh! Now let's know you professionally
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                Help me with all your professional details here
+              </p>
+            </div>
+          </div>
+
+          {/* Get Started Button */}
+          <Button 
+            onClick={continueToProfessional}
+            size="lg"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full font-medium"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            Get Started
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isCompleted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-muted flex flex-col items-center justify-center p-6">
+        <div className="text-center max-w-2xl mx-auto space-y-8">
+          {/* Logo */}
+          <div className="flex justify-center">
+            <div className="grid grid-cols-3 gap-2">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-4 h-4 rounded-full ${
+                    [0, 3, 6].includes(i) ? 'bg-primary' : 'bg-primary/60'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Header */}
+          <div className="space-y-4">
+            <h1 className="text-2xl font-bold text-foreground">
+              🎉 You're All Set!
+            </h1>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Here's your personalized profile summary:
+            </p>
+          </div>
+
+          {/* Profile Summary */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-center space-x-2">
+              <span className="text-2xl">👋</span>
+              <h2 className="text-xl font-semibold text-foreground">Hello Suresh!</h2>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+              <Card className="p-6 text-center space-y-3">
+                <div className="w-12 h-12 mx-auto bg-red-100 rounded-lg flex items-center justify-center">
+                  <span className="text-2xl">📅</span>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-foreground">5</div>
+                  <div className="text-sm text-muted-foreground">Matching Internships</div>
+                  <div className="text-xs text-muted-foreground">Found in business domain</div>
+                </div>
+              </Card>
+
+              <Card className="p-6 text-center space-y-3">
+                <div className="w-12 h-12 mx-auto bg-teal-100 rounded-lg flex items-center justify-center">
+                  <span className="text-2xl">🏢</span>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-foreground">12</div>
+                  <div className="text-sm text-muted-foreground">Auroville Units</div>
+                  <div className="text-xs text-muted-foreground">Relevant to your skills</div>
+                </div>
+              </Card>
+
+              <Card className="p-6 text-center space-y-3">
+                <div className="w-12 h-12 mx-auto bg-purple-100 rounded-lg flex items-center justify-center">
+                  <span className="text-2xl">🎯</span>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-foreground">3</div>
+                  <div className="text-sm text-muted-foreground">Skill Courses</div>
+                  <div className="text-xs text-muted-foreground">To boost your profile</div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+              <Button 
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full font-medium"
+              >
+                Explore my Dashboard
+              </Button>
+              <Button 
+                variant="outline"
+                size="lg"
+                className="px-8 py-3 rounded-full font-medium"
+              >
+                Update Profile
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     );

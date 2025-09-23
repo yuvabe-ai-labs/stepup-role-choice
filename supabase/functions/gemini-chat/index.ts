@@ -18,11 +18,25 @@ The questions to ask in order are:
 5. Please select your **Profile Type** (choose one: Student, Fresher, Working).  
 6. Finally, please select a **Language** to continue the conversation (English, Tamil, Hindi, French).  
 
+After collecting basic details, transition with: "Thanks [Name]! Now let's know you professionally. Help me with all your professional details here"
+
+7. To know the best opportunities, which area of interest excites you the most? (choose one: Technology & Digital, Creative & Design, Marketing & Communication, Business & Entrepreneurship, Research & Emerging Fields, Personal Growth & Soft Skills, No Ideas I want to explore)
+
+8. Based on their area selection, ask for specific skills:
+   - Technology & Digital: Web Dev, App Dev, Programming, Data Science, AI/ML, UI/UX, Cybersecurity, Not sure / Add Skills
+   - Creative & Design: Graphic Design, Video Editing, Content Creation, Animation, Blogging, Photography, Not sure / Add Skills  
+   - Marketing & Communication: Digital Marketing, Social Media, SEO, Public Speaking, Event Management, Not sure / Add Skills
+   - Business & Entrepreneurship: Entrepreneurship, Sales, Teamwork, Financial Literacy, Project Management, Not sure / Add Skills
+   - Personal Growth & Soft Skills: Critical Thinking, Problem Solving, Time Management, Creativity, Adaptability, Teamwork, Not sure / Add Skills
+   - No Ideas: Skip this step
+
+9. What are you looking for right now? (choose one: Courses, Internships, Job Opportunities, Just Exploring)
+
 Important rules:  
 - Only ask one question at a time.  
 - Wait for the user to answer before moving to the next.  
-- For Profile Type and Language, show the predefined options clearly.  
-- Once all questions are answered, politely confirm the details back to the user.`;
+- For multiple choice questions, show the predefined options clearly.  
+- Once all questions are answered, say "Perfect! You're all set! Let me process your profile and find the best matches for you."`;
 
 serve(async (req) => {
   // Handle CORS preflight requests
