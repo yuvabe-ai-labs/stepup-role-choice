@@ -107,6 +107,12 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Gemini API Error:', response.status, errorText);
+      
+      // Handle quota exceeded error specifically
+      if (response.status === 429) {
+        throw new Error('API_QUOTA_EXCEEDED');
+      }
+      
       throw new Error(`Gemini API Error: ${response.status}`);
     }
 
@@ -128,6 +134,19 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in gemini-chat function:', error);
+    
+    // Handle specific error types
+    if (error.message === 'API_QUOTA_EXCEEDED') {
+      return new Response(JSON.stringify({ 
+        error: 'The AI service has reached its daily limit. Please try again tomorrow or contact support.',
+        success: false,
+        errorType: 'QUOTA_EXCEEDED'
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
     return new Response(JSON.stringify({ 
       error: error.message,
       success: false 

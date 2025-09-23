@@ -185,11 +185,21 @@ const Chatbot = () => {
     } catch (error) {
       console.error('Chat error:', error);
       setIsTyping(false);
-      toast({
-        title: "Error",
-        description: "Sorry, I'm having trouble responding right now.",
-        variant: "destructive",
-      });
+      
+      // Handle quota exceeded error
+      if (error.message && error.message.includes('quota')) {
+        toast({
+          title: "Daily Limit Reached",
+          description: "The AI service has reached its daily limit. Please try again tomorrow.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Sorry, I'm having trouble responding right now.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
