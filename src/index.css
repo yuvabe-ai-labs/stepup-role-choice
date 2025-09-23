@@ -9,39 +9,43 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 218 27% 14%;
+    --foreground: 206 20% 14%;
 
     --card: 0 0% 100%;
-    --card-foreground: 218 27% 14%;
+    --card-foreground: 206 20% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 218 27% 14%;
+    --popover-foreground: 206 20% 14%;
 
-    --primary: 263 70% 62%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 218 89% 60%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 263 15% 95%;
-    --secondary-foreground: 263 70% 62%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 218 11% 29%;
 
-    --muted: 263 15% 96%;
-    --muted-foreground: 218 17% 46%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 218 11% 65%;
 
-    --accent: 263 70% 62%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 218 89% 60%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 218 17% 91%;
-    --input: 218 17% 91%;
-    --ring: 263 70% 62%;
+    --border: 220 13% 82%;
+    --input: 220 13% 82%;
+    --ring: 218 89% 60%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
     
-    /* Custom colors for StepUp */
-    --primary-gradient: linear-gradient(135deg, hsl(263, 70%, 62%), hsl(280, 65%, 58%));
-    --hero-gradient: linear-gradient(135deg, hsl(263, 70%, 62%) 0%, hsl(280, 65%, 58%) 100%);
-    --card-shadow: 0 4px 20px -4px hsl(263 70% 62% / 0.15);
+    /* Design colors matching the specification */
+    --signup-text-primary: 206 20% 14%;    /* #1F2A37 */
+    --signup-text-muted: 218 11% 65%;      /* #9CA3AF */
+    --signup-text-secondary: 218 11% 29%;  /* #4B5563 */
+    --signup-border: 220 13% 82%;          /* #D1D5DB */
+    --signup-button: 218 89% 74%;          /* #76A9FA */
+    --signup-link: 218 89% 60%;            /* #3F83F8 */
+    --signup-card-shadow: 0px 2px 25px rgba(0, 0, 0, 0.15);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
