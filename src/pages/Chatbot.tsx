@@ -16,7 +16,7 @@ interface Message {
   timestamp: Date;
 }
 
-const ChatbotOnboarding = () => {
+const Chatbot = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -153,15 +153,12 @@ const ChatbotOnboarding = () => {
         // Check if conversation is complete
         if (data.response.includes("Perfect! You're all set!") || data.response.includes("find the best matches")) {
           setTimeout(async () => {
-            // Mark onboarding as completed and redirect to course recommendation
+            // Mark onboarding as completed
             try {
               await supabase
                 .from('profiles')
                 .update({ onboarding_completed: true })
                 .eq('user_id', user?.id);
-              
-              // Redirect to course recommendation page
-              navigate('/course-recommendation');
             } catch (error) {
               console.error('Error updating onboarding status:', error);
             }
@@ -576,4 +573,4 @@ const ChatbotOnboarding = () => {
   );
 };
 
-export default ChatbotOnboarding;
+export default Chatbot;

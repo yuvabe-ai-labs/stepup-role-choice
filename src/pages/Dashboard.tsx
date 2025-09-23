@@ -134,12 +134,12 @@ const Dashboard = () => {
                   to understand your profile and help you discover opportunities that match your passions.
                 </p>
                 <Button 
-                  onClick={() => navigate('/course-recommendation')}
+                  onClick={() => navigate('/chatbot')}
                   size="lg"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full font-medium"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
-                  View Recommendations
+                  Start AI Assistant
                 </Button>
                 <div className="mt-4 p-4 bg-secondary/20 rounded-lg">
                   <p className="text-sm text-muted-foreground">
