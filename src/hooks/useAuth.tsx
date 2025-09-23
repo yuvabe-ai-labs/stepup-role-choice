@@ -74,7 +74,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .insert({
             user_id: data.user.id,
             full_name: fullName,
-            role: role
+            role: role,
+            onboarding_completed: false
           });
 
         if (profileError) {

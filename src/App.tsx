@@ -2,8 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
@@ -13,11 +15,47 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Protected Route component
+// Protected Route component with onboarding check
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
   
-  if (loading) {
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      if (user) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('onboarding_completed')
+            .eq('user_id', user.id)
+            .single();
+          
+          setHasCompletedOnboarding(profile?.onboarding_completed || false);
+          
+          // Redirect logic based on onboarding status and current location
+          if (!profile?.onboarding_completed && location.pathname !== '/chatbot') {
+            navigate('/chatbot', { replace: true });
+          } else if (profile?.onboarding_completed && location.pathname === '/chatbot') {
+            navigate('/dashboard', { replace: true });
+          }
+        } catch (error) {
+          console.error('Error checking onboarding status:', error);
+        }
+      }
+      setProfileLoading(false);
+    };
+
+    if (!loading && user) {
+      checkOnboardingStatus();
+    } else {
+      setProfileLoading(false);
+    }
+  }, [user, loading, location.pathname, navigate]);
+  
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-muted flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -27,6 +28,30 @@ const Chatbot = () => {
   const [showProfessionalTransition, setShowProfessionalTransition] = useState(false);
   const [userProfile, setUserProfile] = useState<any>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (profile) {
+            setUserProfile(profile);
+          }
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   const continueToProfessional = () => {
     setShowProfessionalTransition(false);
@@ -127,7 +152,17 @@ const Chatbot = () => {
 
         // Check if conversation is complete
         if (data.response.includes("Perfect! You're all set!") || data.response.includes("find the best matches")) {
-          setTimeout(() => {
+          setTimeout(async () => {
+            // Mark onboarding as completed
+            try {
+              await supabase
+                .from('profiles')
+                .update({ onboarding_completed: true })
+                .eq('user_id', user?.id);
+            } catch (error) {
+              console.error('Error updating onboarding status:', error);
+            }
+            
             setIsCompleted(true);
             setIsTyping(false);
           }, 1500);
@@ -312,7 +347,7 @@ const Chatbot = () => {
             </div>
             <div className="space-y-2">
               <h2 className="text-xl font-semibold text-foreground">
-                Thanks Suresh! Now let's know you professionally
+                Thanks {userProfile.full_name?.split(' ')[0] || 'there'}! Now let's know you professionally
               </h2>
               <p className="text-muted-foreground text-sm">
                 Help me with all your professional details here
@@ -366,7 +401,7 @@ const Chatbot = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-center space-x-2">
               <span className="text-2xl">👋</span>
-              <h2 className="text-xl font-semibold text-foreground">Hello Suresh!</h2>
+              <h2 className="text-xl font-semibold text-foreground">Hello {userProfile.full_name?.split(' ')[0] || 'there'}!</h2>
             </div>
 
             {/* Stats Cards */}
@@ -409,9 +444,10 @@ const Chatbot = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
               <Button 
                 size="lg"
+                onClick={() => navigate('/dashboard')}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full font-medium"
               >
-                Explore my Dashboard
+                Explore Dashboard
               </Button>
               <Button 
                 variant="outline"
