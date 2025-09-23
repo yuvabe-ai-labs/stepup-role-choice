@@ -10,7 +10,8 @@ import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
-import Chatbot from "./pages/Chatbot";
+import ChatbotOnboarding from "./pages/ChatbotOnboarding";
+import CourseRecommendation from "./pages/CourseRecommendation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,11 +36,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           
           setHasCompletedOnboarding(profile?.onboarding_completed || false);
           
-          // Redirect logic based on onboarding status and current location
-          if (!profile?.onboarding_completed && location.pathname !== '/chatbot') {
-            navigate('/chatbot', { replace: true });
-          } else if (profile?.onboarding_completed && location.pathname === '/chatbot') {
-            navigate('/dashboard', { replace: true });
+          // New user flow: redirect to chatbot-onboarding
+          if (!profile?.onboarding_completed) {
+            if (location.pathname !== '/chatbot-onboarding' && location.pathname !== '/course-recommendation') {
+              navigate('/chatbot-onboarding', { replace: true });
+            }
+          } else {
+            // Existing user: redirect to dashboard
+            if (location.pathname === '/chatbot-onboarding' || location.pathname === '/course-recommendation') {
+              navigate('/dashboard', { replace: true });
+            }
           }
         } catch (error) {
           console.error('Error checking onboarding status:', error);
@@ -82,9 +88,14 @@ const App = () => (
                 <Dashboard />
               </ProtectedRoute>
             } />
-            <Route path="/chatbot" element={
+            <Route path="/chatbot-onboarding" element={
               <ProtectedRoute>
-                <Chatbot />
+                <ChatbotOnboarding />
+              </ProtectedRoute>
+            } />
+            <Route path="/course-recommendation" element={
+              <ProtectedRoute>
+                <CourseRecommendation />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
