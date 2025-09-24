@@ -155,12 +155,30 @@ const Chatbot = () => {
           setTimeout(async () => {
             // Mark onboarding as completed
             try {
-              await supabase
+              console.log('Updating onboarding completion for user:', user?.id);
+              const { data: updateData, error: updateError } = await supabase
                 .from('profiles')
                 .update({ onboarding_completed: true })
-                .eq('user_id', user?.id);
+                .eq('user_id', user?.id)
+                .select();
+              
+              if (updateError) {
+                console.error('Error updating onboarding status:', updateError);
+                toast({
+                  title: "Update Error",
+                  description: "Failed to update onboarding status: " + updateError.message,
+                  variant: "destructive",
+                });
+              } else {
+                console.log('Successfully updated onboarding status:', updateData);
+              }
             } catch (error) {
               console.error('Error updating onboarding status:', error);
+              toast({
+                title: "Update Error", 
+                description: "Failed to update onboarding status",
+                variant: "destructive",
+              });
             }
             
             setIsCompleted(true);
@@ -459,15 +477,25 @@ const Chatbot = () => {
                   setIsLoading(true);
                   
                   try {
+                    console.log('Updating onboarding completion for user:', user?.id);
                     // Update onboarding status in database
-                    const { error } = await supabase
+                    const { data: updateData, error } = await supabase
                       .from('profiles')
                       .update({ onboarding_completed: true })
-                      .eq('user_id', user?.id);
+                      .eq('user_id', user?.id)
+                      .select();
                     
                     if (error) {
+                      console.error('Database update error:', error);
+                      toast({
+                        title: "Update Error",
+                        description: "Failed to update onboarding status: " + error.message,
+                        variant: "destructive",
+                      });
                       throw error;
                     }
+                    
+                    console.log('Successfully updated onboarding status:', updateData);
                     
                     // Add delay to ensure database update propagates
                     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -477,8 +505,11 @@ const Chatbot = () => {
                   } catch (error) {
                     console.error('Error updating onboarding status:', error);
                     setIsLoading(false);
-                    // Still navigate even if update fails
-                    navigate('/dashboard', { replace: true });
+                    toast({
+                      title: "Navigation Error",
+                      description: "There was an issue completing onboarding. Please try again.",
+                      variant: "destructive",
+                    });
                   }
                 }}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full font-medium"
