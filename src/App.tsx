@@ -11,6 +11,9 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import Chatbot from "./pages/Chatbot";
+import Internships from "./pages/Internships";
+import Courses from "./pages/Courses";
+import Units from "./pages/Units";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -93,6 +96,21 @@ const App = () => (
             <Route path="/chatbot" element={
               <ProtectedRoute>
                 <Chatbot />
+              </ProtectedRoute>
+            } />
+            <Route path="/internships" element={
+              <ProtectedRoute>
+                <Internships />
+              </ProtectedRoute>
+            } />
+            <Route path="/courses" element={
+              <ProtectedRoute>
+                <Courses />
+              </ProtectedRoute>
+            } />
+            <Route path="/units" element={
+              <ProtectedRoute>
+                <Units />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -1,154 +1,298 @@
-import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { LogOut, User, Sparkles } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ChevronLeft, ChevronRight, Clock, MapPin, Building, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-interface Profile {
-  id: string;
-  full_name: string;
-  role: string;
-  created_at: string;
-}
+import { useState } from 'react';
+import Navbar from '@/components/Navbar';
+import ProfileSidebar from '@/components/ProfileSidebar';
 
 const Dashboard = () => {
-  const { user, signOut } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [currentInternshipIndex, setCurrentInternshipIndex] = useState(0);
+  const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
+  // Mock data for recommendations
+  const recommendedInternships = [
+    {
+      id: '1',
+      title: 'Junior UI Designer',
+      company: 'TechCorp',
+      location: 'Remote',
+      duration: '6 Months - Full Time',
+      postedTime: '1d ago',
+      color: 'bg-green-100 border-green-200',
+      icon: 'Y'
+    },
+    {
+      id: '2', 
+      title: 'Marketing Manager',
+      company: 'Digital Solutions',
+      location: 'New York',
+      duration: '6 Months - Full Time',
+      postedTime: '1w ago',
+      color: 'bg-blue-100 border-blue-200',
+      icon: 'M'
+    },
+    {
+      id: '3',
+      title: 'Managing Director Intern', 
+      company: 'Global Corp',
+      location: 'San Francisco',
+      duration: '6 Months - Full Time',
+      postedTime: '2d ago',
+      color: 'bg-purple-100 border-purple-200',
+      icon: 'G'
+    }
+  ];
 
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
+  const recommendedCourses = [
+    {
+      id: '1',
+      title: 'AI & Machine Learning',
+      provider: 'Tech Academy',
+      gradient: 'bg-gradient-to-br from-blue-900 to-purple-900',
+      displayText: 'Generative AI'
+    },
+    {
+      id: '2',
+      title: 'UI/UX Design',
+      provider: 'Design Institute', 
+      gradient: 'bg-gradient-to-br from-purple-800 to-orange-600',
+      displayText: 'UX UI'
+    },
+    {
+      id: '3',
+      title: 'Full Stack Development',
+      provider: 'Code Masters',
+      gradient: 'bg-gradient-to-br from-cyan-500 to-blue-600',
+      displayText: 'Full Stack Development'
+    }
+  ];
 
-        if (error) {
-          toast({
-            title: "Error loading profile",
-            description: error.message,
-            variant: "destructive",
-          });
-        } else {
-          setProfile(data);
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const heroCards = [
+    {
+      id: '1',
+      title: 'Business Conference Annual Summit',
+      type: 'The Company',
+      speaker: 'Speaker by Abdali Anwole',
+      color: 'bg-gradient-to-r from-blue-100 to-blue-200'
+    },
+    {
+      id: '2',
+      title: 'Online Course',
+      subtitle: 'The Learning Academy',
+      type: 'Educational',
+      color: 'bg-gradient-to-r from-green-100 to-teal-100'
+    },
+    {
+      id: '3',
+      title: 'TAKE YOUR BUSINESS TO NEXT LEVEL',
+      type: 'Business Growth',
+      color: 'bg-gradient-to-r from-purple-100 to-purple-200'
+    }
+  ];
 
-    fetchProfile();
-  }, [user, toast]);
-
-  const handleSignOut = async () => {
-    await signOut();
-    toast({
-      title: "Signed out",
-      description: "You have been successfully signed out.",
-    });
+  const nextInternship = () => {
+    setCurrentInternshipIndex((prev) => 
+      prev === recommendedInternships.length - 1 ? 0 : prev + 1
+    );
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-muted flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-          <p className="text-muted-foreground mt-4">Loading your dashboard...</p>
-        </div>
-      </div>
+  const prevInternship = () => {
+    setCurrentInternshipIndex((prev) => 
+      prev === 0 ? recommendedInternships.length - 1 : prev - 1
     );
-  }
+  };
+
+  const nextCourse = () => {
+    setCurrentCourseIndex((prev) => 
+      prev === recommendedCourses.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const prevCourse = () => {
+    setCurrentCourseIndex((prev) => 
+      prev === 0 ? recommendedCourses.length - 1 : prev - 1
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-muted">
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Welcome to StepUp Dashboard
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Hello {profile?.full_name || user?.email}! 👋
-            </p>
+        <div className="grid lg:grid-cols-4 gap-8">
+          {/* Left Sidebar - Profile */}
+          <div className="lg:col-span-1">
+            <ProfileSidebar />
           </div>
-          <Button onClick={handleSignOut} variant="outline" className="flex items-center space-x-2">
-            <LogOut className="w-4 h-4" />
-            <span>Sign Out</span>
-          </Button>
-        </div>
 
-        {/* Profile Card */}
-        <div className="grid gap-6 max-w-4xl mx-auto">
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <User className="w-5 h-5" />
-                <span>Profile Information</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Full Name</label>
-                  <p className="text-foreground font-medium">{profile?.full_name || 'Not set'}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Email</label>
-                  <p className="text-foreground font-medium">{user?.email}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Role</label>
-                  <p className="text-foreground font-medium capitalize">{profile?.role || 'Not set'}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Member Since</label>
-                  <p className="text-foreground font-medium">
-                    {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : 'Unknown'}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Main Content */}
+          <div className="lg:col-span-3 space-y-8">
+            {/* Hero Section */}
+            <div className="grid md:grid-cols-3 gap-4">
+              {heroCards.map((card) => (
+                <Card key={card.id} className={`${card.color} border-0 shadow-sm`}>
+                  <CardContent className="p-6">
+                    <div className="min-h-[120px] flex flex-col justify-center">
+                      <h3 className="font-bold text-sm mb-2">{card.title}</h3>
+                      {card.subtitle && (
+                        <p className="text-xs text-muted-foreground mb-1">{card.subtitle}</p>
+                      )}
+                      {card.speaker && (
+                        <p className="text-xs text-muted-foreground">{card.speaker}</p>
+                      )}
+                      {card.type && (
+                        <Badge variant="secondary" className="w-fit text-xs mt-2">
+                          {card.type}
+                        </Badge>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-          {/* AI Assistant Card */}
-          <Card className="shadow-lg">
-            <CardContent className="pt-6">
-              <div className="text-center py-8">
-                <h2 className="text-2xl font-bold text-foreground mb-4">
-                  🚀 Ready to Get Started?
-                </h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-                  Let's personalize your internship journey! Our AI assistant will ask you a few questions 
-                  to understand your profile and help you discover opportunities that match your passions.
-                </p>
+            {/* Recommended Internships */}
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold">Recommended for you</h2>
                 <Button 
-                  onClick={() => navigate('/chatbot')}
-                  size="lg"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full font-medium"
+                  variant="link" 
+                  className="text-primary p-0 h-auto"
+                  onClick={() => navigate('/internships')}
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Start AI Assistant
+                  View all
                 </Button>
-                <div className="mt-4 p-4 bg-secondary/20 rounded-lg">
-                  <p className="text-sm text-muted-foreground">
-                    ✨ Get personalized internship recommendations in just a few minutes
-                  </p>
+              </div>
+
+              <div className="relative">
+                <div className="flex items-center space-x-4">
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={prevInternship}
+                    className="flex-shrink-0"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+
+                  <div className="flex-1 grid md:grid-cols-3 gap-4">
+                    {[0, 1, 2].map((offset) => {
+                      const index = (currentInternshipIndex + offset) % recommendedInternships.length;
+                      const internship = recommendedInternships[index];
+                      
+                      return (
+                        <Card key={internship.id} className={`${internship.color} shadow-sm hover:shadow-md transition-shadow cursor-pointer`}>
+                          <CardHeader className="pb-3">
+                            <div className="flex justify-between items-start mb-2">
+                              <Badge variant="secondary" className="text-xs">
+                                {internship.postedTime}
+                              </Badge>
+                              <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center text-background font-bold text-sm">
+                                {internship.icon}
+                              </div>
+                            </div>
+                            <CardTitle className="text-base font-semibold">{internship.title}</CardTitle>
+                          </CardHeader>
+                          
+                          <CardContent className="space-y-3">
+                            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                              <Clock className="w-3 h-3" />
+                              <span>{internship.duration}</span>
+                            </div>
+                            
+                            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                              <MapPin className="w-3 h-3" />
+                              <span>{internship.location}</span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={nextInternship}
+                    className="flex-shrink-0"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </section>
+
+            {/* Advertisement placeholder */}
+            <Card className="bg-gradient-to-r from-blue-100 to-blue-200 border-0">
+              <CardContent className="p-8 text-center">
+                <h3 className="text-lg font-bold mb-2">Advertisement Space</h3>
+                <p className="text-sm text-muted-foreground">Featured content and promotions</p>
+              </CardContent>
+            </Card>
+
+            {/* Certified Courses */}
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold">Certified Courses for you</h2>
+                <Button 
+                  variant="link" 
+                  className="text-primary p-0 h-auto"
+                  onClick={() => navigate('/courses')}
+                >
+                  View all
+                </Button>
+              </div>
+
+              <div className="relative">
+                <div className="flex items-center space-x-4">
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={prevCourse}
+                    className="flex-shrink-0"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+
+                  <div className="flex-1 grid md:grid-cols-3 gap-4">
+                    {[0, 1, 2].map((offset) => {
+                      const index = (currentCourseIndex + offset) % recommendedCourses.length;
+                      const course = recommendedCourses[index];
+                      
+                      return (
+                        <Card key={course.id} className="shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden">
+                          <div className={`h-32 ${course.gradient} flex items-center justify-center`}>
+                            <div className="text-white text-sm font-bold text-center px-4">
+                              {course.displayText}
+                            </div>
+                          </div>
+                          
+                          <CardContent className="p-4">
+                            <h3 className="font-semibold text-sm mb-1">{course.title}</h3>
+                            <p className="text-xs text-muted-foreground">{course.provider}</p>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={nextCourse}
+                    className="flex-shrink-0"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </section>
+          </div>
         </div>
       </div>
     </div>
