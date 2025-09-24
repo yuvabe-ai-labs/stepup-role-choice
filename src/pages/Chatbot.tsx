@@ -454,25 +454,36 @@ const Chatbot = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
               <Button 
                 size="lg"
+                disabled={isLoading}
                 onClick={async () => {
-                  // Ensure onboarding is marked as completed before navigation
+                  setIsLoading(true);
+                  
                   try {
-                    await supabase
+                    // Update onboarding status in database
+                    const { error } = await supabase
                       .from('profiles')
                       .update({ onboarding_completed: true })
                       .eq('user_id', user?.id);
+                    
+                    if (error) {
+                      throw error;
+                    }
+                    
+                    // Add delay to ensure database update propagates
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                     
                     // Navigate to dashboard
                     navigate('/dashboard', { replace: true });
                   } catch (error) {
                     console.error('Error updating onboarding status:', error);
+                    setIsLoading(false);
                     // Still navigate even if update fails
                     navigate('/dashboard', { replace: true });
                   }
                 }}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full font-medium"
               >
-                Explore Dashboard
+                {isLoading ? "Preparing Dashboard..." : "Explore Dashboard"}
               </Button>
               <Button 
                 variant="outline"

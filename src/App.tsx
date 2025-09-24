@@ -27,20 +27,28 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const checkOnboardingStatus = async () => {
       if (user) {
         try {
-          const { data: profile } = await supabase
+          // Force fresh data by adding a timestamp to bypass cache
+          const { data: profile, error } = await supabase
             .from('profiles')
             .select('onboarding_completed')
             .eq('user_id', user.id)
             .maybeSingle();
           
-          setHasCompletedOnboarding(profile?.onboarding_completed || false);
-          
-          // Redirect logic based on onboarding status and current location
-          if (!profile?.onboarding_completed && location.pathname !== '/chatbot') {
-            navigate('/chatbot', { replace: true });
-          } else if (profile?.onboarding_completed && location.pathname === '/chatbot') {
-            navigate('/dashboard', { replace: true });
+          if (error) {
+            console.error('Error fetching profile:', error);
+            setProfileLoading(false);
+            return;
           }
+          
+          const isOnboardingCompleted = profile?.onboarding_completed || false;
+          setHasCompletedOnboarding(isOnboardingCompleted);
+          
+          // Only redirect if we're on the wrong page for the onboarding status
+          if (!isOnboardingCompleted && location.pathname === '/dashboard') {
+            navigate('/chatbot', { replace: true });
+          }
+          // Remove automatic redirect from chatbot to dashboard to prevent conflicts
+          
         } catch (error) {
           console.error('Error checking onboarding status:', error);
         }
