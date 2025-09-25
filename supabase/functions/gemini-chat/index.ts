@@ -80,7 +80,17 @@ serve(async (req) => {
   }
 
   try {
-    const { message, conversationHistory = [], userRole = 'student' } = await req.json();
+    const { message, conversationHistory, userRole } = await req.json();
+
+    if (!userRole) {
+      return new Response(
+        JSON.stringify({ error: 'User role is required' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
     
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {

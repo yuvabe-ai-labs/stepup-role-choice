@@ -25,16 +25,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Handle profile creation after signup
+        // Handle profile creation for OAuth signups
         if (event === 'SIGNED_IN' && session?.user) {
-          setTimeout(() => {
-            // Profile will be created via the signup function
-          }, 0);
+          // Check if profile exists
+          const { data: existingProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .single();
+
+          // If no profile exists (OAuth signup), create one
+          if (!existingProfile) {
+            console.log('No profile found for OAuth user, creating profile...');
+            const userData = session.user.user_metadata;
+            const fullName = userData.full_name || userData.name || 'User';
+            
+            const { data: newProfile, error: profileError } = await supabase
+              .from('profiles')
+              .insert({
+                user_id: session.user.id,
+                full_name: fullName,
+                role: 'student', // Default for OAuth, can be changed during onboarding
+                onboarding_completed: false
+              })
+              .select()
+              .single();
+
+            if (profileError) {
+              console.error('OAuth profile creation failed:', profileError);
+              toast({
+                title: "Profile setup failed",
+                description: "Please try signing in again.",
+                variant: "destructive",
+              });
+            } else {
+              console.log('OAuth profile created successfully:', newProfile);
+            }
+          }
         }
       }
     );
@@ -47,10 +80,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [toast]);
 
   const signUp = async (email: string, password: string, fullName: string, role: string) => {
     try {
+      console.log('Starting signup process for:', email, 'with role:', role);
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
@@ -65,30 +99,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       });
 
-      if (error) return { error };
+      if (error) {
+        console.error('Signup error:', error);
+        return { error };
+      }
 
       // Create profile if user was created successfully
       if (data.user) {
-        const { error: profileError } = await supabase
+        console.log('User created successfully, creating profile...');
+        
+        // Create profile with confirmation
+        const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .insert({
             user_id: data.user.id,
             full_name: fullName,
             role: role,
             onboarding_completed: false
-          });
+          })
+          .select()
+          .single();
 
         if (profileError) {
+          console.error('Profile creation failed:', profileError);
           toast({
             title: "Profile creation failed",
             description: profileError.message,
             variant: "destructive",
           });
+          return { error: profileError };
         }
+        
+        console.log('Profile created successfully:', profileData);
       }
 
       return { error: null };
     } catch (error: any) {
+      console.error('Signup process failed:', error);
       return { error };
     }
   };

@@ -26,7 +26,9 @@ const Chatbot = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [showProfessionalTransition, setShowProfessionalTransition] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>({});
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -34,18 +36,33 @@ const Chatbot = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (user) {
-        try {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', user.id)
-            .maybeSingle();
+        console.log('Fetching profile for user:', user.id);
+        setProfileLoading(true);
+        setProfileError(null);
+        
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching profile:', error);
+          setProfileError('Failed to load profile. Please refresh the page.');
+          setProfileLoading(false);
+        } else if (data) {
+          console.log('Profile fetched successfully:', data);
+          setUserProfile(data);
+          setProfileLoading(false);
           
-          if (profile) {
-            setUserProfile(profile);
+          // Check if onboarding is completed
+          if (data?.onboarding_completed) {
+            setIsCompleted(true);
           }
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
+        } else {
+          console.error('No profile found for user');
+          setProfileError('Profile not found. Please try signing in again.');
+          setProfileLoading(false);
         }
       }
     };
@@ -109,7 +126,9 @@ const Chatbot = () => {
 
   const sendMessage = async (messageContent?: string) => {
     const content = messageContent || inputValue.trim();
-    if (!content || isLoading) return;
+    const userRole = userProfile?.role;
+    
+    if (!content || isLoading || !userRole) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -129,11 +148,12 @@ const Chatbot = () => {
         content: msg.content
       }));
 
+      console.log('Sending message to chatbot with role:', userRole);
       const { data, error } = await supabase.functions.invoke('gemini-chat', {
         body: {
           message: content,
           conversationHistory,
-          userRole: userProfile.role || 'student'
+          userRole
         }
       });
 
@@ -244,7 +264,7 @@ const Chatbot = () => {
   };
 
   const getQuickOptions = (lastBotMessage: string) => {
-    const isUnit = userProfile.role === 'unit';
+    const isUnit = userProfile?.role === 'unit';
     
     if (isUnit) {
       // Unit-specific options
@@ -317,8 +337,36 @@ const Chatbot = () => {
     return null;
   };
 
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg font-medium mb-2">Loading your profile...</div>
+          <div className="text-sm text-muted-foreground">Setting up your personalized experience</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (profileError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg font-medium mb-2 text-destructive">Profile Error</div>
+          <div className="text-sm text-muted-foreground mb-4">{profileError}</div>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!showChat) {
-    const isUnit = userProfile.role === 'unit';
+    const isUnit = userProfile?.role === 'unit';
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-muted flex flex-col items-center justify-center p-6">
@@ -387,7 +435,7 @@ const Chatbot = () => {
   }
 
   if (showProfessionalTransition) {
-    const isUnit = userProfile.role === 'unit';
+    const isUnit = userProfile?.role === 'unit';
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-muted flex flex-col items-center justify-center p-6">
@@ -456,7 +504,7 @@ const Chatbot = () => {
   }
 
   if (isCompleted) {
-    const isUnit = userProfile.role === 'unit';
+    const isUnit = userProfile?.role === 'unit';
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-muted flex flex-col items-center justify-center p-6">
