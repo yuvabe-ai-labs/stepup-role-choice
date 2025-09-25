@@ -1,5 +1,6 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ interface Profile {
 
 const ProfileSidebar = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
@@ -62,6 +64,7 @@ const ProfileSidebar = () => {
             variant="outline" 
             size="sm" 
             className="bg-primary text-primary-foreground hover:bg-primary/90 border-primary"
+            onClick={() => navigate('/profile')}
           >
             View Profile
           </Button>
