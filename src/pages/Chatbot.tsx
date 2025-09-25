@@ -132,7 +132,8 @@ const Chatbot = () => {
       const { data, error } = await supabase.functions.invoke('gemini-chat', {
         body: {
           message: content,
-          conversationHistory
+          conversationHistory,
+          userRole: userProfile.role || 'student'
         }
       });
 
@@ -151,7 +152,7 @@ const Chatbot = () => {
         }
 
         // Check if conversation is complete
-        if (data.response.includes("Perfect! You're all set!") || data.response.includes("find the best matches")) {
+        if (data.response.includes("Perfect! You're all set!") || data.response.includes("find the best matches") || data.response.includes("find the best candidates")) {
           setTimeout(async () => {
             // Mark onboarding as completed
             try {
@@ -243,37 +244,82 @@ const Chatbot = () => {
   };
 
   const getQuickOptions = (lastBotMessage: string) => {
-    if (lastBotMessage.includes('Profile Type')) {
-      return ['Student', 'Fresher', 'Working'];
-    }
-    if (lastBotMessage.includes('Language')) {
-      return ['English', 'Tamil', 'Hindi', 'French'];
-    }
-    if (lastBotMessage.includes('area of interest')) {
-      return ['Technology & Digital', 'Creative & Design', 'Marketing & Communication', 'Business & Entrepreneurship', 'Research & Emerging Fields', 'Personal Growth & Soft Skills', 'No Ideas, I want to explore'];
-    }
-    if (lastBotMessage.includes('Technology & Digital')) {
-      return ['Web Dev', 'App Dev', 'Programming', 'Data Science', 'AI/ML', 'UI/UX', 'Cybersecurity', 'Not sure / Add Skills'];
-    }
-    if (lastBotMessage.includes('Creative & Design')) {
-      return ['Graphic Design', 'Video Editing', 'Content Creation', 'Animation', 'Blogging', 'Photography', 'Not sure / Add Skills'];
-    }
-    if (lastBotMessage.includes('Marketing & Communication')) {
-      return ['Digital Marketing', 'Social Media', 'SEO', 'Public Speaking', 'Event Management', 'Not sure / Add Skills'];
-    }
-    if (lastBotMessage.includes('Business & Entrepreneurship')) {
-      return ['Entrepreneurship', 'Sales', 'Teamwork', 'Financial Literacy', 'Project Management', 'Not sure / Add Skills'];
-    }
-    if (lastBotMessage.includes('Personal Growth & Soft Skills')) {
-      return ['Critical Thinking', 'Problem Solving', 'Time Management', 'Creativity', 'Adaptability', 'Teamwork', 'Not sure / Add Skills'];
-    }
-    if (lastBotMessage.includes('looking for right now')) {
-      return ['Courses', 'Internships', 'Job Opportunities', 'Just Exploring'];
+    const isUnit = userProfile.role === 'unit';
+    
+    if (isUnit) {
+      // Unit-specific options
+      if (lastBotMessage.includes('type of unit')) {
+        return ['Startup', 'NGO / Social Enterprise', 'Educational Institution', 'Corporate / Company', 'Government / Public Sector', 'Other'];
+      }
+      if (lastBotMessage.includes('language')) {
+        return ['English', 'Tamil', 'Hindi', 'Telugu', 'French'];
+      }
+      if (lastBotMessage.includes('what your unit focuses on')) {
+        return ['Technology & IT', 'Creative & Design', 'Research & Innovation', 'Marketing & Communications', 'Business & Management', 'Community & Social Impact', 'Education & Training', 'Other'];
+      }
+      if (lastBotMessage.includes('Technology & IT')) {
+        return ['Web Development', 'Mobile App Development', 'Data Analytics', 'Cybersecurity', 'Cloud Computing', 'UI/UX Design', 'AI & ML', 'Add Skills'];
+      }
+      if (lastBotMessage.includes('Creative & Design')) {
+        return ['Graphic Design', 'Video Editing', 'Photography', 'Animation', 'Content Creation', 'Illustration', 'Add Skills'];
+      }
+      if (lastBotMessage.includes('Marketing & Communications')) {
+        return ['Social Media Management', 'SEO', 'Content Writing', 'Event Management', 'PR', 'Influencer Marketing', 'Add Skills'];
+      }
+      if (lastBotMessage.includes('Business & Management')) {
+        return ['Project Management', 'Leadership', 'Sales', 'Financial Literacy', 'HR & Recruitment', 'Entrepreneurship', 'Add Skills'];
+      }
+      if (lastBotMessage.includes('Research & Innovation')) {
+        return ['Research Writing', 'Market Research', 'Data Collection', 'AR/VR', 'Sustainability', 'Product Innovation', 'Add Skills'];
+      }
+      if (lastBotMessage.includes('Community & Social Impact')) {
+        return ['Volunteering', 'Fundraising', 'Event Planning', 'NGO Management', 'Mental Health Support', 'Add Skills'];
+      }
+      if (lastBotMessage.includes('Education & Training')) {
+        return ['Tutoring', 'Curriculum Development', 'Workshop Facilitation', 'Career Counseling', 'Language Training', 'Add Skills'];
+      }
+      if (lastBotMessage.includes('Aurovillian Unit')) {
+        return ['Aurovillian Unit', 'Non-Aurovillian Unit'];
+      }
+      if (lastBotMessage.includes('opportunities can your unit offer')) {
+        return ['Internship Opportunities', 'Courses', 'Volunteering', 'Workshops', 'Job Opportunities', 'Mentorship Programs'];
+      }
+    } else {
+      // Student-specific options
+      if (lastBotMessage.includes('Profile Type')) {
+        return ['Student', 'Fresher', 'Working'];
+      }
+      if (lastBotMessage.includes('Language')) {
+        return ['English', 'Tamil', 'Hindi', 'French'];
+      }
+      if (lastBotMessage.includes('area of interest')) {
+        return ['Technology & Digital', 'Creative & Design', 'Marketing & Communication', 'Business & Entrepreneurship', 'Research & Emerging Fields', 'Personal Growth & Soft Skills', 'No Ideas, I want to explore'];
+      }
+      if (lastBotMessage.includes('Technology & Digital')) {
+        return ['Web Dev', 'App Dev', 'Programming', 'Data Science', 'AI/ML', 'UI/UX', 'Cybersecurity', 'Not sure / Add Skills'];
+      }
+      if (lastBotMessage.includes('Creative & Design')) {
+        return ['Graphic Design', 'Video Editing', 'Content Creation', 'Animation', 'Blogging', 'Photography', 'Not sure / Add Skills'];
+      }
+      if (lastBotMessage.includes('Marketing & Communication')) {
+        return ['Digital Marketing', 'Social Media', 'SEO', 'Public Speaking', 'Event Management', 'Not sure / Add Skills'];
+      }
+      if (lastBotMessage.includes('Business & Entrepreneurship')) {
+        return ['Entrepreneurship', 'Sales', 'Teamwork', 'Financial Literacy', 'Project Management', 'Not sure / Add Skills'];
+      }
+      if (lastBotMessage.includes('Personal Growth & Soft Skills')) {
+        return ['Critical Thinking', 'Problem Solving', 'Time Management', 'Creativity', 'Adaptability', 'Teamwork', 'Not sure / Add Skills'];
+      }
+      if (lastBotMessage.includes('looking for right now')) {
+        return ['Courses', 'Internships', 'Job Opportunities', 'Just Exploring'];
+      }
     }
     return null;
   };
 
   if (!showChat) {
+    const isUnit = userProfile.role === 'unit';
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-muted flex flex-col items-center justify-center p-6">
         <div className="text-center max-w-md mx-auto space-y-8">
@@ -294,11 +340,13 @@ const Chatbot = () => {
           {/* Header */}
           <div className="space-y-4">
             <h1 className="text-2xl font-bold text-foreground">
-              Welcome to STEP-UP Internships
+              {isUnit ? 'Welcome to STEP-UP Unit Portal' : 'Welcome to STEP-UP Internships'}
             </h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Let's have a quick chat to personalize your internship journey! Our AI assistant
-              will help you discover opportunities that match your passions.
+              {isUnit 
+                ? "Let's have a quick chat to set up your unit profile! Our AI assistant will help you connect with the best candidates for your opportunities."
+                : "Let's have a quick chat to personalize your internship journey! Our AI assistant will help you discover opportunities that match your passions."
+              }
             </p>
           </div>
 
@@ -313,10 +361,13 @@ const Chatbot = () => {
             </div>
             <div className="space-y-2">
               <h2 className="text-xl font-semibold text-foreground">
-                Hey mate! Let's know you better
+                {isUnit ? 'Hey there! Let\'s know your unit better' : 'Hey mate! Let\'s know you better'}
               </h2>
               <p className="text-muted-foreground text-sm">
-                Help me with all your personal details here
+                {isUnit 
+                  ? 'Help me with all your unit details here'
+                  : 'Help me with all your personal details here'
+                }
               </p>
             </div>
           </div>
@@ -336,6 +387,8 @@ const Chatbot = () => {
   }
 
   if (showProfessionalTransition) {
+    const isUnit = userProfile.role === 'unit';
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-muted flex flex-col items-center justify-center p-6">
         <div className="text-center max-w-md mx-auto space-y-8">
@@ -356,11 +409,13 @@ const Chatbot = () => {
           {/* Header */}
           <div className="space-y-4">
             <h1 className="text-2xl font-bold text-foreground">
-              Welcome to STEP-UP Internships
+              {isUnit ? 'Welcome to STEP-UP Unit Portal' : 'Welcome to STEP-UP Internships'}
             </h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Let's have a quick chat to personalize your internship journey! Our AI assistant
-              will help you discover opportunities that match your passions.
+              {isUnit 
+                ? "Let's have a quick chat to set up your unit profile! Our AI assistant will help you connect with the best candidates for your opportunities."
+                : "Let's have a quick chat to personalize your internship journey! Our AI assistant will help you discover opportunities that match your passions."
+              }
             </p>
           </div>
 
@@ -375,10 +430,13 @@ const Chatbot = () => {
             </div>
             <div className="space-y-2">
               <h2 className="text-xl font-semibold text-foreground">
-                Thanks {userProfile.full_name?.split(' ')[0] || 'there'}! Now let's know you professionally
+                Thanks {userProfile.full_name?.split(' ')[0] || 'there'}! {isUnit ? 'Now let\'s know your unit professionally' : 'Now let\'s know you professionally'}
               </h2>
               <p className="text-muted-foreground text-sm">
-                Help me with all your professional details here
+                {isUnit 
+                  ? 'Help me with all your unit\'s professional details here'
+                  : 'Help me with all your professional details here'
+                }
               </p>
             </div>
           </div>
@@ -398,6 +456,8 @@ const Chatbot = () => {
   }
 
   if (isCompleted) {
+    const isUnit = userProfile.role === 'unit';
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-muted flex flex-col items-center justify-center p-6">
         <div className="text-center max-w-2xl mx-auto space-y-8">
@@ -421,7 +481,10 @@ const Chatbot = () => {
               🎉 You're All Set!
             </h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Here's your personalized profile summary:
+              {isUnit 
+                ? "Here's your unit profile summary:"
+                : "Here's your personalized profile summary:"
+              }
             </p>
           </div>
 
@@ -429,43 +492,87 @@ const Chatbot = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-center space-x-2">
               <span className="text-2xl">👋</span>
-              <h2 className="text-xl font-semibold text-foreground">Hello {userProfile.full_name?.split(' ')[0] || 'there'}!</h2>
+              <h2 className="text-xl font-semibold text-foreground">
+                {isUnit 
+                  ? `Hello ${userProfile.full_name || 'Unit'}!`
+                  : `Hello ${userProfile.full_name?.split(' ')[0] || 'there'}!`
+                }
+              </h2>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-              <Card className="p-6 text-center space-y-3">
-                <div className="w-12 h-12 mx-auto bg-red-100 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl">📅</span>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-foreground">5</div>
-                  <div className="text-sm text-muted-foreground">Matching Internships</div>
-                  <div className="text-xs text-muted-foreground">Found in business domain</div>
-                </div>
-              </Card>
+              {isUnit ? (
+                <>
+                  <Card className="p-6 text-center space-y-3">
+                    <div className="w-12 h-12 mx-auto bg-blue-100 rounded-lg flex items-center justify-center">
+                      <span className="text-2xl">👥</span>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">25</div>
+                      <div className="text-sm text-muted-foreground">Potential Candidates</div>
+                      <div className="text-xs text-muted-foreground">Matching your requirements</div>
+                    </div>
+                  </Card>
 
-              <Card className="p-6 text-center space-y-3">
-                <div className="w-12 h-12 mx-auto bg-teal-100 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl">🏢</span>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-foreground">12</div>
-                  <div className="text-sm text-muted-foreground">Auroville Units</div>
-                  <div className="text-xs text-muted-foreground">Relevant to your skills</div>
-                </div>
-              </Card>
+                  <Card className="p-6 text-center space-y-3">
+                    <div className="w-12 h-12 mx-auto bg-green-100 rounded-lg flex items-center justify-center">
+                      <span className="text-2xl">🎯</span>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">8</div>
+                      <div className="text-sm text-muted-foreground">Skill Matches</div>
+                      <div className="text-xs text-muted-foreground">Perfect for your unit</div>
+                    </div>
+                  </Card>
 
-              <Card className="p-6 text-center space-y-3">
-                <div className="w-12 h-12 mx-auto bg-purple-100 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl">🎯</span>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-foreground">3</div>
-                  <div className="text-sm text-muted-foreground">Skill Courses</div>
-                  <div className="text-xs text-muted-foreground">To boost your profile</div>
-                </div>
-              </Card>
+                  <Card className="p-6 text-center space-y-3">
+                    <div className="w-12 h-12 mx-auto bg-purple-100 rounded-lg flex items-center justify-center">
+                      <span className="text-2xl">📋</span>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">3</div>
+                      <div className="text-sm text-muted-foreground">Active Listings</div>
+                      <div className="text-xs text-muted-foreground">Ready to post</div>
+                    </div>
+                  </Card>
+                </>
+              ) : (
+                <>
+                  <Card className="p-6 text-center space-y-3">
+                    <div className="w-12 h-12 mx-auto bg-red-100 rounded-lg flex items-center justify-center">
+                      <span className="text-2xl">📅</span>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">5</div>
+                      <div className="text-sm text-muted-foreground">Matching Internships</div>
+                      <div className="text-xs text-muted-foreground">Found in business domain</div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6 text-center space-y-3">
+                    <div className="w-12 h-12 mx-auto bg-teal-100 rounded-lg flex items-center justify-center">
+                      <span className="text-2xl">🏢</span>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">12</div>
+                      <div className="text-sm text-muted-foreground">Auroville Units</div>
+                      <div className="text-xs text-muted-foreground">Relevant to your skills</div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6 text-center space-y-3">
+                    <div className="w-12 h-12 mx-auto bg-purple-100 rounded-lg flex items-center justify-center">
+                      <span className="text-2xl">🎯</span>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">3</div>
+                      <div className="text-sm text-muted-foreground">Skill Courses</div>
+                      <div className="text-xs text-muted-foreground">To boost your profile</div>
+                    </div>
+                  </Card>
+                </>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -486,42 +593,37 @@ const Chatbot = () => {
                       .select();
                     
                     if (error) {
-                      console.error('Database update error:', error);
+                      console.error('Error updating onboarding status:', error);
                       toast({
                         title: "Update Error",
                         description: "Failed to update onboarding status: " + error.message,
                         variant: "destructive",
                       });
-                      throw error;
+                    } else {
+                      console.log('Successfully updated onboarding status:', updateData);
+                      toast({
+                        title: "Profile Complete!",
+                        description: "Your onboarding has been completed successfully.",
+                        variant: "default",
+                      });
+                      // Navigate to dashboard
+                      navigate('/dashboard', { replace: true });
                     }
-                    
-                    console.log('Successfully updated onboarding status:', updateData);
-                    
-                    // Add delay to ensure database update propagates
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    
-                    // Navigate to dashboard
-                    navigate('/dashboard', { replace: true });
-                  } catch (error) {
+                  } catch (error: any) {
                     console.error('Error updating onboarding status:', error);
-                    setIsLoading(false);
                     toast({
-                      title: "Navigation Error",
-                      description: "There was an issue completing onboarding. Please try again.",
+                      title: "Update Error",
+                      description: "Failed to update onboarding status",
                       variant: "destructive",
                     });
+                  } finally {
+                    setIsLoading(false);
                   }
                 }}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full font-medium"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full font-medium min-w-[200px]"
               >
-                {isLoading ? "Preparing Dashboard..." : "Explore Dashboard"}
-              </Button>
-              <Button 
-                variant="outline"
-                size="lg"
-                className="px-8 py-3 rounded-full font-medium"
-              >
-                Update Profile
+                <Sparkles className="w-4 h-4 mr-2" />
+                {isLoading ? 'Setting up...' : (isUnit ? 'Explore Dashboard' : 'Explore Opportunities')}
               </Button>
             </div>
           </div>
