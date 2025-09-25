@@ -1,191 +1,273 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Search, Filter, Clock, MapPin, Building } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
 interface Internship {
   id: string;
   title: string;
   company: string;
-  location: string;
+  companyLogo: string;
   duration: string;
-  type: string;
-  postedTime: string;
-  description: string;
-  requirements: string[];
-  color: string;
+  backgroundImage: string;
+  gradient: string;
 }
 
 const Internships = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedSections, setExpandedSections] = useState({
+    units: true,
+    industry: false,
+    interest: false
+  });
 
   const internships: Internship[] = [
     {
       id: '1',
-      title: 'Junior UI Designer',
-      company: 'TechCorp',
-      location: 'Remote',
-      duration: '6 Months',
-      type: 'Full Time',
-      postedTime: '1d ago',
-      description: 'Join our design team to create intuitive user interfaces and enhance user experiences.',
-      requirements: ['Figma', 'Adobe Creative Suite', 'UI/UX Design'],
-      color: 'bg-green-100 border-green-200'
+      title: 'Senior UI Developer',
+      company: 'Yuvabe',
+      companyLogo: 'Y',
+      duration: '1st agos',
+      backgroundImage: 'bg-gradient-to-br from-gray-900 to-purple-900',
+      gradient: 'bg-gradient-to-br from-gray-900 to-purple-900'
     },
     {
       id: '2',
-      title: 'Marketing Manager',
-      company: 'Digital Solutions',
-      location: 'New York',
-      duration: '6 Months',
-      type: 'Full Time',
-      postedTime: '1w ago',
-      description: 'Lead marketing campaigns and drive brand awareness across multiple channels.',
-      requirements: ['Digital Marketing', 'Analytics', 'Content Strategy'],
-      color: 'bg-blue-100 border-blue-200'
+      title: 'WordPress Developer',
+      company: 'Upasana',
+      companyLogo: 'U',
+      duration: '3rd agos',
+      backgroundImage: 'bg-gradient-to-br from-teal-600 to-blue-700',
+      gradient: 'bg-gradient-to-br from-teal-600 to-blue-700'
     },
     {
       id: '3',
-      title: 'Managing Director Intern',
-      company: 'Global Corp',
-      location: 'San Francisco',
-      duration: '6 Months',
-      type: 'Full Time',
-      postedTime: '2d ago',
-      description: 'Work closely with senior management to develop strategic business initiatives.',
-      requirements: ['Business Strategy', 'Leadership', 'Analytics'],
-      color: 'bg-purple-100 border-purple-200'
+      title: 'Jr. Marketing Manager',
+      company: 'Yuvabe',
+      companyLogo: 'Y',
+      duration: '5d agos',
+      backgroundImage: 'bg-gradient-to-br from-gray-800 to-orange-900',
+      gradient: 'bg-gradient-to-br from-gray-800 to-orange-900'
     },
     {
       id: '4',
-      title: 'Software Engineer Intern',
-      company: 'StartupXYZ',
-      location: 'Austin',
-      duration: '3 Months',
-      type: 'Part Time',
-      postedTime: '3d ago',
-      description: 'Develop and maintain web applications using modern technologies.',
-      requirements: ['React', 'JavaScript', 'Node.js'],
-      color: 'bg-orange-100 border-orange-200'
+      title: 'Marketing Intern',
+      company: 'Upasana',
+      companyLogo: 'U',
+      duration: '10d agos',
+      backgroundImage: 'bg-gradient-to-br from-blue-600 to-teal-700',
+      gradient: 'bg-gradient-to-br from-blue-600 to-teal-700'
     },
     {
       id: '5',
-      title: 'Data Analyst Intern',
-      company: 'Analytics Pro',
-      location: 'Chicago',
-      duration: '4 Months',
-      type: 'Full Time',
-      postedTime: '1w ago',
-      description: 'Analyze large datasets to derive meaningful insights for business decisions.',
-      requirements: ['Python', 'SQL', 'Tableau'],
-      color: 'bg-pink-100 border-pink-200'
+      title: 'Barista Intern',
+      company: "Marc's Cafe",
+      companyLogo: 'M',
+      duration: '2d agos',
+      backgroundImage: 'bg-gradient-to-br from-gray-700 to-gray-900',
+      gradient: 'bg-gradient-to-br from-gray-700 to-gray-900'
     },
     {
       id: '6',
-      title: 'Product Management Intern',
-      company: 'Innovation Labs',
-      location: 'Seattle',
-      duration: '6 Months',
-      type: 'Full Time',
-      postedTime: '4d ago',
-      description: 'Support product development lifecycle and coordinate with cross-functional teams.',
-      requirements: ['Product Strategy', 'Agile', 'Market Research'],
-      color: 'bg-cyan-100 border-cyan-200'
+      title: 'Tailoring Intern',
+      company: 'Upasana',
+      companyLogo: 'U',
+      duration: '6d agos',
+      backgroundImage: 'bg-gradient-to-br from-teal-700 to-blue-800',
+      gradient: 'bg-gradient-to-br from-teal-700 to-blue-800'
+    },
+    {
+      id: '7',
+      title: 'Junior UI Designer',
+      company: 'Yuvabe',
+      companyLogo: 'Y',
+      duration: '5d agos',
+      backgroundImage: 'bg-gradient-to-br from-gray-900 to-purple-900',
+      gradient: 'bg-gradient-to-br from-gray-900 to-purple-900'
+    },
+    {
+      id: '8',
+      title: 'WordPress Developer',
+      company: 'Upasana',
+      companyLogo: 'U',
+      duration: '3rd agos',
+      backgroundImage: 'bg-gradient-to-br from-teal-600 to-blue-700',
+      gradient: 'bg-gradient-to-br from-teal-600 to-blue-700'
+    },
+    {
+      id: '9',
+      title: 'Sr. Marketing Manager',
+      company: 'Yuvabe',
+      companyLogo: 'Y',
+      duration: '5d agos',
+      backgroundImage: 'bg-gradient-to-br from-gray-800 to-orange-900',
+      gradient: 'bg-gradient-to-br from-gray-800 to-orange-900'
     }
   ];
 
-  const filteredInternships = internships.filter(internship =>
-    internship.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    internship.company.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filterOptions = {
+    units: ['Yuvabe', 'Upasana', "Marc's cafe", 'Egial', 'Youth center', 'Auronico'],
+    industry: ['Yuvabe', 'Upasana', "Marc's cafe", 'Egial', 'Youth center', 'Auronico'],
+    interest: ['Yuvabe', 'Upasana', "Marc's cafe", 'Egial', 'Youth center', 'Auronico']
+  };
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Internship Opportunities</h1>
-          <p className="text-muted-foreground">Discover amazing internship opportunities that match your skills and interests</p>
-        </div>
-
-        {/* Search and Filters */}
-        <div className="mb-6 flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search internships or companies..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Button variant="outline" className="flex items-center space-x-2">
-            <Filter className="w-4 h-4" />
-            <span>Filters</span>
-          </Button>
-        </div>
-
-        {/* Internships Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredInternships.map((internship) => (
-            <Card key={internship.id} className={`shadow-sm hover:shadow-md transition-shadow cursor-pointer ${internship.color}`}>
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start mb-2">
-                  <Badge variant="secondary" className="text-xs">
-                    {internship.postedTime}
-                  </Badge>
-                  <div className="w-10 h-10 bg-foreground rounded-full flex items-center justify-center">
-                    <Building className="w-5 h-5 text-background" />
-                  </div>
-                </div>
-                <CardTitle className="text-lg font-semibold">{internship.title}</CardTitle>
-                <p className="text-sm text-muted-foreground">{internship.company}</p>
-              </CardHeader>
-              
-              <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {internship.description}
-                </p>
-                
-                <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                  <div className="flex items-center space-x-1">
-                    <Clock className="w-3 h-3" />
-                    <span>{internship.duration} - {internship.type}</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                  <MapPin className="w-3 h-3" />
-                  <span>{internship.location}</span>
-                </div>
-
-                <div className="flex flex-wrap gap-1">
-                  {internship.requirements.slice(0, 3).map((req) => (
-                    <Badge key={req} variant="outline" className="text-xs">
-                      {req}
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="w-80 bg-background border-r border-border p-6 min-h-screen">
+          <h2 className="text-lg font-semibold mb-6">All Filters</h2>
+          
+          {/* Units Filter */}
+          <div className="mb-6">
+            <button
+              onClick={() => toggleSection('units')}
+              className="flex items-center justify-between w-full text-left font-medium mb-3"
+            >
+              <span>Units</span>
+              {expandedSections.units ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+            {expandedSections.units && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {filterOptions.units.map(option => (
+                    <Badge
+                      key={option}
+                      variant="outline"
+                      className="cursor-pointer hover:bg-accent"
+                    >
+                      {option}
                     </Badge>
                   ))}
                 </div>
+                <button className="text-sm text-primary">+ Show More</button>
+              </div>
+            )}
+          </div>
 
-                <Button className="w-full mt-4" size="sm">
-                  Apply Now
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+          {/* Industry Filter */}
+          <div className="mb-6">
+            <button
+              onClick={() => toggleSection('industry')}
+              className="flex items-center justify-between w-full text-left font-medium mb-3"
+            >
+              <span>Industry</span>
+              {expandedSections.industry ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+            {expandedSections.industry && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {filterOptions.industry.map(option => (
+                    <Badge
+                      key={option}
+                      variant="outline"
+                      className="cursor-pointer hover:bg-accent"
+                    >
+                      {option}
+                    </Badge>
+                  ))}
+                </div>
+                <button className="text-sm text-primary">+ Show More</button>
+              </div>
+            )}
+          </div>
+
+          {/* Interest Filter */}
+          <div className="mb-6">
+            <button
+              onClick={() => toggleSection('interest')}
+              className="flex items-center justify-between w-full text-left font-medium mb-3"
+            >
+              <span>Interest</span>
+              {expandedSections.interest ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+            {expandedSections.interest && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {filterOptions.interest.map(option => (
+                    <Badge
+                      key={option}
+                      variant="outline"
+                      className="cursor-pointer hover:bg-accent"
+                    >
+                      {option}
+                    </Badge>
+                  ))}
+                </div>
+                <button className="text-sm text-primary">+ Show More</button>
+              </div>
+            )}
+          </div>
+
+          <Button className="w-full">Apply</Button>
         </div>
 
-        {filteredInternships.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No internships found matching your search.</p>
+        {/* Main Content */}
+        <div className="flex-1 p-6">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold mb-2">Explore 16 Units just for you</h1>
           </div>
-        )}
+
+          {/* Internships Grid */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {internships.map((internship) => (
+              <Card key={internship.id} className="overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                <div className={`h-48 ${internship.gradient} relative flex items-center justify-center`}>
+                  <Badge className="absolute top-3 left-3 bg-white/90 text-gray-800 text-xs">
+                    {internship.duration}
+                  </Badge>
+                  <div className="text-white">
+                    <h3 className="text-xl font-bold text-center">{internship.title}</h3>
+                  </div>
+                  <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white w-6 h-6" />
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                    <div className="w-2 h-2 bg-white/60 rounded-full"></div>
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                    <div className="w-2 h-2 bg-white/60 rounded-full"></div>
+                    <div className="w-2 h-2 bg-white/60 rounded-full"></div>
+                    <div className="w-2 h-2 bg-white/60 rounded-full"></div>
+                  </div>
+                </div>
+                
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                        {internship.companyLogo}
+                      </div>
+                      <span className="text-sm font-medium">{internship.company}</span>
+                    </div>
+                    <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
+                      View
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
