@@ -31,42 +31,63 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Handle profile creation for OAuth signups
+        // Handle profile creation for first-time signups and OAuth
         if (event === 'SIGNED_IN' && session?.user) {
+          console.log('User signed in, checking profile...');
+          
           // Check if profile exists
-          const { data: existingProfile } = await supabase
+          const { data: existingProfile, error: fetchError } = await supabase
             .from('profiles')
             .select('*')
             .eq('user_id', session.user.id)
-            .single();
+            .maybeSingle();
 
-          // If no profile exists (OAuth signup), create one
+          if (fetchError) {
+            console.error('Error fetching profile:', fetchError);
+            return;
+          }
+
+          // If no profile exists, create one
           if (!existingProfile) {
-            console.log('No profile found for OAuth user, creating profile...');
+            console.log('No profile found, creating profile...');
+            
             const userData = session.user.user_metadata;
-            const fullName = userData.full_name || userData.name || 'User';
+            const pendingRole = localStorage.getItem('pendingRole');
+            const userRole = userData.role || pendingRole || 'student';
+            const fullName = userData.full_name || userData.name || userData.email?.split('@')[0] || 'User';
+            
+            // Clear pending role
+            if (pendingRole) {
+              localStorage.removeItem('pendingRole');
+            }
             
             const { data: newProfile, error: profileError } = await supabase
               .from('profiles')
               .insert({
                 user_id: session.user.id,
                 full_name: fullName,
-                role: 'student', // Default for OAuth, can be changed during onboarding
+                role: userRole,
                 onboarding_completed: false
               })
               .select()
               .single();
 
             if (profileError) {
-              console.error('OAuth profile creation failed:', profileError);
+              console.error('Profile creation failed:', profileError);
               toast({
                 title: "Profile setup failed",
-                description: "Please try signing in again.",
+                description: "There was an error setting up your profile. Please contact support.",
                 variant: "destructive",
               });
             } else {
-              console.log('OAuth profile created successfully:', newProfile);
+              console.log('Profile created successfully:', newProfile);
+              toast({
+                title: "Welcome!",
+                description: "Your account has been set up successfully.",
+              });
             }
+          } else {
+            console.log('Profile already exists:', existingProfile);
           }
         }
       }
@@ -104,34 +125,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { error };
       }
 
-      // Create profile if user was created successfully
-      if (data.user) {
-        console.log('User created successfully, creating profile...');
-        
-        // Create profile with confirmation
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: data.user.id,
-            full_name: fullName,
-            role: role,
-            onboarding_completed: false
-          })
-          .select()
-          .single();
-
-        if (profileError) {
-          console.error('Profile creation failed:', profileError);
-          toast({
-            title: "Profile creation failed",
-            description: profileError.message,
-            variant: "destructive",
-          });
-          return { error: profileError };
-        }
-        
-        console.log('Profile created successfully:', profileData);
-      }
+      // Don't create profile immediately - will be created on first sign in
+      console.log('User signup initiated, profile will be created on email confirmation');
 
       return { error: null };
     } catch (error: any) {
@@ -146,8 +141,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         password,
       });
+      
+      if (error) {
+        console.error('Sign in error:', error);
+        // Handle specific error for unconfirmed email
+        if (error.message.includes('Email not confirmed')) {
+          return { 
+            error: { 
+              ...error, 
+              message: 'Please check your email and click the confirmation link before signing in.' 
+            }
+          };
+        }
+      }
+      
       return { error };
     } catch (error: any) {
+      console.error('Sign in failed:', error);
       return { error };
     }
   };
@@ -184,6 +194,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       return { error };
     } catch (error: any) {
+      console.error('OAuth sign in failed:', error);
       return { error };
     }
   };

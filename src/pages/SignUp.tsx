@@ -63,8 +63,14 @@ const SignUp = () => {
   };
 
   const handleOAuthSignUp = async (provider: 'google' | 'apple') => {
+    // Store the role for profile creation after OAuth
+    if (role) {
+      localStorage.setItem('pendingRole', role);
+    }
+    
     const { error } = await signInWithOAuth(provider);
     if (error) {
+      localStorage.removeItem('pendingRole'); // Clean up on error
       toast({
         title: "Sign up failed",
         description: error.message,

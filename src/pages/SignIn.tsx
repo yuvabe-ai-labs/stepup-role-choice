@@ -46,8 +46,14 @@ const SignIn = () => {
   };
 
   const handleOAuthSignIn = async (provider: 'google' | 'apple') => {
+    // Store the role for profile creation if it doesn't exist
+    if (role) {
+      localStorage.setItem('pendingRole', role);
+    }
+    
     const { error } = await signInWithOAuth(provider);
     if (error) {
+      localStorage.removeItem('pendingRole'); // Clean up on error
       toast({
         title: "Sign in failed",
         description: error.message,
