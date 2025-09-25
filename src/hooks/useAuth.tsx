@@ -23,73 +23,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // Set up auth state listener FIRST - keep it synchronous
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-
-        // Handle profile creation for first-time signups and OAuth
-        if (event === 'SIGNED_IN' && session?.user) {
-          console.log('User signed in, checking profile...');
-          
-          // Check if profile exists
-          const { data: existingProfile, error: fetchError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .maybeSingle();
-
-          if (fetchError) {
-            console.error('Error fetching profile:', fetchError);
-            return;
-          }
-
-          // If no profile exists, create one
-          if (!existingProfile) {
-            console.log('No profile found, creating profile...');
-            
-            const userData = session.user.user_metadata;
-            const pendingRole = localStorage.getItem('pendingRole');
-            const userRole = userData.role || pendingRole || 'student';
-            const fullName = userData.full_name || userData.name || userData.email?.split('@')[0] || 'User';
-            
-            // Clear pending role
-            if (pendingRole) {
-              localStorage.removeItem('pendingRole');
-            }
-            
-            const { data: newProfile, error: profileError } = await supabase
-              .from('profiles')
-              .insert({
-                user_id: session.user.id,
-                full_name: fullName,
-                role: userRole,
-                onboarding_completed: false
-              })
-              .select()
-              .single();
-
-            if (profileError) {
-              console.error('Profile creation failed:', profileError);
-              toast({
-                title: "Profile setup failed",
-                description: "There was an error setting up your profile. Please contact support.",
-                variant: "destructive",
-              });
-            } else {
-              console.log('Profile created successfully:', newProfile);
-              toast({
-                title: "Welcome!",
-                description: "Your account has been set up successfully.",
-              });
-            }
-          } else {
-            console.log('Profile already exists:', existingProfile);
-          }
-        }
       }
     );
 
@@ -101,7 +41,86 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [toast]);
+  }, []);
+
+  // Handle profile operations in a separate effect to avoid deadlock
+  useEffect(() => {
+    const handleProfileOperations = async () => {
+      if (!user || !session) return;
+
+      try {
+        console.log('Checking profile for user:', user.id);
+        
+        // Check if profile exists
+        const { data: existingProfile, error: fetchError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (fetchError) {
+          console.error('Error fetching profile:', fetchError);
+          toast({
+            title: "Profile check failed",
+            description: "There was an error checking your profile.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // If no profile exists, create one
+        if (!existingProfile) {
+          console.log('No profile found, creating profile...');
+          
+          const userData = user.user_metadata;
+          const pendingRole = localStorage.getItem('pendingRole');
+          const userRole = userData.role || pendingRole || 'student';
+          const fullName = userData.full_name || userData.name || user.email?.split('@')[0] || 'User';
+          
+          // Clear pending role
+          if (pendingRole) {
+            localStorage.removeItem('pendingRole');
+          }
+          
+          const { data: newProfile, error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: user.id,
+              full_name: fullName,
+              role: userRole,
+              onboarding_completed: false
+            })
+            .select()
+            .single();
+
+          if (profileError) {
+            console.error('Profile creation failed:', profileError);
+            toast({
+              title: "Profile setup failed",
+              description: "There was an error setting up your profile. Please contact support.",
+              variant: "destructive",
+            });
+          } else {
+            console.log('Profile created successfully:', newProfile);
+            toast({
+              title: "Welcome!",
+              description: "Your account has been set up successfully.",
+            });
+          }
+        } else {
+          console.log('Profile already exists:', existingProfile);
+        }
+      } catch (error) {
+        console.error('Profile operation failed:', error);
+      }
+    };
+
+    // Defer profile operations to avoid blocking auth state changes
+    if (user && session) {
+      const timeoutId = setTimeout(handleProfileOperations, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [user, session, toast]);
 
   const signUp = async (email: string, password: string, fullName: string, role: string) => {
     try {
