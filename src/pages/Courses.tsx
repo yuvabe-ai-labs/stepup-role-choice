@@ -2,17 +2,13 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronDown, ChevronRight, Clock, Users } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import { useCourses } from '@/hooks/useCourses';
+import type { Tables } from '@/integrations/supabase/types';
 
-interface Course {
-  id: string;
-  title: string;
-  duration: string;
-  enrolled: string;
-  gradient: string;
-  image: string;
-}
+type Course = Tables<'courses'>;
 
 const Courses = () => {
   const [expandedSections, setExpandedSections] = useState({
@@ -21,80 +17,7 @@ const Courses = () => {
     interest: false
   });
 
-  const courses: Course[] = [
-    {
-      id: '1',
-      title: 'AI & Machine Learning',
-      duration: '6 Months',
-      enrolled: '32 Enrolled',
-      gradient: 'bg-gradient-to-br from-indigo-900 to-purple-800',
-      image: 'Generative AI'
-    },
-    {
-      id: '2',
-      title: 'UI/UX Design',
-      duration: '3 Months',
-      enrolled: '22 Enrolled',
-      gradient: 'bg-gradient-to-br from-purple-700 to-pink-600',
-      image: 'UX UI'
-    },
-    {
-      id: '3',
-      title: 'Full Stack Development',
-      duration: '4 Months',
-      enrolled: '15 Enrolled',
-      gradient: 'bg-gradient-to-br from-blue-600 to-cyan-500',
-      image: 'Full Stack Development'
-    },
-    {
-      id: '4',
-      title: 'Digital Marketing',
-      duration: '3 Months',
-      enrolled: '193 Enrolled',
-      gradient: 'bg-gradient-to-br from-blue-500 to-teal-600',
-      image: 'Digital Marketing'
-    },
-    {
-      id: '5',
-      title: 'Corporate Sustainability',
-      duration: '6 Months',
-      enrolled: '50 Enrolled',
-      gradient: 'bg-gradient-to-br from-green-700 to-teal-800',
-      image: 'Corporate Sustainability'
-    },
-    {
-      id: '6',
-      title: 'AI & Machine Learning',
-      duration: '6 Months',
-      enrolled: '32 Enrolled',
-      gradient: 'bg-gradient-to-br from-indigo-900 to-purple-800',
-      image: 'Generative AI'
-    },
-    {
-      id: '7',
-      title: 'UI/UX Design',
-      duration: '3 Months',
-      enrolled: '22 Enrolled',
-      gradient: 'bg-gradient-to-br from-purple-700 to-pink-600',
-      image: 'UX UI'
-    },
-    {
-      id: '8',
-      title: 'Full Stack Development',
-      duration: '4 Months',
-      enrolled: '15 Enrolled',
-      gradient: 'bg-gradient-to-br from-blue-600 to-cyan-500',
-      image: 'Full Stack Development'
-    },
-    {
-      id: '9',
-      title: 'Digital Marketing',
-      duration: '3 Months',
-      enrolled: '193 Enrolled',
-      gradient: 'bg-gradient-to-br from-blue-500 to-teal-600',
-      image: 'Digital Marketing'
-    }
-  ];
+  const { courses, loading, error } = useCourses();
 
   const filterOptions = {
     units: ['Yuvabe', 'Upasana', "Marc's cafe", 'Egial', 'Youth center', 'Auronico'],
@@ -217,39 +140,88 @@ const Courses = () => {
         {/* Main Content */}
         <div className="flex-1 p-6">
           <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-2">Explore 12 Courses just for you</h1>
+            <h1 className="text-2xl font-bold mb-2">
+              Explore {loading ? '...' : courses.length} Courses just for you
+            </h1>
           </div>
 
           {/* Courses Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {courses.map((course) => (
-              <Card key={course.id} className="overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                <div className={`h-32 ${course.gradient} relative flex items-center justify-center`}>
-                  <div className="text-white text-center">
-                    <div className="text-lg font-bold">{course.image}</div>
-                  </div>
-                </div>
+            {loading ? (
+              // Loading skeletons
+              Array.from({ length: 6 }).map((_, index) => (
+                <Card key={index} className="overflow-hidden shadow-sm">
+                  <Skeleton className="h-32 w-full" />
+                  <CardContent className="p-4 space-y-3">
+                    <Skeleton className="h-6 w-3/4" />
+                    <div className="flex items-center justify-between">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                    <Skeleton className="h-4 w-16" />
+                  </CardContent>
+                </Card>
+              ))
+            ) : error ? (
+              <div className="col-span-full text-center py-8">
+                <p className="text-muted-foreground">Error loading courses: {error}</p>
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.location.reload()}
+                  className="mt-4"
+                >
+                  Try Again
+                </Button>
+              </div>
+            ) : courses.length === 0 ? (
+              <div className="col-span-full text-center py-8">
+                <p className="text-muted-foreground">No courses available at the moment.</p>
+              </div>
+            ) : (
+              courses.map((course, index) => {
+                const gradients = [
+                  'bg-gradient-to-br from-indigo-900 to-purple-800',
+                  'bg-gradient-to-br from-purple-700 to-pink-600',
+                  'bg-gradient-to-br from-blue-600 to-cyan-500',
+                  'bg-gradient-to-br from-blue-500 to-teal-600',
+                  'bg-gradient-to-br from-green-700 to-teal-800',
+                  'bg-gradient-to-br from-orange-600 to-red-600',
+                  'bg-gradient-to-br from-yellow-600 to-orange-600',
+                  'bg-gradient-to-br from-pink-600 to-rose-600',
+                  'bg-gradient-to-br from-slate-700 to-slate-800'
+                ];
+                const gradient = gradients[index % gradients.length];
                 
-                <CardContent className="p-4 space-y-3">
-                  <h3 className="font-semibold text-lg">{course.title}</h3>
-                  
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <div className="flex items-center space-x-1">
-                      <Clock className="w-3 h-3" />
-                      <span>{course.duration}</span>
+                return (
+                  <Card key={course.id} className="overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div className={`h-32 ${gradient} relative flex items-center justify-center`}>
+                      <div className="text-white text-center">
+                        <div className="text-lg font-bold">{course.category || 'Course'}</div>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <Users className="w-3 h-3" />
-                      <span>{course.enrolled}</span>
-                    </div>
-                  </div>
-                  
-                  <Button variant="link" className="text-primary p-0 h-auto text-sm">
-                    Know more →
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                    
+                    <CardContent className="p-4 space-y-3">
+                      <h3 className="font-semibold text-lg">{course.title}</h3>
+                      
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{course.duration}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Users className="w-3 h-3" />
+                          <span>{course.enrolled_count} enrolled</span>
+                        </div>
+                      </div>
+                      
+                      <Button variant="link" className="text-primary p-0 h-auto text-sm">
+                        Know more →
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
