@@ -654,8 +654,9 @@ const Chatbot = () => {
                         description: "Your onboarding has been completed successfully.",
                         variant: "default",
                       });
-                      // Navigate to dashboard
-                      navigate('/dashboard', { replace: true });
+                      // Navigate to appropriate dashboard based on user role
+                      const dashboardPath = isUnit ? '/unit-dashboard' : '/dashboard';
+                      navigate(dashboardPath, { replace: true });
                     }
                   } catch (error: any) {
                     console.error('Error updating onboarding status:', error);

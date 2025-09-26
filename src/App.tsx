@@ -10,6 +10,7 @@ import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
+import UnitDashboard from "./pages/UnitDashboard";
 import Chatbot from "./pages/Chatbot";
 import Internships from "./pages/Internships";
 import Courses from "./pages/Courses";
@@ -92,6 +93,11 @@ const App = () => (
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/unit-dashboard" element={
+              <ProtectedRoute>
+                <UnitDashboard />
               </ProtectedRoute>
             } />
             <Route path="/chatbot" element={
