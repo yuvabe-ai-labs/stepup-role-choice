@@ -92,11 +92,10 @@ serve(async (req) => {
       );
     }
     
-    const GEMINI_API_KEY = "AIzaSyCMY4PaMghn1w3hlsJiafuc66OKV8lrDU0";
-    //  Deno.env.get('GEMINI_API_KEY');
-    // if (!GEMINI_API_KEY) {
-    //   throw new Error('GEMINI_API_KEY is not configured');
-    // }
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is not configured');
+    }
 
     console.log('Sending request to Gemini API...');
     
