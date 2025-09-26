@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,11 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
-interface Unit {
+interface Internship {
   id: string;
-  name: string;
-  type: string;
-  logo: string;
+  title: string;
+  company: string;
+  companyLogo: string;
   duration: string;
   backgroundImage: string;
   gradient: string;
@@ -23,60 +22,87 @@ const Units = () => {
     interest: false
   });
 
-  const units: Unit[] = [
+  const internships: Internship[] = [
     {
       id: '1',
-      name: 'Yuvabe',
-      type: 'Technology Unit',
-      logo: 'Y',
+      title: 'Senior UI Developer',
+      company: 'Yuvabe',
+      companyLogo: 'Y',
       duration: '1st agos',
       backgroundImage: 'bg-gradient-to-br from-gray-900 to-purple-900',
       gradient: 'bg-gradient-to-br from-gray-900 to-purple-900'
     },
     {
       id: '2',
-      name: 'Upasana',
-      type: 'Fashion Unit',
-      logo: 'U',
+      title: 'WordPress Developer',
+      company: 'Upasana',
+      companyLogo: 'U',
       duration: '3rd agos',
       backgroundImage: 'bg-gradient-to-br from-teal-600 to-blue-700',
       gradient: 'bg-gradient-to-br from-teal-600 to-blue-700'
     },
     {
       id: '3',
-      name: "Marc's Cafe",
-      type: 'Food & Beverage Unit',
-      logo: 'M',
+      title: 'Jr. Marketing Manager',
+      company: 'Yuvabe',
+      companyLogo: 'Y',
       duration: '5d agos',
       backgroundImage: 'bg-gradient-to-br from-gray-800 to-orange-900',
       gradient: 'bg-gradient-to-br from-gray-800 to-orange-900'
     },
     {
       id: '4',
-      name: 'Egial',
-      type: 'Education Unit',
-      logo: 'E',
+      title: 'Marketing Intern',
+      company: 'Upasana',
+      companyLogo: 'U',
       duration: '10d agos',
       backgroundImage: 'bg-gradient-to-br from-blue-600 to-teal-700',
       gradient: 'bg-gradient-to-br from-blue-600 to-teal-700'
     },
     {
       id: '5',
-      name: 'Youth Center',
-      type: 'Community Unit',
-      logo: 'Y',
+      title: 'Barista Intern',
+      company: "Marc's Cafe",
+      companyLogo: 'M',
       duration: '2d agos',
       backgroundImage: 'bg-gradient-to-br from-gray-700 to-gray-900',
       gradient: 'bg-gradient-to-br from-gray-700 to-gray-900'
     },
     {
       id: '6',
-      name: 'Auronico',
-      type: 'Healthcare Unit',
-      logo: 'A',
+      title: 'Tailoring Intern',
+      company: 'Upasana',
+      companyLogo: 'U',
       duration: '6d agos',
       backgroundImage: 'bg-gradient-to-br from-teal-700 to-blue-800',
       gradient: 'bg-gradient-to-br from-teal-700 to-blue-800'
+    },
+    {
+      id: '7',
+      title: 'Junior UI Designer',
+      company: 'Yuvabe',
+      companyLogo: 'Y',
+      duration: '5d agos',
+      backgroundImage: 'bg-gradient-to-br from-gray-900 to-purple-900',
+      gradient: 'bg-gradient-to-br from-gray-900 to-purple-900'
+    },
+    {
+      id: '8',
+      title: 'WordPress Developer',
+      company: 'Upasana',
+      companyLogo: 'U',
+      duration: '3rd agos',
+      backgroundImage: 'bg-gradient-to-br from-teal-600 to-blue-700',
+      gradient: 'bg-gradient-to-br from-teal-600 to-blue-700'
+    },
+    {
+      id: '9',
+      title: 'Sr. Marketing Manager',
+      company: 'Yuvabe',
+      companyLogo: 'Y',
+      duration: '5d agos',
+      backgroundImage: 'bg-gradient-to-br from-gray-800 to-orange-900',
+      gradient: 'bg-gradient-to-br from-gray-800 to-orange-900'
     }
   ];
 
@@ -201,20 +227,19 @@ const Units = () => {
         {/* Main Content */}
         <div className="flex-1 p-6">
           <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-2">Explore 6 Units just for you</h1>
+            <h1 className="text-2xl font-bold mb-2">Explore 16 Units just for you</h1>
           </div>
 
-          {/* Units Grid */}
+          {/* Internships Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {units.map((unit) => (
-              <Card key={unit.id} className="overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                <div className={`h-48 ${unit.gradient} relative flex items-center justify-center`}>
+            {internships.map((internship) => (
+              <Card key={internship.id} className="overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                <div className={`h-48 ${internship.gradient} relative flex items-center justify-center`}>
                   <Badge className="absolute top-3 left-3 bg-white/90 text-gray-800 text-xs">
-                    {unit.duration}
+                    {internship.duration}
                   </Badge>
-                  <div className="text-white text-center">
-                    <h3 className="text-xl font-bold mb-1">{unit.name}</h3>
-                    <p className="text-sm opacity-90">{unit.type}</p>
+                  <div className="text-white">
+                    <h3 className="text-xl font-bold text-center">{internship.title}</h3>
                   </div>
                   <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white w-6 h-6" />
                   <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
@@ -230,9 +255,9 @@ const Units = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                        {unit.logo}
+                        {internship.companyLogo}
                       </div>
-                      <span className="text-sm font-medium">{unit.name}</span>
+                      <span className="text-sm font-medium">{internship.company}</span>
                     </div>
                     <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
                       View
