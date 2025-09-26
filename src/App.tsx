@@ -16,6 +16,7 @@ import Internships from "./pages/Internships";
 import Courses from "./pages/Courses";
 import Units from "./pages/Units";
 import Profile from "./pages/Profile";
+import AllApplications from "./pages/AllApplications";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -123,6 +124,11 @@ const App = () => (
             <Route path="/profile" element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/all-applications" element={
+              <ProtectedRoute>
+                <AllApplications />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

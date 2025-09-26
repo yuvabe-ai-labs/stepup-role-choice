@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Bell, Menu, Search, Users, FileText, Calendar, Briefcase } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,7 @@ interface Candidate {
 }
 
 const UnitDashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('applications');
 
   const mockCandidates: Candidate[] = [
@@ -236,7 +238,11 @@ const UnitDashboard = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-xl font-semibold">Recent Applications</CardTitle>
-                <Button variant="link" className="text-primary">
+                <Button 
+                  variant="link" 
+                  className="text-primary"
+                  onClick={() => navigate('/all-applications')}
+                >
                   View all
                 </Button>
               </CardHeader>
