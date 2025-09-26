@@ -14,6 +14,217 @@ export type Database = {
   }
   public: {
     Tables: {
+      applications: {
+        Row: {
+          applied_date: string
+          cover_letter: string | null
+          id: string
+          internship_id: string
+          status: Database["public"]["Enums"]["application_status"]
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          applied_date?: string
+          cover_letter?: string | null
+          id?: string
+          internship_id: string
+          status?: Database["public"]["Enums"]["application_status"]
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          applied_date?: string
+          cover_letter?: string | null
+          id?: string
+          internship_id?: string
+          status?: Database["public"]["Enums"]["application_status"]
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_internship_id_fkey"
+            columns: ["internship_id"]
+            isOneToOne: false
+            referencedRelation: "internships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_enrollments: {
+        Row: {
+          completion_date: string | null
+          course_id: string
+          created_at: string
+          enrollment_date: string
+          id: string
+          progress: number | null
+          status: Database["public"]["Enums"]["enrollment_status"]
+          student_id: string
+        }
+        Insert: {
+          completion_date?: string | null
+          course_id: string
+          created_at?: string
+          enrollment_date?: string
+          id?: string
+          progress?: number | null
+          status?: Database["public"]["Enums"]["enrollment_status"]
+          student_id: string
+        }
+        Update: {
+          completion_date?: string | null
+          course_id?: string
+          created_at?: string
+          enrollment_date?: string
+          id?: string
+          progress?: number | null
+          status?: Database["public"]["Enums"]["enrollment_status"]
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          difficulty_level: string | null
+          duration: string | null
+          enrolled_count: number | null
+          id: string
+          provider: string | null
+          status: Database["public"]["Enums"]["course_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          difficulty_level?: string | null
+          duration?: string | null
+          enrolled_count?: number | null
+          id?: string
+          provider?: string | null
+          status?: Database["public"]["Enums"]["course_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          difficulty_level?: string | null
+          duration?: string | null
+          enrolled_count?: number | null
+          id?: string
+          provider?: string | null
+          status?: Database["public"]["Enums"]["course_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internships: {
+        Row: {
+          application_deadline: string | null
+          company_name: string
+          created_at: string
+          created_by: string
+          description: string | null
+          duration: string | null
+          id: string
+          location: string | null
+          payment: string | null
+          posted_date: string | null
+          requirements: Json | null
+          responsibilities: Json | null
+          skills_required: Json | null
+          status: Database["public"]["Enums"]["internship_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          application_deadline?: string | null
+          company_name: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          location?: string | null
+          payment?: string | null
+          posted_date?: string | null
+          requirements?: Json | null
+          responsibilities?: Json | null
+          skills_required?: Json | null
+          status?: Database["public"]["Enums"]["internship_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          application_deadline?: string | null
+          company_name?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          location?: string | null
+          payment?: string | null
+          posted_date?: string | null
+          requirements?: Json | null
+          responsibilities?: Json | null
+          skills_required?: Json | null
+          status?: Database["public"]["Enums"]["internship_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internships_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -44,6 +255,118 @@ export type Database = {
         }
         Relationships: []
       }
+      student_profiles: {
+        Row: {
+          created_at: string
+          education: Json | null
+          experience_level: string | null
+          id: string
+          interests: Json | null
+          languages: Json | null
+          looking_for: Json | null
+          preferred_language: string | null
+          profile_id: string
+          profile_type: string | null
+          projects: Json | null
+          skills: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          education?: Json | null
+          experience_level?: string | null
+          id?: string
+          interests?: Json | null
+          languages?: Json | null
+          looking_for?: Json | null
+          preferred_language?: string | null
+          profile_id: string
+          profile_type?: string | null
+          projects?: Json | null
+          skills?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          education?: Json | null
+          experience_level?: string | null
+          id?: string
+          interests?: Json | null
+          languages?: Json | null
+          looking_for?: Json | null
+          preferred_language?: string | null
+          profile_id?: string
+          profile_type?: string | null
+          projects?: Json | null
+          skills?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_profiles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      units: {
+        Row: {
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          focus_areas: Json | null
+          id: string
+          is_aurovillian: boolean | null
+          opportunities_offered: Json | null
+          profile_id: string
+          skills_offered: Json | null
+          unit_name: string
+          unit_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          focus_areas?: Json | null
+          id?: string
+          is_aurovillian?: boolean | null
+          opportunities_offered?: Json | null
+          profile_id: string
+          skills_offered?: Json | null
+          unit_name: string
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          focus_areas?: Json | null
+          id?: string
+          is_aurovillian?: boolean | null
+          opportunities_offered?: Json | null
+          profile_id?: string
+          skills_offered?: Json | null
+          unit_name?: string
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "units_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -52,7 +375,16 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      app_role: "student" | "unit" | "admin"
+      application_status:
+        | "applied"
+        | "shortlisted"
+        | "rejected"
+        | "interviewed"
+        | "hired"
+      course_status: "active" | "inactive" | "draft"
+      enrollment_status: "enrolled" | "completed" | "dropped"
+      internship_status: "active" | "closed" | "draft"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -179,6 +511,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["student", "unit", "admin"],
+      application_status: [
+        "applied",
+        "shortlisted",
+        "rejected",
+        "interviewed",
+        "hired",
+      ],
+      course_status: ["active", "inactive", "draft"],
+      enrollment_status: ["enrolled", "completed", "dropped"],
+      internship_status: ["active", "closed", "draft"],
+    },
   },
 } as const
