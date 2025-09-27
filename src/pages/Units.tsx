@@ -122,12 +122,12 @@
 //   return (
 //     <div className="min-h-screen bg-background">
 //       <Navbar />
-
+      
 //       <div className="flex">
 //         {/* Sidebar */}
 //         <div className="w-80 bg-background border-r border-border p-6 min-h-screen">
 //           <h2 className="text-lg font-semibold mb-6">All Filters</h2>
-
+          
 //           {/* Units Filter */}
 //           <div className="mb-6">
 //             <button
@@ -250,7 +250,7 @@
 //                     <div className="w-2 h-2 bg-white/60 rounded-full"></div>
 //                   </div>
 //                 </div>
-
+                
 //                 <CardContent className="p-4">
 //                   <div className="flex items-center justify-between">
 //                     <div className="flex items-center space-x-2">
@@ -275,6 +275,7 @@
 
 // export default Units;
 
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -283,9 +284,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { supabase } from '@/integrations/supabase/client';
-type Json = string | number | boolean | null | {
-  [key: string]: Json;
-} | Json[];
+
+type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
+
 interface Unit {
   id: string;
   unit_name: string;
@@ -302,6 +303,7 @@ interface Unit {
   updated_at: string;
 }
 
+
 // Helper to safely parse JSON
 function safeParse<T>(data: any, fallback: T): T {
   if (!data) return fallback;
@@ -314,8 +316,18 @@ function safeParse<T>(data: any, fallback: T): T {
 
 // Helper to get gradient based on unit type or name
 function getUnitGradient(unitName: string, unitType: string): string {
-  const gradients = ['bg-gradient-to-br from-gray-900 to-purple-900', 'bg-gradient-to-br from-teal-600 to-blue-700', 'bg-gradient-to-br from-gray-800 to-orange-900', 'bg-gradient-to-br from-blue-600 to-teal-700', 'bg-gradient-to-br from-gray-700 to-gray-900', 'bg-gradient-to-br from-teal-700 to-blue-800', 'bg-gradient-to-br from-purple-600 to-indigo-700', 'bg-gradient-to-br from-green-600 to-teal-700', 'bg-gradient-to-br from-red-600 to-pink-700'];
-
+  const gradients = [
+    'bg-gradient-to-br from-gray-900 to-purple-900',
+    'bg-gradient-to-br from-teal-600 to-blue-700',
+    'bg-gradient-to-br from-gray-800 to-orange-900',
+    'bg-gradient-to-br from-blue-600 to-teal-700',
+    'bg-gradient-to-br from-gray-700 to-gray-900',
+    'bg-gradient-to-br from-teal-700 to-blue-800',
+    'bg-gradient-to-br from-purple-600 to-indigo-700',
+    'bg-gradient-to-br from-green-600 to-teal-700',
+    'bg-gradient-to-br from-red-600 to-pink-700'
+  ];
+  
   // Use hash of unit name to consistently assign gradient
   const hash = unitName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return gradients[hash % gradients.length];
@@ -326,12 +338,14 @@ function getTimeAgo(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
   const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+  
   if (diffInHours === 0) return 'Today';
   if (diffInHours === 1) return '1d ago';
   if (diffInHours < 7) return `${diffInHours}d ago`;
   if (diffInHours < 30) return `${Math.floor(diffInHours / 7)}w ago`;
   return `${Math.floor(diffInHours / 30)}m ago`;
 }
+
 const Units = () => {
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -347,12 +361,11 @@ const Units = () => {
     const fetchUnits = async () => {
       try {
         setLoading(true);
-        const {
-          data,
-          error
-        } = await supabase.from('units').select('*').order('created_at', {
-          ascending: false
-        });
+        const { data, error } = await supabase
+          .from('units')
+          .select('*')
+          .order('created_at', { ascending: false });
+
         if (error) {
           console.error('Error fetching units:', error);
           setError(error.message);
@@ -366,6 +379,7 @@ const Units = () => {
         setLoading(false);
       }
     };
+
     fetchUnits();
   }, []);
 
@@ -373,9 +387,11 @@ const Units = () => {
   const getUniqueUnitNames = () => {
     return [...new Set(units.map(unit => unit.unit_name))];
   };
+
   const getUniqueUnitTypes = () => {
     return [...new Set(units.map(unit => unit.unit_type))];
   };
+
   const getUniqueFocusAreas = () => {
     const allFocusAreas = units.flatMap(unit => {
       const focusAreas = safeParse(unit.focus_areas, {});
@@ -383,116 +399,118 @@ const Units = () => {
     });
     return [...new Set(allFocusAreas)];
   };
+
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
   };
-  return <div className="min-h-screen bg-gray-50">
+
+  return (
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       <div className="flex">
         {/* Sidebar */}
-          <div className="w-72 bg-white border-r border-gray-200 p-6 min-h-screen rounded-md">
-            <h2 className="text-base font-semibold text-gray-800 mb-6">All Filters</h2>
-          
-            {/* Units Filter */}
-            <div className="mb-6">
-              <button
-                onClick={() => toggleSection('units')}
-                className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
-              >
-                <span>Units</span>
-                {expandedSections.units ? (
-                  <ChevronDown className="w-4 h-4 text-gray-500" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-gray-500" />
-                )}
-              </button>
-              {expandedSections.units && (
-                <div className="space-y-2">
-                  <div className="flex flex-wrap gap-2">
-                    {getUniqueUnitNames().map((unitName) => (
-                      <span
-                        key={unitName}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100"
-                      >
-                        {unitName}
-                      </span>
-                    ))}
-                  </div>
-                  <button className="text-xs text-blue-600 mt-2">+ Show More</button>
-                </div>
+        <div className="w-72 bg-white border-r border-gray-200 p-6 min-h-screen">
+          <h2 className="text-base font-semibold text-gray-800 mb-6">All Filters</h2>
+        
+          {/* Units Filter */}
+          <div className="mb-6">
+            <button
+              onClick={() => toggleSection('units')}
+              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
+            >
+              <span>Units</span>
+              {expandedSections.units ? (
+                <ChevronDown className="w-4 h-4 text-gray-500" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-gray-500" />
               )}
-            </div>
-          
-            {/* Industry Filter */}
-            <div className="mb-6">
-              <button
-                onClick={() => toggleSection('industry')}
-                className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
-              >
-                <span>Industry</span>
-                {expandedSections.industry ? (
-                  <ChevronDown className="w-4 h-4 text-gray-500" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-gray-500" />
-                )}
-              </button>
-              {expandedSections.industry && (
-                <div className="space-y-2">
-                  <div className="flex flex-wrap gap-2">
-                    {getUniqueUnitTypes().map((unitType) => (
-                      <span
-                        key={unitType}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100"
-                      >
-                        {unitType}
-                      </span>
-                    ))}
-                  </div>
-                  <button className="text-xs text-blue-600 mt-2">+ Show More</button>
+            </button>
+            {expandedSections.units && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {getUniqueUnitNames().map(unitName => (
+                    <span
+                      key={unitName}
+                      className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100"
+                    >
+                      {unitName}
+                    </span>
+                  ))}
                 </div>
-              )}
-            </div>
-          
-            {/* Interest Filter */}
-            <div className="mb-6">
-              <button
-                onClick={() => toggleSection('interest')}
-                className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
-              >
-                <span>Interest</span>
-                {expandedSections.interest ? (
-                  <ChevronDown className="w-4 h-4 text-gray-500" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-gray-500" />
-                )}
-              </button>
-              {expandedSections.interest && (
-                <div className="space-y-2">
-                  <div className="flex flex-wrap gap-2">
-                    {getUniqueFocusAreas().map((focusArea) => (
-                      <span
-                        key={focusArea}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100"
-                      >
-                        {focusArea}
-                      </span>
-                    ))}
-                  </div>
-                  <button className="text-xs text-blue-600 mt-2">+ Show More</button>
-                </div>
-              )}
-            </div>
-          
-            {/* Apply button */}
-            <Button className="w-full bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium py-2 rounded-md">
-              Apply
-            </Button>
+                <button className="text-xs text-blue-600 mt-2">+ Show More</button>
+              </div>
+            )}
           </div>
-
+        
+          {/* Unit Type Filter */}
+          <div className="mb-6">
+            <button
+              onClick={() => toggleSection('industry')}
+              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
+            >
+              <span>Unit Type</span>
+              {expandedSections.industry ? (
+                <ChevronDown className="w-4 h-4 text-gray-500" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-gray-500" />
+              )}
+            </button>
+            {expandedSections.industry && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {getUniqueUnitTypes().map(unitType => (
+                    <span
+                      key={unitType}
+                      className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100"
+                    >
+                      {unitType}
+                    </span>
+                  ))}
+                </div>
+                <button className="text-xs text-blue-600 mt-2">+ Show More</button>
+              </div>
+            )}
+          </div>
+        
+          {/* Focus Areas Filter */}
+          <div className="mb-6">
+            <button
+              onClick={() => toggleSection('interest')}
+              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
+            >
+              <span>Focus Areas</span>
+              {expandedSections.interest ? (
+                <ChevronDown className="w-4 h-4 text-gray-500" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-gray-500" />
+              )}
+            </button>
+            {expandedSections.interest && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {getUniqueFocusAreas().map(focusArea => (
+                    <span
+                      key={focusArea}
+                      className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100"
+                    >
+                      {focusArea}
+                    </span>
+                  ))}
+                </div>
+                <button className="text-xs text-blue-600 mt-2">+ Show More</button>
+              </div>
+            )}
+          </div>
+        
+          {/* Apply button */}
+          <Button className="w-full bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium py-2 rounded-md">
+            Apply
+          </Button>
+        </div>
 
 
         {/* Main Content */}
@@ -503,11 +521,11 @@ const Units = () => {
             </h1>
           </div>
 
-          {loading ? (/* Loading Skeleton */
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({
-            length: 6
-          }).map((_, index) => <Card key={index} className="overflow-hidden shadow-sm">
+          {loading ? (
+            /* Loading Skeleton */
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Card key={index} className="overflow-hidden shadow-sm">
                   <Skeleton className="h-48 w-full" />
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -518,18 +536,30 @@ const Units = () => {
                       <Skeleton className="h-8 w-16" />
                     </div>
                   </CardContent>
-                </Card>)}
-            </div>) : error ? <div className="text-center py-16">
+                </Card>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
               <p className="text-gray-500">Error loading units: {error}</p>
-            </div> : units.length === 0 ? <div className="text-center py-16">
+            </div>
+          ) : units.length === 0 ? (
+            <div className="text-center py-16">
               <p className="text-gray-500">No units available.</p>
-            </div> : (/* Units Grid */
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {units.map(unit => {
-            const focusAreas = safeParse(unit.focus_areas, {});
-            const gradient = getUnitGradient(unit.unit_name, unit.unit_type);
-            const timeAgo = getTimeAgo(unit.created_at);
-            return <Card key={unit.id} className="overflow-hidden shadow border border-gray-200 rounded-xl hover:shadow-md transition-shadow cursor-pointer">
+            </div>
+          ) : (
+            /* Units Grid */
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {units.map((unit) => {
+                const focusAreas = safeParse(unit.focus_areas, {});
+                const gradient = getUnitGradient(unit.unit_name, unit.unit_type);
+                const timeAgo = getTimeAgo(unit.created_at);
+
+                return (
+                      <Card 
+                        key={unit.id} 
+                        className="overflow-hidden shadow border border-gray-200 rounded-xl hover:shadow-md transition-shadow cursor-pointer"
+                      >
                         {/* Top section with gradient */}
                         <div className={`h-48 ${gradient} relative flex items-center justify-center`}>
                           {/* Time badge */}
@@ -543,11 +573,18 @@ const Units = () => {
                             <p className="text-white/80 text-sm">{unit.unit_type}</p>
                       
                             {/* Focus areas */}
-                            {Object.keys(focusAreas).length > 0 && <div className="mt-2 flex flex-wrap justify-center gap-1">
-                                {Object.entries(focusAreas as Record<string, string>).slice(0, 2).map(([key, value]) => <Badge key={key} className="bg-white/20 text-white text-xs font-medium px-2 py-0.5 rounded-md">
+                            {Object.keys(focusAreas).length > 0 && (
+                              <div className="mt-2 flex flex-wrap justify-center gap-1">
+                                {Object.entries(focusAreas as Record<string, string>).slice(0, 2).map(([key, value]) => (
+                                  <Badge 
+                                    key={key} 
+                                    className="bg-white/20 text-white text-xs font-medium px-2 py-0.5 rounded-md"
+                                  >
                                     {key}: {value}
-                                  </Badge>)}
-                              </div>}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
                           </div>
                       
                           {/* Chevron */}
@@ -566,16 +603,23 @@ const Units = () => {
                             </div>
                       
                             {/* View button */}
-                            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-md px-3 py-1.5">
+                            <Button 
+                              size="sm" 
+                              className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-md px-3 py-1.5"
+                            >
                               View
                             </Button>
                           </div>
                         </CardContent>
-                      </Card>;
-          })}
-            </div>)}
+                      </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Units;
