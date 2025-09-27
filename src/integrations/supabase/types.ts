@@ -163,12 +163,17 @@ export type Database = {
       internships: {
         Row: {
           application_deadline: string | null
+          application_url: string | null
+          benefits: Json | null
+          company_email: string | null
+          company_logo: string | null
           company_name: string
           created_at: string
           created_by: string
           description: string | null
           duration: string | null
           id: string
+          is_paid: boolean | null
           location: string | null
           payment: string | null
           posted_date: string | null
@@ -181,12 +186,17 @@ export type Database = {
         }
         Insert: {
           application_deadline?: string | null
+          application_url?: string | null
+          benefits?: Json | null
+          company_email?: string | null
+          company_logo?: string | null
           company_name: string
           created_at?: string
           created_by: string
           description?: string | null
           duration?: string | null
           id?: string
+          is_paid?: boolean | null
           location?: string | null
           payment?: string | null
           posted_date?: string | null
@@ -199,12 +209,17 @@ export type Database = {
         }
         Update: {
           application_deadline?: string | null
+          application_url?: string | null
+          benefits?: Json | null
+          company_email?: string | null
+          company_logo?: string | null
           company_name?: string
           created_at?: string
           created_by?: string
           description?: string | null
           duration?: string | null
           id?: string
+          is_paid?: boolean | null
           location?: string | null
           payment?: string | null
           posted_date?: string | null
