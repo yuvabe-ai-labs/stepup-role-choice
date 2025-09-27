@@ -285,17 +285,24 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { supabase } from '@/integrations/supabase/client';
 
+type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
+
 interface Unit {
   id: string;
   unit_name: string;
   unit_type: string;
-  focus_areas: string;
+  focus_areas: Json;
+  opportunities_offered: Json;
+  skills_offered: Json;
+  profile_id: string;
   contact_email: string;
   contact_phone: string;
   address: string;
   is_aurovillian: boolean;
   created_at: string;
+  updated_at: string;
 }
+
 
 // Helper to safely parse JSON
 function safeParse<T>(data: any, fallback: T): T {
@@ -558,7 +565,7 @@ const Units = () => {
                         <p className="text-white/80 text-sm">{unit.unit_type}</p>
                         {Object.keys(focusAreas).length > 0 && (
                           <div className="mt-2">
-                            {Object.entries(focusAreas).slice(0, 2).map(([key, value]) => (
+                            {Object.entries(focusAreas as Record<string, string>).slice(0, 2).map(([key, value]) => (
                               <Badge key={key} className="bg-white/20 text-white text-xs mr-1 mb-1">
                                 {key}: {value}
                               </Badge>
