@@ -581,7 +581,6 @@ const Internships = () => {
                     ))}
                   </div>
                 </div>
-
               )}
             </div>
           )}
