@@ -591,7 +591,10 @@ const Units = () => {
                           </div>
                           <div className="flex flex-col">
                             <span className="text-sm font-medium">{unit.unit_name}</span>
-                            
+                            {unit.is_aurovillian && (
+                              <Badge className="text-xs bg-green-100 text-green-700 w-fit">
+                                Aurovillian
+                              </Badge>
                             )}
                           </div>
                         </div>
