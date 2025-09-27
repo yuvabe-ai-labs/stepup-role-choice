@@ -561,6 +561,7 @@ const Units = () => {
             </div>}
         </div>
       </div>
-    </div>;
+    </div>
+);
 };
 export default Units;
