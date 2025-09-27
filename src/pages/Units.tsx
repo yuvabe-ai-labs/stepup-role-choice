@@ -555,58 +555,62 @@ const Units = () => {
                 const timeAgo = getTimeAgo(unit.created_at);
 
                 return (
-                  <Card key={unit.id} className="overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                    <div className={`h-48 ${gradient} relative flex items-center justify-center`}>
-                      <Badge className="absolute top-3 left-3 bg-white/90 text-gray-800 text-xs">
-                        {timeAgo}
-                      </Badge>
-                      <div className="text-white text-center px-4">
-                        <h3 className="text-xl font-bold mb-1">{unit.unit_name}</h3>
-                        <p className="text-white/80 text-sm">{unit.unit_type}</p>
-                        {Object.keys(focusAreas).length > 0 && (
-                          <div className="mt-2">
-                            {Object.entries(focusAreas as Record<string, string>).slice(0, 2).map(([key, value]) => (
-                              <Badge key={key} className="bg-white/20 text-white text-xs mr-1 mb-1">
-                                {key}: {value}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <ChevronRight className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white w-6 h-6" />
-                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                        <div className="w-2 h-2 bg-white/60 rounded-full"></div>
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
-                        <div className="w-2 h-2 bg-white/60 rounded-full"></div>
-                        <div className="w-2 h-2 bg-white/60 rounded-full"></div>
-                        <div className="w-2 h-2 bg-white/60 rounded-full"></div>
-                      </div>
-                    </div>
-                    
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                            {unit.unit_name.charAt(0)}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium">{unit.unit_name}</span>
-                            {unit.is_aurovillian && (
-                              <Badge className="text-xs bg-green-100 text-green-700 w-fit">
-                                Aurovillian
-                              </Badge>
+                      <Card 
+                        key={unit.id} 
+                        className="overflow-hidden shadow border border-gray-200 rounded-xl hover:shadow-md transition-shadow cursor-pointer"
+                      >
+                        {/* Top section with gradient */}
+                        <div className={`h-48 ${gradient} relative flex items-center justify-center`}>
+                          {/* Time badge */}
+                          <Badge className="absolute top-3 left-3 bg-white text-gray-800 text-xs font-semibold px-2 py-0.5 rounded-md">
+                            {timeAgo}
+                          </Badge>
+                      
+                          {/* Title + unit type */}
+                          <div className="text-white text-center px-4">
+                            <h3 className="text-lg font-semibold mb-1">{unit.unit_name}</h3>
+                            <p className="text-white/80 text-sm">{unit.unit_type}</p>
+                      
+                            {/* Focus areas */}
+                            {Object.keys(focusAreas).length > 0 && (
+                              <div className="mt-2 flex flex-wrap justify-center gap-1">
+                                {Object.entries(focusAreas as Record<string, string>).slice(0, 2).map(([key, value]) => (
+                                  <Badge 
+                                    key={key} 
+                                    className="bg-white/20 text-white text-xs font-medium px-2 py-0.5 rounded-md"
+                                  >
+                                    {key}: {value}
+                                  </Badge>
+                                ))}
+                              </div>
                             )}
                           </div>
+                      
+                          {/* Chevron */}
+                          <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-white w-5 h-5" />
                         </div>
-                        <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
-                          View
-                        </Button>
-                      </div>
-                      {unit.address && (
-                        <p className="text-xs text-gray-500 mt-2">{unit.address}</p>
-                      )}
-                    </CardContent>
-                  </Card>
+                        
+                        {/* Bottom content */}
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            {/* Unit icon + info */}
+                            <div className="flex items-center space-x-2">
+                              <div className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                                {unit.unit_name.charAt(0)}
+                              </div>
+                              <span className="text-sm font-medium">{unit.unit_name}</span>
+                            </div>
+                      
+                            {/* View button */}
+                            <Button 
+                              size="sm" 
+                              className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-md px-3 py-1.5"
+                            >
+                              View
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
                 );
               })}
             </div>
