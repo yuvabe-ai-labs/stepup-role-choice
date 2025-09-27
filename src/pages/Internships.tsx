@@ -271,7 +271,7 @@ function parseNumberedObject(data: any): string[] {
   if (typeof data === 'object') {
     return Object.entries(data)
       .sort(([a], [b]) => parseInt(a) - parseInt(b))
-      .map(([_, value]) => value)
+      .map(([_, value]) => value as string)
       .filter(value => typeof value === 'string' && value.length > 0 && !value.toLowerCase().includes('responsibilities') && !value.toLowerCase().includes('requirements') && !value.toLowerCase().includes('candidates'));
   }
   return [];

@@ -685,26 +685,32 @@ const Chatbot = () => {
   const quickOptions = getQuickOptions(lastBotMessage);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-muted flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b bg-card/50 backdrop-blur">
-        <div className="flex justify-center">
-          <div className="grid grid-cols-3 gap-1">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <div
-                key={i}
-                className={`w-3 h-3 rounded-full ${
-                  [0, 3, 6].includes(i) ? 'bg-primary' : 'bg-primary/60'
-                }`}
-              />
-            ))}
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-muted flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-2xl mx-auto h-[80vh] flex flex-col">
+        {/* Logo and Welcome */}
+        <div className="text-center mb-6">
+          <div className="flex justify-center mb-4">
+            <div className="grid grid-cols-3 gap-2">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-4 h-4 rounded-full ${
+                    [0, 3, 6].includes(i) ? 'bg-primary' : 'bg-primary/60'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
+          <h1 className="text-xl font-bold text-foreground mb-2">
+            Welcome to STEP-UP Internships
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Let's have a quick chat to personalize your internship journey! Our AI assistant will help you discover opportunities that match your passions.
+          </p>
         </div>
-        <h1 className="text-center text-lg font-semibold mt-2">STEP-UP Internships</h1>
-      </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto space-y-4 mb-4">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -764,27 +770,28 @@ const Chatbot = () => {
           </div>
         )}
         <div ref={messagesEndRef} />
-      </div>
+        </div>
 
-      {/* Input Area */}
-      <div className="p-4 border-t bg-card/50 backdrop-blur">
-        <div className="flex space-x-2 max-w-2xl mx-auto">
-          <Input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Type your answer"
-            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-            disabled={isLoading}
-            className="flex-1"
-          />
-          <Button
-            onClick={() => sendMessage()}
-            disabled={!inputValue.trim() || isLoading}
-            size="sm"
-            className="px-4"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
+        {/* Input Area */}
+        <div className="mt-4">
+          <div className="flex space-x-2">
+            <Input
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Type your answer"
+              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+              disabled={isLoading}
+              className="flex-1"
+            />
+            <Button
+              onClick={() => sendMessage()}
+              disabled={!inputValue.trim() || isLoading}
+              size="sm"
+              className="px-4"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
