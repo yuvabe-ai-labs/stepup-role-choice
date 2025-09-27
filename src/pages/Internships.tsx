@@ -272,7 +272,7 @@ function parseNumberedObject(data: any): string[] {
     return Object.entries(data)
       .sort(([a], [b]) => parseInt(a) - parseInt(b))
       .map(([_, value]) => value)
-      .filter(value => typeof value === 'string' && value.length > 0);
+      .filter(value => typeof value === 'string' && value.length > 0 && !value.toLowerCase().includes('responsibilities') && !value.toLowerCase().includes('requirements') && !value.toLowerCase().includes('candidates'));
   }
   return [];
 }
@@ -294,11 +294,39 @@ const Internships = () => {
   const selectedInternshipData =
     internships.find((int) => int.id === selectedInternship) || internships[0];
 
-  // Parse all data fields from database
-  const responsibilities = parseNumberedObject(safeParse(selectedInternshipData?.responsibilities, {}));
-  const requirements = parseNumberedObject(safeParse(selectedInternshipData?.requirements, {}));
-  const skills = parseNumberedObject(safeParse(selectedInternshipData?.skills_required, {}));
-  const benefits = parseNumberedObject(safeParse(selectedInternshipData?.benefits, {}));
+  // Parse all data fields from database with error handling
+  let responsibilities = [];
+  let requirements = [];
+  let skills = [];
+  let benefits = [];
+  
+  try {
+    responsibilities = parseNumberedObject(safeParse(selectedInternshipData?.responsibilities, {}));
+  } catch (e) {
+    console.error('Error parsing responsibilities:', e);
+    responsibilities = [];
+  }
+  
+  try {
+    requirements = parseNumberedObject(safeParse(selectedInternshipData?.requirements, {}));
+  } catch (e) {
+    console.error('Error parsing requirements:', e);
+    requirements = [];
+  }
+  
+  try {
+    skills = parseNumberedObject(safeParse(selectedInternshipData?.skills_required, {}));
+  } catch (e) {
+    console.error('Error parsing skills:', e);
+    skills = [];
+  }
+  
+  try {
+    benefits = parseNumberedObject(safeParse(selectedInternshipData?.benefits, {}));
+  } catch (e) {
+    console.error('Error parsing benefits:', e);
+    benefits = [];
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
