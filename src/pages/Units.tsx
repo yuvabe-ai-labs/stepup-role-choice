@@ -289,7 +289,7 @@ interface Unit {
   id: string;
   unit_name: string;
   unit_type: string;
-  focus_areas: any;
+  focus_areas: string;
   contact_email: string;
   contact_phone: string;
   address: string;
