@@ -264,6 +264,19 @@ function safeParse<T>(data: any, fallback: T): T {
   }
 }
 
+// Helper to convert numbered object to array
+function parseNumberedObject(data: any): string[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if (typeof data === 'object') {
+    return Object.entries(data)
+      .sort(([a], [b]) => parseInt(a) - parseInt(b))
+      .map(([_, value]) => value)
+      .filter(value => typeof value === 'string' && value.length > 0);
+  }
+  return [];
+}
+
 const Internships = () => {
   const { internships: rawInternships = [], loading, error } = useInternships();
   const [selectedInternship, setSelectedInternship] = useState<string>('');
@@ -281,63 +294,11 @@ const Internships = () => {
   const selectedInternshipData =
     internships.find((int) => int.id === selectedInternship) || internships[0];
 
-  // Parse responsibilities and requirements safely
-  const rawResponsibilities = safeParse<any>(
-    selectedInternshipData?.responsibilities,
-    {}
-  );
-  
-  // Convert numbered object to array, skipping the first key if it's just a header
-  const keyResponsibilities = Array.isArray(rawResponsibilities)
-    ? rawResponsibilities
-    : rawResponsibilities && typeof rawResponsibilities === 'object'
-    ? Object.entries(rawResponsibilities)
-        .filter(([key]) => key !== '1' || !rawResponsibilities['1']?.toLowerCase().includes('responsibilities'))
-        .map(([_, value]) => value)
-        .filter(value => typeof value === 'string' && value.length > 0)
-    : [
-        'Assist in designing user interfaces for web and mobile applications',
-        'Conduct user research and usability testing',
-        'Create wireframes, prototypes, and design mockups',
-        'Collaborate with developers to implement designs',
-        'Participate in design reviews and team meetings',
-        'Help maintain design systems and style guides'
-      ];
-
-  const rawRequirements = safeParse<any>(
-    selectedInternshipData?.requirements,
-    {}
-  );
-  
-  // Convert numbered object to array, skipping the first key if it's just a header
-  const requirements = Array.isArray(rawRequirements)
-    ? rawRequirements
-    : rawRequirements && typeof rawRequirements === 'object'
-    ? Object.entries(rawRequirements)
-        .filter(([key]) => key !== '1' || !rawRequirements['1']?.toLowerCase().includes('requirements'))
-        .map(([_, value]) => value)
-        .filter(value => typeof value === 'string' && value.length > 0)
-    : [
-        'Currently pursuing or recently completed degree in Design, HCI, or related field',
-        'Proficiency in design tools like Figma, Sketch, or Adobe XD',
-        'Basic understanding of HTML/CSS'
-      ];
-
-  const rawSkillsRequired = safeParse<any>(
-    selectedInternshipData?.skills_required,
-    {}
-  );
-  
-  // Convert numbered object to array for skills
-  const skillsArray = rawSkillsRequired && typeof rawSkillsRequired === 'object'
-    ? Object.entries(rawSkillsRequired)
-        .map(([_, value]) => value)
-        .filter(value => typeof value === 'string' && value.length > 0)
-    : [];
-  
-  const skillsRequired = skillsArray.length > 0 
-    ? { 'Technical Skills': skillsArray }
-    : {};
+  // Parse all data fields from database
+  const responsibilities = parseNumberedObject(safeParse(selectedInternshipData?.responsibilities, {}));
+  const requirements = parseNumberedObject(safeParse(selectedInternshipData?.requirements, {}));
+  const skills = parseNumberedObject(safeParse(selectedInternshipData?.skills_required, {}));
+  const benefits = parseNumberedObject(safeParse(selectedInternshipData?.benefits, {}));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -398,7 +359,7 @@ const Internships = () => {
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-3">
                       <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-xs font-bold">
-                        {internship.company_name.charAt(0)}
+                        {internship.company_name?.charAt(0) || 'C'}
                       </div>
                       <Badge className="bg-blue-500 hover:bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
                         Saved 5d ago
@@ -466,20 +427,20 @@ const Internships = () => {
                       {selectedInternshipData.title}
                     </h1>
                     <p className="text-lg text-gray-700 mb-3 font-medium">
-                      {selectedInternshipData.company_name}
+                      {selectedInternshipData.company_name?.replace(/\n/g, '')}
                     </p>
                     <div className="flex items-center space-x-5 text-sm text-gray-600">
                       <div className="flex items-center">
                         <MapPin className="w-4 h-4 mr-1.5 text-gray-500" />
-                        Auroville, Tamil Nadu
+                        {selectedInternshipData.location}
                       </div>
                       <div className="flex items-center">
                         <Clock className="w-4 h-4 mr-1.5 text-gray-500" />
-                        6 Months - Full Time
+                        {selectedInternshipData.duration}
                       </div>
                       <div className="flex items-center">
                         <DollarSign className="w-4 h-4 mr-1.5 text-gray-500" />
-                        Paid - Not Disclosed
+                        {selectedInternshipData.payment}
                       </div>
                     </div>
                   </div>
@@ -502,70 +463,94 @@ const Internships = () => {
               {/* About the Internship */}
               <div className="mb-8">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">About the Internship</h2>
-                <div className="text-gray-700 leading-relaxed space-y-4">
-                  <p>
-                    We are looking for a creative and passionate UI/UX Design Intern to join our team at Auroville Design Studio. 
-                    This is an excellent opportunity to work on real-world projects while contributing to Auroville's sustainable 
-                    community initiatives.
-                  </p>
-                  <p>
-                    As an intern, you'll work closely with our design team to create user-centered digital experiences that align 
-                    with Auroville's values of conscious living and environmental sustainability.
-                  </p>
+                <div className="text-gray-700 leading-relaxed">
+                  <p>{selectedInternshipData.description}</p>
                 </div>
               </div>
 
               {/* Key Responsibilities */}
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Key Responsibilities</h2>
-                <div className="space-y-3">
-                  {keyResponsibilities.map((responsibility, index) => (
-                    <div key={index} className="flex items-start space-x-3">
-                      <div className="w-5 h-5 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Check className="w-3 h-3" />
-                      </div>
-                      <p className="text-gray-700 leading-relaxed">{responsibility}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Requirements */}
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Requirements from the Candidates</h2>
-                <div className="space-y-3">
-                  {requirements.map((requirement, index) => (
-                    <div key={index} className="flex items-start space-x-3">
-                      <div className="w-5 h-5 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Check className="w-3 h-3" />
-                      </div>
-                      <p className="text-gray-700 leading-relaxed">{requirement}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Skills Required */}
-              {Object.keys(skillsRequired).length > 0 && (
+              {responsibilities.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Skills Required</h2>
-                  <div className="space-y-4">
-                    {Object.entries(skillsRequired).map(([category, skills]) => (
-                      <div key={category}>
-                        <h3 className="font-medium text-gray-800 mb-2">{category}</h3>
-                        <ul className="space-y-1 ml-4">
-                          {skills.map((skill, i) => (
-                            <li key={i} className="text-gray-700 leading-relaxed flex items-start">
-                              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                              {skill}
-                            </li>
-                          ))}
-                        </ul>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Key Responsibilities</h2>
+                  <div className="space-y-3">
+                    {responsibilities.map((responsibility, index) => (
+                      <div key={index} className="flex items-start space-x-3">
+                        <div className="w-5 h-5 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <Check className="w-3 h-3" />
+                        </div>
+                        <p className="text-gray-700 leading-relaxed">{responsibility}</p>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
+
+              {/* Requirements */}
+              {requirements.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Requirements from the Candidates</h2>
+                  <div className="space-y-3">
+                    {requirements.map((requirement, index) => (
+                      <div key={index} className="flex items-start space-x-3">
+                        <div className="w-5 h-5 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <Check className="w-3 h-3" />
+                        </div>
+                        <p className="text-gray-700 leading-relaxed">{requirement}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Skills Required */}
+              {skills.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Skills Required</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {skills.map((skill, index) => (
+                      <Badge key={index} variant="secondary" className="bg-gray-100 text-gray-700 px-3 py-1">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Benefits */}
+              {benefits.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Benefits</h2>
+                  <div className="space-y-3">
+                    {benefits.map((benefit, index) => (
+                      <div key={index} className="flex items-start space-x-3">
+                        <div className="w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <Check className="w-3 h-3" />
+                        </div>
+                        <p className="text-gray-700 leading-relaxed">{benefit}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Additional Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {selectedInternshipData.application_deadline && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Application Deadline</h3>
+                    <p className="text-gray-700">
+                      {new Date(selectedInternshipData.application_deadline).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+                
+                {selectedInternshipData.company_email && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Contact</h3>
+                    <p className="text-gray-700">{selectedInternshipData.company_email}</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
