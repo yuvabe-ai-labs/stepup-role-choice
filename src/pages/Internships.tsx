@@ -243,32 +243,23 @@
 
 // export default Internships;
 
-"use client";
-
 import React, { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, DollarSign, Bookmark, Share, Check } from "lucide-react";
 import Navbar from "@/components/Navbar";
-
-// ✅ Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase } from "@/integrations/supabase/client";
 
 type Internship = {
   id: string;
   title: string;
-  company: string;
+  company_name: string;
   description: string;
   duration: string;
   location: string;
   payment: string;
-  posted: string;
-  about: string;
+  posted_date: string;
   responsibilities: string[];
   requirements: string[];
 };
@@ -329,10 +320,10 @@ const Internships = () => {
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
                     <div className="w-8 h-8 bg-foreground text-background rounded-full flex items-center justify-center text-sm font-bold">
-                      {int.company?.charAt(0) || "?"}
+                      {int.company_name?.charAt(0) || "?"}
                     </div>
                     <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
-                      Shared {int.posted}
+                      Shared {int.posted_date}
                     </Badge>
                   </div>
                   <h3 className="font-semibold text-sm mb-1">{int.title}</h3>
@@ -364,7 +355,7 @@ const Internships = () => {
                       {internship.title}
                     </h1>
                     <p className="text-lg text-muted-foreground mb-4">
-                      {internship.company}
+                      {internship.company_name}
                     </p>
 
                     <div className="flex items-center space-x-6 text-muted-foreground">
@@ -400,7 +391,7 @@ const Internships = () => {
               {/* About */}
               <div className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">About the Internship</h2>
-                <p className="text-muted-foreground whitespace-pre-line">{internship.about}</p>
+                <p className="text-muted-foreground whitespace-pre-line">{internship.description}</p>
               </div>
 
               {/* Responsibilities */}
