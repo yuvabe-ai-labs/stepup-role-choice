@@ -464,14 +464,20 @@ const Units = () => {
 
           {/* Apply + Clear */}
           <div className="space-y-2">
-            <Button className="w-full text-sm font-medium py-2 border-2 border-teal-500 rounded-3xl bg-transparent hover:bg-teal-50 text-teal-500">
-                Apply
-              </Button>
-            <Button variant="outline" className="w-full text-sm font-medium py-2 rounded-md" onClick={clearFilters}>
+            {/* Apply Button */}
+            <Button className="w-full text-sm font-medium py-2 border-2 border-teal-500 rounded-3xl bg-transparent text-teal-500 hover:bg-teal-50">
+              Apply
+            </Button>
+          
+            {/* Clear Filters Button */}
+            <Button 
+              className="w-full text-sm font-medium py-2 border-2 border-gray-300 rounded-md bg-transparent text-gray-600 hover:bg-gray-100"
+              onClick={clearFilters}
+            >
               Clear Filters
             </Button>
           </div>
-        </div>
+
 
         {/* Main Content */}
         <div className="flex-1 p-6">
