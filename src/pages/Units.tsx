@@ -413,104 +413,105 @@ const Units = () => {
       
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-80 bg-white border-r border-gray-200 p-6 min-h-screen">
-          <h2 className="text-lg font-semibold mb-6">All Filters</h2>
-          
+        <div className="w-72 bg-white border-r border-gray-200 p-6 min-h-screen">
+          <h2 className="text-base font-semibold text-gray-800 mb-6">All Filters</h2>
+        
           {/* Units Filter */}
           <div className="mb-6">
             <button
               onClick={() => toggleSection('units')}
-              className="flex items-center justify-between w-full text-left font-medium mb-3"
+              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
             >
               <span>Units</span>
               {expandedSections.units ? (
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-4 h-4 text-gray-500" />
               ) : (
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4 text-gray-500" />
               )}
             </button>
             {expandedSections.units && (
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">
                   {getUniqueUnitNames().map(unitName => (
-                    <Badge
+                    <span
                       key={unitName}
-                      variant="outline"
-                      className="cursor-pointer hover:bg-gray-100"
+                      className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100"
                     >
                       {unitName}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
-                <button className="text-sm text-blue-600">+ Show More</button>
+                <button className="text-xs text-blue-600 mt-2">+ Show More</button>
               </div>
             )}
           </div>
-
+        
           {/* Unit Type Filter */}
           <div className="mb-6">
             <button
               onClick={() => toggleSection('industry')}
-              className="flex items-center justify-between w-full text-left font-medium mb-3"
+              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
             >
               <span>Unit Type</span>
               {expandedSections.industry ? (
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-4 h-4 text-gray-500" />
               ) : (
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4 text-gray-500" />
               )}
             </button>
             {expandedSections.industry && (
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">
                   {getUniqueUnitTypes().map(unitType => (
-                    <Badge
+                    <span
                       key={unitType}
-                      variant="outline"
-                      className="cursor-pointer hover:bg-gray-100"
+                      className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100"
                     >
                       {unitType}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
-                <button className="text-sm text-blue-600">+ Show More</button>
+                <button className="text-xs text-blue-600 mt-2">+ Show More</button>
               </div>
             )}
           </div>
-
+        
           {/* Focus Areas Filter */}
           <div className="mb-6">
             <button
               onClick={() => toggleSection('interest')}
-              className="flex items-center justify-between w-full text-left font-medium mb-3"
+              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
             >
               <span>Focus Areas</span>
               {expandedSections.interest ? (
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-4 h-4 text-gray-500" />
               ) : (
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4 text-gray-500" />
               )}
             </button>
             {expandedSections.interest && (
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">
                   {getUniqueFocusAreas().map(focusArea => (
-                    <Badge
+                    <span
                       key={focusArea}
-                      variant="outline"
-                      className="cursor-pointer hover:bg-gray-100"
+                      className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100"
                     >
                       {focusArea}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
-                <button className="text-sm text-blue-600">+ Show More</button>
+                <button className="text-xs text-blue-600 mt-2">+ Show More</button>
               </div>
             )}
           </div>
-
-          <Button className="w-full bg-blue-600 hover:bg-blue-700">Apply</Button>
+        
+          {/* Apply button */}
+          <Button className="w-full bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium py-2 rounded-md">
+            Apply
+          </Button>
         </div>
+
 
         {/* Main Content */}
         <div className="flex-1 p-6">
