@@ -524,7 +524,7 @@ const Units = () => {
             /* Loading Skeleton */
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, index) => (
-                <Card key={index} className="overflow-hidden shadow-sm rounded-full">
+                <Card key={index} className="overflow-hidden shadow-sm">
                   <Skeleton className="h-48 w-full" />
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
