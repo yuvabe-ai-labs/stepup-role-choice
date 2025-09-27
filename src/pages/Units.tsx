@@ -394,62 +394,105 @@ const Units = () => {
       
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-72 bg-white border-r border-gray-200 p-6 min-h-screen rounded-md">
-          <h2 className="text-base font-semibold text-gray-800 mb-6">All Filters</h2>
-        
-          {/* Units Filter */}
-          <div className="mb-6">
-            <button onClick={() => toggleSection('units')} className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3">
-              <span>Units</span>
-              {expandedSections.units ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
-            </button>
-            {expandedSections.units && <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {getUniqueUnitNames().map(unitName => <span key={unitName} className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100">
-                      {unitName}
-                    </span>)}
+          <div className="w-72 bg-white border-r border-gray-200 p-6 min-h-screen rounded-md">
+            <h2 className="text-base font-semibold text-gray-800 mb-6">All Filters</h2>
+          
+            {/* Units Filter */}
+            <div className="mb-6">
+              <button
+                onClick={() => toggleSection('units')}
+                className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
+              >
+                <span>Units</span>
+                {expandedSections.units ? (
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-gray-500" />
+                )}
+              </button>
+              {expandedSections.units && (
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
+                    {getUniqueUnitNames().map((unitName) => (
+                      <span
+                        key={unitName}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100"
+                      >
+                        {unitName}
+                      </span>
+                    ))}
+                  </div>
+                  <button className="text-xs text-blue-600 mt-2">+ Show More</button>
                 </div>
-                <button className="text-xs text-blue-600 mt-2">+ Show More</button>
-              </div>}
-          </div>
-        
-          {/* Unit Type Filter */}
-          <div className="mb-6">
-            <button onClick={() => toggleSection('industry')} className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3">
-              <span>Unit Type</span>
-              {expandedSections.industry ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
-            </button>
-            {expandedSections.industry && <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {getUniqueUnitTypes().map(unitType => <span key={unitType} className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100">
-                      {unitType}
-                    </span>)}
+              )}
+            </div>
+          
+            {/* Industry Filter */}
+            <div className="mb-6">
+              <button
+                onClick={() => toggleSection('industry')}
+                className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
+              >
+                <span>Industry</span>
+                {expandedSections.industry ? (
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-gray-500" />
+                )}
+              </button>
+              {expandedSections.industry && (
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
+                    {getUniqueUnitTypes().map((unitType) => (
+                      <span
+                        key={unitType}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100"
+                      >
+                        {unitType}
+                      </span>
+                    ))}
+                  </div>
+                  <button className="text-xs text-blue-600 mt-2">+ Show More</button>
                 </div>
-                <button className="text-xs text-blue-600 mt-2">+ Show More</button>
-              </div>}
-          </div>
-        
-          {/* Focus Areas Filter */}
-          <div className="mb-6">
-            <button onClick={() => toggleSection('interest')} className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3">
-              <span>Focus Areas</span>
-              {expandedSections.interest ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
-            </button>
-            {expandedSections.interest && <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {getUniqueFocusAreas().map(focusArea => <span key={focusArea} className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100">
-                      {focusArea}
-                    </span>)}
+              )}
+            </div>
+          
+            {/* Interest Filter */}
+            <div className="mb-6">
+              <button
+                onClick={() => toggleSection('interest')}
+                className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
+              >
+                <span>Interest</span>
+                {expandedSections.interest ? (
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-gray-500" />
+                )}
+              </button>
+              {expandedSections.interest && (
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
+                    {getUniqueFocusAreas().map((focusArea) => (
+                      <span
+                        key={focusArea}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-full cursor-pointer text-gray-700 hover:bg-gray-100"
+                      >
+                        {focusArea}
+                      </span>
+                    ))}
+                  </div>
+                  <button className="text-xs text-blue-600 mt-2">+ Show More</button>
                 </div>
-                <button className="text-xs text-blue-600 mt-2">+ Show More</button>
-              </div>}
+              )}
+            </div>
+          
+            {/* Apply button */}
+            <Button className="w-full bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium py-2 rounded-md">
+              Apply
+            </Button>
           </div>
-        
-          {/* Apply button */}
-          <Button className="w-full bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium py-2 rounded-md">
-            Apply
-          </Button>
-        </div>
+
 
 
         {/* Main Content */}
