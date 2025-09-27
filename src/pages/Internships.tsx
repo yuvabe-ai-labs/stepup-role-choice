@@ -23,25 +23,29 @@ const Internships = () => {
 
   const selectedInternshipData = internships.find(int => int.id === selectedInternship) || internships[0];
 
-  // Get dynamic data or fallback to static data
-  const keyResponsibilities = selectedInternshipData?.responsibilities 
-    ? (selectedInternshipData.responsibilities as string[])
-    : [
-        'Assist in designing user interfaces for web and mobile applications',
-        'Conduct user research and usability testing',
-        'Create wireframes, prototypes, and design mockups',
-        'Collaborate with developers to implement designs',
-        'Participate in design reviews and team meetings',
-        'Help maintain design systems and style guides'
-      ];
+  // // Get dynamic data or fallback to static data
+  // const keyResponsibilities = selectedInternshipData?.responsibilities 
+  //   ? (selectedInternshipData.responsibilities as string[])
+  //   : [
+  //       'Assist in designing user interfaces for web and mobile applications',
+  //       'Conduct user research and usability testing',
+  //       'Create wireframes, prototypes, and design mockups',
+  //       'Collaborate with developers to implement designs',
+  //       'Participate in design reviews and team meetings',
+  //       'Help maintain design systems and style guides'
+  //     ];
 
-  const requirements = selectedInternshipData?.requirements 
-    ? (selectedInternshipData.requirements as string[])
-    : [
-        'Currently pursuing or recently completed degree in Design, HCI, or related field',
-        'Proficiency in design tools like Figma, Sketch, or Adobe XD',
-        'Basic understanding of HTML/CSS'
-      ];
+  // const requirements = selectedInternshipData?.requirements 
+  //   ? (selectedInternshipData.requirements as string[])
+  //   : [
+  //       'Currently pursuing or recently completed degree in Design, HCI, or related field',
+  //       'Proficiency in design tools like Figma, Sketch, or Adobe XD',
+  //       'Basic understanding of HTML/CSS'
+  //     ];
+
+  const keyResponsibilities = selectedInternshipData?.responsibilities ?? [];
+  const requirements = selectedInternshipData?.requirements ?? [];
+
 
   return (
     <div className="min-h-screen bg-background">
