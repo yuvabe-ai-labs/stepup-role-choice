@@ -250,6 +250,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { MapPin, Clock, DollarSign, Bookmark, Share, Check } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useInternships } from '@/hooks/useInternships';
+import { useApplicationStatus } from '@/hooks/useApplicationStatus';
+import ApplicationDialog from '@/components/ApplicationDialog';
+import ApplicationSuccessDialog from '@/components/ApplicationSuccessDialog';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Internship = Tables<'internships'>;
@@ -280,6 +283,10 @@ function parseNumberedObject(data: any): string[] {
 const Internships = () => {
   const { internships: rawInternships = [], loading, error } = useInternships();
   const [selectedInternship, setSelectedInternship] = useState<string>('');
+  const [showApplicationDialog, setShowApplicationDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  
+  const { hasApplied, isLoading: applicationLoading, markAsApplied } = useApplicationStatus(selectedInternship);
 
   // Ensure internships is always an array
   const internships = Array.isArray(rawInternships) ? rawInternships : rawInternships ? [rawInternships] : [];
@@ -482,8 +489,12 @@ const Internships = () => {
                     <Share className="w-4 h-4" />
                     <span>Share</span>
                   </Button>
-                  <Button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md font-medium">
-                    Apply Now
+                  <Button 
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md font-medium"
+                    onClick={() => setShowApplicationDialog(true)}
+                    disabled={applicationLoading}
+                  >
+                    {hasApplied ? 'Applied' : 'Apply Now'}
                   </Button>
                 </div>
               </div>
@@ -583,6 +594,25 @@ const Internships = () => {
           )}
         </div>
       </div>
+
+      {/* Application Dialog */}
+      {selectedInternshipData && (
+        <ApplicationDialog
+          isOpen={showApplicationDialog}
+          onClose={() => setShowApplicationDialog(false)}
+          internship={selectedInternshipData}
+          onSuccess={() => {
+            markAsApplied();
+            setShowSuccessDialog(true);
+          }}
+        />
+      )}
+
+      {/* Success Dialog */}
+      <ApplicationSuccessDialog
+        isOpen={showSuccessDialog}
+        onClose={() => setShowSuccessDialog(false)}
+      />
     </div>
   );
 };
