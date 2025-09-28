@@ -114,11 +114,17 @@ const Chatbot = () => {
     setShowChat(true);
     setIsTyping(true);
 
-    // Simulate initial bot message delay
     setTimeout(() => {
+      // Prefer full_name from userProfile, fallback to user_metadata, then email, then generic greeting
+      const name =
+        userProfile.full_name ||
+        user?.user_metadata?.full_name ||
+        user?.email?.split("@")[0] ||
+        "there";
+
       const initialMessage: Message = {
         id: "1",
-        content: "Hey 👋, what's your name?",
+        content: `Hey 👋, ${name}! Let's get to know you better.`,
         role: "assistant",
         timestamp: new Date(),
       };
@@ -263,35 +269,50 @@ const Chatbot = () => {
   const storeUserData = async (userResponse: string) => {
     if (!user?.id) return;
 
-    const lastBotMessage = messages.filter((m) => m.role === "assistant").slice(-1)[0]?.content || "";
+    const lastBotMessage =
+      messages.filter((m) => m.role === "assistant").slice(-1)[0]?.content ||
+      "";
     const isUnit = userProfile?.role === "unit";
-    
+
     try {
       let updateData: any = {};
 
       // For students
       if (!isUnit) {
         // Phone number (question 3)
-        if (lastBotMessage.includes("Phone Number") || lastBotMessage.includes("phone number")) {
+        if (
+          lastBotMessage.includes("Phone Number") ||
+          lastBotMessage.includes("phone number")
+        ) {
           updateData.phone = userResponse.trim();
           console.log("Storing phone number:", userResponse);
         }
-        
+
         // Gender (question 4)
-        if (lastBotMessage.includes("Gender") || lastBotMessage.includes("gender")) {
+        if (
+          lastBotMessage.includes("Gender") ||
+          lastBotMessage.includes("gender")
+        ) {
           updateData.gender = userResponse.trim();
           console.log("Storing gender:", userResponse);
         }
-        
+
         // Profile Type (question 5)
-        if (lastBotMessage.includes("Profile Type") || lastBotMessage.includes("profile type")) {
+        if (
+          lastBotMessage.includes("Profile Type") ||
+          lastBotMessage.includes("profile type")
+        ) {
           updateData.profile_type = userResponse.trim();
           console.log("Storing profile type:", userResponse);
         }
       } else {
         // For units
         // Phone number (question 5 for units)
-        if (lastBotMessage.includes("number to reach") || lastBotMessage.includes("phone") || lastBotMessage.includes("contact number")) {
+        if (
+          lastBotMessage.includes("number to reach") ||
+          lastBotMessage.includes("phone") ||
+          lastBotMessage.includes("contact number")
+        ) {
           updateData.phone = userResponse.trim();
           console.log("Storing unit phone number:", userResponse);
         }
@@ -354,6 +375,9 @@ const Chatbot = () => {
       }
       if (lastBotMessage.includes("language")) {
         return ["English", "Tamil", "Hindi", "Telugu", "French"];
+      }
+      if (lastBotMessage.includes("Gender")) {
+        return ["Male", "Female", "Prefer not to say"];
       }
       if (lastBotMessage.includes("what your unit focuses on")) {
         return [
@@ -463,6 +487,9 @@ const Chatbot = () => {
       }
       if (lastBotMessage.includes("Language")) {
         return ["English", "Tamil", "Hindi", "French"];
+      }
+      if (lastBotMessage.includes("Gender")) {
+        return ["Male", "Female", "Prefer not to say"];
       }
       if (lastBotMessage.includes("area of interest")) {
         return [
