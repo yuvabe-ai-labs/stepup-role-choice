@@ -145,6 +145,9 @@ const Chatbot = () => {
     setIsLoading(true);
     setIsTyping(true);
 
+    // Store user data based on conversation context
+    await storeUserData(content);
+
     try {
       const conversationHistory = messages.map((msg) => ({
         role: msg.role,
@@ -254,6 +257,64 @@ const Chatbot = () => {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const storeUserData = async (userResponse: string) => {
+    if (!user?.id) return;
+
+    const lastBotMessage = messages.filter((m) => m.role === "assistant").slice(-1)[0]?.content || "";
+    const isUnit = userProfile?.role === "unit";
+    
+    try {
+      let updateData: any = {};
+
+      // For students
+      if (!isUnit) {
+        // Phone number (question 3)
+        if (lastBotMessage.includes("Phone Number") || lastBotMessage.includes("phone number")) {
+          updateData.phone = userResponse.trim();
+          console.log("Storing phone number:", userResponse);
+        }
+        
+        // Gender (question 4)
+        if (lastBotMessage.includes("Gender") || lastBotMessage.includes("gender")) {
+          updateData.gender = userResponse.trim();
+          console.log("Storing gender:", userResponse);
+        }
+        
+        // Profile Type (question 5)
+        if (lastBotMessage.includes("Profile Type") || lastBotMessage.includes("profile type")) {
+          updateData.profile_type = userResponse.trim();
+          console.log("Storing profile type:", userResponse);
+        }
+      } else {
+        // For units
+        // Phone number (question 5 for units)
+        if (lastBotMessage.includes("number to reach") || lastBotMessage.includes("phone") || lastBotMessage.includes("contact number")) {
+          updateData.phone = userResponse.trim();
+          console.log("Storing unit phone number:", userResponse);
+        }
+      }
+
+      // Update profile if we have data to store
+      if (Object.keys(updateData).length > 0) {
+        const { data, error } = await supabase
+          .from("profiles")
+          .update(updateData)
+          .eq("user_id", user.id)
+          .select();
+
+        if (error) {
+          console.error("Error updating profile data:", error);
+        } else {
+          console.log("Successfully updated profile data:", data);
+          // Update local state
+          setUserProfile((prev: any) => ({ ...prev, ...updateData }));
+        }
+      }
+    } catch (error) {
+      console.error("Error storing user data:", error);
     }
   };
 
