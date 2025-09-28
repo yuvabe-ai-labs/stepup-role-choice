@@ -242,29 +242,50 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           created_at: string
+          date_of_birth: string | null
+          email: string | null
           full_name: string
+          gender: string | null
           id: string
           onboarding_completed: boolean | null
+          phone: string | null
+          profile_type: string | null
           role: string
+          skills: string[] | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          address?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
           full_name: string
+          gender?: string | null
           id?: string
           onboarding_completed?: boolean | null
+          phone?: string | null
+          profile_type?: string | null
           role: string
+          skills?: string[] | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          address?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
           full_name?: string
+          gender?: string | null
           id?: string
           onboarding_completed?: boolean | null
+          phone?: string | null
+          profile_type?: string | null
           role?: string
+          skills?: string[] | null
           updated_at?: string
           user_id?: string
         }
@@ -272,6 +293,7 @@ export type Database = {
       }
       student_profiles: {
         Row: {
+          cover_letter: string | null
           created_at: string
           education: Json | null
           experience_level: string | null
@@ -279,14 +301,17 @@ export type Database = {
           interests: Json | null
           languages: Json | null
           looking_for: Json | null
+          portfolio_url: string | null
           preferred_language: string | null
           profile_id: string
           profile_type: string | null
           projects: Json | null
+          resume_url: string | null
           skills: Json | null
           updated_at: string
         }
         Insert: {
+          cover_letter?: string | null
           created_at?: string
           education?: Json | null
           experience_level?: string | null
@@ -294,14 +319,17 @@ export type Database = {
           interests?: Json | null
           languages?: Json | null
           looking_for?: Json | null
+          portfolio_url?: string | null
           preferred_language?: string | null
           profile_id: string
           profile_type?: string | null
           projects?: Json | null
+          resume_url?: string | null
           skills?: Json | null
           updated_at?: string
         }
         Update: {
+          cover_letter?: string | null
           created_at?: string
           education?: Json | null
           experience_level?: string | null
@@ -309,10 +337,12 @@ export type Database = {
           interests?: Json | null
           languages?: Json | null
           looking_for?: Json | null
+          portfolio_url?: string | null
           preferred_language?: string | null
           profile_id?: string
           profile_type?: string | null
           projects?: Json | null
+          resume_url?: string | null
           skills?: Json | null
           updated_at?: string
         }
@@ -334,6 +364,7 @@ export type Database = {
           created_at: string
           focus_areas: Json | null
           id: string
+          image: string | null
           is_aurovillian: boolean | null
           opportunities_offered: Json | null
           profile_id: string
@@ -349,6 +380,7 @@ export type Database = {
           created_at?: string
           focus_areas?: Json | null
           id?: string
+          image?: string | null
           is_aurovillian?: boolean | null
           opportunities_offered?: Json | null
           profile_id: string
@@ -364,6 +396,7 @@ export type Database = {
           created_at?: string
           focus_areas?: Json | null
           id?: string
+          image?: string | null
           is_aurovillian?: boolean | null
           opportunities_offered?: Json | null
           profile_id?: string
