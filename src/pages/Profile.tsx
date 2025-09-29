@@ -1,45 +1,44 @@
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import Navbar from '@/components/Navbar';
 import { Edit, Mail, Phone, MapPin, Plus } from 'lucide-react';
-
-interface Profile {
-  id: string;
-  full_name: string;
-  role: string;
-  created_at: string;
-}
+import { useProfileData } from '@/hooks/useProfileData';
+import { PersonalDetailsDialog } from '@/components/profile/PersonalDetailsDialog';
+import { SkillsDialog } from '@/components/profile/SkillsDialog';
+import { format } from 'date-fns';
 
 const Profile = () => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { profile, studentProfile, loading, updateProfile, updateStudentProfile } = useProfileData();
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
-
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (!error && data) {
-          setProfile(data);
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      }
-    };
-
-    fetchProfile();
-  }, [user]);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="relative h-48 bg-gradient-to-r from-primary to-primary-foreground">
+          <div className="absolute inset-0 bg-black/20" />
+        </div>
+        <div className="container mx-auto px-4 -mt-24 relative z-10">
+          <Card className="mb-8 bg-white">
+            <CardContent className="p-6">
+              <div className="flex items-start space-x-6">
+                <Skeleton className="h-24 w-24 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-8 w-48" />
+                  <Skeleton className="h-4 w-64" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   const quickLinks = [
     { name: 'Profile Summary', action: 'Update' },
@@ -50,57 +49,6 @@ const Profile = () => {
     { name: 'Interests', action: 'Add' },
     { name: 'Internships', action: 'Add' },
     { name: 'Personal Details', action: 'Add' },
-  ];
-
-  const skills = [
-    'Figma', 'Framer', 'User Interface Design', 'User Experience Design',
-    'Adobe Creative Suite', 'XD Wiring', 'MAYA', 'Information Architecture',
-    'Wireframes', 'WordPress', 'Social Media Ads'
-  ];
-
-  const languages = [
-    { name: 'English', proficiency: 5, read: 5, write: 4, speak: 5 },
-    { name: 'Tamil', proficiency: 4, read: 2, write: 4, speak: 5 },
-    { name: 'Spanish', proficiency: 3, read: 4, write: 2, speak: 5 },
-  ];
-
-  const completedCourses = [
-    {
-      title: 'Digital Marketing',
-      provider: 'SkillUp - SkillUp Program',
-      completedDate: 'Apr 30, 2025'
-    },
-    {
-      title: 'Design Intern',
-      provider: 'Bharat Verse',
-      completedDate: 'Dec 16, 2024'
-    }
-  ];
-
-  const education = [
-    {
-      degree: 'Bachelor of Design (Visual Communication)',
-      institution: 'National Institute of Design',
-      years: '2017 - 2021',
-      cgpa: '8.5 CGPA'
-    },
-    {
-      degree: 'Higher Secondary Certificate',
-      institution: 'St. Mary\'s Higher Secondary School',
-      years: '2015 - 2017',
-      percentage: '94%'
-    }
-  ];
-
-  const internships = [
-    {
-      title: 'UI/UX Designer',
-      company: 'Aurora Earth Institute'
-    },
-    {
-      title: 'Design Intern',
-      company: 'Bharat Verse'
-    }
   ];
 
   const renderProficiencyDots = (level: number) => {
@@ -138,24 +86,28 @@ const Profile = () => {
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
                   <h1 className="text-2xl font-bold">{profile?.full_name || 'Student Name'}</h1>
-                  <Edit className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
+                  <PersonalDetailsDialog profile={profile!} onUpdate={updateProfile}>
+                    <Edit className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
+                  </PersonalDetailsDialog>
                 </div>
                 <p className="text-muted-foreground mb-4">
-                  {profile?.role || 'Digital Marketing Associate | Canva Expert | AI Prompt Writer'}
+                  {profile?.role === 'student' ? 'Student' : profile?.role || 'User'}
                 </p>
                 
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center space-x-1">
                     <Mail className="w-4 h-4" />
-                    <span>{user?.email || 'student@gmail.com'}</span>
+                    <span>{profile?.email || user?.email || 'No email provided'}</span>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <Phone className="w-4 h-4" />
-                    <span>+91 98764 44200</span>
-                  </div>
+                  {profile?.phone && (
+                    <div className="flex items-center space-x-1">
+                      <Phone className="w-4 h-4" />
+                      <span>{profile.phone}</span>
+                    </div>
+                  )}
                   <div className="flex items-center space-x-1">
                     <MapPin className="w-4 h-4" />
-                    <span>Coimbatore, Tamil Nadu</span>
+                    <span>Location not provided</span>
                   </div>
                 </div>
               </div>
@@ -212,16 +164,22 @@ const Profile = () => {
                   </Button>
                 </div>
                 <div className="space-y-4">
-                  {completedCourses.map((course, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                      <div>
-                        <h4 className="font-medium">{course.title}</h4>
-                        <p className="text-sm text-muted-foreground">{course.provider}</p>
-                        <p className="text-sm text-muted-foreground">Completed on {course.completedDate}</p>
+                  {studentProfile?.completed_courses && studentProfile.completed_courses.length > 0 ? (
+                    studentProfile.completed_courses.map((course, index) => (
+                      <div key={index} className="flex items-center justify-between p-4 border border-border rounded-lg">
+                        <div>
+                          <h4 className="font-medium">{course.title}</h4>
+                          <p className="text-sm text-muted-foreground">{course.provider}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Completed on {format(new Date(course.completion_date), 'MMM dd, yyyy')}
+                          </p>
+                        </div>
+                        <Button variant="outline" size="sm">View</Button>
                       </div>
-                      <Button variant="outline" size="sm">View</Button>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground">No completed courses yet. Add your first course!</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -231,14 +189,20 @@ const Profile = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Key Skills</h3>
-                  <Edit className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
+                  <SkillsDialog studentProfile={studentProfile} onUpdate={updateStudentProfile}>
+                    <Edit className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
+                  </SkillsDialog>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {skills.map((skill, index) => (
-                    <Badge key={index} variant="secondary" className="px-3 py-1">
-                      {skill}
-                    </Badge>
-                  ))}
+                  {studentProfile?.skills && studentProfile.skills.length > 0 ? (
+                    studentProfile.skills.map((skill, index) => (
+                      <Badge key={index} variant="secondary" className="px-3 py-1">
+                        {skill}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground">No skills added yet. Click the edit icon to add your skills!</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -253,18 +217,26 @@ const Profile = () => {
                   </Button>
                 </div>
                 <div className="space-y-4">
-                  {education.map((edu, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">{edu.degree}</h4>
-                        <p className="text-sm text-muted-foreground">{edu.institution}</p>
+                  {studentProfile?.education && studentProfile.education.length > 0 ? (
+                    studentProfile.education.map((edu, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">{edu.degree}</h4>
+                          <p className="text-sm text-muted-foreground">{edu.institution}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm">
+                            {edu.start_year} - {edu.end_year || 'Present'}
+                          </p>
+                          {edu.score && (
+                            <p className="text-sm text-primary font-medium">{edu.score}</p>
+                          )}
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm">{edu.years}</p>
-                        <p className="text-sm text-primary font-medium">{edu.cgpa || edu.percentage}</p>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground">No education details added yet.</p>
+                  )}
                 </div>
                 <div className="mt-4 space-y-2">
                   <Button variant="ghost" size="sm" className="text-primary">
@@ -287,9 +259,32 @@ const Profile = () => {
                     Add Project
                   </Button>
                 </div>
-                <p className="text-muted-foreground">
-                  Stand out by adding details about the projects that you have done so far.
-                </p>
+                {studentProfile?.projects && studentProfile.projects.length > 0 ? (
+                  <div className="space-y-4">
+                    {studentProfile.projects.map((project, index) => (
+                      <div key={index} className="p-4 border border-border rounded-lg">
+                        <h4 className="font-medium">{project.title}</h4>
+                        <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
+                        {project.technologies && project.technologies.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {project.technologies.map((tech, techIndex) => (
+                              <Badge key={techIndex} variant="outline" className="text-xs">
+                                {tech}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {format(new Date(project.start_date), 'MMM yyyy')} - {project.end_date ? format(new Date(project.end_date), 'MMM yyyy') : 'Present'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">
+                    Stand out by adding details about the projects that you have done so far.
+                  </p>
+                )}
               </CardContent>
             </Card>
 
@@ -302,9 +297,19 @@ const Profile = () => {
                     Add Interest
                   </Button>
                 </div>
-                <p className="text-muted-foreground">
-                  Stand out by telling about your interests.
-                </p>
+                {studentProfile?.interests && studentProfile.interests.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {studentProfile.interests.map((interest, index) => (
+                      <Badge key={index} variant="outline" className="px-3 py-1">
+                        {interest}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">
+                    Stand out by telling about your interests.
+                  </p>
+                )}
               </CardContent>
             </Card>
 
@@ -317,17 +322,9 @@ const Profile = () => {
                     Add Internship
                   </Button>
                 </div>
-                <div className="space-y-4">
-                  {internships.map((internship, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                      <div>
-                        <h4 className="font-medium">{internship.title}</h4>
-                        <p className="text-sm text-muted-foreground">{internship.company}</p>
-                      </div>
-                      <Button variant="outline" size="sm">View</Button>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-muted-foreground">
+                  No internships added yet. Add your internship experience!
+                </p>
               </CardContent>
             </Card>
 
@@ -336,29 +333,32 @@ const Profile = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Personal Details</h3>
-                  <Edit className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
+                  <PersonalDetailsDialog profile={profile!} onUpdate={updateProfile}>
+                    <Edit className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
+                  </PersonalDetailsDialog>
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Personal</p>
-                    <p className="font-medium">Male, Single/ Unmarried</p>
+                    <p className="text-sm text-muted-foreground mb-1">Gender</p>
+                    <p className="font-medium">{profile?.gender || 'Not specified'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Graduated</p>
-                    <p className="font-medium">No</p>
+                    <p className="text-sm text-muted-foreground mb-1">Phone</p>
+                    <p className="font-medium">{profile?.phone || 'Not provided'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Date Of Birth</p>
-                    <p className="font-medium">19 Aug 2006</p>
+                    <p className="font-medium">
+                      {profile?.date_of_birth 
+                        ? format(new Date(profile.date_of_birth), 'dd MMM yyyy')
+                        : 'Not provided'
+                      }
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Differently Abled</p>
-                    <p className="font-medium">No</p>
+                    <p className="text-sm text-muted-foreground mb-1">Profile Type</p>
+                    <p className="font-medium">{profile?.profile_type || 'Not specified'}</p>
                   </div>
-                </div>
-                <div className="mt-4">
-                  <p className="text-sm text-muted-foreground mb-1">Address</p>
-                  <p className="font-medium">No. 34, French Colony Street, Gandhi Nagar, Coimbatore, Tamil Nadu - 600 235</p>
                 </div>
               </CardContent>
             </Card>
@@ -373,30 +373,36 @@ const Profile = () => {
                   </Button>
                 </div>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-5 gap-4 text-sm text-muted-foreground mb-2">
-                    <span>Language</span>
-                    <span>Proficiency</span>
-                    <span>Read</span>
-                    <span>Write</span>
-                    <span>Speak</span>
-                  </div>
-                  {languages.map((lang, index) => (
-                    <div key={index} className="grid grid-cols-5 gap-4 items-center">
-                      <span className="font-medium">{lang.name}</span>
-                      <div className="flex space-x-1">
-                        {renderProficiencyDots(lang.proficiency)}
+                  {studentProfile?.languages && studentProfile.languages.length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-5 gap-4 text-sm text-muted-foreground mb-2">
+                        <span>Language</span>
+                        <span>Proficiency</span>
+                        <span>Read</span>
+                        <span>Write</span>
+                        <span>Speak</span>
                       </div>
-                      <div className="flex space-x-1">
-                        {renderProficiencyDots(lang.read)}
-                      </div>
-                      <div className="flex space-x-1">
-                        {renderProficiencyDots(lang.write)}
-                      </div>
-                      <div className="flex space-x-1">
-                        {renderProficiencyDots(lang.speak)}
-                      </div>
-                    </div>
-                  ))}
+                      {studentProfile.languages.map((lang, index) => (
+                        <div key={index} className="grid grid-cols-5 gap-4 items-center">
+                          <span className="font-medium">{lang.name}</span>
+                          <div className="flex space-x-1">
+                            {renderProficiencyDots(lang.proficiency)}
+                          </div>
+                          <div className="flex space-x-1">
+                            {renderProficiencyDots(lang.read)}
+                          </div>
+                          <div className="flex space-x-1">
+                            {renderProficiencyDots(lang.write)}
+                          </div>
+                          <div className="flex space-x-1">
+                            {renderProficiencyDots(lang.speak)}
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <p className="text-muted-foreground">No languages added yet.</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
