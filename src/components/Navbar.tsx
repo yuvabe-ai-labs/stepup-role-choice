@@ -25,7 +25,7 @@ const Navbar = () => {
         <div className="flex justify-center">
           <a href="/">
             <img
-              src="public/logo.png"
+              src="src/assets/logo-2.png"
               alt="Company Logo"
               className="h-5 w-auto cursor-pointer"
             />
