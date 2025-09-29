@@ -7,7 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Send, Sparkles } from "lucide-react";
-import chatbotAvatar from "@/assets/chatbot-avatar.png";
+import chatbotAvatar from "@/assets/chatbot.png";
+import logo from "@/assets/logo-2.png";
 
 interface Message {
   id: string;
@@ -614,7 +615,7 @@ const Chatbot = () => {
           <div className="flex justify-center">
             <a href="/">
               <img
-                src="src/assets/logo-2.png"
+                src={logo}
                 alt="Company Logo"
                 className="h-30 w-auto cursor-pointer"
               />
@@ -639,7 +640,7 @@ const Chatbot = () => {
           <div className="relative">
             <div className="w-32 h-32 mx-auto mb-4 relative">
               <img
-                src="src/assets/chatbot-avatar.png"
+                src={chatbotAvatar}
                 alt="AI Assistant"
                 className="w-full h-full rounded-full object-cover"
               />
@@ -682,7 +683,7 @@ const Chatbot = () => {
           <div className="flex justify-center">
             <a href="/">
               <img
-                src="src/assets/logo-2.png"
+                src={logo}
                 alt="Company Logo"
                 className="h-30 w-auto cursor-pointer"
               />
@@ -707,7 +708,7 @@ const Chatbot = () => {
           <div className="relative">
             <div className="w-32 h-32 mx-auto mb-4 relative">
               <img
-                src="src/assets/chatbot-avatar.png"
+                src={chatbotAvatar}
                 alt="AI Assistant"
                 className="w-full h-full rounded-full object-cover"
               />
@@ -751,7 +752,7 @@ const Chatbot = () => {
           <div className="flex justify-center">
             <a href="/">
               <img
-                src="src/assets/logo-2.png"
+                src={logo}
                 alt="Company Logo"
                 className="h-30 w-auto cursor-pointer"
               />
@@ -977,7 +978,7 @@ const Chatbot = () => {
           <div className="flex justify-center">
             <a href="/">
               <img
-                src="src/assets/logo-2.png"
+                src={logo}
                 alt="Company Logo"
                 className="h-30 w-auto cursor-pointer"
               />
@@ -1016,7 +1017,7 @@ const Chatbot = () => {
                 {message.role === "assistant" && (
                   <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                     <img
-                      src="src/assets/chatbot-avatar.png"
+                      src={chatbotAvatar}
                       alt="AI Assistant"
                       className="w-full h-full object-cover"
                     />
@@ -1050,7 +1051,7 @@ const Chatbot = () => {
               <div className="flex items-start space-x-3 max-w-[80%]">
                 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                   <img
-                    src="src/assets/chatbot-avatar.png"
+                    src={chatbotAvatar}
                     alt="AI Assistant"
                     className="w-full h-full object-cover"
                   />
