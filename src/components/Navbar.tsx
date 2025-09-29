@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
+import logo from "@/assets/logo-2.png";
 
 const Navbar = () => {
   const { user } = useAuth();
@@ -25,7 +26,7 @@ const Navbar = () => {
         <div className="flex justify-center">
           <a href="/">
             <img
-              src="src/assets/logo-2.png"
+              src={logo}
               alt="Company Logo"
               className="h-5 w-auto cursor-pointer"
             />
