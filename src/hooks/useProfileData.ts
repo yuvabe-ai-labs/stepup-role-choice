@@ -128,6 +128,7 @@
 //     refetch: fetchProfileData
 //   };
 // };
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -152,6 +153,8 @@ export const useProfileData = () => {
       setLoading(true);
       setError(null);
 
+      console.log('Fetching profile for user ID:', user.id);
+
       // Fetch basic profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -159,8 +162,12 @@ export const useProfileData = () => {
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile fetch error:', profileError);
+        throw profileError;
+      }
 
+      console.log('Profile data fetched:', profileData);
       setProfile(profileData);
 
       // Always try to fetch student profile regardless of role
@@ -176,6 +183,7 @@ export const useProfileData = () => {
         console.warn('Error fetching student profile:', studentError);
       }
 
+      console.log('Student profile data fetched:', studentData);
       // Cast the data to StudentProfile type, handling missing properties
       setStudentProfile(studentData as StudentProfile || null);
 
