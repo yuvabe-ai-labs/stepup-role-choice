@@ -128,7 +128,6 @@
 //     refetch: fetchProfileData
 //   };
 // };
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -138,6 +137,7 @@ import { useToast } from '@/hooks/use-toast';
 export const useProfileData = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+
   const [profile, setProfile] = useState<DatabaseProfile | null>(null);
   const [studentProfile, setStudentProfile] = useState<StudentProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -155,7 +155,7 @@ export const useProfileData = () => {
 
       console.log('Fetching profile for user ID:', user.id);
 
-      // Fetch basic profile
+      // 1. Fetch basic profile by user_id
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -168,32 +168,34 @@ export const useProfileData = () => {
       }
 
       console.log('Profile data fetched:', profileData);
-      setProfile(profileData);
+      setProfile(profileData as DatabaseProfile);
 
-      // Always try to fetch student profile regardless of role
-      // This allows for more flexibility and handles cases where role might not be set
-      const { data: studentData, error: studentError } = await supabase
-        .from('student_profiles')
-        .select('*')
-        .eq('profile_id', user.id)
-        .maybeSingle();
+      // 2. Fetch student profile using profile.id
+      let studentData: StudentProfile | null = null;
+      if (profileData?.id) {
+        const { data, error: studentError } = await supabase
+          .from('student_profiles')
+          .select('*')
+          .eq('profile_id', profileData.id) // ✅ FIXED
+          .maybeSingle();
 
-      if (studentError && studentError.code !== 'PGRST116') {
-        // PGRST116 means no rows returned, which is fine
-        console.warn('Error fetching student profile:', studentError);
+        if (studentError && studentError.code !== 'PGRST116') {
+          // PGRST116 = no rows returned → not an error
+          console.warn('Error fetching student profile:', studentError);
+        }
+
+        console.log('Student profile data fetched:', studentData);
+        studentData = data as StudentProfile | null;
       }
 
-      console.log('Student profile data fetched:', studentData);
-      // Cast the data to StudentProfile type, handling missing properties
-      setStudentProfile(studentData as StudentProfile || null);
-
+      setStudentProfile(studentData);
     } catch (err: any) {
       console.error('Profile fetch error:', err);
       setError(err.message);
       toast({
         title: "Error",
         description: "Failed to fetch profile data",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -214,55 +216,58 @@ export const useProfileData = () => {
       if (error) throw error;
 
       setProfile(data as DatabaseProfile);
+
       toast({
         title: "Success",
-        description: "Profile updated successfully"
+        description: "Profile updated successfully",
       });
     } catch (err: any) {
       console.error('Profile update error:', err);
       toast({
         title: "Error",
         description: "Failed to update profile",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   const updateStudentProfile = async (updates: Partial<StudentProfile>) => {
-    if (!user) return;
+    if (!profile?.id) return; // ✅ must use profile.id
 
     try {
       const { data, error } = await supabase
         .from('student_profiles')
-        .upsert({
-          profile_id: user.id,
-          ...updates
-        }, {
-          onConflict: 'profile_id'
-        })
+        .upsert(
+          {
+            profile_id: profile.id, // ✅ FIXED
+            ...updates,
+          },
+          { onConflict: 'profile_id' }
+        )
         .select()
         .single();
 
       if (error) throw error;
 
       setStudentProfile(data as StudentProfile);
+
       toast({
         title: "Success",
-        description: "Student profile updated successfully"
+        description: "Student profile updated successfully",
       });
     } catch (err: any) {
       console.error('Student profile update error:', err);
       toast({
         title: "Error",
         description: "Failed to update student profile",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   useEffect(() => {
     fetchProfileData();
-  }, [user?.id]); // More specific dependency
+  }, [user?.id]);
 
   return {
     profile,
@@ -271,6 +276,6 @@ export const useProfileData = () => {
     error,
     updateProfile,
     updateStudentProfile,
-    refetch: fetchProfileData
+    refetch: fetchProfileData,
   };
 };
