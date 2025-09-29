@@ -614,7 +614,7 @@ const Chatbot = () => {
           <div className="flex justify-center">
             <a href="/">
               <img
-                src="public/logo.png"
+                src="src/assets/logo-2.png"
                 alt="Company Logo"
                 className="h-30 w-auto cursor-pointer"
               />
@@ -639,7 +639,7 @@ const Chatbot = () => {
           <div className="relative">
             <div className="w-32 h-32 mx-auto mb-4 relative">
               <img
-                src="public/chatbotAvatar.png"
+                src="src/assets/chatbot-avatar.png"
                 alt="AI Assistant"
                 className="w-full h-full rounded-full object-cover"
               />
@@ -682,7 +682,7 @@ const Chatbot = () => {
           <div className="flex justify-center">
             <a href="/">
               <img
-                src="public/logo.png"
+                src="src/assets/logo-2.png"
                 alt="Company Logo"
                 className="h-30 w-auto cursor-pointer"
               />
@@ -707,7 +707,7 @@ const Chatbot = () => {
           <div className="relative">
             <div className="w-32 h-32 mx-auto mb-4 relative">
               <img
-                src="public/chatbotAvatar.png"
+                src="src/assets/chatbot-avatar.png"
                 alt="AI Assistant"
                 className="w-full h-full rounded-full object-cover"
               />
@@ -751,7 +751,7 @@ const Chatbot = () => {
           <div className="flex justify-center">
             <a href="/">
               <img
-                src="public/logo.png"
+                src="src/assets/logo-2.png"
                 alt="Company Logo"
                 className="h-30 w-auto cursor-pointer"
               />
@@ -977,7 +977,7 @@ const Chatbot = () => {
           <div className="flex justify-center">
             <a href="/">
               <img
-                src="public/logo.png"
+                src="src/assets/logo-2.png"
                 alt="Company Logo"
                 className="h-30 w-auto cursor-pointer"
               />
@@ -1016,7 +1016,7 @@ const Chatbot = () => {
                 {message.role === "assistant" && (
                   <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                     <img
-                      src="public/chatbotAvatar.png"
+                      src="src/assets/chatbot-avatar.png"
                       alt="AI Assistant"
                       className="w-full h-full object-cover"
                     />
@@ -1050,7 +1050,7 @@ const Chatbot = () => {
               <div className="flex items-start space-x-3 max-w-[80%]">
                 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                   <img
-                    src="public/chatbotAvatar.png"
+                    src="src/assets/chatbot-avatar.png"
                     alt="AI Assistant"
                     className="w-full h-full object-cover"
                   />
