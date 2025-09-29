@@ -128,6 +128,7 @@
 //     refetch: fetchProfileData
 //   };
 // };
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -172,30 +173,49 @@ export const useProfileData = () => {
 
       // 2. Fetch student profile using profile.id
       let studentData: StudentProfile | null = null;
+
       if (profileData?.id) {
         const { data, error: studentError } = await supabase
           .from('student_profiles')
           .select('*')
-          .eq('profile_id', profileData.id) // ✅ FIXED
+          .eq('profile_id', profileData.id)
           .maybeSingle();
 
         if (studentError && studentError.code !== 'PGRST116') {
-          // PGRST116 = no rows returned → not an error
           console.warn('Error fetching student profile:', studentError);
         }
 
-        console.log('Student profile data fetched:', studentData);
         studentData = data as StudentProfile | null;
+
+        // Auto-create if missing and role = student
+        if (!studentData && profileData?.role === 'student') {
+          console.log('No student profile found, creating one...');
+          const { data: newStudent, error: insertError } = await supabase
+            .from('student_profiles')
+            .insert({
+              profile_id: profileData.id,
+              profile_type: profileData.profile_type || 'Student',
+            })
+            .select()
+            .single();
+
+          if (insertError) {
+            console.error('Error creating student profile:', insertError);
+          } else {
+            studentData = newStudent as StudentProfile;
+          }
+        }
       }
 
       setStudentProfile(studentData);
+      console.log('Student profile data fetched:', studentData);
     } catch (err: any) {
       console.error('Profile fetch error:', err);
       setError(err.message);
       toast({
-        title: "Error",
-        description: "Failed to fetch profile data",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to fetch profile data',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -218,15 +238,15 @@ export const useProfileData = () => {
       setProfile(data as DatabaseProfile);
 
       toast({
-        title: "Success",
-        description: "Profile updated successfully",
+        title: 'Success',
+        description: 'Profile updated successfully',
       });
     } catch (err: any) {
       console.error('Profile update error:', err);
       toast({
-        title: "Error",
-        description: "Failed to update profile",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update profile',
+        variant: 'destructive',
       });
     }
   };
@@ -252,15 +272,15 @@ export const useProfileData = () => {
       setStudentProfile(data as StudentProfile);
 
       toast({
-        title: "Success",
-        description: "Student profile updated successfully",
+        title: 'Success',
+        description: 'Student profile updated successfully',
       });
     } catch (err: any) {
       console.error('Student profile update error:', err);
       toast({
-        title: "Error",
-        description: "Failed to update student profile",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update student profile',
+        variant: 'destructive',
       });
     }
   };
