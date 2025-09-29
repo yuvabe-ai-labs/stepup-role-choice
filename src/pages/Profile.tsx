@@ -11,11 +11,32 @@ import { Edit, Mail, Phone, MapPin, Plus } from 'lucide-react';
 import { useProfileData } from '@/hooks/useProfileData';
 import { PersonalDetailsDialog } from '@/components/profile/PersonalDetailsDialog';
 import { SkillsDialog } from '@/components/profile/SkillsDialog';
+import { EducationDialog } from '@/components/profile/EducationDialog';
+import { ProjectDialog } from '@/components/profile/ProjectDialog';
+import { CourseDialog } from '@/components/profile/CourseDialog';
+import { InterestDialog } from '@/components/profile/InterestDialog';
+import { LanguageDialog } from '@/components/profile/LanguageDialog';
+import { InternshipDialog } from '@/components/profile/InternshipDialog';
+import { ProfileSummaryDialog } from '@/components/profile/ProfileSummaryDialog';
 import { format } from 'date-fns';
 
 const Profile = () => {
   const { user } = useAuth();
-  const { profile, studentProfile, loading, updateProfile, updateStudentProfile } = useProfileData();
+  const { 
+    profile, 
+    studentProfile, 
+    loading, 
+    updateProfile, 
+    updateStudentProfile, 
+    addEducationEntry,
+    addProjectEntry,
+    addCourseEntry,
+    addLanguageEntry,
+    addInternshipEntry,
+    updateInterests,
+    updateCoverLetter,
+    parseJsonField,
+  } = useProfileData();
 
   if (loading) {
     return (
@@ -62,19 +83,6 @@ const Profile = () => {
         }`}
       />
     ));
-  };
-
-  // Helper function to safely parse JSON data
-  const parseJsonField = (field: any, defaultValue: any = []) => {
-    if (!field) return defaultValue;
-    if (typeof field === 'string') {
-      try {
-        return JSON.parse(field);
-      } catch {
-        return defaultValue;
-      }
-    }
-    return Array.isArray(field) ? field : defaultValue;
   };
 
   // Safe data extraction
@@ -169,7 +177,12 @@ const Profile = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Profile Summary</h3>
-                  <Edit className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
+                  <ProfileSummaryDialog 
+                    summary={studentProfile?.cover_letter || ''}
+                    onSave={updateCoverLetter}
+                  >
+                    <Edit className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
+                  </ProfileSummaryDialog>
                 </div>
                 <p className="text-muted-foreground">
                   {studentProfile?.cover_letter || 
@@ -184,9 +197,11 @@ const Profile = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Completed Courses</h3>
-                  <Button variant="ghost" size="sm" className="text-primary">
-                    Add Completed Course
-                  </Button>
+                  <CourseDialog onSave={addCourseEntry}>
+                    <Button variant="ghost" size="sm" className="text-primary">
+                      Add Completed Course
+                    </Button>
+                  </CourseDialog>
                 </div>
                 <div className="space-y-4">
                   {completedCourses.length > 0 ? (
@@ -237,9 +252,11 @@ const Profile = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Education</h3>
-                  <Button variant="ghost" size="sm" className="text-primary">
-                    Add Education
-                  </Button>
+                  <EducationDialog onSave={addEducationEntry}>
+                    <Button variant="ghost" size="sm" className="text-primary">
+                      Add Education
+                    </Button>
+                  </EducationDialog>
                 </div>
                 <div className="space-y-4">
                   {education.length > 0 ? (
@@ -280,9 +297,11 @@ const Profile = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Projects</h3>
-                  <Button variant="ghost" size="sm" className="text-primary">
-                    Add Project
-                  </Button>
+                  <ProjectDialog onSave={addProjectEntry}>
+                    <Button variant="ghost" size="sm" className="text-primary">
+                      Add Project
+                    </Button>
+                  </ProjectDialog>
                 </div>
                 {projects.length > 0 ? (
                   <div className="space-y-4">
@@ -318,9 +337,11 @@ const Profile = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Interests</h3>
-                  <Button variant="ghost" size="sm" className="text-primary">
-                    Add Interest
-                  </Button>
+                  <InterestDialog interests={interests} onSave={updateInterests}>
+                    <Button variant="ghost" size="sm" className="text-primary">
+                      Add Interest
+                    </Button>
+                  </InterestDialog>
                 </div>
                 {interests.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
@@ -343,9 +364,11 @@ const Profile = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Internships</h3>
-                  <Button variant="ghost" size="sm" className="text-primary">
-                    Add Internship
-                  </Button>
+                  <InternshipDialog onSave={addInternshipEntry}>
+                    <Button variant="ghost" size="sm" className="text-primary">
+                      Add Internship
+                    </Button>
+                  </InternshipDialog>
                 </div>
                 <p className="text-muted-foreground">
                   No internships added yet. Add your internship experience!
@@ -395,9 +418,11 @@ const Profile = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Languages</h3>
-                  <Button variant="ghost" size="sm" className="text-primary">
-                    Add Languages
-                  </Button>
+                  <LanguageDialog onSave={addLanguageEntry}>
+                    <Button variant="ghost" size="sm" className="text-primary">
+                      Add Languages
+                    </Button>
+                  </LanguageDialog>
                 </div>
                 <div className="space-y-4">
                   {languages.length > 0 ? (

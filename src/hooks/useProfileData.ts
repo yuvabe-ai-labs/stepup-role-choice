@@ -325,6 +325,59 @@ export const useProfileData = () => {
     }
   };
 
+  // Helper function to safely parse JSON data
+  const parseJsonField = (field: any, defaultValue: any = []) => {
+    if (!field) return defaultValue;
+    if (typeof field === 'string') {
+      try {
+        return JSON.parse(field);
+      } catch {
+        return defaultValue;
+      }
+    }
+    return Array.isArray(field) ? field : defaultValue;
+  };
+
+  // Array management helpers
+  const addEducationEntry = async (education: Omit<any, 'id'>) => {
+    const currentEducation = parseJsonField(studentProfile?.education, []);
+    const newEducation = [...currentEducation, { ...education, id: crypto.randomUUID() }];
+    await updateStudentProfile({ education: newEducation });
+  };
+
+  const addProjectEntry = async (project: Omit<any, 'id'>) => {
+    const currentProjects = parseJsonField(studentProfile?.projects, []);
+    const newProjects = [...currentProjects, { ...project, id: crypto.randomUUID() }];
+    await updateStudentProfile({ projects: newProjects });
+  };
+
+  const addCourseEntry = async (course: Omit<any, 'id'>) => {
+    const currentCourses = parseJsonField(studentProfile?.completed_courses, []);
+    const newCourses = [...currentCourses, { ...course, id: crypto.randomUUID() }];
+    await updateStudentProfile({ completed_courses: newCourses });
+  };
+
+  const addLanguageEntry = async (language: Omit<any, 'id'>) => {
+    const currentLanguages = parseJsonField(studentProfile?.languages, []);
+    const newLanguages = [...currentLanguages, { ...language, id: crypto.randomUUID() }];
+    await updateStudentProfile({ languages: newLanguages });
+  };
+
+  const addInternshipEntry = async (internship: Omit<any, 'id'>) => {
+    // For now, we'll store in a JSON field, but could be moved to a separate table later
+    const currentInternships = parseJsonField((studentProfile as any)?.internships || [], []);
+    const newInternships = [...currentInternships, { ...internship, id: crypto.randomUUID() }];
+    await updateStudentProfile({ internships: newInternships } as any);
+  };
+
+  const updateInterests = async (interests: string[]) => {
+    await updateStudentProfile({ interests });
+  };
+
+  const updateCoverLetter = async (coverLetter: string) => {
+    await updateStudentProfile({ cover_letter: coverLetter });
+  };
+
   useEffect(() => {
     fetchProfileData();
   }, [user?.id]);
@@ -337,6 +390,15 @@ export const useProfileData = () => {
     updateProfile,
     updateStudentProfile,
     refetch: fetchProfileData,
+    // Array management helpers
+    addEducationEntry,
+    addProjectEntry,
+    addCourseEntry,
+    addLanguageEntry,
+    addInternshipEntry,
+    updateInterests,
+    updateCoverLetter,
+    parseJsonField,
   };
 };
 
