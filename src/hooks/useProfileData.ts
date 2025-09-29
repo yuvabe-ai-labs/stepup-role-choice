@@ -378,6 +378,49 @@ export const useProfileData = () => {
     await updateStudentProfile({ cover_letter: coverLetter });
   };
 
+  // Remove functions for each array type
+  const removeEducationEntry = async (id: string) => {
+    const currentEducation = parseJsonField(studentProfile?.education, []);
+    const updatedEducation = currentEducation.filter((edu: any) => edu.id !== id);
+    await updateStudentProfile({ education: updatedEducation });
+  };
+
+  const removeProjectEntry = async (id: string) => {
+    const currentProjects = parseJsonField(studentProfile?.projects, []);
+    const updatedProjects = currentProjects.filter((project: any) => project.id !== id);
+    await updateStudentProfile({ projects: updatedProjects });
+  };
+
+  const removeCourseEntry = async (id: string) => {
+    const currentCourses = parseJsonField(studentProfile?.completed_courses, []);
+    const updatedCourses = currentCourses.filter((course: any) => course.id !== id);
+    await updateStudentProfile({ completed_courses: updatedCourses });
+  };
+
+  const removeLanguageEntry = async (id: string) => {
+    const currentLanguages = parseJsonField(studentProfile?.languages, []);
+    const updatedLanguages = currentLanguages.filter((lang: any) => lang.id !== id);
+    await updateStudentProfile({ languages: updatedLanguages });
+  };
+
+  const removeInternshipEntry = async (id: string) => {
+    const currentInternships = parseJsonField((studentProfile as any)?.internships || [], []);
+    const updatedInternships = currentInternships.filter((internship: any) => internship.id !== id);
+    await updateStudentProfile({ internships: updatedInternships } as any);
+  };
+
+  const removeInterest = async (interest: string) => {
+    const currentInterests = parseJsonField(studentProfile?.interests, []);
+    const updatedInterests = currentInterests.filter((item: string) => item !== interest);
+    await updateStudentProfile({ interests: updatedInterests });
+  };
+
+  const removeSkill = async (skill: string) => {
+    const currentSkills = parseJsonField(studentProfile?.skills, []);
+    const updatedSkills = currentSkills.filter((item: string) => item !== skill);
+    await updateStudentProfile({ skills: updatedSkills });
+  };
+
   useEffect(() => {
     fetchProfileData();
   }, [user?.id]);
@@ -399,6 +442,14 @@ export const useProfileData = () => {
     updateInterests,
     updateCoverLetter,
     parseJsonField,
+    // Remove functions
+    removeEducationEntry,
+    removeProjectEntry,
+    removeCourseEntry,
+    removeLanguageEntry,
+    removeInternshipEntry,
+    removeInterest,
+    removeSkill,
   };
 };
 
