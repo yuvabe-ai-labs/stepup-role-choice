@@ -101,7 +101,7 @@ const SignIn = () => {
 
           {/* Right Side - Sign In Form */}
           <div className="w-full max-w-md mx-auto">
-            <div className="text-center mb-8">
+            {/* <div className="text-center mb-8">
               <Link
                 to="/"
                 className="inline-flex items-center space-x-2 text-2xl font-bold text-primary mb-6"
@@ -114,7 +114,7 @@ const SignIn = () => {
                   {role}
                 </span>
               </div>
-            </div>
+            </div> */}
 
             <Card className="shadow-xl border-0">
               <CardHeader className="text-center pb-4">
