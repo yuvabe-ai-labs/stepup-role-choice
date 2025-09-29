@@ -312,7 +312,7 @@ const Profile = () => {
                     <p className="text-muted-foreground">No education details added yet.</p>
                   )}
                 </div>
-                <div className="mt-4 space-y-2">
+                {/* <div className="mt-4 space-y-2">
                   <Button variant="ghost" size="sm" className="text-primary">
                     Add Master/ Post-graduate
                   </Button>
@@ -320,7 +320,7 @@ const Profile = () => {
                   <Button variant="ghost" size="sm" className="text-primary">
                     Add Doctorate/ PhD
                   </Button>
-                </div>
+                </div> */}
               </CardContent>
             </Card>
 
