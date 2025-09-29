@@ -1,13 +1,30 @@
-import { Search, Bell, Menu } from "lucide-react";
+import {
+  Search,
+  Bell,
+  Menu,
+  User,
+  FileText,
+  MessageSquare,
+  HelpCircle,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "@/assets/logo-2.png";
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -18,6 +35,11 @@ const Navbar = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -74,20 +96,70 @@ const Navbar = () => {
             <Menu className="h-5 w-5" />
           </Button>
 
-          {/* User Avatar */}
-          <div className="flex items-center space-x-2">
-            <div className="flex flex-col space-y-1">
-              <div className="w-4 h-0.5 bg-black rounded-full"></div>
-              <div className="w-4 h-0.5 bg-black rounded-full"></div>
-              <div className="w-4 h-0.5 bg-black rounded-full"></div>
-            </div>
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="" />
-              <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                {user?.email?.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </div>
+          {/* User Avatar with Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center space-x-2 bg-gray-200 p-1 rounded-full px-3 gap-2 hover:bg-gray-300 transition-colors">
+                <div className="flex flex-col space-y-1 gap-0.5">
+                  <div className="w-4 h-[3px] bg-black rounded-full -translate-x-1"></div>
+                  <div className="w-4 h-[3px] bg-black rounded-full translate-x-1"></div>
+                  <div className="w-4 h-[3px] bg-black rounded-full -translate-x-1"></div>
+                </div>
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                    {user?.email?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40 rounded-lg">
+              <DropdownMenuItem
+                onClick={() => navigate("/profile")}
+                className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
+              >
+                <User className="mr-2 h-4 w-4" />
+                <span>My Profile</span>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => navigate("/applications")}
+                className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                <span>Applications</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => navigate("/feedbacks")}
+                className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
+              >
+                <MessageSquare className="mr-2 h-4 w-4" />
+                <span>Feedbacks</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => navigate("/help")}
+                className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
+              >
+                <HelpCircle className="mr-2 h-4 w-4" />
+                <span>Help</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => navigate("/settings")}
+                className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleSignOut}
+                className="cursor-pointer text-red-600 focus:bg-transparent focus:text-red-600"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Sign Out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </nav>
