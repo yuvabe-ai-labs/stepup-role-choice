@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/use-toast";
 import { Eye, EyeOff, GraduationCap, Building } from "lucide-react";
-import stepupIllustration from "@/assets/stepup-illustration.jpg";
+import signupIllustration from "@/assets/signup-illustration.png";
 import { sign } from "crypto";
 
 const SignIn = () => {
