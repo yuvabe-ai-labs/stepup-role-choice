@@ -128,7 +128,6 @@
 //     refetch: fetchProfileData
 //   };
 // };
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -177,7 +176,8 @@ export const useProfileData = () => {
         console.warn('Error fetching student profile:', studentError);
       }
 
-      setStudentProfile(studentData || null);
+      // Cast the data to StudentProfile type, handling missing properties
+      setStudentProfile(studentData as StudentProfile || null);
 
     } catch (err: any) {
       console.error('Profile fetch error:', err);
@@ -205,7 +205,7 @@ export const useProfileData = () => {
 
       if (error) throw error;
 
-      setProfile(data);
+      setProfile(data as DatabaseProfile);
       toast({
         title: "Success",
         description: "Profile updated successfully"
@@ -237,7 +237,7 @@ export const useProfileData = () => {
 
       if (error) throw error;
 
-      setStudentProfile(data);
+      setStudentProfile(data as StudentProfile);
       toast({
         title: "Success",
         description: "Student profile updated successfully"
