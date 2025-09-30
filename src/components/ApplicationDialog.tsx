@@ -21,7 +21,6 @@ interface ProfileData {
   full_name: string;
   email: string;
   phone: string;
-  address: string;
   date_of_birth: string;
 }
 
@@ -64,7 +63,7 @@ const ApplicationDialog: React.FC<ApplicationDialogProps> = ({
         // Fetch basic profile data
         const { data: profile } = await supabase
           .from('profiles')
-          .select('full_name, email, phone, address, date_of_birth')
+          .select('full_name, email, phone, date_of_birth')
           .eq('user_id', user.id)
           .single();
 
@@ -177,10 +176,6 @@ const ApplicationDialog: React.FC<ApplicationDialogProps> = ({
                   <div className="flex items-center space-x-3">
                     <Checkbox checked disabled />
                     <span className="text-sm">Phone: {profileData?.phone || 'Not provided'}</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Checkbox checked disabled />
-                    <span className="text-sm">Address: {profileData?.address || 'Not provided'}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Checkbox checked disabled />

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -70,6 +71,7 @@ function getTimeAgo(dateString: string): string {
   return `${Math.floor(diffInDays / 30)}m ago`;
 }
 const Units = () => {
+  const navigate = useNavigate();
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -393,6 +395,7 @@ const Units = () => {
                         <Button
                           size="sm"
                           className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-md px-3 py-1.5"
+                          onClick={() => navigate(`/units/${unit.id}`)}
                         >
                           View
                         </Button>

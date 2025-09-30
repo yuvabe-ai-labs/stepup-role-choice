@@ -165,6 +165,7 @@ export type Database = {
           application_deadline: string | null
           application_url: string | null
           benefits: Json | null
+          company_description: string | null
           company_email: string | null
           company_logo: string | null
           company_name: string
@@ -188,6 +189,7 @@ export type Database = {
           application_deadline?: string | null
           application_url?: string | null
           benefits?: Json | null
+          company_description?: string | null
           company_email?: string | null
           company_logo?: string | null
           company_name: string
@@ -211,6 +213,7 @@ export type Database = {
           application_deadline?: string | null
           application_url?: string | null
           benefits?: Json | null
+          company_description?: string | null
           company_email?: string | null
           company_logo?: string | null
           company_name?: string
@@ -242,7 +245,6 @@ export type Database = {
       }
       profiles: {
         Row: {
-          address: string | null
           created_at: string
           date_of_birth: string | null
           email: string | null
@@ -253,12 +255,10 @@ export type Database = {
           phone: string | null
           profile_type: string | null
           role: string
-          skills: string[] | null
           updated_at: string
           user_id: string
         }
         Insert: {
-          address?: string | null
           created_at?: string
           date_of_birth?: string | null
           email?: string | null
@@ -269,12 +269,10 @@ export type Database = {
           phone?: string | null
           profile_type?: string | null
           role: string
-          skills?: string[] | null
           updated_at?: string
           user_id: string
         }
         Update: {
-          address?: string | null
           created_at?: string
           date_of_birth?: string | null
           email?: string | null
@@ -285,14 +283,96 @@ export type Database = {
           phone?: string | null
           profile_type?: string | null
           role?: string
-          skills?: string[] | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
       }
+      student_education: {
+        Row: {
+          created_at: string | null
+          degree: string
+          end_year: number | null
+          id: string
+          institution: string
+          profile_id: string
+          score: string | null
+          start_year: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          degree: string
+          end_year?: number | null
+          id?: string
+          institution: string
+          profile_id: string
+          score?: string | null
+          start_year?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          degree?: string
+          end_year?: number | null
+          id?: string
+          institution?: string
+          profile_id?: string
+          score?: string | null
+          start_year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_education_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
+      student_internships: {
+        Row: {
+          company: string
+          created_at: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          profile_id: string
+          role: string
+          start_date: string | null
+        }
+        Insert: {
+          company: string
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          profile_id: string
+          role: string
+          start_date?: string | null
+        }
+        Update: {
+          company?: string
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          profile_id?: string
+          role?: string
+          start_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_internships_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       student_profiles: {
         Row: {
+          completed_courses: Json | null
           cover_letter: string | null
           created_at: string
           education: Json | null
@@ -311,6 +391,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          completed_courses?: Json | null
           cover_letter?: string | null
           created_at?: string
           education?: Json | null
@@ -329,6 +410,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          completed_courses?: Json | null
           cover_letter?: string | null
           created_at?: string
           education?: Json | null
@@ -362,48 +444,63 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           created_at: string
+          description: string | null
           focus_areas: Json | null
           id: string
           image: string | null
           is_aurovillian: boolean | null
+          mission: string | null
           opportunities_offered: Json | null
           profile_id: string
+          recent_projects: Json | null
           skills_offered: Json | null
           unit_name: string
           unit_type: string | null
           updated_at: string
+          values: Json | null
+          website_url: string | null
         }
         Insert: {
           address?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          description?: string | null
           focus_areas?: Json | null
           id?: string
           image?: string | null
           is_aurovillian?: boolean | null
+          mission?: string | null
           opportunities_offered?: Json | null
           profile_id: string
+          recent_projects?: Json | null
           skills_offered?: Json | null
           unit_name: string
           unit_type?: string | null
           updated_at?: string
+          values?: Json | null
+          website_url?: string | null
         }
         Update: {
           address?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          description?: string | null
           focus_areas?: Json | null
           id?: string
           image?: string | null
           is_aurovillian?: boolean | null
+          mission?: string | null
           opportunities_offered?: Json | null
           profile_id?: string
+          recent_projects?: Json | null
           skills_offered?: Json | null
           unit_name?: string
           unit_type?: string | null
           updated_at?: string
+          values?: Json | null
+          website_url?: string | null
         }
         Relationships: [
           {

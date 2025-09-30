@@ -15,6 +15,7 @@ import Chatbot from "./pages/Chatbot";
 import Internships from "./pages/Internships";
 import Courses from "./pages/Courses";
 import Units from "./pages/Units";
+import UnitView from "./pages/UnitView";
 import Profile from "./pages/Profile";
 import AllApplications from "./pages/AllApplications";
 import NotFound from "./pages/NotFound";
@@ -119,6 +120,11 @@ const App = () => (
             <Route path="/units" element={
               <ProtectedRoute>
                 <Units />
+              </ProtectedRoute>
+            } />
+            <Route path="/units/:id" element={
+              <ProtectedRoute>
+                <UnitView />
               </ProtectedRoute>
             } />
             <Route path="/profile" element={
