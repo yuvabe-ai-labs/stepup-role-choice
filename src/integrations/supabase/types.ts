@@ -20,6 +20,7 @@ export type Database = {
           cover_letter: string | null
           id: string
           internship_id: string
+          profile_match_score: number | null
           status: Database["public"]["Enums"]["application_status"]
           student_id: string
           updated_at: string
@@ -29,6 +30,7 @@ export type Database = {
           cover_letter?: string | null
           id?: string
           internship_id: string
+          profile_match_score?: number | null
           status?: Database["public"]["Enums"]["application_status"]
           student_id: string
           updated_at?: string
@@ -38,6 +40,7 @@ export type Database = {
           cover_letter?: string | null
           id?: string
           internship_id?: string
+          profile_match_score?: number | null
           status?: Database["public"]["Enums"]["application_status"]
           student_id?: string
           updated_at?: string
@@ -372,14 +375,21 @@ export type Database = {
       }
       student_profiles: {
         Row: {
+          achievements: Json | null
+          avatar_url: string | null
+          behance_url: string | null
+          bio: string | null
           completed_courses: Json | null
           cover_letter: string | null
           created_at: string
+          dribbble_url: string | null
           education: Json | null
           experience_level: string | null
           id: string
           interests: Json | null
           languages: Json | null
+          linkedin_url: string | null
+          location: string | null
           looking_for: Json | null
           portfolio_url: string | null
           preferred_language: string | null
@@ -389,16 +399,24 @@ export type Database = {
           resume_url: string | null
           skills: Json | null
           updated_at: string
+          website_url: string | null
         }
         Insert: {
+          achievements?: Json | null
+          avatar_url?: string | null
+          behance_url?: string | null
+          bio?: string | null
           completed_courses?: Json | null
           cover_letter?: string | null
           created_at?: string
+          dribbble_url?: string | null
           education?: Json | null
           experience_level?: string | null
           id?: string
           interests?: Json | null
           languages?: Json | null
+          linkedin_url?: string | null
+          location?: string | null
           looking_for?: Json | null
           portfolio_url?: string | null
           preferred_language?: string | null
@@ -408,16 +426,24 @@ export type Database = {
           resume_url?: string | null
           skills?: Json | null
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
+          achievements?: Json | null
+          avatar_url?: string | null
+          behance_url?: string | null
+          bio?: string | null
           completed_courses?: Json | null
           cover_letter?: string | null
           created_at?: string
+          dribbble_url?: string | null
           education?: Json | null
           experience_level?: string | null
           id?: string
           interests?: Json | null
           languages?: Json | null
+          linkedin_url?: string | null
+          location?: string | null
           looking_for?: Json | null
           portfolio_url?: string | null
           preferred_language?: string | null
@@ -427,6 +453,7 @@ export type Database = {
           resume_url?: string | null
           skills?: Json | null
           updated_at?: string
+          website_url?: string | null
         }
         Relationships: [
           {
