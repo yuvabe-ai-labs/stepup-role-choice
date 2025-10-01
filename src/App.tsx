@@ -16,6 +16,7 @@ import Internships from "./pages/Internships";
 import Courses from "./pages/Courses";
 import Units from "./pages/Units";
 import UnitView from "./pages/UnitView";
+import CandidateProfile from "./pages/CandidateProfile";
 import Profile from "./pages/Profile";
 import AllApplications from "./pages/AllApplications";
 import NotFound from "./pages/NotFound";
@@ -125,6 +126,11 @@ const App = () => (
             <Route path="/units/:id" element={
               <ProtectedRoute>
                 <UnitView />
+              </ProtectedRoute>
+            } />
+            <Route path="/candidate/:id" element={
+              <ProtectedRoute>
+                <CandidateProfile />
               </ProtectedRoute>
             } />
             <Route path="/profile" element={

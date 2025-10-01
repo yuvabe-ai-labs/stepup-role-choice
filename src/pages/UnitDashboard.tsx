@@ -7,90 +7,50 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useUnitApplications } from '@/hooks/useUnitApplications';
 
-interface Candidate {
-  id: string;
-  name: string;
-  role: string;
-  description: string;
-  skills: string[];
-  status: 'Shortlisted' | 'Rejected' | 'Interview' | 'Hired';
-  avatar: string;
-}
+const safeParse = (data: any, fallback: any) => {
+  if (!data) return fallback;
+  try {
+    return typeof data === 'string' ? JSON.parse(data) : data;
+  } catch {
+    return fallback;
+  }
+};
 
 const UnitDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('applications');
-
-  const mockCandidates: Candidate[] = [
-    {
-      id: '1',
-      name: 'Pankaj Sharma',
-      role: 'Front-End Developer',
-      description: 'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.',
-      skills: ['Figma', 'Wireframe', 'Sketch', '+2'],
-      status: 'Shortlisted',
-      avatar: '/placeholder.svg'
-    },
-    {
-      id: '2',
-      name: 'Sanksr Sharma',
-      role: 'Visual Designer',
-      description: 'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.',
-      skills: ['Figma', 'Wireframe', 'Sketch', '+2'],
-      status: 'Rejected',
-      avatar: '/placeholder.svg'
-    },
-    {
-      id: '3',
-      name: 'Pooja Agarwal',
-      role: 'Business Analyst',
-      description: 'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.',
-      skills: ['Figma', 'Wireframe', 'Sketch', '+2'],
-      status: 'Rejected',
-      avatar: '/placeholder.svg'
-    },
-    {
-      id: '4',
-      name: 'Ranjith Singh',
-      role: 'Market Researcher',
-      description: 'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.',
-      skills: ['Figma', 'Wireframe', 'Sketch', '+2'],
-      status: 'Interview',
-      avatar: '/placeholder.svg'
-    },
-    {
-      id: '5',
-      name: 'Rithika Agarwal',
-      role: 'Marketing Associate',
-      description: 'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.',
-      skills: ['Figma', 'Wireframe', 'Sketch', '+2'],
-      status: 'Shortlisted',
-      avatar: '/placeholder.svg'
-    },
-    {
-      id: '6',
-      name: 'Krunal Sharma',
-      role: 'UI/UX Designer',
-      description: 'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.',
-      skills: ['Figma', 'Wireframe', 'Sketch', '+2'],
-      status: 'Interview',
-      avatar: '/placeholder.svg'
-    }
-  ];
+  const { applications, stats, loading } = useUnitApplications();
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Shortlisted':
+      case 'shortlisted':
         return 'bg-green-100 text-green-800 hover:bg-green-100';
-      case 'Rejected':
+      case 'rejected':
         return 'bg-red-100 text-red-800 hover:bg-red-100';
-      case 'Interview':
+      case 'interviewed':
         return 'bg-orange-100 text-orange-800 hover:bg-orange-100';
-      case 'Hired':
+      case 'hired':
         return 'bg-blue-100 text-blue-800 hover:bg-blue-100';
       default:
         return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'shortlisted':
+        return 'Shortlisted';
+      case 'rejected':
+        return 'Rejected';
+      case 'interviewed':
+        return 'Interview';
+      case 'hired':
+        return 'Hired';
+      default:
+        return 'Applied';
     }
   };
 
@@ -148,8 +108,14 @@ const UnitDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Applications</p>
-                  <p className="text-3xl font-bold">85</p>
-                  <p className="text-xs text-green-600">+30% from last month</p>
+                  {loading ? (
+                    <Skeleton className="h-10 w-16 my-1" />
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold">{stats.total}</p>
+                      <p className="text-xs text-muted-foreground">All time</p>
+                    </>
+                  )}
                 </div>
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                   <Users className="w-6 h-6 text-blue-600" />
@@ -162,9 +128,15 @@ const UnitDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Job Descriptions</p>
-                  <p className="text-3xl font-bold">23</p>
-                  <p className="text-xs text-green-600">+2 this week</p>
+                  <p className="text-sm font-medium text-muted-foreground">Shortlisted</p>
+                  {loading ? (
+                    <Skeleton className="h-10 w-16 my-1" />
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold">{stats.shortlisted}</p>
+                      <p className="text-xs text-muted-foreground">Candidates</p>
+                    </>
+                  )}
                 </div>
                 <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
                   <FileText className="w-6 h-6 text-teal-600" />
@@ -178,8 +150,14 @@ const UnitDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Interview Scheduled</p>
-                  <p className="text-3xl font-bold">2</p>
-                  <p className="text-xs text-blue-600">2 interviews today</p>
+                  {loading ? (
+                    <Skeleton className="h-10 w-16 my-1" />
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold">{stats.interviews}</p>
+                      <p className="text-xs text-muted-foreground">Candidates</p>
+                    </>
+                  )}
                 </div>
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                   <Calendar className="w-6 h-6 text-orange-600" />
@@ -192,9 +170,15 @@ const UnitDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Hired This Month</p>
-                  <p className="text-3xl font-bold">4</p>
-                  <p className="text-xs text-green-600">Goal: 6 Candidates</p>
+                  <p className="text-sm font-medium text-muted-foreground">Hired</p>
+                  {loading ? (
+                    <Skeleton className="h-10 w-16 my-1" />
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold">{stats.hired}</p>
+                      <p className="text-xs text-muted-foreground">All time</p>
+                    </>
+                  )}
                 </div>
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                   <Briefcase className="w-6 h-6 text-green-600" />
@@ -247,49 +231,104 @@ const UnitDashboard = () => {
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {mockCandidates.map((candidate) => (
-                    <Card key={candidate.id} className="border border-border/50 hover:shadow-md transition-shadow">
-                      <CardContent className="p-6">
-                        <div className="flex items-start space-x-4">
-                          <Avatar className="w-12 h-12">
-                            <AvatarImage src={candidate.avatar} alt={candidate.name} />
-                            <AvatarFallback>{candidate.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <h3 className="font-semibold text-foreground truncate">{candidate.name}</h3>
-                              <Badge 
-                                variant="secondary" 
-                                className={getStatusColor(candidate.status)}
-                              >
-                                {candidate.status}
-                              </Badge>
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(6)].map((_, i) => (
+                      <Card key={i} className="border border-border/50">
+                        <CardContent className="p-6">
+                          <div className="flex items-start space-x-4">
+                            <Skeleton className="w-12 h-12 rounded-full" />
+                            <div className="flex-1">
+                              <Skeleton className="h-5 w-32 mb-2" />
+                              <Skeleton className="h-4 w-24 mb-3" />
+                              <Skeleton className="h-3 w-full mb-4" />
+                              <Skeleton className="h-8 w-full" />
                             </div>
-                            <p className="text-sm text-muted-foreground mb-2">{candidate.role}</p>
-                            <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
-                              {candidate.description}
-                            </p>
-                            <div className="flex flex-wrap gap-1 mb-4">
-                              {candidate.skills.map((skill, index) => (
-                                <Badge 
-                                  key={index} 
-                                  variant="outline" 
-                                  className="text-xs px-2 py-1 bg-muted/50"
-                                >
-                                  {skill}
-                                </Badge>
-                              ))}
-                            </div>
-                            <Button variant="outline" size="sm" className="w-full">
-                              View Profile
-                            </Button>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : applications.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                    <h3 className="text-lg font-medium mb-2">No Applications Yet</h3>
+                    <p className="text-muted-foreground">Applications for your internships will appear here.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {applications.slice(0, 6).map((application) => {
+                      const skills = safeParse(application.studentProfile.skills, []);
+                      const displaySkills = skills.slice(0, 3).map((s: any) => 
+                        typeof s === 'string' ? s : s.name
+                      );
+                      
+                      return (
+                        <Card key={application.id} className="border border-border/50 hover:shadow-md transition-shadow">
+                          <CardContent className="p-6">
+                            <div className="flex items-start space-x-4">
+                              <Avatar className="w-12 h-12">
+                                <AvatarImage 
+                                  src={application.studentProfile.avatar_url || undefined} 
+                                  alt={application.profile.full_name} 
+                                />
+                                <AvatarFallback>
+                                  {application.profile.full_name.split(' ').map(n => n[0]).join('')}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between mb-1">
+                                  <h3 className="font-semibold text-foreground truncate">
+                                    {application.profile.full_name}
+                                  </h3>
+                                  <Badge 
+                                    variant="secondary" 
+                                    className={getStatusColor(application.status)}
+                                  >
+                                    {getStatusLabel(application.status)}
+                                  </Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  {application.internship.title}
+                                </p>
+                                <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                                  {application.studentProfile.bio || 'No bio provided'}
+                                </p>
+                                <div className="flex flex-wrap gap-1 mb-4">
+                                  {displaySkills.map((skill: string, index: number) => (
+                                    <Badge 
+                                      key={index} 
+                                      variant="outline" 
+                                      className="text-xs px-2 py-1 bg-muted/50"
+                                    >
+                                      {skill}
+                                    </Badge>
+                                  ))}
+                                  {skills.length > 3 && (
+                                    <Badge 
+                                      variant="outline" 
+                                      className="text-xs px-2 py-1 bg-muted/50"
+                                    >
+                                      +{skills.length - 3}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="w-full"
+                                  onClick={() => navigate(`/candidate/${application.id}`)}
+                                >
+                                  View Profile
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
