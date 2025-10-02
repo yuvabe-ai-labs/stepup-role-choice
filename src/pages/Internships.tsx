@@ -251,7 +251,7 @@ import { MapPin, Clock, DollarSign, Bookmark, Share, Check } from 'lucide-react'
 import Navbar from '@/components/Navbar';
 import { useInternships } from '@/hooks/useInternships';
 import { useApplicationStatus } from '@/hooks/useApplicationStatus';
-import ApplicationDialog from '@/components/ApplicationDialog';
+import ProfileSummaryDialog from '@/components/ProfileSummaryDialog';
 import ApplicationSuccessDialog from '@/components/ApplicationSuccessDialog';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -597,7 +597,7 @@ const Internships = () => {
 
       {/* Application Dialog */}
       {selectedInternshipData && (
-        <ApplicationDialog
+        <ProfileSummaryDialog
           isOpen={showApplicationDialog}
           onClose={() => setShowApplicationDialog(false)}
           internship={selectedInternshipData}

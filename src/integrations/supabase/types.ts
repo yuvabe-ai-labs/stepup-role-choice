@@ -19,6 +19,7 @@ export type Database = {
           applied_date: string
           cover_letter: string | null
           id: string
+          included_sections: Json | null
           internship_id: string
           profile_match_score: number | null
           status: Database["public"]["Enums"]["application_status"]
@@ -29,6 +30,7 @@ export type Database = {
           applied_date?: string
           cover_letter?: string | null
           id?: string
+          included_sections?: Json | null
           internship_id: string
           profile_match_score?: number | null
           status?: Database["public"]["Enums"]["application_status"]
@@ -39,6 +41,7 @@ export type Database = {
           applied_date?: string
           cover_letter?: string | null
           id?: string
+          included_sections?: Json | null
           internship_id?: string
           profile_match_score?: number | null
           status?: Database["public"]["Enums"]["application_status"]
@@ -248,12 +251,15 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           created_at: string
           date_of_birth: string | null
+          differently_abled: boolean | null
           email: string | null
           full_name: string
           gender: string | null
           id: string
+          marital_status: string | null
           onboarding_completed: boolean | null
           phone: string | null
           profile_type: string | null
@@ -262,12 +268,15 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          address?: string | null
           created_at?: string
           date_of_birth?: string | null
+          differently_abled?: boolean | null
           email?: string | null
           full_name: string
           gender?: string | null
           id?: string
+          marital_status?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
           profile_type?: string | null
@@ -276,12 +285,15 @@ export type Database = {
           user_id: string
         }
         Update: {
+          address?: string | null
           created_at?: string
           date_of_birth?: string | null
+          differently_abled?: boolean | null
           email?: string | null
           full_name?: string
           gender?: string | null
           id?: string
+          marital_status?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
           profile_type?: string | null

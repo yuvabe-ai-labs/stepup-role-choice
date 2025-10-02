@@ -14,34 +14,31 @@ const ApplicationSuccessDialog: React.FC<ApplicationSuccessDialogProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md text-center p-8">
-        <div className="space-y-6">
+      <DialogContent className="max-w-3xl text-center p-12 bg-white">
+        <div className="space-y-8">
+          {/* Success Message */}
+          <h2 className="text-3xl font-bold text-gray-900">
+            Your profile has been sent to the Unit Successfully!
+          </h2>
+
           {/* Success Illustration */}
-          <div className="flex justify-center">
+          <div className="flex justify-center py-8">
             <img 
               src={successIllustration} 
               alt="Success" 
-              className="w-32 h-32 object-contain"
+              className="w-80 h-80 object-contain"
             />
           </div>
 
-          {/* Success Message */}
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Profile Sent Successfully!
-            </h2>
-            <p className="text-sm text-gray-600">
-              Your profile has been sent to the Unit successfully!
-            </p>
-          </div>
-
           {/* Close Button */}
-          <Button 
-            onClick={onClose}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-          >
-            Close
-          </Button>
+          <div className="flex justify-center">
+            <Button 
+              onClick={onClose}
+              className="px-12 py-3 bg-blue-500 hover:bg-blue-600 text-white text-lg rounded-lg"
+            >
+              Close
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
