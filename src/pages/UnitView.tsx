@@ -7,7 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Mail, Phone, MapPin, Clock, ExternalLink } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useUnitView } from '@/hooks/useUnitView';
-import ApplicationDialog from '@/components/ApplicationDialog';
+import ProfileSummaryDialog from '@/components/ProfileSummaryDialog';
+import ApplicationSuccessDialog from '@/components/ApplicationSuccessDialog';
 import type { Tables } from '@/integrations/supabase/types';
 
 const safeParse = (data: any, fallback: any) => {
@@ -25,6 +26,7 @@ const UnitView = () => {
   const { unit, internships, loading, error } = useUnitView(id || '');
   const [selectedInternship, setSelectedInternship] = useState<Tables<'internships'> | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   const handleApply = (internship: Tables<'internships'>) => {
     setSelectedInternship(internship);
@@ -292,18 +294,25 @@ const UnitView = () => {
 
       {/* Application Dialog */}
       {selectedInternship && (
-        <ApplicationDialog
+        <ProfileSummaryDialog
           isOpen={isDialogOpen}
-          onClose={() => {
-            setIsDialogOpen(false);
-            setSelectedInternship(null);
-          }}
+          onClose={() => setIsDialogOpen(false)}
           internship={selectedInternship}
           onSuccess={() => {
-            // Optionally refresh internships or show success state
+            setIsDialogOpen(false);
+            setShowSuccessDialog(true);
           }}
         />
       )}
+
+      {/* Success Dialog */}
+      <ApplicationSuccessDialog
+        isOpen={showSuccessDialog}
+        onClose={() => {
+          setShowSuccessDialog(false);
+          setSelectedInternship(null);
+        }}
+      />
     </div>
   );
 };
