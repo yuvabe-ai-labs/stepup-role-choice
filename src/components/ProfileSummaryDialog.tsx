@@ -123,7 +123,7 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({
 
       // Create application record
       const applicationData = {
-        student_id: user.id,
+        student_id: profileData.profile.id, // Use profile.id, not auth user.id
         internship_id: internship.id,
         status: 'applied' as const,
         cover_letter: profileData.studentProfile?.cover_letter || '',
@@ -135,6 +135,11 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({
         .insert(applicationData);
 
       if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Your application has been submitted successfully!",
+      });
 
       onSuccess();
       onClose();

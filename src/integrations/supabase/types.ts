@@ -252,52 +252,70 @@ export type Database = {
       profiles: {
         Row: {
           address: string | null
+          age: number | null
+          bio: string | null
           created_at: string
           date_of_birth: string | null
           differently_abled: boolean | null
+          education_level: string | null
           email: string | null
           full_name: string
           gender: string | null
           id: string
+          interest_area: string[] | null
+          languages: string[] | null
           marital_status: string | null
           onboarding_completed: boolean | null
           phone: string | null
           profile_type: string | null
           role: string
+          skills: string[] | null
           updated_at: string
           user_id: string
         }
         Insert: {
           address?: string | null
+          age?: number | null
+          bio?: string | null
           created_at?: string
           date_of_birth?: string | null
           differently_abled?: boolean | null
+          education_level?: string | null
           email?: string | null
           full_name: string
           gender?: string | null
           id?: string
+          interest_area?: string[] | null
+          languages?: string[] | null
           marital_status?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
           profile_type?: string | null
           role: string
+          skills?: string[] | null
           updated_at?: string
           user_id: string
         }
         Update: {
           address?: string | null
+          age?: number | null
+          bio?: string | null
           created_at?: string
           date_of_birth?: string | null
           differently_abled?: boolean | null
+          education_level?: string | null
           email?: string | null
           full_name?: string
           gender?: string | null
           id?: string
+          interest_area?: string[] | null
+          languages?: string[] | null
           marital_status?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
           profile_type?: string | null
           role?: string
+          skills?: string[] | null
           updated_at?: string
           user_id?: string
         }

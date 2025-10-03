@@ -15,10 +15,20 @@ export const useApplicationStatus = (internshipId: string) => {
       }
 
       try {
+        // First, get the profile_id from the profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (profileError) throw profileError;
+
+        // Then check if application exists with this profile_id
         const { data, error } = await supabase
           .from('applications')
           .select('id')
-          .eq('student_id', user.id)
+          .eq('student_id', profile.id)
           .eq('internship_id', internshipId)
           .maybeSingle();
 
