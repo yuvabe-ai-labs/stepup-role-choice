@@ -37,7 +37,7 @@ export const useUnitApplications = () => {
         const { data: internships, error: internshipsError } = await supabase
           .from('internships')
           .select('id')
-          .eq('created_by', user.id);
+          .eq(user.id);
 
         if (internshipsError) throw internshipsError;
 
