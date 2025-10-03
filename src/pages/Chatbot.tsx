@@ -518,7 +518,7 @@ const Chatbot = () => {
   }, [messages]);
 
   const handleOptionClick = (option: string) => {
-    if (option === "Add Skills" || option === "Not sure / Add Skills") {
+    if (option === "Add Skills") {
       // Allow manual input
       sendMessage(option);
       return;
@@ -749,7 +749,7 @@ const Chatbot = () => {
           "AI/ML",
           "UI/UX",
           "Cybersecurity",
-          "Not sure / Add Skills",
+          "Add Skills",
         ];
       }
       if (lastBotMessage.includes("Creative & Design")) {
@@ -760,7 +760,7 @@ const Chatbot = () => {
           "Animation",
           "Blogging",
           "Photography",
-          "Not sure / Add Skills",
+          "Add Skills",
         ];
       }
       if (lastBotMessage.includes("Marketing & Communication")) {
@@ -770,7 +770,7 @@ const Chatbot = () => {
           "SEO",
           "Public Speaking",
           "Event Management",
-          "Not sure / Add Skills",
+          "Add Skills",
         ];
       }
       if (lastBotMessage.includes("Business & Entrepreneurship")) {
@@ -780,7 +780,7 @@ const Chatbot = () => {
           "Teamwork",
           "Financial Literacy",
           "Project Management",
-          "Not sure / Add Skills",
+          "Add Skills",
         ];
       }
       if (lastBotMessage.includes("Personal Growth & Soft Skills")) {
@@ -791,7 +791,7 @@ const Chatbot = () => {
           "Creativity",
           "Adaptability",
           "Teamwork",
-          "Not sure / Add Skills",
+          "Add Skills",
         ];
       }
       if (lastBotMessage.includes("looking for right now")) {
@@ -1339,4 +1339,3 @@ const Chatbot = () => {
 };
 
 export default Chatbot;
-  
