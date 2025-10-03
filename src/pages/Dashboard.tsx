@@ -311,77 +311,27 @@ import {
   ChevronRight,
   Clock,
   MapPin,
-  Building,
-  Sparkles,
+  Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import ProfileSidebar from "@/components/ProfileSidebar";
+import { useInternships } from "@/hooks/useInternships";
+import { useCourses } from "@/hooks/useCourses";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentInternshipIndex, setCurrentInternshipIndex] = useState(0);
   const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
+  
+  const { internships, loading: internshipsLoading } = useInternships();
+  const { courses, loading: coursesLoading } = useCourses();
 
-  // Mock data for recommendations
-  const recommendedInternships = [
-    {
-      id: "1",
-      title: "Junior UI Designer",
-      company: "TechCorp",
-      location: "Remote",
-      duration: "6 Months - Full Time",
-      postedTime: "1d ago",
-      color: "bg-green-100 border-green-200",
-      icon: "Y",
-    },
-    {
-      id: "2",
-      title: "Marketing Manager",
-      company: "Digital Solutions",
-      location: "New York",
-      duration: "6 Months - Full Time",
-      postedTime: "1w ago",
-      color: "bg-blue-100 border-blue-200",
-      icon: "M",
-    },
-    {
-      id: "3",
-      title: "Managing Director Intern",
-      company: "Global Corp",
-      location: "San Francisco",
-      duration: "6 Months - Full Time",
-      postedTime: "2d ago",
-      color: "bg-purple-100 border-purple-200",
-      icon: "G",
-    },
-  ];
-
-  const recommendedCourses = [
-    {
-      id: "1",
-      title: "AI & Machine Learning",
-      provider: "Tech Academy",
-      gradient: "bg-gradient-to-br from-blue-900 to-purple-900",
-      displayText: "Generative AI",
-    },
-    {
-      id: "2",
-      title: "UI/UX Design",
-      provider: "Design Institute",
-      gradient: "bg-gradient-to-br from-purple-800 to-orange-600",
-      displayText: "UX UI",
-    },
-    {
-      id: "3",
-      title: "Full Stack Development",
-      provider: "Code Masters",
-      gradient: "bg-gradient-to-br from-cyan-500 to-blue-600",
-      displayText: "Full Stack Development",
-    },
-  ];
+  // Take only the first 6 items for recommendations
+  const recommendedInternships = internships.slice(0, 6);
+  const recommendedCourses = courses.slice(0, 6);
 
   const heroCards = [
     {
@@ -491,6 +441,14 @@ const Dashboard = () => {
                   </Button>
                 </div>
 
+                {internshipsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : recommendedInternships.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No internships available</p>
+                ) : (
+
                 <div className="relative">
                   <div className="flex items-center space-x-4">
                     <Button
@@ -508,19 +466,28 @@ const Dashboard = () => {
                           (currentInternshipIndex + offset) %
                           recommendedInternships.length;
                         const internship = recommendedInternships[index];
+                        
+                        if (!internship) return null;
+
+                        const colors = ['bg-green-100 border-green-200', 'bg-blue-100 border-blue-200', 'bg-purple-100 border-purple-200'];
+                        const colorClass = colors[offset % colors.length];
+                        const initial = internship.company_name?.charAt(0) || 'C';
+                        const daysAgo = Math.floor((Date.now() - new Date(internship.created_at).getTime()) / (1000 * 60 * 60 * 24));
+                        const timeText = daysAgo === 0 ? 'Today' : daysAgo === 1 ? '1d ago' : `${daysAgo}d ago`;
 
                         return (
                           <Card
                             key={internship.id}
-                            className={`${internship.color} shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
+                            className={`${colorClass} shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
+                            onClick={() => navigate('/internships')}
                           >
                             <CardHeader className="pb-3">
                               <div className="flex justify-between items-start mb-2">
                                 <Badge variant="secondary" className="text-xs">
-                                  {internship.postedTime}
+                                  {timeText}
                                 </Badge>
                                 <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center text-background font-bold text-sm">
-                                  {internship.icon}
+                                  {initial}
                                 </div>
                               </div>
                               <CardTitle className="text-base font-semibold">
@@ -531,12 +498,12 @@ const Dashboard = () => {
                             <CardContent className="space-y-3">
                               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                                 <Clock className="w-3 h-3" />
-                                <span>{internship.duration}</span>
+                                <span>{internship.duration || 'Not specified'}</span>
                               </div>
 
                               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                                 <MapPin className="w-3 h-3" />
-                                <span>{internship.location}</span>
+                                <span>{internship.location || 'Remote'}</span>
                               </div>
                             </CardContent>
                           </Card>
@@ -554,6 +521,7 @@ const Dashboard = () => {
                     </Button>
                   </div>
                 </div>
+                )}
               </Card>
             </section>
 
@@ -583,60 +551,83 @@ const Dashboard = () => {
                   </Button>
                 </div>
 
-                <div className="relative">
-                  <div className="flex items-center space-x-4">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={prevCourse}
-                      className="flex-shrink-0"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </Button>
-
-                    <div className="flex-1 grid md:grid-cols-3 gap-4">
-                      {[0, 1, 2].map((offset) => {
-                        const index =
-                          (currentCourseIndex + offset) %
-                          recommendedCourses.length;
-                        const course = recommendedCourses[index];
-
-                        return (
-                          <Card
-                            key={course.id}
-                            className="shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
-                          >
-                            <div
-                              className={`h-32 ${course.gradient} flex items-center justify-center`}
-                            >
-                              <div className="text-white text-sm font-bold text-center px-4">
-                                {course.displayText}
-                              </div>
-                            </div>
-
-                            <CardContent className="p-4">
-                              <h3 className="font-semibold text-sm mb-1">
-                                {course.title}
-                              </h3>
-                              <p className="text-xs text-muted-foreground">
-                                {course.provider}
-                              </p>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={nextCourse}
-                      className="flex-shrink-0"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
+                {coursesLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
-                </div>
+                ) : recommendedCourses.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No courses available</p>
+                ) : (
+                  <div className="relative">
+                    <div className="flex items-center space-x-4">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={prevCourse}
+                        className="flex-shrink-0"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+
+                      <div className="flex-1 grid md:grid-cols-3 gap-4">
+                        {[0, 1, 2].map((offset) => {
+                          const index =
+                            (currentCourseIndex + offset) %
+                            recommendedCourses.length;
+                          const course = recommendedCourses[index];
+                          
+                          if (!course) return null;
+
+                          const gradients = [
+                            'bg-gradient-to-br from-blue-900 to-purple-900',
+                            'bg-gradient-to-br from-purple-800 to-orange-600',
+                            'bg-gradient-to-br from-cyan-500 to-blue-600'
+                          ];
+                          const gradientClass = gradients[offset % gradients.length];
+
+                          return (
+                            <Card
+                              key={course.id}
+                              className="shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
+                              onClick={() => navigate('/courses')}
+                            >
+                              <div
+                                className={`h-32 ${gradientClass} flex items-center justify-center`}
+                              >
+                                <div className="text-white text-sm font-bold text-center px-4">
+                                  {course.title}
+                                </div>
+                              </div>
+
+                              <CardContent className="p-4">
+                                <h3 className="font-semibold text-sm mb-1">
+                                  {course.title}
+                                </h3>
+                                <p className="text-xs text-muted-foreground">
+                                  {course.provider || 'Online Course'}
+                                </p>
+                                {course.difficulty_level && (
+                                  <Badge variant="secondary" className="mt-2 text-xs">
+                                    {course.difficulty_level}
+                                  </Badge>
+                                )}
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={nextCourse}
+                        className="flex-shrink-0"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </Card>
             </section>
           </div>

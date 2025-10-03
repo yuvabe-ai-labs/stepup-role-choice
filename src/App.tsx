@@ -23,22 +23,23 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Protected Route component with onboarding check
+// Protected Route component with onboarding check and role-based routing
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const [profileLoading, setProfileLoading] = useState(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   
   useEffect(() => {
-    const checkOnboardingStatus = async () => {
+    const checkProfileAndRedirect = async () => {
       if (user) {
         try {
-          // Force fresh data by adding a timestamp to bypass cache
+          // Fetch profile with role and onboarding status
           const { data: profile, error } = await supabase
             .from('profiles')
-            .select('onboarding_completed')
+            .select('onboarding_completed, role')
             .eq('user_id', user.id)
             .maybeSingle();
           
@@ -49,23 +50,42 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           }
           
           const isOnboardingCompleted = profile?.onboarding_completed || false;
-          setHasCompletedOnboarding(isOnboardingCompleted);
+          const role = profile?.role || 'student';
           
-          // Only redirect if we're on the wrong page for the onboarding status
-          if (!isOnboardingCompleted && location.pathname === '/dashboard') {
+          setHasCompletedOnboarding(isOnboardingCompleted);
+          setUserRole(role);
+          
+          // If onboarding not completed, redirect to chatbot
+          if (!isOnboardingCompleted && location.pathname !== '/chatbot') {
             navigate('/chatbot', { replace: true });
+            setProfileLoading(false);
+            return;
           }
-          // Remove automatic redirect from chatbot to dashboard to prevent conflicts
+          
+          // Role-based routing after onboarding is complete
+          if (isOnboardingCompleted) {
+            // For students accessing unit dashboard or vice versa
+            if (role === 'student' && location.pathname === '/unit-dashboard') {
+              navigate('/dashboard', { replace: true });
+            } else if (role === 'unit' && location.pathname === '/dashboard') {
+              navigate('/unit-dashboard', { replace: true });
+            }
+            // Redirect from chatbot to appropriate dashboard after onboarding
+            else if (location.pathname === '/chatbot') {
+              const targetDashboard = role === 'unit' ? '/unit-dashboard' : '/dashboard';
+              navigate(targetDashboard, { replace: true });
+            }
+          }
           
         } catch (error) {
-          console.error('Error checking onboarding status:', error);
+          console.error('Error checking profile:', error);
         }
       }
       setProfileLoading(false);
     };
 
     if (!loading && user) {
-      checkOnboardingStatus();
+      checkProfileAndRedirect();
     } else {
       setProfileLoading(false);
     }

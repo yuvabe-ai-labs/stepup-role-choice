@@ -1,99 +1,65 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { ArrowLeft, Search, Bell, Menu } from 'lucide-react';
+import { ArrowLeft, Search, Bell, Menu, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-interface Application {
-  id: string;
-  name: string;
-  title: string;
-  description: string;
-  skills: string[];
-  additionalSkills?: number;
-  status: 'shortlisted' | 'applied' | 'rejected' | 'interviewed';
-  avatar?: string;
-}
+import { useUnitApplications } from '@/hooks/useUnitApplications';
 
 const AllApplications = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const { applications, loading, error } = useUnitApplications();
 
-  const applications: Application[] = [
-    {
-      id: '1',
-      name: 'Pankaj Sharma',
-      title: 'UI/UX Designer',
-      description: 'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.',
-      skills: ['Figma', 'Wireframe', 'Sketch'],
-      additionalSkills: 2,
-      status: 'shortlisted'
-    },
-    {
-      id: '2',
-      name: 'Pankaj Sharma',
-      title: 'UI/UX Designer',
-      description: 'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.',
-      skills: ['Figma', 'Wireframe', 'Sketch'],
-      additionalSkills: 2,
-      status: 'applied'
-    },
-    {
-      id: '3',
-      name: 'Pankaj Sharma',
-      title: 'UI/UX Designer',
-      description: 'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.',
-      skills: ['Figma', 'Wireframe', 'Sketch'],
-      additionalSkills: 2,
-      status: 'rejected'
-    },
-    {
-      id: '4',
-      name: 'Pankaj Sharma',
-      title: 'UI/UX Designer',
-      description: 'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.',
-      skills: ['Figma', 'Wireframe', 'Sketch'],
-      additionalSkills: 2,
-      status: 'interviewed'
-    },
-    {
-      id: '5',
-      name: 'Pankaj Sharma',
-      title: 'UI/UX Designer',
-      description: 'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.',
-      skills: ['Figma', 'Wireframe', 'Sketch'],
-      additionalSkills: 2,
-      status: 'shortlisted'
-    },
-    {
-      id: '6',
-      name: 'Pankaj Sharma',
-      title: 'UI/UX Designer',
-      description: 'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.',
-      skills: ['Figma', 'Wireframe', 'Sketch'],
-      additionalSkills: 2,
-      status: 'interviewed'
-    }
-  ];
+  // Filter applications based on search query
+  const filteredApplications = useMemo(() => {
+    if (!searchQuery.trim()) return applications;
+    
+    const query = searchQuery.toLowerCase();
+    return applications.filter(app => 
+      app.profile.full_name.toLowerCase().includes(query) ||
+      app.internship.title.toLowerCase().includes(query) ||
+      app.status.toLowerCase().includes(query)
+    );
+  }, [applications, searchQuery]);
 
-  const getStatusBadge = (status: Application['status']) => {
-    const statusConfig = {
-      shortlisted: { label: 'Shortlisted', variant: 'default' as const, className: 'bg-green-100 text-green-700' },
-      applied: { label: 'Applied', variant: 'secondary' as const, className: 'bg-orange-100 text-orange-700' },
-      rejected: { label: 'Rejected', variant: 'destructive' as const, className: 'bg-red-100 text-red-700' },
-      interviewed: { label: 'Interviewed', variant: 'default' as const, className: 'bg-blue-100 text-blue-700' }
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive'; className: string }> = {
+      shortlisted: { label: 'Shortlisted', variant: 'default', className: 'bg-green-100 text-green-700' },
+      applied: { label: 'Applied', variant: 'secondary', className: 'bg-orange-100 text-orange-700' },
+      rejected: { label: 'Rejected', variant: 'destructive', className: 'bg-red-100 text-red-700' },
+      interviewed: { label: 'Interviewed', variant: 'default', className: 'bg-blue-100 text-blue-700' },
+      hired: { label: 'Hired', variant: 'default', className: 'bg-purple-100 text-purple-700' }
     };
 
-    const config = statusConfig[status];
+    const config = statusConfig[status] || statusConfig.applied;
     return (
       <Badge variant={config.variant} className={config.className}>
         {config.label}
       </Badge>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -153,56 +119,77 @@ const AllApplications = () => {
 
         {/* Applications Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-7xl">
-          {applications.map((application) => (
-            <Card key={application.id} className="p-6">
-              <CardContent className="p-0">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  {/* Avatar and Status */}
-                  <div className="relative">
-                    <Avatar className="w-16 h-16">
-                      <AvatarImage src={application.avatar} />
-                      <AvatarFallback className="text-lg font-semibold">
-                        {application.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="absolute -top-2 -right-2">
-                      {getStatusBadge(application.status)}
+          {filteredApplications.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-muted-foreground">
+                {searchQuery ? 'No applications found matching your search.' : 'No applications yet.'}
+              </p>
+            </div>
+          ) : (
+            filteredApplications.map((application) => {
+              const skills = Array.isArray(application.studentProfile.skills) 
+                ? application.studentProfile.skills.slice(0, 3)
+                : [];
+              const additionalSkills = Array.isArray(application.studentProfile.skills)
+                ? Math.max(0, application.studentProfile.skills.length - 3)
+                : 0;
+
+              return (
+                <Card key={application.id} className="p-6">
+                  <CardContent className="p-0">
+                    <div className="flex flex-col items-center text-center space-y-4">
+                      {/* Avatar and Status */}
+                      <div className="relative">
+                        <Avatar className="w-16 h-16">
+                          <AvatarImage src={application.studentProfile.avatar_url || undefined} />
+                          <AvatarFallback className="text-lg font-semibold">
+                            {application.profile.full_name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="absolute -top-2 -right-2">
+                          {getStatusBadge(application.status)}
+                        </div>
+                      </div>
+
+                      {/* Name and Title */}
+                      <div>
+                        <h3 className="font-semibold text-lg">{application.profile.full_name}</h3>
+                        <p className="text-muted-foreground text-sm">{application.internship.title}</p>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                        {application.studentProfile.bio || 'No bio available'}
+                      </p>
+
+                      {/* Skills */}
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {skills.map((skill: any, index: number) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {typeof skill === 'string' ? skill : skill.name}
+                          </Badge>
+                        ))}
+                        {additionalSkills > 0 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{additionalSkills}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* View Profile Button */}
+                      <Button 
+                        variant="outline" 
+                        className="w-full mt-4"
+                        onClick={() => navigate(`/candidate/${application.student_id}`)}
+                      >
+                        View Profile
+                      </Button>
                     </div>
-                  </div>
-
-                  {/* Name and Title */}
-                  <div>
-                    <h3 className="font-semibold text-lg">{application.name}</h3>
-                    <p className="text-muted-foreground text-sm">{application.title}</p>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {application.description}
-                  </p>
-
-                  {/* Skills */}
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {application.skills.map((skill, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {skill}
-                      </Badge>
-                    ))}
-                    {application.additionalSkills && (
-                      <Badge variant="secondary" className="text-xs">
-                        +{application.additionalSkills}
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* View Profile Button */}
-                  <Button variant="outline" className="w-full mt-4">
-                    View Profile
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
