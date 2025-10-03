@@ -37,8 +37,8 @@ export const useUnitApplications = () => {
         const { data: internships, error: internshipsError } = await supabase
           .from('internships')
           .select('id')
-          .eq(user.id);
-
+          .eq('created_by', user.id);
+z
         if (internshipsError) throw internshipsError;
 
         const internshipIds = internships?.map(i => i.id) || [];
