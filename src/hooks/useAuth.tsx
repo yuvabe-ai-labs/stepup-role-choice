@@ -1,16 +1,27 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  ReactNode,
+} from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  signUp: (email: string, password: string, fullName: string, role: string) => Promise<{ error: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+    role: string
+  ) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
-  signInWithOAuth: (provider: 'google' | 'apple') => Promise<{ error: any }>;
+  signInWithOAuth: (provider: "google" | "apple") => Promise<{ error: any }>;
   loading: boolean;
 }
 
@@ -24,14 +35,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Set up auth state listener FIRST - keep it synchronous
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, session?.user?.id);
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -49,17 +60,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!user || !session) return;
 
       try {
-        console.log('Checking profile for user:', user.id);
-        
+        console.log("Checking profile for user:", user.id);
+
         // Check if profile exists
         const { data: existingProfile, error: fetchError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
+          .from("profiles")
+          .select("*")
+          .eq("user_id", user.id)
           .maybeSingle();
 
         if (fetchError) {
-          console.error('Error fetching profile:', fetchError);
+          console.error("Error fetching profile:", fetchError);
           toast({
             title: "Profile check failed",
             description: "There was an error checking your profile.",
@@ -70,48 +81,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // If no profile exists, create one
         if (!existingProfile) {
-          console.log('No profile found, creating profile...');
-          
+          console.log("No profile found, creating profile...");
+
           const userData = user.user_metadata;
-          const pendingRole = localStorage.getItem('pendingRole');
-          const userRole = userData.role || pendingRole || 'student';
-          const fullName = userData.full_name || userData.name || user.email?.split('@')[0] || 'User';
-          
+          const pendingRole = localStorage.getItem("pendingRole");
+          const userRole = userData.role || pendingRole || "student";
+          const fullName =
+            userData.full_name ||
+            userData.name ||
+            user.email?.split("@")[0] ||
+            "User";
+          const email = user.email || "";
+
           // Clear pending role
           if (pendingRole) {
-            localStorage.removeItem('pendingRole');
+            localStorage.removeItem("pendingRole");
           }
-          
+
           const { data: newProfile, error: profileError } = await supabase
-            .from('profiles')
+            .from("profiles")
             .insert({
               user_id: user.id,
               full_name: fullName,
               role: userRole,
-              onboarding_completed: false
+              email: email,
+              onboarding_completed: false,
             })
             .select()
             .single();
 
           if (profileError) {
-            console.error('Profile creation failed:', profileError);
+            console.error("Profile creation failed:", profileError);
             toast({
               title: "Profile setup failed",
-              description: "There was an error setting up your profile. Please contact support.",
+              description:
+                "There was an error setting up your profile. Please contact support.",
               variant: "destructive",
             });
           } else {
-            console.log('Profile created successfully:', newProfile);
+            console.log("Profile created successfully:", newProfile);
             toast({
               title: "Welcome!",
               description: "Your account has been set up successfully.",
             });
           }
         } else {
-          console.log('Profile already exists:', existingProfile);
+          console.log("Profile already exists:", existingProfile);
         }
       } catch (error) {
-        console.error('Profile operation failed:', error);
+        console.error("Profile operation failed:", error);
       }
     };
 
@@ -122,11 +140,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user, session, toast]);
 
-  const signUp = async (email: string, password: string, fullName: string, role: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    fullName: string,
+    role: string
+  ) => {
     try {
-      console.log('Starting signup process for:', email, 'with role:', role);
-      const redirectUrl = `${window.location.origin}/`;
-      
+      console.log("Starting signup process for:", email, "with role:", role);
+      // Redirect to role-specific signin page after email confirmation
+      const redirectUrl = `${window.location.origin}/auth/${role}/signin`;
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -134,22 +158,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
-            role: role
-          }
-        }
+            role: role,
+          },
+        },
       });
 
       if (error) {
-        console.error('Signup error:', error);
+        console.error("Signup error:", error);
         return { error };
       }
 
       // Don't create profile immediately - will be created on first sign in
-      console.log('User signup initiated, profile will be created on email confirmation');
+      console.log(
+        "User signup initiated, profile will be created on email confirmation"
+      );
 
       return { error: null };
     } catch (error: any) {
-      console.error('Signup process failed:', error);
+      console.error("Signup process failed:", error);
       return { error };
     }
   };
@@ -160,23 +186,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         password,
       });
-      
+
       if (error) {
-        console.error('Sign in error:', error);
+        console.error("Sign in error:", error);
         // Handle specific error for unconfirmed email
-        if (error.message.includes('Email not confirmed')) {
-          return { 
-            error: { 
-              ...error, 
-              message: 'Please check your email and click the confirmation link before signing in.' 
-            }
+        if (error.message.includes("Email not confirmed")) {
+          return {
+            error: {
+              ...error,
+              message:
+                "Please check your email and click the confirmation link before signing in.",
+            },
           };
         }
       }
-      
+
       return { error };
     } catch (error: any) {
-      console.error('Sign in failed:', error);
+      console.error("Sign in failed:", error);
       return { error };
     }
   };
@@ -203,7 +230,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signInWithOAuth = async (provider: 'google' | 'apple') => {
+  const signInWithOAuth = async (provider: "google" | "apple") => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -213,7 +240,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       return { error };
     } catch (error: any) {
-      console.error('OAuth sign in failed:', error);
+      console.error("OAuth sign in failed:", error);
       return { error };
     }
   };
@@ -235,7 +262,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

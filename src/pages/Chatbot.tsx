@@ -33,6 +33,8 @@ const Chatbot = () => {
   const [profileError, setProfileError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [isMultiSelect, setIsMultiSelect] = useState(false);
 
   // Fetch user profile data
   useEffect(() => {
@@ -132,6 +134,16 @@ const Chatbot = () => {
       setMessages([initialMessage]);
       setIsTyping(false);
     }, 1000);
+  };
+
+  const stringToArray = (value: string): string[] => {
+    if (value.includes(",")) {
+      return value
+        .split(",")
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0);
+    }
+    return [value.trim()];
   };
 
   const sendMessage = async (messageContent?: string) => {
@@ -280,6 +292,8 @@ const Chatbot = () => {
 
       // For students
       if (!isUnit) {
+        // STUDENT DATA COLLECTION
+
         // Phone number (question 3)
         if (
           lastBotMessage.includes("Phone Number") ||
@@ -306,9 +320,106 @@ const Chatbot = () => {
           updateData.profile_type = userResponse.trim();
           console.log("Storing profile type:", userResponse);
         }
+
+        // Interest Area (question 6)
+        if (
+          lastBotMessage.includes(
+            "Which area of interest excites you the most"
+          ) ||
+          lastBotMessage.includes("area of interest")
+        ) {
+          updateData.interest_area = stringToArray(userResponse);
+          console.log("Storing skills as array:", updateData.interest_area);
+        }
+
+        // Skills (after area of interest selection)
+        if (
+          lastBotMessage.includes("Technology & Digital") ||
+          lastBotMessage.includes("Creative & Design") ||
+          lastBotMessage.includes("Marketing & Communication") ||
+          lastBotMessage.includes("Business & Entrepreneurship") ||
+          lastBotMessage.includes("Personal Growth & Soft Skills")
+        ) {
+          updateData.skills = stringToArray(userResponse);
+          console.log("Storing skills as array:", updateData.skills);
+        }
+
+        if (lastBotMessage.includes("looking for right now")) {
+          updateData.purpose = stringToArray(userResponse);
+          console.log("Storing purpose:", updateData.purpose);
+        }
+
+        // Education Level
+        if (
+          lastBotMessage.includes("education") ||
+          lastBotMessage.includes("studying") ||
+          lastBotMessage.includes("grade")
+        ) {
+          updateData.education_level = userResponse.trim();
+          console.log("Storing education level:", userResponse);
+        }
+
+        // Bio/About
+        if (
+          lastBotMessage.includes("about yourself") ||
+          lastBotMessage.includes("tell me more") ||
+          lastBotMessage.includes("describe yourself")
+        ) {
+          updateData.bio = userResponse.trim();
+          console.log("Storing bio:", userResponse);
+        }
+      }
+
+      // Save to database
+      if (Object.keys(updateData).length > 0 && user) {
+        console.log("Updating profile with data:", updateData);
+
+        const { data: updatedProfile, error } = await supabase
+          .from("profiles")
+          .update(updateData)
+          .eq("user_id", user.id)
+          .select()
+          .single();
+
+        if (error) {
+          console.error("Failed to update profile:", error);
+        } else {
+          console.log("Profile updated successfully:", updatedProfile);
+        }
       } else {
-        // For units
-        // Phone number (question 5 for units)
+        // UNIT DATA COLLECTION
+
+        // Unit Name (question 2)
+        if (
+          lastBotMessage.includes("name of your unit") ||
+          lastBotMessage.includes("unit name") ||
+          lastBotMessage.includes("organization name")
+        ) {
+          updateData.unit_name = userResponse.trim();
+          console.log("Storing unit name:", userResponse);
+        }
+
+        // Unit Type/Category (question 3)
+        if (
+          lastBotMessage.includes("type of unit") ||
+          lastBotMessage.includes("category") ||
+          lastBotMessage.includes("what kind of unit")
+        ) {
+          updateData.unit_type = userResponse.trim();
+          console.log("Storing unit type:", userResponse);
+        }
+
+        // Unit Description (question 4)
+        if (
+          lastBotMessage.includes("describe your unit") ||
+          lastBotMessage.includes("what does your unit do") ||
+          lastBotMessage.includes("about your unit")
+        ) {
+          updateData.unit_description = userResponse.trim();
+          console.log("Storing unit description:", userResponse);
+        }
+
+        // Phone number (question 5)
         if (
           lastBotMessage.includes("number to reach") ||
           lastBotMessage.includes("phone") ||
@@ -316,6 +427,46 @@ const Chatbot = () => {
         ) {
           updateData.phone = userResponse.trim();
           console.log("Storing unit phone number:", userResponse);
+        }
+
+        // Unit Address/Location (question 6)
+        if (
+          lastBotMessage.includes("location") ||
+          lastBotMessage.includes("address") ||
+          lastBotMessage.includes("where is your unit")
+        ) {
+          updateData.unit_address = userResponse.trim();
+          console.log("Storing unit address:", userResponse);
+        }
+
+        // Unit Website
+        if (
+          lastBotMessage.includes("website") ||
+          lastBotMessage.includes("web address") ||
+          lastBotMessage.includes("URL")
+        ) {
+          updateData.website = userResponse.trim();
+          console.log("Storing website:", userResponse);
+        }
+
+        // Services Offered
+        if (
+          lastBotMessage.includes("services") ||
+          lastBotMessage.includes("what do you offer") ||
+          lastBotMessage.includes("programs")
+        ) {
+          updateData.services_offered = userResponse.trim();
+          console.log("Storing services offered:", userResponse);
+        }
+
+        // Target Audience
+        if (
+          lastBotMessage.includes("target audience") ||
+          lastBotMessage.includes("who do you serve") ||
+          lastBotMessage.includes("participants")
+        ) {
+          updateData.target_audience = userResponse.trim();
+          console.log("Storing target audience:", userResponse);
         }
       }
 
@@ -340,21 +491,107 @@ const Chatbot = () => {
     }
   };
 
+  const getQuestionType = (lastBotMessage: string) => {
+    const multiSelectQuestions = [
+      "opportunities can your unit offer",
+      "looking for right now",
+      "Technology & IT",
+      "Creative & Design",
+      "Marketing & Communications",
+      "Business & Management",
+      "Research & Innovation",
+      "Community & Social Impact",
+      "Education & Training",
+      "Technology & Digital",
+    ];
+
+    return multiSelectQuestions.some((q) => lastBotMessage.includes(q))
+      ? "multi"
+      : "single";
+  };
+
+  useEffect(() => {
+    const lastBotMsg = messages[messages.length - 1]?.content || "";
+    const questionType = getQuestionType(lastBotMsg);
+    setIsMultiSelect(questionType === "multi");
+    setSelectedOptions([]);
+  }, [messages]);
+
+  const handleOptionClick = (option: string) => {
+    if (option === "Add Skills" || option === "Not sure / Add Skills") {
+      // Allow manual input
+      sendMessage(option);
+      return;
+    }
+
+    if (isMultiSelect) {
+      setSelectedOptions((prev) => {
+        if (prev.includes(option)) {
+          return prev.filter((o) => o !== option);
+        } else {
+          return [...prev, option];
+        }
+      });
+    } else {
+      sendMessage(option);
+      setSelectedOptions([]);
+    }
+  };
+
+  const handleSubmitMultiSelect = () => {
+    if (selectedOptions.length > 0) {
+      sendMessage(selectedOptions.join(", "));
+      setSelectedOptions([]);
+    }
+  };
+
   const renderQuickOptions = (options: string[]) => {
     return (
-      <div className="flex flex-wrap gap-2 mt-2">
-        {options.map((option) => (
-          <Button
-            key={option}
-            onClick={() => sendMessage(option)}
-            disabled={isLoading}
-            className="px-4 py-2 border border-blue-500 text-blue-600 rounded-full text-sm"
-            variant="ghost"
-            size="sm"
-          >
-            {option}
-          </Button>
-        ))}
+      <div className="space-y-2 mt-2">
+        <div className="flex flex-wrap gap-2">
+          {options.map((option) => {
+            const isSelected = selectedOptions.includes(option);
+            return (
+              <Button
+                key={option}
+                onClick={() => handleOptionClick(option)}
+                disabled={isLoading}
+                className={`px-4 py-2 border rounded-full text-sm transition-colors ${
+                  isSelected
+                    ? "border-blue-500 bg-blue-500 text-white"
+                    : "border-blue-500 text-blue-600"
+                }`}
+                variant="ghost"
+                size="sm"
+              >
+                {option}
+                {isSelected && isMultiSelect && " ✓"}
+              </Button>
+            );
+          })}
+        </div>
+
+        {isMultiSelect && selectedOptions.length > 0 && (
+          <div className="flex gap-2 items-center">
+            <Button
+              onClick={handleSubmitMultiSelect}
+              disabled={isLoading}
+              className="px-6 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700"
+              size="sm"
+            >
+              Submit ({selectedOptions.length} selected)
+            </Button>
+            <Button
+              onClick={() => setSelectedOptions([])}
+              disabled={isLoading}
+              className="px-4 py-2 border border-gray-300 text-gray-600 rounded-full text-sm"
+              variant="ghost"
+              size="sm"
+            >
+              Clear
+            </Button>
+          </div>
+        )}
       </div>
     );
   };
@@ -1040,7 +1277,7 @@ const Chatbot = () => {
           {/* Quick Options */}
           {quickOptions && messages.length > 0 && !isTyping && !isLoading && (
             <div className="flex justify-start">
-              <div className="max-w-[80%] flex flex-wrap gap-2">
+              <div className="max-w-[80%]">
                 {renderQuickOptions(quickOptions)}
               </div>
             </div>
@@ -1102,3 +1339,4 @@ const Chatbot = () => {
 };
 
 export default Chatbot;
+  

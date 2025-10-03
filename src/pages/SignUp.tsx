@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle } from "lucide-react";
 import signupIllustration from "@/assets/signup-illustration.png";
+import { Eye, EyeOff } from "lucide-react";
 
 const SignUp = () => {
   const { role } = useParams<{ role: string }>();
@@ -17,6 +18,7 @@ const SignUp = () => {
   const { signUp, signInWithOAuth } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   // Password validation rules
   const passwordRules = [
@@ -275,60 +277,29 @@ const SignUp = () => {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-[12px] leading-[11px] mb-2"
-                  style={{
-                    color: "#4B5563",
-                    fontFamily:
-                      "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
-                  }}
+                  className="block text-[12px] mb-2"
+                  style={{ color: "#4B5563" }}
                 >
                   Password *
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center">
+                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center gap-2">
                   <input
                     id="password"
-                    type="password"
-                    placeholder="Create a password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full text-[10px] leading-[11px] outline-none bg-transparent placeholder-[#9CA3AF]"
-                    style={{
-                      fontFamily:
-                        "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
-                    }}
+                    className="w-full text-[10px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-[#9CA3AF] hover:text-[#4B5563] transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
                 </div>
-
-                {/* Password Strength Checker */}
-                {password && (
-                  <div className="mt-4 space-y-2">
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                      {passwordRules.map((rule, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <CheckCircle
-                            className="w-[9px] h-[9px]"
-                            style={{
-                              color: rule.test(password)
-                                ? "#10B981"
-                                : "#D9D9D9",
-                            }}
-                          />
-                          <span
-                            className="text-[10px] leading-[10px]"
-                            style={{
-                              color: "#9CA3AF",
-                              fontFamily:
-                                "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
-                            }}
-                          >
-                            {rule.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Sign Up Button */}
