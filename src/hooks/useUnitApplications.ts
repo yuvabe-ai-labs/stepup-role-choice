@@ -33,11 +33,21 @@ export const useUnitApplications = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Not authenticated');
 
+        // Get the profile ID for this user
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (profileError) throw profileError;
+        if (!profile) throw new Error('Profile not found');
+
         // Fetch all internships created by this unit
         const { data: internships, error: internshipsError } = await supabase
           .from('internships')
           .select('id')
-          .eq('created_by', user.id);
+          .eq('created_by', profile.id);
 
         if (internshipsError) throw internshipsError;
 
