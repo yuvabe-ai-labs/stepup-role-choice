@@ -38,7 +38,7 @@ export const useUnitApplications = () => {
           .from('internships')
           .select('id')
           .eq('created_by', user.id);
-z
+
         if (internshipsError) throw internshipsError;
 
         const internshipIds = internships?.map(i => i.id) || [];
