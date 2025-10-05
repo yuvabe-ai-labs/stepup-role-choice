@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -166,7 +166,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
         skills_required: skillsArray,
         language_requirements: data.language_requirements,
         application_deadline: format(data.application_deadline, 'yyyy-MM-dd'),
-        created_by: profile.id,
+        created_by: user.id,
         status: 'active',
         company_name: 'YuvaNext', // Default company name
       });
@@ -199,9 +199,9 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="text-xl font-semibold">Create new Job Description</DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1">
+              <DialogDescription className="text-sm text-muted-foreground mt-1">
                 This information is important for candidates to know better about Job/Internship
-              </p>
+              </DialogDescription>
             </div>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
