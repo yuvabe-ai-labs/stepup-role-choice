@@ -271,7 +271,7 @@ const UnitDashboard = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {applications.slice(0, 9).map((application) => {
-                    const skills = safeParse(application.studentProfile.skills, []);
+                    const skills = safeParse(application.studentProfile?.skills, []);
                     const displaySkills = skills.slice(0, 3).map((s: any) => 
                       typeof s === 'string' ? s : s.name || s
                     );
@@ -283,7 +283,7 @@ const UnitDashboard = () => {
                           <div className="flex flex-col items-center text-center">
                             <Avatar className="w-20 h-20 mb-4 ring-2 ring-primary/10">
                               <AvatarImage 
-                                src={application.studentProfile.avatar_url || undefined} 
+                                src={application.studentProfile?.avatar_url || undefined} 
                                 alt={application.profile.full_name} 
                               />
                               <AvatarFallback className="text-lg">
@@ -305,7 +305,7 @@ const UnitDashboard = () => {
                             </Badge>
 
                             <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                              {application.studentProfile.bio || 'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.'}
+                              {application.studentProfile?.bio || 'Passionate about creating user-centered digital experiences.'}
                             </p>
 
                             <div className="flex flex-wrap gap-2 justify-center mb-4">
@@ -538,7 +538,7 @@ const UnitDashboard = () => {
                           <div className="flex items-center gap-4 mb-4">
                             <Avatar className="w-16 h-16">
                               <AvatarImage 
-                                src={candidate.studentProfile.avatar_url || undefined} 
+                                src={candidate.studentProfile?.avatar_url || undefined} 
                                 alt={candidate.profile.full_name} 
                               />
                               <AvatarFallback>

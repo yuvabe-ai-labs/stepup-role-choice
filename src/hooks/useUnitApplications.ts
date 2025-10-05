@@ -71,27 +71,59 @@ export const useUnitApplications = () => {
         const applicationsWithDetails = await Promise.all(
           (applicationsData || []).map(async (app) => {
             const [internshipRes, profileRes, studentProfileRes] = await Promise.all([
-              supabase.from('internships').select('*').eq('id', app.internship_id).single(),
-              supabase.from('profiles').select('*').eq('id', app.student_id).single(),
-              supabase.from('student_profiles').select('*').eq('profile_id', app.student_id).single(),
+              supabase.from('internships').select('*').eq('id', app.internship_id).maybeSingle(),
+              supabase.from('profiles').select('*').eq('id', app.student_id).maybeSingle(),
+              supabase.from('student_profiles').select('*').eq('profile_id', app.student_id).maybeSingle(),
             ]);
+
+            // Skip applications with missing data
+            if (!internshipRes.data || !profileRes.data) {
+              return null;
+            }
 
             return {
               ...app,
-              internship: internshipRes.data!,
-              profile: profileRes.data!,
-              studentProfile: studentProfileRes.data!,
+              internship: internshipRes.data,
+              profile: profileRes.data,
+              studentProfile: studentProfileRes.data || {
+                id: '',
+                profile_id: app.student_id,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                skills: [],
+                avatar_url: null,
+                bio: null,
+                location: null,
+                portfolio_url: null,
+                resume_url: null,
+                behance_url: null,
+                dribbble_url: null,
+                linkedin_url: null,
+                education: [],
+                projects: [],
+                languages: [],
+                completed_courses: null,
+                interests: [],
+                experience_level: null,
+                looking_for: [],
+                profile_type: null,
+                preferred_language: null,
+                cover_letter: null,
+              },
             };
           })
         );
 
-        setApplications(applicationsWithDetails);
+        // Filter out null entries
+        const validApplications = applicationsWithDetails.filter(app => app !== null) as ApplicationWithDetails[];
+
+        setApplications(validApplications);
 
         // Calculate stats
-        const total = applicationsWithDetails.length;
-        const shortlisted = applicationsWithDetails.filter(a => a.status === 'shortlisted').length;
-        const interviews = applicationsWithDetails.filter(a => a.status === 'interviewed').length;
-        const hired = applicationsWithDetails.filter(a => a.status === 'hired').length;
+        const total = validApplications.length;
+        const shortlisted = validApplications.filter(a => a.status === 'shortlisted').length;
+        const interviews = validApplications.filter(a => a.status === 'interviewed').length;
+        const hired = validApplications.filter(a => a.status === 'hired').length;
 
         setStats({ total, shortlisted, interviews, hired });
       } catch (error) {
