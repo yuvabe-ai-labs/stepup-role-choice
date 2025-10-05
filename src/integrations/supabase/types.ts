@@ -181,6 +181,7 @@ export type Database = {
           duration: string | null
           id: string
           is_paid: boolean | null
+          language_requirements: Json | null
           location: string | null
           payment: string | null
           posted_date: string | null
@@ -205,6 +206,7 @@ export type Database = {
           duration?: string | null
           id?: string
           is_paid?: boolean | null
+          language_requirements?: Json | null
           location?: string | null
           payment?: string | null
           posted_date?: string | null
@@ -229,6 +231,7 @@ export type Database = {
           duration?: string | null
           id?: string
           is_paid?: boolean | null
+          language_requirements?: Json | null
           location?: string | null
           payment?: string | null
           posted_date?: string | null

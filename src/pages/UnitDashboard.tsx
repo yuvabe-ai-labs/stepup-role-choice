@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUnitApplications } from '@/hooks/useUnitApplications';
 import { useInternships } from '@/hooks/useInternships';
+import CreateInternshipDialog from '@/components/CreateInternshipDialog';
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -27,6 +28,12 @@ const UnitDashboard = () => {
   const [activeTab, setActiveTab] = useState('applications');
   const { applications, stats, loading } = useUnitApplications();
   const { internships, loading: internshipsLoading } = useInternships();
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+
+  const handleInternshipCreated = () => {
+    // Refresh the page to reload internships
+    window.location.reload();
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -390,7 +397,10 @@ const UnitDashboard = () => {
                     <SelectItem value="closed">Closed</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button className="bg-teal-600 hover:bg-teal-700">
+                <Button 
+                  className="bg-teal-600 hover:bg-teal-700"
+                  onClick={() => setShowCreateDialog(true)}
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Create New JD
                 </Button>
@@ -675,6 +685,13 @@ const UnitDashboard = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Create Internship Dialog */}
+      <CreateInternshipDialog
+        isOpen={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        onSuccess={handleInternshipCreated}
+      />
     </div>
   );
 };
