@@ -251,73 +251,121 @@ export type Database = {
       }
       profiles: {
         Row: {
+          achievements: Json | null
           address: string | null
           age: number | null
+          avatar_url: string | null
+          behance_url: string | null
           bio: string | null
+          completed_courses: Json | null
+          cover_letter: string | null
           created_at: string
           date_of_birth: string | null
           differently_abled: boolean | null
+          dribbble_url: string | null
+          education: Json | null
           education_level: string | null
           email: string | null
+          experience_level: string | null
           full_name: string
           gender: string | null
           id: string
           interest_area: string[] | null
           languages: string[] | null
+          linkedin_url: string | null
+          location: string | null
+          looking_for: string[] | null
           marital_status: string | null
           onboarding_completed: boolean | null
           phone: string | null
+          portfolio_url: string | null
           profile_type: string | null
+          projects: Json | null
+          purpose: string[] | null
+          resume_url: string | null
           role: string
           skills: string[] | null
           updated_at: string
           user_id: string
+          website_url: string | null
         }
         Insert: {
+          achievements?: Json | null
           address?: string | null
           age?: number | null
+          avatar_url?: string | null
+          behance_url?: string | null
           bio?: string | null
+          completed_courses?: Json | null
+          cover_letter?: string | null
           created_at?: string
           date_of_birth?: string | null
           differently_abled?: boolean | null
+          dribbble_url?: string | null
+          education?: Json | null
           education_level?: string | null
           email?: string | null
+          experience_level?: string | null
           full_name: string
           gender?: string | null
           id?: string
           interest_area?: string[] | null
           languages?: string[] | null
+          linkedin_url?: string | null
+          location?: string | null
+          looking_for?: string[] | null
           marital_status?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
+          portfolio_url?: string | null
           profile_type?: string | null
+          projects?: Json | null
+          purpose?: string[] | null
+          resume_url?: string | null
           role: string
           skills?: string[] | null
           updated_at?: string
           user_id: string
+          website_url?: string | null
         }
         Update: {
+          achievements?: Json | null
           address?: string | null
           age?: number | null
+          avatar_url?: string | null
+          behance_url?: string | null
           bio?: string | null
+          completed_courses?: Json | null
+          cover_letter?: string | null
           created_at?: string
           date_of_birth?: string | null
           differently_abled?: boolean | null
+          dribbble_url?: string | null
+          education?: Json | null
           education_level?: string | null
           email?: string | null
+          experience_level?: string | null
           full_name?: string
           gender?: string | null
           id?: string
           interest_area?: string[] | null
           languages?: string[] | null
+          linkedin_url?: string | null
+          location?: string | null
+          looking_for?: string[] | null
           marital_status?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
+          portfolio_url?: string | null
           profile_type?: string | null
+          projects?: Json | null
+          purpose?: string[] | null
+          resume_url?: string | null
           role?: string
           skills?: string[] | null
           updated_at?: string
           user_id?: string
+          website_url?: string | null
         }
         Relationships: []
       }

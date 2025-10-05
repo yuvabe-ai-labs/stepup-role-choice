@@ -863,8 +863,8 @@ const Chatbot = () => {
           <div className="space-y-4">
             <h1 className="text-2xl font-bold text-foreground">
               {isUnit
-                ? "Welcome to STEP-UP Unit Portal"
-                : "Welcome to STEP-UP Internships"}
+                ? "Welcome to YuvaNext Unit Portal"
+                : "Welcome to YuvaNext Internships"}
             </h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
               {isUnit
@@ -931,8 +931,8 @@ const Chatbot = () => {
           <div className="space-y-4">
             <h1 className="text-2xl font-bold text-foreground">
               {isUnit
-                ? "Welcome to STEP-UP Unit Portal"
-                : "Welcome to STEP-UP Internships"}
+                ? "Welcome to YuvaNext Unit Portal"
+                : "Welcome to YuvaNext Internships"}
             </h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
               {isUnit
@@ -1222,7 +1222,7 @@ const Chatbot = () => {
             </a>
           </div>
           <h1 className="text-xl font-bold text-foreground mb-2">
-            Welcome to STEP-UP Internships
+            Welcome to YuvaNext Internships
           </h1>
           <p className="text-muted-foreground text-sm">
             Let's have a quick chat to personalize your internship journey! Our

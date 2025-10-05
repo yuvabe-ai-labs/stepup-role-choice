@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { GraduationCap, Building } from 'lucide-react';
-import stepupIllustration from '@/assets/stepup-illustration.jpg';
+import yuvanextIllustration from '@/assets/stepup-illustration.jpg';
 
 const Landing = () => {
   return (
@@ -11,7 +11,7 @@ const Landing = () => {
         {/* Header */}
         <header className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
-            StepUp
+            YuvaNext
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Take the next step in your journey. Choose your path to get started.
@@ -24,8 +24,8 @@ const Landing = () => {
           <div className="order-2 lg:order-1">
             <div className="relative">
               <img 
-                src={stepupIllustration} 
-                alt="StepUp Progress Illustration" 
+                src={yuvanextIllustration} 
+                alt="YuvaNext Progress Illustration"
                 className="w-full h-auto rounded-2xl shadow-lg"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent rounded-2xl"></div>
@@ -100,7 +100,7 @@ const Landing = () => {
             {/* Footer Text */}
             <div className="text-center lg:text-left pt-6">
               <p className="text-sm text-muted-foreground">
-                New to StepUp? Create an account after selecting your role.
+                New to YuvaNext? Create an account after selecting your role.
               </p>
             </div>
           </div>
