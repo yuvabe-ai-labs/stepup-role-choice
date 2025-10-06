@@ -154,6 +154,14 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
       const skillsArray = data.skills_required.split(',').map(s => s.trim());
       const responsibilitiesArray = data.responsibilities.split('\n').filter(r => r.trim());
       const benefitsArray = data.benefits.split('\n').filter(b => b.trim());
+const { data: units } = await supabase
+  .from('units')
+  .select('unit_name')
+      .eq('profile_id', profile.id)
+  .single();
+      
+
+company_name: profile.company_name,
 
       // Create internship
       console.log('Creating internship with profile ID:', profile.id);
@@ -170,7 +178,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
         application_deadline: format(data.application_deadline, 'yyyy-MM-dd'),
         created_by: profile.id,
         status: 'active',
-        company_name: 'YuvaNext', // Default company name
+        company_name: units.company_name,
       });
 
       if (error) throw error;
