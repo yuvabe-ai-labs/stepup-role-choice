@@ -156,6 +156,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
       const benefitsArray = data.benefits.split('\n').filter(b => b.trim());
 
       // Create internship
+      console.log('Creating internship with profile ID:', profile.id);
       const { error } = await supabase.from('internships').insert({
         title: data.title,
         duration: data.duration,
@@ -167,7 +168,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
         skills_required: skillsArray,
         language_requirements: data.language_requirements,
         application_deadline: format(data.application_deadline, 'yyyy-MM-dd'),
-        created_by: user.id,
+        created_by: profile.id,
         status: 'active',
         company_name: 'YuvaNext', // Default company name
       });
