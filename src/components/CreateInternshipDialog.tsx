@@ -178,8 +178,7 @@ company_name: profile.company_name,
         application_deadline: format(data.application_deadline, 'yyyy-MM-dd'),
         created_by: profile.id,
         status: 'active',
-        company_name: "sheik",
-        // company_name: units.company_name,
+        company_name: units.unit_name,
       });
 
       if (error) throw error;
