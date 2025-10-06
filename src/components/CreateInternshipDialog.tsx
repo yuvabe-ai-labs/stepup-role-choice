@@ -446,11 +446,11 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                       type="button"
                       size="sm"
                       className="absolute bottom-2 right-2 bg-teal-600 hover:bg-teal-700"
-                      onClick={() => handleAIAssist('skills_required')}
-                      disabled={aiLoading === 'skills_required'}
+                      onClick={() => handleAIAssist('responsibilities')}
+                      disabled={aiLoading === 'responsibilities'}
                     >
                       <Sparkles className="w-4 h-4 mr-1" />
-                      {aiLoading === 'skills_required' ? 'Generating...' : 'AI Assistant'}
+                      {aiLoading === 'responsibilities' ? 'Generating...' : 'AI Assistant'}
                     </Button>
                   </div>
                 )}
@@ -514,11 +514,11 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                       type="button"
                       size="sm"
                       className="absolute bottom-2 right-2 bg-teal-600 hover:bg-teal-700"
-                      onClick={() => handleAIAssist('responsibilities')}
-                      disabled={aiLoading === 'responsibilities'}
+                      onClick={() => handleAIAssist('skills_required')}
+                      disabled={aiLoading === 'skills_required'}
                     >
                       <Sparkles className="w-4 h-4 mr-1" />
-                      {aiLoading === 'responsibilities' ? 'Generating...' : 'AI Assistant'}
+                      {aiLoading === 'skills_required' ? 'Generating...' : 'AI Assistant'}
                     </Button>
                   </div>
                 )}
