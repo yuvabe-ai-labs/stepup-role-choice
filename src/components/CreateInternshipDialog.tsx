@@ -237,8 +237,9 @@ company_name: profile.company_name,
           userRole: 'unit'
         }
       });
-
+      console.log(prompt);
       console.log('AI Response:', aiResponse);
+
 
       if (error) throw error;
 
