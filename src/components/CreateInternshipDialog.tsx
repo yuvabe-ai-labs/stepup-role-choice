@@ -82,6 +82,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [aiLoading, setAiLoading] = useState<string | null>(null);
   const [languages, setLanguages] = useState<LanguageProficiency[]>([
     { language: '', read: false, write: false, speak: false }
   ]);
@@ -189,6 +190,73 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // AI Assistant function
+  const handleAIAssist = async (fieldName: keyof FormData) => {
+    console.log('AI Assist triggered for:', fieldName);
+    setAiLoading(fieldName);
+
+    try {
+      const currentValue = watch(fieldName) as string;
+      const jobTitle = watch('title') || 'this position';
+      
+      let prompt = '';
+      
+      switch (fieldName) {
+        case 'description':
+          prompt = `Write a clear and professional "About Internship" description for a ${jobTitle} internship position. The description should be 2-3 paragraphs explaining what the internship is about, what the intern will be doing, and what they will learn. Make it engaging and suitable for all types of internship roles.${currentValue ? ` Current description: "${currentValue}". Please improve and rewrite it.` : ''}`;
+          break;
+        case 'responsibilities':
+          prompt = `List 5-7 key responsibilities for a ${jobTitle} internship. Format as bullet points, one per line. Make them clear, actionable, and relevant to the role.${currentValue ? ` Current responsibilities: "${currentValue}". Please improve and expand on them.` : ''}`;
+          break;
+        case 'benefits':
+          prompt = `List 4-6 post-internship benefits that a candidate would receive after completing a ${jobTitle} internship. Format as bullet points, one per line. Include things like certificates, recommendations, networking opportunities, skill development, etc.${currentValue ? ` Current benefits: "${currentValue}". Please improve and expand on them.` : ''}`;
+          break;
+        case 'skills_required':
+          prompt = `List 5-8 essential skills required for a ${jobTitle} internship. Format as a comma-separated list. Include both technical and soft skills relevant to the role.${currentValue ? ` Current skills: "${currentValue}". Please improve and expand on them.` : ''}`;
+          break;
+        default:
+          prompt = `Help improve the following text for a ${jobTitle} internship: ${currentValue}`;
+      }
+
+      const { data: aiResponse, error } = await supabase.functions.invoke('gemini-chat', {
+        body: {
+          message: prompt,
+          conversationHistory: [],
+          userRole: 'unit'
+        }
+      });
+
+      console.log('AI Response:', aiResponse);
+
+      if (error) throw error;
+
+      if (aiResponse?.response) {
+        // Clean up the response (remove markdown formatting if present)
+        let cleanResponse = aiResponse.response
+          .replace(/\*\*/g, '')
+          .replace(/\*/g, '')
+          .replace(/^#+\s/gm, '')
+          .trim();
+
+        setValue(fieldName, cleanResponse, { shouldValidate: true });
+
+        toast({
+          title: "AI Suggestion Applied",
+          description: "The content has been generated successfully!",
+        });
+      }
+    } catch (error) {
+      console.error('AI Assist error:', error);
+      toast({
+        title: "AI Assist Failed",
+        description: "Unable to generate AI suggestion. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setAiLoading(null);
     }
   };
 
@@ -343,9 +411,11 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                       type="button"
                       size="sm"
                       className="absolute bottom-2 right-2 bg-teal-600 hover:bg-teal-700"
+                      onClick={() => handleAIAssist('description')}
+                      disabled={aiLoading === 'description'}
                     >
                       <Sparkles className="w-4 h-4 mr-1" />
-                      AI Assistant
+                      {aiLoading === 'description' ? 'Generating...' : 'AI Assistant'}
                     </Button>
                   </div>
                 )}
@@ -375,9 +445,11 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                       type="button"
                       size="sm"
                       className="absolute bottom-2 right-2 bg-teal-600 hover:bg-teal-700"
+                      onClick={() => handleAIAssist('skills_required')}
+                      disabled={aiLoading === 'skills_required'}
                     >
                       <Sparkles className="w-4 h-4 mr-1" />
-                      AI Assistant
+                      {aiLoading === 'skills_required' ? 'Generating...' : 'AI Assistant'}
                     </Button>
                   </div>
                 )}
@@ -407,9 +479,11 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                       type="button"
                       size="sm"
                       className="absolute bottom-2 right-2 bg-teal-600 hover:bg-teal-700"
+                      onClick={() => handleAIAssist('benefits')}
+                      disabled={aiLoading === 'benefits'}
                     >
                       <Sparkles className="w-4 h-4 mr-1" />
-                      AI Assistant
+                      {aiLoading === 'benefits' ? 'Generating...' : 'AI Assistant'}
                     </Button>
                   </div>
                 )}
@@ -439,9 +513,11 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                       type="button"
                       size="sm"
                       className="absolute bottom-2 right-2 bg-teal-600 hover:bg-teal-700"
+                      onClick={() => handleAIAssist('responsibilities')}
+                      disabled={aiLoading === 'responsibilities'}
                     >
                       <Sparkles className="w-4 h-4 mr-1" />
-                      AI Assistant
+                      {aiLoading === 'responsibilities' ? 'Generating...' : 'AI Assistant'}
                     </Button>
                   </div>
                 )}

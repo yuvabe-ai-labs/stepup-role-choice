@@ -17,9 +17,9 @@ export const useUnitApplications = () => {
   const [applications, setApplications] = useState<ApplicationWithDetails[]>([]);
   const [stats, setStats] = useState({
     total: 0,
-    shortlisted: 0,
+    totalJobs: 0,
     interviews: 0,
-    hired: 0,
+    hiredThisMonth: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -111,11 +111,21 @@ export const useUnitApplications = () => {
 
         // Calculate stats
         const total = validApplications.length;
-        const shortlisted = validApplications.filter(a => a.status === 'shortlisted').length;
+        const totalJobs = internshipIds.length;
         const interviews = validApplications.filter(a => a.status === 'interviewed').length;
-        const hired = validApplications.filter(a => a.status === 'hired').length;
+        
+        // Get hired this month
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        const hiredThisMonth = validApplications.filter(a => {
+          if (a.status === 'hired') {
+            const appliedDate = new Date(a.applied_date);
+            return appliedDate.getMonth() === currentMonth && appliedDate.getFullYear() === currentYear;
+          }
+          return false;
+        }).length;
 
-        setStats({ total, shortlisted, interviews, hired });
+        setStats({ total, totalJobs, interviews, hiredThisMonth });
       } catch (error) {
         console.error('Error fetching applications:', error);
         setError('Failed to fetch applications');

@@ -29,6 +29,7 @@ const UnitDashboard = () => {
   const { applications, stats, loading } = useUnitApplications();
   const { internships, loading: internshipsLoading } = useInternships();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [jobFilter, setJobFilter] = useState('all');
 
   const handleInternshipCreated = () => {
     // Refresh the page to reload internships
@@ -148,13 +149,13 @@ const UnitDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Shortlisted</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Job Descriptions</p>
                   {loading ? (
                     <Skeleton className="h-10 w-16 my-1" />
                   ) : (
                     <>
-                      <p className="text-3xl font-bold">{stats.shortlisted}</p>
-                      <p className="text-xs text-muted-foreground">Candidates</p>
+                      <p className="text-3xl font-bold">{stats.totalJobs}</p>
+                      <p className="text-xs text-muted-foreground">Active & Closed</p>
                     </>
                   )}
                 </div>
@@ -190,13 +191,13 @@ const UnitDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Hired</p>
+                  <p className="text-sm font-medium text-muted-foreground">Hired This Month</p>
                   {loading ? (
                     <Skeleton className="h-10 w-16 my-1" />
                   ) : (
                     <>
-                      <p className="text-3xl font-bold">{stats.hired}</p>
-                      <p className="text-xs text-muted-foreground">All time</p>
+                      <p className="text-3xl font-bold">{stats.hiredThisMonth}</p>
+                      <p className="text-xs text-muted-foreground">{new Date().toLocaleString('default', { month: 'long' })}</p>
                     </>
                   )}
                 </div>
@@ -387,7 +388,7 @@ const UnitDashboard = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold">Job Descriptions</h2>
               <div className="flex gap-4">
-                <Select defaultValue="all">
+                <Select value={jobFilter} onValueChange={setJobFilter}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select Filter" />
                   </SelectTrigger>
@@ -429,7 +430,14 @@ const UnitDashboard = () => {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {internships.slice(0, 6).map((internship) => {
+                  {internships
+                    .filter((internship) => {
+                      if (jobFilter === 'all') return true;
+                      if (jobFilter === 'active') return internship.status === 'active';
+                      if (jobFilter === 'closed') return internship.status !== 'active';
+                      return true;
+                    })
+                    .slice(0, 6).map((internship) => {
                     const applicationCount = applications.filter(app => app.internship_id === internship.id).length;
                     
                     return (
@@ -473,7 +481,7 @@ const UnitDashboard = () => {
                           <Button 
                             variant="outline" 
                             className="w-full"
-                            onClick={() => navigate('/all-applications')}
+                            onClick={() => navigate(`/internship-applicants/${internship.id}`)}
                           >
                             View Applicants
                             <ArrowRight className="w-4 h-4 ml-2" />
