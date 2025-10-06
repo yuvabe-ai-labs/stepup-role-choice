@@ -215,7 +215,7 @@ company_name: profile.company_name,
       
       switch (fieldName) {
         case 'description':
-          prompt = `Write a clear and professional "About Internship" description for a ${jobTitle} internship position. The description should be 2-3 paragraphs explaining what the internship is about, what the intern will be doing, and what they will learn. Make it engaging and suitable for all types of internship roles.${currentValue ? ` Current description: "${currentValue}". Please improve and rewrite it.` : ''}`;
+          prompt = `Write a clear and professional "About Internship" description for a ${jobTitle} internship position. The description should be 1-2 paragraphs explaining what the internship is about, what the intern will be doing. Make it engaging and suitable for all types of internship roles.${currentValue ? ` Current description: "${currentValue}". Please improve and rewrite it.` : ''}`;
           break;
         case 'responsibilities':
           prompt = `List 5-7 key responsibilities for a ${jobTitle} internship. Format as bullet points, one per line. Make them clear, actionable, and relevant to the role.${currentValue ? ` Current responsibilities: "${currentValue}". Please improve and expand on them.` : ''}`;
