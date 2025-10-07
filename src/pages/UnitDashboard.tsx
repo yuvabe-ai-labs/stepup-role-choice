@@ -1,23 +1,36 @@
-import { useState } from 'react';
-import { Bell, Menu, Search, Users, FileText, Calendar, Briefcase, Settings, Sparkles, ArrowRight, Filter, Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Progress } from '@/components/ui/progress';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useUnitApplications } from '@/hooks/useUnitApplications';
-import { useInternships } from '@/hooks/useInternships';
-import CreateInternshipDialog from '@/components/CreateInternshipDialog';
+import { useState } from "react";
+import {
+  Bell,
+  Menu,
+  Search,
+  Users,
+  FileText,
+  Calendar,
+  Briefcase,
+  Settings,
+  Sparkles,
+  ArrowRight,
+  Filter,
+  Plus,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useUnitApplications } from "@/hooks/useUnitApplications";
+import { useInternships } from "@/hooks/useInternships";
+import CreateInternshipDialog from "@/components/CreateInternshipDialog";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
   try {
-    return typeof data === 'string' ? JSON.parse(data) : data;
+    return typeof data === "string" ? JSON.parse(data) : data;
   } catch {
     return fallback;
   }
@@ -25,11 +38,11 @@ const safeParse = (data: any, fallback: any) => {
 
 const UnitDashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('applications');
+  const [activeTab, setActiveTab] = useState("applications");
   const { applications, stats, loading } = useUnitApplications();
   const { internships, loading: internshipsLoading } = useInternships();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [jobFilter, setJobFilter] = useState('all');
+  const [jobFilter, setJobFilter] = useState("all");
 
   const handleInternshipCreated = () => {
     // Refresh the page to reload internships
@@ -38,42 +51,42 @@ const UnitDashboard = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'shortlisted':
-        return 'bg-green-500 text-white hover:bg-green-500';
-      case 'rejected':
-        return 'bg-red-500 text-white hover:bg-red-500';
-      case 'interviewed':
-        return 'bg-blue-500 text-white hover:bg-blue-500';
-      case 'hired':
-        return 'bg-green-500 text-white hover:bg-green-500';
+      case "shortlisted":
+        return "bg-green-500 text-white hover:bg-green-500";
+      case "rejected":
+        return "bg-red-500 text-white hover:bg-red-500";
+      case "interviewed":
+        return "bg-blue-500 text-white hover:bg-blue-500";
+      case "hired":
+        return "bg-green-500 text-white hover:bg-green-500";
       default:
-        return 'bg-gray-500 text-white hover:bg-gray-500';
+        return "bg-gray-500 text-white hover:bg-gray-500";
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'shortlisted':
-        return 'Shortlisted';
-      case 'rejected':
-        return 'Not Shortlist';
-      case 'interviewed':
-        return 'Interviewed';
-      case 'hired':
-        return 'Shortlisted';
+      case "shortlisted":
+        return "Shortlisted";
+      case "rejected":
+        return "Not Shortlist";
+      case "interviewed":
+        return "Interviewed";
+      case "hired":
+        return "Shortlisted";
       default:
-        return 'Applied';
+        return "Applied";
     }
   };
 
   const getMatchColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-orange-600';
-    return 'text-red-600';
+    if (score >= 80) return "text-green-600";
+    if (score >= 60) return "text-orange-600";
+    return "text-red-600";
   };
 
   // Filter hired candidates for Candidates Management tab
-  const hiredCandidates = applications.filter(app => app.status === 'hired');
+  const hiredCandidates = applications.filter((app) => app.status === "hired");
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,11 +105,7 @@ const UnitDashboard = () => {
           <div className="flex-1 max-w-md mx-8">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Search"
-                className="pl-10 bg-muted/30 border-muted"
-              />
+              <Input type="text" placeholder="Search" className="pl-10 bg-muted/30 border-muted" />
             </div>
           </div>
 
@@ -197,7 +206,11 @@ const UnitDashboard = () => {
                   ) : (
                     <>
                       <p className="text-3xl font-bold">{stats.hiredThisMonth}</p>
-                      <p className="text-xs text-muted-foreground">{new Date().toLocaleString('default', { month: 'long' })}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date().toLocaleString("default", {
+                          month: "long",
+                        })}
+                      </p>
                     </>
                   )}
                 </div>
@@ -212,25 +225,25 @@ const UnitDashboard = () => {
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 bg-muted/30 p-1 rounded-full">
-            <TabsTrigger 
-              value="applications" 
+            <TabsTrigger
+              value="applications"
               className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
               Applications
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="job-descriptions"
               className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
               Job Descriptions
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="candidates"
               className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
               Candidates Management
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="reports"
               className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
@@ -279,58 +292,53 @@ const UnitDashboard = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {applications.slice(0, 9).map((application) => {
-                    const skills = safeParse(application.studentProfile?.skills, []);
-                    const displaySkills = skills.slice(0, 3).map((s: any) => 
-                      typeof s === 'string' ? s : s.name || s
-                    );
+                    const skills = application.profile?.skills || [];
+                    const displaySkills = skills
+                      .slice(0, 3)
+                      .map((s: any) => (typeof s === "string" ? s : s?.name || s || ""));
                     const matchScore = application.profile_match_score || Math.floor(Math.random() * 40 + 60);
-                    
+
                     return (
                       <Card key={application.id} className="border border-border/50 hover:shadow-md transition-shadow">
                         <CardContent className="p-6">
                           <div className="flex flex-col items-center text-center">
                             <Avatar className="w-20 h-20 mb-4 ring-2 ring-primary/10">
-                              <AvatarImage 
-                                src={application.studentProfile?.avatar_url || undefined} 
-                                alt={application.profile.full_name} 
+                              <AvatarImage
+                                src={application.profile?.avatar_url || undefined}
+                                alt={application.profile?.full_name || "User"}
                               />
                               <AvatarFallback className="text-lg">
-                                {application.profile.full_name.split(' ').map(n => n[0]).join('')}
+                                {application.profile?.full_name
+                                  ?.split(" ")
+                                  .map((n) => n[0])
+                                  .join("") || "?"}
                               </AvatarFallback>
                             </Avatar>
 
                             <h3 className="font-semibold text-lg mb-1">
-                              {application.profile.full_name}
+                              {application.profile?.full_name || "Unknown"}
                             </h3>
                             <p className="text-sm text-muted-foreground mb-3">
-                              {application.internship.title}
+                              {application.internship?.title || "No Title"}
                             </p>
 
-                            <Badge 
-                              className={`${getStatusColor(application.status)} mb-4`}
-                            >
+                            <Badge className={`${getStatusColor(application.status)} mb-4`}>
                               {getStatusLabel(application.status)}
                             </Badge>
 
                             <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                              {application.studentProfile?.bio || 'Passionate about creating user-centered digital experiences.'}
+                              {application.profile?.bio ||
+                                "Passionate about creating user-centered digital experiences."}
                             </p>
 
                             <div className="flex flex-wrap gap-2 justify-center mb-4">
                               {displaySkills.map((skill: string, index: number) => (
-                                <Badge 
-                                  key={index} 
-                                  variant="outline" 
-                                  className="text-xs bg-muted/50"
-                                >
+                                <Badge key={index} variant="outline" className="text-xs bg-muted/50">
                                   {skill}
                                 </Badge>
                               ))}
                               {skills.length > 3 && (
-                                <Badge 
-                                  variant="outline" 
-                                  className="text-xs bg-muted/50"
-                                >
+                                <Badge variant="outline" className="text-xs bg-muted/50">
                                   +{skills.length - 3}
                                 </Badge>
                               )}
@@ -342,9 +350,15 @@ const UnitDashboard = () => {
                                   <Sparkles className="w-4 h-4 text-purple-500" />
                                   <span className="text-xs font-medium">AI Analysis for the profile</span>
                                 </div>
-                                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${
-                                  matchScore >= 80 ? 'border-green-500' : matchScore >= 60 ? 'border-orange-500' : 'border-red-500'
-                                }`}>
+                                <div
+                                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${
+                                    matchScore >= 80
+                                      ? "border-green-500"
+                                      : matchScore >= 60
+                                        ? "border-orange-500"
+                                        : "border-red-500"
+                                  }`}
+                                >
                                   <span className="text-xs font-bold">{matchScore}%</span>
                                 </div>
                               </div>
@@ -353,9 +367,9 @@ const UnitDashboard = () => {
                               </p>
                             </div>
 
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
+                            <Button
+                              variant="outline"
+                              size="sm"
                               className="w-full"
                               onClick={() => navigate(`/candidate/${application.id}`)}
                             >
@@ -371,11 +385,7 @@ const UnitDashboard = () => {
                 {/* View All button - always show if there are applications */}
                 {applications.length > 0 && (
                   <div className="flex justify-center mt-8">
-                    <Button 
-                      variant="outline"
-                      className="px-8"
-                      onClick={() => navigate('/all-applications')}
-                    >
+                    <Button variant="outline" className="px-8" onClick={() => navigate("/all-applications")}>
                       View All
                     </Button>
                   </div>
@@ -399,10 +409,7 @@ const UnitDashboard = () => {
                     <SelectItem value="closed">Closed</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button 
-                  className="bg-teal-600 hover:bg-teal-700"
-                  onClick={() => setShowCreateDialog(true)}
-                >
+                <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => setShowCreateDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   Create New JD
                 </Button>
@@ -433,64 +440,67 @@ const UnitDashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {internships
                     .filter((internship) => {
-                      if (jobFilter === 'all') return true;
-                      if (jobFilter === 'active') return internship.status === 'active';
-                      if (jobFilter === 'closed') return internship.status !== 'active';
+                      if (jobFilter === "all") return true;
+                      if (jobFilter === "active") return internship.status === "active";
+                      if (jobFilter === "closed") return internship.status !== "active";
                       return true;
                     })
-                    .slice(0, 6).map((internship) => {
-                    const applicationCount = applications.filter(app => app.internship_id === internship.id).length;
-                    
-                    return (
-                      <Card key={internship.id} className="relative">
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between mb-4">
-                            <h3 className="font-semibold text-lg">{internship.title}</h3>
-                            <div className="flex items-center gap-2">
-                              <Badge 
-                                className={internship.status === 'active' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}
-                              >
-                                {internship.status === 'active' ? 'Active' : 'Closed'}
-                              </Badge>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <Settings className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
+                    .slice(0, 6)
+                    .map((internship) => {
+                      const applicationCount = applications.filter((app) => app.internship_id === internship.id).length;
 
-                          <div className="space-y-2 mb-4">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Applications:</span>
-                              <span className="font-medium">{applicationCount} Applied</span>
+                      return (
+                        <Card key={internship.id} className="relative">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <h3 className="font-semibold text-lg">{internship.title}</h3>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  className={
+                                    internship.status === "active" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                                  }
+                                >
+                                  {internship.status === "active" ? "Active" : "Closed"}
+                                </Badge>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <Settings className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Duration:</span>
-                              <span className="font-medium">{internship.duration || 'Not specified'}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Created on:</span>
-                              <span className="font-medium">
-                                {new Date(internship.created_at).toLocaleDateString('en-GB', {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  year: 'numeric'
-                                })}
-                              </span>
-                            </div>
-                          </div>
 
-                          <Button 
-                            variant="outline" 
-                            className="w-full"
-                            onClick={() => navigate(`/internship-applicants/${internship.id}`)}
-                          >
-                            View Applicants
-                            <ArrowRight className="w-4 h-4 ml-2" />
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
+                            <div className="space-y-2 mb-4">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Applications:</span>
+                                <span className="font-medium">{applicationCount} Applied</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Duration:</span>
+                                <span className="font-medium">{internship.duration || "Not specified"}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Created on:</span>
+                                <span className="font-medium">
+                                  {new Date(internship.created_at).toLocaleDateString("en-GB", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                  })}
+                                </span>
+                              </div>
+                            </div>
+
+                            <Button
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => navigate(`/internship-applicants/${internship.id}`)}
+                            >
+                              View Applicants
+                              <ArrowRight className="w-4 h-4 ml-2" />
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                 </div>
 
                 {internships.length > 6 && (
@@ -510,11 +520,7 @@ const UnitDashboard = () => {
               <h2 className="text-2xl font-semibold">Candidate Management</h2>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  type="text"
-                  placeholder="Select by names"
-                  className="pl-10 w-[250px]"
-                />
+                <Input type="text" placeholder="Select by names" className="pl-10 w-[250px]" />
               </div>
             </div>
 
@@ -541,27 +547,28 @@ const UnitDashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {hiredCandidates.slice(0, 6).map((candidate) => {
                     const progress = Math.floor(Math.random() * 60 + 20);
-                    
+
                     return (
                       <Card key={candidate.id}>
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between mb-4">
+                            <div className="text-sm text-muted-foreground">{candidate.internship.title}</div>
                             <div className="text-sm text-muted-foreground">
-                              {candidate.internship.title}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {candidate.internship.duration || '6 Months'} | Full time
+                              {candidate.internship.duration || "6 Months"} | Full time
                             </div>
                           </div>
 
                           <div className="flex items-center gap-4 mb-4">
                             <Avatar className="w-16 h-16">
-                              <AvatarImage 
-                                src={candidate.studentProfile?.avatar_url || undefined} 
-                                alt={candidate.profile.full_name} 
+                              <AvatarImage
+                                src={candidate.profile?.avatar_url || undefined}
+                                alt={candidate.profile.full_name}
                               />
                               <AvatarFallback>
-                                {candidate.profile.full_name.split(' ').map(n => n[0]).join('')}
+                                {candidate.profile.full_name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
                               </AvatarFallback>
                             </Avatar>
                             <div>
@@ -595,7 +602,8 @@ const UnitDashboard = () => {
                                 </Avatar>
                               </div>
                               <span className="text-xs text-muted-foreground">
-                                Guided by <span className="font-medium">Darshini</span> & <span className="font-medium">Abinesh</span>
+                                Guided by <span className="font-medium">Darshini</span> &{" "}
+                                <span className="font-medium">Abinesh</span>
                               </span>
                             </div>
                             <Button variant="outline" size="sm">
@@ -662,18 +670,18 @@ const UnitDashboard = () => {
                 </div>
 
                 <div className="h-[400px] flex items-end justify-between gap-4 border-l border-b border-border p-4">
-                  {['Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun'].map((day, index) => {
+                  {["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"].map((day, index) => {
                     const prevWeekHeight = Math.random() * 60 + 20;
                     const thisWeekHeight = Math.random() * 60 + 20;
-                    
+
                     return (
                       <div key={day} className="flex-1 flex flex-col items-center gap-2">
-                        <div className="w-full flex gap-1 items-end" style={{ height: '300px' }}>
-                          <div 
+                        <div className="w-full flex gap-1 items-end" style={{ height: "300px" }}>
+                          <div
                             className="flex-1 bg-cyan-300 rounded-t-lg transition-all hover:opacity-80"
                             style={{ height: `${prevWeekHeight}%` }}
                           ></div>
-                          <div 
+                          <div
                             className="flex-1 bg-teal-600 rounded-t-lg transition-all hover:opacity-80"
                             style={{ height: `${thisWeekHeight}%` }}
                           ></div>
