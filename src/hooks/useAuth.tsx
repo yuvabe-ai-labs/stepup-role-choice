@@ -120,6 +120,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
           } else {
             console.log("Profile created successfully:", newProfile);
+            
+            // Initialize role-specific table
+            if (userRole === "student") {
+              const { error: studentError } = await supabase
+                .from("student_profiles")
+                .insert({
+                  profile_id: newProfile.id,
+                });
+              
+              if (studentError) {
+                console.error("Student profile initialization failed:", studentError);
+              } else {
+                console.log("Student profile initialized successfully");
+              }
+            } else if (userRole === "unit") {
+              const { error: unitError } = await supabase
+                .from("units")
+                .insert({
+                  profile_id: newProfile.id,
+                  unit_name: fullName, // Use signup name as initial unit name
+                });
+              
+              if (unitError) {
+                console.error("Unit profile initialization failed:", unitError);
+              } else {
+                console.log("Unit profile initialized successfully");
+              }
+            }
+            
             toast({
               title: "Welcome!",
               description: "Your account has been set up successfully.",
