@@ -28,25 +28,56 @@ export const useUnitApplications = () => {
     const fetchApplications = async () => {
       try {
         setLoading(true);
+        console.log('=== Fetching Unit Applications ===');
 
         // Get current user
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('Not authenticated');
+        if (!user) {
+          console.error('No authenticated user found');
+          throw new Error('Not authenticated');
+        }
+        console.log('Current user ID:', user.id);
 
-        // Fetch all internships created by this unit
+        // Get profile ID for current user
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          throw profileError;
+        }
+
+        if (!profile) {
+          console.error('No profile found for user:', user.id);
+          throw new Error('Profile not found');
+        }
+        console.log('Profile ID:', profile.id);
+
+        // Fetch all internships created by this unit (using profile ID)
         const { data: internships, error: internshipsError } = await supabase
           .from('internships')
-          .select('id')
-          .eq('created_by', user.id);
+          .select('id, title')
+          .eq('created_by', profile.id);
 
-        if (internshipsError) throw internshipsError;
+        if (internshipsError) {
+          console.error('Error fetching internships:', internshipsError);
+          throw internshipsError;
+        }
 
+        console.log('Found internships:', internships?.length || 0);
         const internshipIds = internships?.map(i => i.id) || [];
+        
         if (internshipIds.length === 0) {
+          console.log('No internships found for this unit');
           setApplications([]);
+          setStats({ total: 0, totalJobs: 0, interviews: 0, hiredThisMonth: 0 });
           setLoading(false);
           return;
         }
+        console.log('Internship IDs:', internshipIds);
 
         // Fetch applications for these internships
         const { data: applicationsData, error: appsError } = await supabase
@@ -55,7 +86,12 @@ export const useUnitApplications = () => {
           .in('internship_id', internshipIds)
           .order('applied_date', { ascending: false });
 
-        if (appsError) throw appsError;
+        if (appsError) {
+          console.error('Error fetching applications:', appsError);
+          throw appsError;
+        }
+
+        console.log('Found applications:', applicationsData?.length || 0);
 
         // Fetch related data for each application
         const applicationsWithDetails = await Promise.all(
@@ -107,6 +143,7 @@ export const useUnitApplications = () => {
         // Filter out null entries
         const validApplications = applicationsWithDetails.filter(app => app !== null) as ApplicationWithDetails[];
 
+        console.log('Valid applications:', validApplications.length);
         setApplications(validApplications);
 
         // Calculate stats
@@ -125,7 +162,9 @@ export const useUnitApplications = () => {
           return false;
         }).length;
 
-        setStats({ total, totalJobs, interviews, hiredThisMonth });
+        const calculatedStats = { total, totalJobs, interviews, hiredThisMonth };
+        console.log('Stats:', calculatedStats);
+        setStats(calculatedStats);
       } catch (error) {
         console.error('Error fetching applications:', error);
         setError('Failed to fetch applications');

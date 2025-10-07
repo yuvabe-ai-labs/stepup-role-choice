@@ -154,14 +154,17 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
       const skillsArray = data.skills_required.split(',').map(s => s.trim());
       const responsibilitiesArray = data.responsibilities.split('\n').filter(r => r.trim());
       const benefitsArray = data.benefits.split('\n').filter(b => b.trim());
-const { data: units } = await supabase
-  .from('units')
-  .select('unit_name')
-      .eq('profile_id', profile.id)
-  .single();
       
-
-company_name: profile.company_name,
+      // Get unit name from units table
+      const { data: units, error: unitsError } = await supabase
+        .from('units')
+        .select('unit_name')
+        .eq('profile_id', profile.id)
+        .maybeSingle();
+      
+      if (unitsError) {
+        console.error('Error fetching unit:', unitsError);
+      }
 
       // Create internship
       console.log('Creating internship with profile ID:', profile.id);
@@ -178,7 +181,7 @@ company_name: profile.company_name,
         application_deadline: format(data.application_deadline, 'yyyy-MM-dd'),
         created_by: profile.id,
         status: 'active',
-        company_name: units.unit_name,
+        company_name: units?.unit_name || 'Unit',
       });
 
       if (error) throw error;
