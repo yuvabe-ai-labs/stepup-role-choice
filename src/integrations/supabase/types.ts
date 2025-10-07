@@ -471,7 +471,7 @@ export type Database = {
           languages: Json | null
           linkedin_url: string | null
           location: string | null
-          looking_for: Json | null
+          looking_for: string[] | null
           portfolio_url: string | null
           preferred_language: string | null
           profile_id: string
@@ -498,7 +498,7 @@ export type Database = {
           languages?: Json | null
           linkedin_url?: string | null
           location?: string | null
-          looking_for?: Json | null
+          looking_for?: string[] | null
           portfolio_url?: string | null
           preferred_language?: string | null
           profile_id: string
@@ -525,7 +525,7 @@ export type Database = {
           languages?: Json | null
           linkedin_url?: string | null
           location?: string | null
-          looking_for?: Json | null
+          looking_for?: string[] | null
           portfolio_url?: string | null
           preferred_language?: string | null
           profile_id?: string
