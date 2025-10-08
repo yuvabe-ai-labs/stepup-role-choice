@@ -255,13 +255,14 @@ const Units = () => {
                         <div className="flex items-center space-x-2">
                           <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
                             {unit.unit_name.charAt(0)}
+                            <img src={unit.image} alt={`${unit.unit_name} logo`} />
                           </div>
                           <span className="text-sm font-medium line-clamp-1">{unit.unit_name}</span>
                         </div>
 
                         <Button
                           size="sm"
-                          className="bg-orange-500 hover:bg-orange-600 text-white rounded-2xl"
+                          className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/unit-view/${unit.id}`);
