@@ -7,6 +7,7 @@ import { ChevronDown, ChevronRight, Clock, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useCourses } from "@/hooks/useCourses";
 import type { Tables } from "@/integrations/supabase/types";
+import { formatDistanceToNow } from "date-fns";
 
 type Course = Tables<"courses">;
 
@@ -222,17 +223,14 @@ const Courses = () => {
                       <div className="text-white text-center">
                         <div className="text-lg font-bold">{course.category || "Course"}</div>
                       </div>
+                      {/* 🕒 Added 'time ago' */}
+                      <span className="absolute top-2 right-2 text-xs bg-white/70 text-gray-700 px-2 py-0.5 rounded-full">
+                        {formatDistanceToNow(new Date(course.created_at), { addSuffix: true })}
+                      </span>
                     </div>
 
                     <CardContent className="p-4 space-y-3">
                       <h3 className="font-semibold text-lg">{course.title}</h3>
-
-                      {/* Truncated description */}
-                      <p className="text-sm text-muted-foreground">
-                        {course.description?.length > 100
-                          ? course.description.slice(0, 100) + "..."
-                          : course.description}
-                      </p>
 
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <div className="flex items-center space-x-1">
@@ -249,28 +247,6 @@ const Courses = () => {
                         Know more →
                       </Button>
                     </CardContent>
-
-                    {/* <CardContent className="p-4 space-y-3">
-                      <h3 className="font-semibold text-lg">{course.title}</h3>
-
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <div className="flex items-center space-x-1">
-                          <Clock className="w-3 h-3" />
-                          <span>{course.duration}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Users className="w-3 h-3" />
-                          <span>{course.enrolled_count} enrolled</span>
-                        </div>
-                      </div>
-
-                      <Button
-                        variant="link"
-                        className="text-primary p-0 h-auto text-sm"
-                      >
-                        Know more →
-                      </Button>
-                    </CardContent> */}
                   </Card>
                 );
               })
