@@ -1,401 +1,275 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { ChevronRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { supabase } from "@/integrations/supabase/client";
-type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | {
-      [key: string]: Json;
-    }
-  | Json[];
-interface Unit {
-  id: string;
-  unit_name: string;
-  unit_type: string;
-  focus_areas: Json;
-  opportunities_offered: Json;
-  skills_offered: Json;
-  profile_id: string;
-  contact_email: string;
-  contact_phone: string;
-  address: string;
-  is_aurovillian: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import { useUnits } from "@/hooks/useUnits";
+import { formatDistanceToNow } from "date-fns";
 
-// --- Helpers ---
-function safeParse<T>(data: any, fallback: T): T {
-  if (!data) return fallback;
-  try {
-    return typeof data === "string" ? JSON.parse(data) : data;
-  } catch {
-    return fallback;
-  }
-}
-function getUnitGradient(unitName: string, unitType: string): string {
-  const gradients = [
-    "bg-gradient-to-br from-gray-900 to-purple-900",
-    "bg-gradient-to-br from-teal-600 to-blue-700",
-    "bg-gradient-to-br from-gray-800 to-orange-900",
-    "bg-gradient-to-br from-blue-600 to-teal-700",
-    "bg-gradient-to-br from-gray-700 to-gray-900",
-    "bg-gradient-to-br from-teal-700 to-blue-800",
-    "bg-gradient-to-br from-purple-600 to-indigo-700",
-    "bg-gradient-to-br from-green-600 to-teal-700",
-    "bg-gradient-to-br from-red-600 to-pink-700",
-  ];
-  const hash = unitName
-    .split("")
-    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return gradients[hash % gradients.length];
-}
-function getTimeAgo(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInDays = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
-  );
-  if (diffInDays === 0) return "Today";
-  if (diffInDays === 1) return "1d ago";
-  if (diffInDays < 7) return `${diffInDays}d ago`;
-  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)}w ago`;
-  return `${Math.floor(diffInDays / 30)}m ago`;
-}
 const Units = () => {
   const navigate = useNavigate();
-  const [units, setUnits] = useState<Unit[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [expandedSections, setExpandedSections] = useState({
-    units: true,
-    industry: false,
-    interest: false,
+  const { units, loading, error } = useUnits();
+  
+  const [filters, setFilters] = useState({
+    unitNames: [] as string[],
+    industries: [] as string[],
+    isAurovillian: null as boolean | null,
   });
 
-  // filter states
-  const [selectedUnits, setSelectedUnits] = useState<string[]>([]);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedFocusAreas, setSelectedFocusAreas] = useState<string[]>([]);
+  console.log('[Units] Current filters:', filters);
+  console.log('[Units] Total units loaded:', units.length);
 
-  // Fetch units
-  useEffect(() => {
-    const fetchUnits = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from("units")
-          .select("*")
-          .order("created_at", {
-            ascending: false,
-          });
-        if (error) {
-          console.error("Error fetching units:", error);
-          setError(error.message);
-        } else {
-          setUnits(data || []);
-        }
-      } catch (err) {
-        console.error("Error:", err);
-        setError("Failed to fetch units");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUnits();
-  }, []);
+  // Extract unique values for filters
+  const uniqueUnitNames = Array.from(new Set(units.map((u) => u.unit_name).filter(Boolean))).slice(0, 10);
+  const uniqueIndustries = Array.from(new Set(units.map((u) => u.industry || u.unit_type).filter(Boolean))).slice(0, 10);
 
-  // Helpers for filters
-  const getUniqueUnitNames = () => [
-    ...new Set(units.map((unit) => unit.unit_name)),
-  ];
-  const getUniqueUnitTypes = () => [
-    ...new Set(units.map((unit) => unit.unit_type)),
-  ];
-  const getUniqueFocusAreas = () => {
-    const allFocusAreas = units.flatMap((unit) => {
-      const focusAreas = safeParse(unit.focus_areas, {});
-      return Object.keys(focusAreas);
-    });
-    return [...new Set(allFocusAreas)];
-  };
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections((prev) => ({
+  const toggleFilter = (category: "unitNames" | "industries", value: string) => {
+    console.log('[Units] Toggle filter:', category, value);
+    setFilters((prev) => ({
       ...prev,
-      [section]: !prev[section],
+      [category]: prev[category].includes(value)
+        ? prev[category].filter((v) => v !== value)
+        : [...prev[category], value],
     }));
   };
-  const toggleFilter = (
-    value: string,
-    setState: React.Dispatch<React.SetStateAction<string[]>>
-  ) => {
-    setState((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
-    );
+
+  const toggleAuroville = (checked: boolean) => {
+    console.log('[Units] Toggle Auroville:', checked);
+    setFilters((prev) => ({
+      ...prev,
+      isAurovillian: checked ? true : null,
+    }));
   };
-  const clearFilters = () => {
-    setSelectedUnits([]);
-    setSelectedTypes([]);
-    setSelectedFocusAreas([]);
+
+  const resetFilters = () => {
+    console.log('[Units] Reset all filters');
+    setFilters({ unitNames: [], industries: [], isAurovillian: null });
   };
 
   // Apply filters
   const filteredUnits = units.filter((unit) => {
-    const focusAreas = safeParse(unit.focus_areas, {});
-    const focusAreaKeys = Object.keys(focusAreas);
-    if (selectedUnits.length > 0 && !selectedUnits.includes(unit.unit_name)) {
+    if (filters.unitNames.length > 0 && !filters.unitNames.includes(unit.unit_name)) {
       return false;
     }
-    if (selectedTypes.length > 0 && !selectedTypes.includes(unit.unit_type)) {
-      return false;
+    if (filters.industries.length > 0) {
+      const unitIndustry = unit.industry || unit.unit_type;
+      if (!unitIndustry || !filters.industries.includes(unitIndustry)) {
+        return false;
+      }
     }
-    if (
-      selectedFocusAreas.length > 0 &&
-      !selectedFocusAreas.some((f) => focusAreaKeys.includes(f))
-    ) {
+    if (filters.isAurovillian !== null && unit.is_aurovillian !== filters.isAurovillian) {
       return false;
     }
     return true;
   });
+
+  console.log('[Units] Filtered units:', filteredUnits.length);
+
+  const getUnitGradient = (index: number) => {
+    const gradients = [
+      "bg-gradient-to-br from-purple-600 to-blue-600",
+      "bg-gradient-to-br from-teal-600 to-green-600",
+      "bg-gradient-to-br from-orange-600 to-red-600",
+      "bg-gradient-to-br from-blue-600 to-cyan-500",
+      "bg-gradient-to-br from-pink-600 to-purple-600",
+      "bg-gradient-to-br from-gray-700 to-gray-900",
+    ];
+    return gradients[index % gradients.length];
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-80 bg-background border border-border rounded-2xl shadow-md p-6 m-6 h-auto">
-          <h2 className="text-base font-semibold text-gray-800 mb-6">
-            All Filters
-          </h2>
+      <div className="flex gap-6 p-6">
+        {/* Left Sidebar - Filters */}
+        <div className="w-80 bg-card border rounded-3xl p-6 h-fit sticky top-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold">Filters</h2>
+            <Button
+              variant="ghost"
+              className="text-primary hover:text-primary/80 text-sm font-medium"
+              onClick={resetFilters}
+            >
+              Reset all
+            </Button>
+          </div>
+
+          {/* Auroville Toggle */}
+          <div className="mb-6 p-4 bg-muted rounded-lg">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="auroville-toggle" className="text-sm font-medium">
+                Auroville Units Only
+              </Label>
+              <Switch
+                id="auroville-toggle"
+                checked={filters.isAurovillian === true}
+                onCheckedChange={toggleAuroville}
+              />
+            </div>
+          </div>
 
           {/* Units Filter */}
           <div className="mb-6">
-            <button
-              onClick={() => toggleSection("units")}
-              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
-            >
-              <span>Units</span>
-              {expandedSections.units ? (
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-gray-500" />
-              )}
-            </button>
-            {expandedSections.units && (
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {getUniqueUnitNames().map((unitName) => (
-                    <span
-                      key={unitName}
-                      onClick={() => toggleFilter(unitName, setSelectedUnits)}
-                      className={`px-3 py-1 text-sm border rounded-full cursor-pointer ${
-                        selectedUnits.includes(unitName)
-                          ? "bg-sky-500 text-white border-sky-500"
-                          : "border-gray-300 text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      {unitName}
-                    </span>
-                  ))}
+            <h3 className="text-sm font-semibold text-muted-foreground mb-3">Units</h3>
+            <div className="space-y-3 max-h-60 overflow-y-auto">
+              {uniqueUnitNames.map((unitName) => (
+                <div key={unitName} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`unit-${unitName}`}
+                    checked={filters.unitNames.includes(unitName)}
+                    onCheckedChange={() => toggleFilter("unitNames", unitName)}
+                  />
+                  <label
+                    htmlFor={`unit-${unitName}`}
+                    className="text-sm font-medium cursor-pointer line-clamp-1"
+                  >
+                    {unitName}
+                  </label>
                 </div>
-              </div>
+              ))}
+            </div>
+            {uniqueUnitNames.length > 10 && (
+              <Button variant="link" className="text-primary text-sm p-0 mt-2">
+                +{units.length - 10} More
+              </Button>
             )}
           </div>
 
-          {/* Unit Type Filter */}
+          {/* Industry Filter */}
           <div className="mb-6">
-            <button
-              onClick={() => toggleSection("industry")}
-              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
-            >
-              <span>Unit Type</span>
-              {expandedSections.industry ? (
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-gray-500" />
-              )}
-            </button>
-            {expandedSections.industry && (
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {getUniqueUnitTypes().map((unitType) => (
-                    <span
-                      key={unitType}
-                      onClick={() => toggleFilter(unitType, setSelectedTypes)}
-                      className={`px-3 py-1 text-sm border rounded-full cursor-pointer ${
-                        selectedTypes.includes(unitType)
-                          ? "bg-sky-500 text-white border-sky-500"
-                          : "border-gray-300 text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      {unitType}
-                    </span>
-                  ))}
+            <h3 className="text-sm font-semibold text-muted-foreground mb-3">Industry</h3>
+            <div className="space-y-3 max-h-60 overflow-y-auto">
+              {uniqueIndustries.map((industry) => (
+                <div key={industry} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`industry-${industry}`}
+                    checked={filters.industries.includes(industry)}
+                    onCheckedChange={() => toggleFilter("industries", industry)}
+                  />
+                  <label
+                    htmlFor={`industry-${industry}`}
+                    className="text-sm font-medium cursor-pointer line-clamp-1"
+                  >
+                    {industry}
+                  </label>
                 </div>
-              </div>
+              ))}
+            </div>
+            {uniqueIndustries.length > 10 && (
+              <Button variant="link" className="text-primary text-sm p-0 mt-2">
+                +{uniqueIndustries.length - 10} More
+              </Button>
             )}
           </div>
 
-          {/* Focus Areas Filter */}
-          <div className="mb-6">
-            <button
-              onClick={() => toggleSection("interest")}
-              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
-            >
-              <span>Focus Areas</span>
-              {expandedSections.interest ? (
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-gray-500" />
-              )}
-            </button>
-            {expandedSections.interest && (
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {getUniqueFocusAreas().map((focusArea) => (
-                    <span
-                      key={focusArea}
-                      onClick={() =>
-                        toggleFilter(focusArea, setSelectedFocusAreas)
-                      }
-                      className={`px-3 py-1 text-sm border rounded-full cursor-pointer ${
-                        selectedFocusAreas.includes(focusArea)
-                          ? "bg-sky-500 text-white border-sky-500"
-                          : "border-gray-300 text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      {focusArea}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Apply + Clear */}
-          <div className="space-y-2">
-            <Button
-              variant="outline"
-              className="w-full text-sm font-medium py-2 border-2 border-teal-500 rounded-3xl bg-transparent hover:bg-teal-50 text-teal-500"
-              onClick={clearFilters}
-            >
-              Clear Filters
-            </Button>
-          </div>
+          <Button
+            className="w-full rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all"
+            variant="outline"
+            onClick={resetFilters}
+          >
+            Apply
+          </Button>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-6">
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-2">
-              Explore {filteredUnits.length} Units just for you
+        <div className="flex-1">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold">
+              Explore {filteredUnits.length}+ Units just for you
             </h1>
           </div>
 
+          {error && (
+            <div className="text-center py-8">
+              <p className="text-destructive">{error}</p>
+            </div>
+          )}
+
           {loading ? (
-            // Loading Skeleton
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({
-                length: 6,
-              }).map((_, index) => (
-                <Card key={index} className="overflow-hidden shadow-sm">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="overflow-hidden rounded-3xl">
                   <Skeleton className="h-48 w-full" />
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Skeleton className="w-6 h-6 rounded-full" />
-                        <Skeleton className="h-4 w-20" />
-                      </div>
-                      <Skeleton className="h-8 w-16" />
-                    </div>
+                    <Skeleton className="h-6 w-full mb-2" />
+                    <Skeleton className="h-4 w-3/4" />
                   </CardContent>
                 </Card>
               ))}
             </div>
-          ) : error ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500">Error loading units: {error}</p>
-            </div>
           ) : filteredUnits.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500">No units available.</p>
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No units found matching your filters.</p>
+              <Button variant="outline" onClick={resetFilters} className="mt-4">
+                Clear Filters
+              </Button>
             </div>
           ) : (
-            // Units Grid
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredUnits.map((unit) => {
-                const focusAreas = safeParse(unit.focus_areas, {});
-                const gradient = getUnitGradient(
-                  unit.unit_name,
-                  unit.unit_type
-                );
-                const timeAgo = getTimeAgo(unit.created_at);
+              {filteredUnits.map((unit, index) => {
+                const gradient = getUnitGradient(index);
+                const focusAreas = typeof unit.focus_areas === 'object' && unit.focus_areas !== null
+                  ? Object.entries(unit.focus_areas as Record<string, any>).slice(0, 2)
+                  : [];
+
                 return (
                   <Card
                     key={unit.id}
-                    className="overflow-hidden shadow border border-gray-200 rounded-xl hover:shadow-md transition-shadow cursor-pointer"
+                    className="overflow-hidden rounded-3xl hover:shadow-lg transition-all cursor-pointer"
+                    onClick={() => navigate(`/units/${unit.id}`)}
                   >
-                    {/* Top section with gradient */}
-                    <div
-                      className={`h-48 ${gradient} relative flex items-center justify-center`}
-                    >
-                      <Badge className="absolute top-3 left-3 bg-white text-gray-800 text-xs font-semibold px-2 py-0.5 rounded-md">
-                        {timeAgo}
+                    {/* Unit Header */}
+                    <div className={`${gradient} h-48 relative flex flex-col items-center justify-center p-6 text-white`}>
+                      <Badge className="absolute top-3 left-3 bg-white/90 text-foreground">
+                        {formatDistanceToNow(new Date(unit.created_at), { addSuffix: true })}
                       </Badge>
 
-                      <div className="text-white text-center px-4">
-                        <h3 className="text-lg font-semibold mb-1">
-                          {unit.unit_name}
-                        </h3>
-                        <p className="text-white/80 text-sm">
-                          {unit.unit_type}
-                        </p>
+                      {unit.is_aurovillian && (
+                        <Badge className="absolute top-3 right-3 bg-green-500 text-white">
+                          Auroville
+                        </Badge>
+                      )}
 
-                        {Object.keys(focusAreas).length > 0 && (
-                          <div className="mt-2 flex flex-wrap justify-center gap-1">
-                            {Object.entries(
-                              focusAreas as Record<string, string>
-                            )
-                              .slice(0, 2)
-                              .map(([key, value]) => (
-                                <Badge
-                                  key={key}
-                                  className="bg-white/20 text-white text-xs font-medium px-2 py-0.5 rounded-md"
-                                >
-                                  {key}: {value}
-                                </Badge>
-                              ))}
-                          </div>
-                        )}
-                      </div>
+                      <h3 className="text-xl font-bold text-center mb-2">{unit.unit_name}</h3>
+                      <p className="text-sm text-white/80">{unit.unit_type}</p>
 
-                      <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-white w-5 h-5" />
+                      {focusAreas.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2 justify-center">
+                          {focusAreas.map(([key]) => (
+                            <Badge key={key} variant="secondary" className="bg-white/20 text-white text-xs">
+                              {key}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+
+                      <ChevronRight className="absolute right-4 bottom-4 w-6 h-6" />
                     </div>
 
-                    {/* Bottom content */}
+                    {/* Unit Footer */}
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <div className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
                             {unit.unit_name.charAt(0)}
                           </div>
-                          <span className="text-sm font-medium">
-                            {unit.unit_name}
-                          </span>
+                          <span className="text-sm font-medium line-clamp-1">{unit.unit_name}</span>
                         </div>
 
                         <Button
                           size="sm"
-                          className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-md px-3 py-1.5"
-                          onClick={() => navigate(`/units/${unit.id}`)}
+                          className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/unit-view/${unit.id}`);
+                          }}
                         >
                           View
                         </Button>
@@ -411,4 +285,5 @@ const Units = () => {
     </div>
   );
 };
+
 export default Units;

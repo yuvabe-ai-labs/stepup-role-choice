@@ -20,15 +20,18 @@ const SignIn = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    console.log('[SignIn] Submitting with keepLoggedIn:', keepLoggedIn);
+    const { error } = await signIn(email, password, keepLoggedIn);
 
     if (error) {
+      console.error('[SignIn] Sign in failed:', error);
       toast({
         title: "Sign in failed",
         description: error.message,
         variant: "destructive",
       });
     } else {
+      console.log('[SignIn] Sign in successful');
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
