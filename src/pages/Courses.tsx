@@ -28,12 +28,8 @@ const Courses = () => {
   // Dynamic filters
   const filterOptions = {
     units: Array.from(new Set(courses.map((c) => c.provider).filter(Boolean))),
-    industry: Array.from(
-      new Set(courses.map((c) => c.category).filter(Boolean))
-    ),
-    interest: Array.from(
-      new Set(courses.map((c) => c.difficulty_level).filter(Boolean))
-    ),
+    industry: Array.from(new Set(courses.map((c) => c.category).filter(Boolean))),
+    interest: Array.from(new Set(courses.map((c) => c.difficulty_level).filter(Boolean))),
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -44,17 +40,12 @@ const Courses = () => {
   };
 
   // Toggle filter selection
-  const toggleFilter = (
-    section: keyof typeof selectedFilters,
-    value: string
-  ) => {
+  const toggleFilter = (section: keyof typeof selectedFilters, value: string) => {
     setSelectedFilters((prev) => {
       const isSelected = prev[section].includes(value);
       return {
         ...prev,
-        [section]: isSelected
-          ? prev[section].filter((v) => v !== value)
-          : [...prev[section], value],
+        [section]: isSelected ? prev[section].filter((v) => v !== value) : [...prev[section], value],
       };
     });
   };
@@ -62,17 +53,14 @@ const Courses = () => {
   // Apply filtering
   const filteredCourses = courses.filter((course) => {
     const matchUnit =
-      selectedFilters.units.length === 0 ||
-      (course.provider && selectedFilters.units.includes(course.provider));
+      selectedFilters.units.length === 0 || (course.provider && selectedFilters.units.includes(course.provider));
 
     const matchIndustry =
-      selectedFilters.industry.length === 0 ||
-      (course.category && selectedFilters.industry.includes(course.category));
+      selectedFilters.industry.length === 0 || (course.category && selectedFilters.industry.includes(course.category));
 
     const matchInterest =
       selectedFilters.interest.length === 0 ||
-      (course.difficulty_level &&
-        selectedFilters.interest.includes(course.difficulty_level));
+      (course.difficulty_level && selectedFilters.interest.includes(course.difficulty_level));
 
     return matchUnit && matchIndustry && matchInterest;
   });
@@ -93,11 +81,7 @@ const Courses = () => {
               className="flex items-center justify-between w-full text-left font-medium mb-3"
             >
               <span>Units</span>
-              {expandedSections.units ? (
-                <ChevronDown className="w-4 h-4" />
-              ) : (
-                <ChevronRight className="w-4 h-4" />
-              )}
+              {expandedSections.units ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </button>
             {expandedSections.units && (
               <div className="space-y-2">
@@ -105,11 +89,7 @@ const Courses = () => {
                   {filterOptions.units.map((option) => (
                     <Badge
                       key={option}
-                      variant={
-                        selectedFilters.units.includes(option)
-                          ? "default"
-                          : "outline"
-                      }
+                      variant={selectedFilters.units.includes(option) ? "default" : "outline"}
                       className="cursor-pointer hover:bg-accent"
                       onClick={() => toggleFilter("units", option)}
                     >
@@ -128,11 +108,7 @@ const Courses = () => {
               className="flex items-center justify-between w-full text-left font-medium mb-3"
             >
               <span>Industry</span>
-              {expandedSections.industry ? (
-                <ChevronDown className="w-4 h-4" />
-              ) : (
-                <ChevronRight className="w-4 h-4" />
-              )}
+              {expandedSections.industry ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </button>
             {expandedSections.industry && (
               <div className="space-y-2">
@@ -140,11 +116,7 @@ const Courses = () => {
                   {filterOptions.industry.map((option) => (
                     <Badge
                       key={option}
-                      variant={
-                        selectedFilters.industry.includes(option)
-                          ? "default"
-                          : "outline"
-                      }
+                      variant={selectedFilters.industry.includes(option) ? "default" : "outline"}
                       className="cursor-pointer hover:bg-accent"
                       onClick={() => toggleFilter("industry", option)}
                     >
@@ -163,11 +135,7 @@ const Courses = () => {
               className="flex items-center justify-between w-full text-left font-medium mb-3"
             >
               <span>Interest</span>
-              {expandedSections.interest ? (
-                <ChevronDown className="w-4 h-4" />
-              ) : (
-                <ChevronRight className="w-4 h-4" />
-              )}
+              {expandedSections.interest ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </button>
             {expandedSections.interest && (
               <div className="space-y-2">
@@ -175,11 +143,7 @@ const Courses = () => {
                   {filterOptions.interest.map((option) => (
                     <Badge
                       key={option}
-                      variant={
-                        selectedFilters.interest.includes(option)
-                          ? "default"
-                          : "outline"
-                      }
+                      variant={selectedFilters.interest.includes(option) ? "default" : "outline"}
                       className="cursor-pointer hover:bg-accent"
                       onClick={() => toggleFilter("interest", option)}
                     >
@@ -193,9 +157,7 @@ const Courses = () => {
 
           <Button
             className="w-full text-sm font-medium py-2 border-2 border-teal-500 rounded-3xl bg-transparent hover:bg-teal-50 text-teal-500"
-            onClick={() =>
-              setSelectedFilters({ units: [], industry: [], interest: [] })
-            }
+            onClick={() => setSelectedFilters({ units: [], industry: [], interest: [] })}
           >
             Clear Filters
           </Button>
@@ -204,10 +166,7 @@ const Courses = () => {
         {/* Main Content */}
         <div className="flex-1 p-6">
           <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-2">
-              Explore {loading ? "..." : filteredCourses.length} Courses just
-              for you
-            </h1>
+            <h1 className="text-2xl font-bold mb-2">Explore {loading ? "..." : filteredCourses.length} Courses</h1>
           </div>
 
           {/* Courses Grid */}
@@ -228,22 +187,14 @@ const Courses = () => {
               ))
             ) : error ? (
               <div className="col-span-full text-center py-8">
-                <p className="text-muted-foreground">
-                  Error loading courses: {error}
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={() => window.location.reload()}
-                  className="mt-4"
-                >
+                <p className="text-muted-foreground">Error loading courses: {error}</p>
+                <Button variant="outline" onClick={() => window.location.reload()} className="mt-4">
                   Try Again
                 </Button>
               </div>
             ) : filteredCourses.length === 0 ? (
               <div className="col-span-full text-center py-8">
-                <p className="text-muted-foreground">
-                  No courses available at the moment.
-                </p>
+                <p className="text-muted-foreground">No courses available at the moment.</p>
               </div>
             ) : (
               filteredCourses.map((course, index) => {
@@ -265,13 +216,9 @@ const Courses = () => {
                     key={course.id}
                     className="overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                   >
-                    <div
-                      className={`h-32 ${gradient} relative flex items-center justify-center`}
-                    >
+                    <div className={`h-32 ${gradient} relative flex items-center justify-center`}>
                       <div className="text-white text-center">
-                        <div className="text-lg font-bold">
-                          {course.category || "Course"}
-                        </div>
+                        <div className="text-lg font-bold">{course.category || "Course"}</div>
                       </div>
                     </div>
 
@@ -289,10 +236,7 @@ const Courses = () => {
                         </div>
                       </div>
 
-                      <Button
-                        variant="link"
-                        className="text-primary p-0 h-auto text-sm"
-                      >
+                      <Button variant="link" className="text-primary p-0 h-auto text-sm">
                         Know more →
                       </Button>
                     </CardContent>
