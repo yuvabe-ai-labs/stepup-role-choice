@@ -30,7 +30,7 @@ const Courses = () => {
   ];
 
   const toggleFilter = (category: "difficulty" | "duration", value: string) => {
-    console.log('[Courses] Toggle filter:', category, value);
+    console.log("[Courses] Toggle filter:", category, value);
     setFilters((prev) => ({
       ...prev,
       [category]: prev[category].includes(value)
@@ -40,12 +40,12 @@ const Courses = () => {
   };
 
   const setPostedDateFilter = (value: string) => {
-    console.log('[Courses] Set posted date filter:', value);
+    console.log("[Courses] Set posted date filter:", value);
     setFilters((prev) => ({ ...prev, postedDate: value }));
   };
 
   const resetFilters = () => {
-    console.log('[Courses] Reset all filters');
+    console.log("[Courses] Reset all filters");
     setFilters({ difficulty: [], duration: [], postedDate: "" });
   };
 
@@ -91,10 +91,7 @@ const Courses = () => {
                     checked={filters.difficulty.includes(level)}
                     onCheckedChange={() => toggleFilter("difficulty", level)}
                   />
-                  <label
-                    htmlFor={`difficulty-${level}`}
-                    className="text-sm font-medium cursor-pointer"
-                  >
+                  <label htmlFor={`difficulty-${level}`} className="text-sm font-medium cursor-pointer">
                     {level}
                   </label>
                 </div>
@@ -113,10 +110,7 @@ const Courses = () => {
                     checked={filters.postedDate === date.value}
                     onCheckedChange={() => setPostedDateFilter(date.value)}
                   />
-                  <label
-                    htmlFor={`posted-${date.value}`}
-                    className="text-sm font-medium cursor-pointer"
-                  >
+                  <label htmlFor={`posted-${date.value}`} className="text-sm font-medium cursor-pointer">
                     {date.label}
                   </label>
                 </div>
@@ -135,10 +129,7 @@ const Courses = () => {
                     checked={filters.duration.includes(duration)}
                     onCheckedChange={() => toggleFilter("duration", duration)}
                   />
-                  <label
-                    htmlFor={`duration-${duration}`}
-                    className="text-sm font-medium cursor-pointer"
-                  >
+                  <label htmlFor={`duration-${duration}`} className="text-sm font-medium cursor-pointer">
                     {duration}
                   </label>
                 </div>
@@ -158,9 +149,7 @@ const Courses = () => {
         {/* Main Content */}
         <div className="flex-1">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold">
-              Explore {courses.length}+ Courses just for you
-            </h1>
+            <h1 className="text-3xl font-bold">Explore {courses.length} Courses</h1>
           </div>
 
           {error && (
@@ -183,18 +172,11 @@ const Courses = () => {
               const gradient = gradients[Math.floor(Math.random() * gradients.length)];
 
               return (
-                <Card
-                  key={course.id}
-                  className="overflow-hidden rounded-3xl hover:shadow-lg transition-all"
-                >
+                <Card key={course.id} className="overflow-hidden rounded-3xl hover:shadow-lg transition-all">
                   {/* Course Image/Gradient Header */}
                   <div className={`h-40 ${gradient} relative flex items-center justify-center p-4`}>
                     {course.image_url ? (
-                      <img
-                        src={course.image_url}
-                        alt={course.title}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={course.image_url} alt={course.title} className="w-full h-full object-cover" />
                     ) : (
                       <div className="text-white text-center">
                         <h3 className="text-2xl font-bold">{course.category || "Course"}</h3>
