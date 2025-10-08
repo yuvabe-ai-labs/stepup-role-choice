@@ -166,7 +166,9 @@ const Courses = () => {
         {/* Main Content */}
         <div className="flex-1 p-6">
           <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-2">Explore {loading ? "..." : filteredCourses.length} Courses</h1>
+            <h1 className="text-2xl font-bold mb-2">
+              Explore {loading ? "..." : filteredCourses.length} Courses just for you
+            </h1>
           </div>
 
           {/* Courses Grid */}
@@ -225,6 +227,13 @@ const Courses = () => {
                     <CardContent className="p-4 space-y-3">
                       <h3 className="font-semibold text-lg">{course.title}</h3>
 
+                      {/* Truncated description */}
+                      <p className="text-sm text-muted-foreground">
+                        {course.description?.length > 100
+                          ? course.description.slice(0, 100) + "..."
+                          : course.description}
+                      </p>
+
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <div className="flex items-center space-x-1">
                           <Clock className="w-3 h-3" />
@@ -240,6 +249,28 @@ const Courses = () => {
                         Know more →
                       </Button>
                     </CardContent>
+
+                    {/* <CardContent className="p-4 space-y-3">
+                      <h3 className="font-semibold text-lg">{course.title}</h3>
+
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{course.duration}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Users className="w-3 h-3" />
+                          <span>{course.enrolled_count} enrolled</span>
+                        </div>
+                      </div>
+
+                      <Button
+                        variant="link"
+                        className="text-primary p-0 h-auto text-sm"
+                      >
+                        Know more →
+                      </Button>
+                    </CardContent> */}
                   </Card>
                 );
               })
