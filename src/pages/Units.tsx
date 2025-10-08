@@ -264,7 +264,7 @@ const Units = () => {
                           className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/unit-view/${unit.id}`);
+                            navigate(`/unit/${unit.id}`);
                           }}
                         >
                           View
