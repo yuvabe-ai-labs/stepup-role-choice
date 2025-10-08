@@ -1,91 +1,38 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, MapPin } from "lucide-react";
-import { format } from "date-fns";
+import { Label } from "@/components/ui/label";
+import { ChevronRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { useInfiniteUnits } from "@/hooks/useInfiniteUnits";
-import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { useUnits } from "@/hooks/useUnits";
 import { formatDistanceToNow } from "date-fns";
 
 const Units = () => {
+  const navigate = useNavigate();
+  const { units, loading, error } = useUnits();
+
   const [filters, setFilters] = useState({
-    units: [] as string[],
+    unitNames: [] as string[],
     industries: [] as string[],
-    departments: [] as string[],
     isAurovillian: null as boolean | null,
-    postedDate: "",
-    interestAreas: [] as string[],
   });
 
-  const [dateFrom, setDateFrom] = useState<Date>();
-  const [dateTo, setDateTo] = useState<Date>();
-  const [showMoreUnits, setShowMoreUnits] = useState(false);
-  const [showMoreIndustries, setShowMoreIndustries] = useState(false);
-  const [showMoreDepartments, setShowMoreDepartments] = useState(false);
-  const [showMoreInterests, setShowMoreInterests] = useState(false);
+  console.log("[Units] Current filters:", filters);
+  console.log("[Units] Total units loaded:", units.length);
 
-  const { units, loading, error, hasMore, loadMore } = useInfiniteUnits(filters);
-  const { observerTarget } = useInfiniteScroll({ loading, hasMore, onLoadMore: loadMore });
+  // Extract unique values for filters
+  const uniqueUnitNames = Array.from(new Set(units.map((u) => u.unit_name).filter(Boolean))).slice(0, 10);
+  const uniqueIndustries = Array.from(new Set(units.map((u) => u.industry || u.unit_type).filter(Boolean))).slice(
+    0,
+    10,
+  );
 
-  // Sample data for filters - in production, these should come from API
-  const unitNames = [
-    "Yuvabe",
-    "Language Lab",
-    "Yuvabe Education",
-    "YouthLink",
-    "Upasana",
-    "Auromics Trust",
-    "Tapasya",
-    "Marc's Cafe",
-  ];
-
-  const industries = [
-    "IT Services & Consulting",
-    "Software Products",
-    "Education & Training",
-    "Engineering & Construction",
-    "Healthcare",
-    "Hospitality",
-  ];
-
-  const departments = [
-    "Engineering - Software & QA",
-    "Sales & Business Development",
-    "UI/UX Design",
-    "Digital Marketing",
-    "Content Writing",
-    "Product Management",
-  ];
-
-  const interestAreas = [
-    "Air conditioning",
-    "Assisted living",
-    "Disability Access",
-    "Cable Ready",
-    "Controlled access",
-    "Available now",
-    "College",
-    "Corporate",
-    "Elevator",
-    "High speed internet",
-    "Garage",
-  ];
-
-  const postedDates = [
-    { value: "today", label: "Today" },
-    { value: "week", label: "This Week" },
-    { value: "month", label: "This Month" },
-  ];
-
-  const toggleFilter = (category: "units" | "industries" | "departments" | "interestAreas", value: string) => {
+  const toggleFilter = (category: "unitNames" | "industries", value: string) => {
     console.log("[Units] Toggle filter:", category, value);
     setFilters((prev) => ({
       ...prev,
@@ -95,338 +42,242 @@ const Units = () => {
     }));
   };
 
-  const setPostedDateFilter = (value: string) => {
-    console.log("[Units] Set posted date filter:", value);
-    setFilters((prev) => ({ ...prev, postedDate: value }));
-  };
-
   const toggleAuroville = (checked: boolean) => {
-    console.log("[Units] Toggle Auroville filter:", checked);
-    setFilters((prev) => ({ ...prev, isAurovillian: checked ? true : null }));
+    console.log("[Units] Toggle Auroville:", checked);
+    setFilters((prev) => ({
+      ...prev,
+      isAurovillian: checked ? true : null,
+    }));
   };
 
   const resetFilters = () => {
     console.log("[Units] Reset all filters");
-    setFilters({
-      units: [],
-      industries: [],
-      departments: [],
-      isAurovillian: null,
-      postedDate: "",
-      interestAreas: [],
-    });
-    setDateFrom(undefined);
-    setDateTo(undefined);
+    setFilters({ unitNames: [], industries: [], isAurovillian: null });
   };
 
-  const applyFilters = () => {
-    console.log("[Units] Apply filters clicked", filters);
-    // Filters are already applied through the filters state
+  // Apply filters
+  const filteredUnits = units.filter((unit) => {
+    if (filters.unitNames.length > 0 && !filters.unitNames.includes(unit.unit_name)) {
+      return false;
+    }
+    if (filters.industries.length > 0) {
+      const unitIndustry = unit.industry || unit.unit_type;
+      if (!unitIndustry || !filters.industries.includes(unitIndustry)) {
+        return false;
+      }
+    }
+    if (filters.isAurovillian !== null && unit.is_aurovillian !== filters.isAurovillian) {
+      return false;
+    }
+    return true;
+  });
+
+  console.log("[Units] Filtered units:", filteredUnits.length);
+
+  const getUnitGradient = (index: number) => {
+    const gradients = [
+      "bg-gradient-to-br from-purple-600 to-blue-600",
+      "bg-gradient-to-br from-teal-600 to-green-600",
+      "bg-gradient-to-br from-orange-600 to-red-600",
+      "bg-gradient-to-br from-blue-600 to-cyan-500",
+      "bg-gradient-to-br from-pink-600 to-purple-600",
+      "bg-gradient-to-br from-gray-700 to-gray-900",
+    ];
+    return gradients[index % gradients.length];
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="flex gap-6 p-6 max-w-[1400px] mx-auto">
+      <div className="flex gap-6 p-6">
         {/* Left Sidebar - Filters */}
         <div className="w-80 bg-card border rounded-3xl p-6 h-fit sticky top-6">
-          <div className="max-h-[calc(100vh-120px)] overflow-y-auto pr-2 space-y-6 custom-scrollbar">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">Filters</h2>
-              <Button
-                variant="ghost"
-                className="text-primary hover:text-primary/80 text-sm font-medium h-auto p-0"
-                onClick={resetFilters}
-              >
-                Reset all
-              </Button>
-            </div>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold">Filters</h2>
+            <Button
+              variant="ghost"
+              className="text-primary hover:text-primary/80 text-sm font-medium"
+              onClick={resetFilters}
+            >
+              Reset all
+            </Button>
+          </div>
 
-            {/* Units Filter */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Units</h3>
-              <div className="space-y-3">
-                {unitNames.slice(0, showMoreUnits ? unitNames.length : 4).map((unit) => (
-                  <div key={unit} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`unit-${unit}`}
-                      checked={filters.units.includes(unit)}
-                      onCheckedChange={() => toggleFilter("units", unit)}
-                    />
-                    <label htmlFor={`unit-${unit}`} className="text-sm cursor-pointer">
-                      {unit}
-                    </label>
-                  </div>
-                ))}
-                {unitNames.length > 4 && (
-                  <Button
-                    variant="ghost"
-                    className="text-primary text-xs p-0 h-auto font-medium"
-                    onClick={() => setShowMoreUnits(!showMoreUnits)}
-                  >
-                    {showMoreUnits ? "Show Less" : `+${unitNames.length - 4} More`}
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Industry Filter */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Industry</h3>
-              <div className="space-y-3">
-                {industries.slice(0, showMoreIndustries ? industries.length : 4).map((industry) => (
-                  <div key={industry} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`industry-${industry}`}
-                      checked={filters.industries.includes(industry)}
-                      onCheckedChange={() => toggleFilter("industries", industry)}
-                    />
-                    <label htmlFor={`industry-${industry}`} className="text-sm cursor-pointer">
-                      {industry}
-                    </label>
-                  </div>
-                ))}
-                {industries.length > 4 && (
-                  <Button
-                    variant="ghost"
-                    className="text-primary text-xs p-0 h-auto font-medium"
-                    onClick={() => setShowMoreIndustries(!showMoreIndustries)}
-                  >
-                    {showMoreIndustries ? "Show Less" : `+${industries.length - 4} More`}
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Department Filter */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Department</h3>
-              <div className="space-y-3">
-                {departments.slice(0, showMoreDepartments ? departments.length : 4).map((dept) => (
-                  <div key={dept} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`dept-${dept}`}
-                      checked={filters.departments.includes(dept)}
-                      onCheckedChange={() => toggleFilter("departments", dept)}
-                    />
-                    <label htmlFor={`dept-${dept}`} className="text-sm cursor-pointer">
-                      {dept}
-                    </label>
-                  </div>
-                ))}
-                {departments.length > 4 && (
-                  <Button
-                    variant="ghost"
-                    className="text-primary text-xs p-0 h-auto font-medium"
-                    onClick={() => setShowMoreDepartments(!showMoreDepartments)}
-                  >
-                    {showMoreDepartments ? "Show Less" : `+${departments.length - 4} More`}
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Posting Date Filter */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Posting Date</h3>
-              <div className="space-y-3">
-                <div className="flex gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "From"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} />
-                    </PopoverContent>
-                  </Popover>
-
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateTo ? format(dateTo, "dd/MM/yyyy") : "To"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={dateTo} onSelect={setDateTo} />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                <div className="flex gap-2">
-                  {postedDates.map((date) => (
-                    <Button
-                      key={date.value}
-                      variant={filters.postedDate === date.value ? "default" : "outline"}
-                      size="sm"
-                      className="flex-1 text-xs"
-                      onClick={() => setPostedDateFilter(date.value)}
-                    >
-                      {date.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Interest Areas */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Interest Areas</h3>
-              <div className="flex flex-wrap gap-2">
-                {interestAreas.slice(0, showMoreInterests ? interestAreas.length : 8).map((interest) => (
-                  <Badge
-                    key={interest}
-                    variant={filters.interestAreas.includes(interest) ? "default" : "outline"}
-                    className="cursor-pointer"
-                    onClick={() => toggleFilter("interestAreas", interest)}
-                  >
-                    {interest}
-                  </Badge>
-                ))}
-              </div>
-              {interestAreas.length > 8 && (
-                <Button
-                  variant="ghost"
-                  className="text-primary text-xs p-0 h-auto font-medium mt-2"
-                  onClick={() => setShowMoreInterests(!showMoreInterests)}
-                >
-                  {showMoreInterests ? "Show Less" : "+ Show More"}
-                </Button>
-              )}
-            </div>
-
-            {/* Auroville Toggle */}
+          {/* Auroville Toggle */}
+          <div className="mb-6 p-4 bg-muted rounded-lg">
             <div className="flex items-center justify-between">
-              <label htmlFor="auroville-toggle" className="text-sm font-medium">
-                Auroville Units
-              </label>
+              <Label htmlFor="auroville-toggle" className="text-sm font-medium">
+                Auroville Units Only
+              </Label>
               <Switch
                 id="auroville-toggle"
                 checked={filters.isAurovillian === true}
                 onCheckedChange={toggleAuroville}
               />
             </div>
-
-            {/* Apply Button */}
-            <Button className="w-full" onClick={applyFilters}>
-              Apply
-            </Button>
           </div>
+
+          {/* Units Filter */}
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-3">Units</h3>
+            <div className="space-y-3 max-h-60 overflow-y-auto">
+              {uniqueUnitNames.map((unitName) => (
+                <div key={unitName} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`unit-${unitName}`}
+                    checked={filters.unitNames.includes(unitName)}
+                    onCheckedChange={() => toggleFilter("unitNames", unitName)}
+                  />
+                  <label htmlFor={`unit-${unitName}`} className="text-sm font-medium cursor-pointer line-clamp-1">
+                    {unitName}
+                  </label>
+                </div>
+              ))}
+            </div>
+            {uniqueUnitNames.length > 10 && (
+              <Button variant="link" className="text-primary text-sm p-0 mt-2">
+                +{units.length - 10} More
+              </Button>
+            )}
+          </div>
+
+          {/* Industry Filter */}
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-3">Industry</h3>
+            <div className="space-y-3 max-h-60 overflow-y-auto">
+              {uniqueIndustries.map((industry) => (
+                <div key={industry} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`industry-${industry}`}
+                    checked={filters.industries.includes(industry)}
+                    onCheckedChange={() => toggleFilter("industries", industry)}
+                  />
+                  <label htmlFor={`industry-${industry}`} className="text-sm font-medium cursor-pointer line-clamp-1">
+                    {industry}
+                  </label>
+                </div>
+              ))}
+            </div>
+            {uniqueIndustries.length > 10 && (
+              <Button variant="link" className="text-primary text-sm p-0 mt-2">
+                +{uniqueIndustries.length - 10} More
+              </Button>
+            )}
+          </div>
+
+          <Button
+            className="w-full rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all"
+            variant="outline"
+            onClick={resetFilters}
+          >
+            Apply
+          </Button>
         </div>
 
-        {/* Main Content - Units Grid */}
+        {/* Main Content */}
         <div className="flex-1">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold">Explore {filteredUnits.length} Units</h1>
+          </div>
+
           {error && (
-            <div className="bg-destructive/10 text-destructive p-4 rounded-lg mb-6">
-              {error}
+            <div className="text-center py-8">
+              <p className="text-destructive">{error}</p>
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {units.map((unit) => (
-              <Link key={unit.id} to={`/units/${unit.id}`}>
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  <div className="relative h-48 bg-gradient-to-br from-primary/20 to-primary/5">
-                    {unit.image ? (
-                      <img
-                        src={unit.image}
-                        alt={unit.unit_name || "Unit"}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="text-4xl font-bold text-primary/20">
-                          {unit.unit_name?.charAt(0) || "U"}
-                        </div>
-                      </div>
-                    )}
-                    <div className="absolute top-3 right-3">
-                      <Badge variant="secondary" className="bg-background/90 backdrop-blur">
-                        {formatDistanceToNow(new Date(unit.created_at), { addSuffix: true })}
-                      </Badge>
-                    </div>
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-bold text-lg mb-2 line-clamp-1">{unit.unit_name}</h3>
-                    {unit.industry && (
-                      <Badge variant="outline" className="mb-2">
-                        {unit.industry}
-                      </Badge>
-                    )}
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                      {unit.description || "No description available"}
-                    </p>
-                    {unit.address && (
-                      <div className="flex items-center text-xs text-muted-foreground">
-                        <MapPin className="w-3 h-3 mr-1" />
-                        <span className="line-clamp-1">{unit.address}</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-
-            {/* Loading Skeletons */}
-            {loading &&
-              Array.from({ length: 6 }).map((_, i) => (
-                <Card key={`skeleton-${i}`} className="overflow-hidden">
+          {loading ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="overflow-hidden rounded-3xl">
                   <Skeleton className="h-48 w-full" />
-                  <CardContent className="p-4 space-y-3">
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
+                  <CardContent className="p-4">
+                    <Skeleton className="h-6 w-full mb-2" />
+                    <Skeleton className="h-4 w-3/4" />
                   </CardContent>
                 </Card>
               ))}
-          </div>
-
-          {/* Infinite Scroll Trigger */}
-          {hasMore && !loading && (
-            <div ref={observerTarget} className="h-20 flex items-center justify-center mt-6">
-              <div className="text-sm text-muted-foreground">Loading more...</div>
             </div>
-          )}
-
-          {/* No More Results */}
-          {!hasMore && units.length > 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No more units to load
-            </div>
-          )}
-
-          {/* No Results */}
-          {!loading && units.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-lg text-muted-foreground">No units found</p>
-              <Button variant="outline" className="mt-4" onClick={resetFilters}>
-                Reset Filters
+          ) : filteredUnits.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No units found matching your filters.</p>
+              <Button variant="outline" onClick={resetFilters} className="mt-4">
+                Clear Filters
               </Button>
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {filteredUnits.map((unit, index) => {
+                const gradient = getUnitGradient(index);
+                const focusAreas =
+                  typeof unit.focus_areas === "object" && unit.focus_areas !== null
+                    ? Object.entries(unit.focus_areas as Record<string, any>).slice(0, 2)
+                    : [];
+
+                return (
+                  <Card
+                    key={unit.id}
+                    className="overflow-hidden rounded-3xl hover:shadow-lg transition-all cursor-pointer"
+                    onClick={() => navigate(`/units/${unit.id}`)}
+                  >
+                    {/* Unit Header */}
+                    <div
+                      className={`${gradient} h-48 relative flex flex-col items-center justify-center p-6 text-white`}
+                    >
+                      <Badge className="absolute top-3 left-3 bg-white/90 text-foreground">
+                        {formatDistanceToNow(new Date(unit.created_at), { addSuffix: true })}
+                      </Badge>
+
+                      {unit.is_aurovillian && (
+                        <Badge className="absolute top-3 right-3 bg-green-500 text-white">Auroville</Badge>
+                      )}
+
+                      <h3 className="text-xl font-bold text-center mb-2">{unit.unit_name}</h3>
+                      <p className="text-sm text-white/80">{unit.unit_type}</p>
+
+                      {focusAreas.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2 justify-center">
+                          {focusAreas.map(([key]) => (
+                            <Badge key={key} variant="secondary" className="bg-white/20 text-white text-xs">
+                              {key}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+
+                      <ChevronRight className="absolute right-4 bottom-4 w-6 h-6" />
+                    </div>
+
+                    {/* Unit Footer */}
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
+                            <img src={unit.image} alt={`${unit.unit_name} logo`} />
+                          </div>
+                          <span className="text-sm font-medium line-clamp-1">{unit.unit_name}</span>
+                        </div>
+
+                        <Button
+                          size="sm"
+                          className="bg-orange-500 hover:bg-orange-600 text-white rounded-3xl"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/units/${unit.id}`);
+                          }}
+                        >
+                          View
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
       </div>
-
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: hsl(var(--muted));
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: hsl(var(--muted-foreground) / 0.5);
-        }
-      `}</style>
     </div>
   );
 };
