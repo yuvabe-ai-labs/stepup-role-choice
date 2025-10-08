@@ -239,7 +239,6 @@ const Courses = () => {
                           <Clock className="w-3 h-3" />
                           <span>{course.duration}</span>
                         </div>
-
                         <div className="flex items-center space-x-1">
                           <Users className="w-3 h-3" />
                           <span>{course.enrolled_count} enrolled</span>
