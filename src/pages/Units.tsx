@@ -15,22 +15,25 @@ import { formatDistanceToNow } from "date-fns";
 const Units = () => {
   const navigate = useNavigate();
   const { units, loading, error } = useUnits();
-  
+
   const [filters, setFilters] = useState({
     unitNames: [] as string[],
     industries: [] as string[],
     isAurovillian: null as boolean | null,
   });
 
-  console.log('[Units] Current filters:', filters);
-  console.log('[Units] Total units loaded:', units.length);
+  console.log("[Units] Current filters:", filters);
+  console.log("[Units] Total units loaded:", units.length);
 
   // Extract unique values for filters
   const uniqueUnitNames = Array.from(new Set(units.map((u) => u.unit_name).filter(Boolean))).slice(0, 10);
-  const uniqueIndustries = Array.from(new Set(units.map((u) => u.industry || u.unit_type).filter(Boolean))).slice(0, 10);
+  const uniqueIndustries = Array.from(new Set(units.map((u) => u.industry || u.unit_type).filter(Boolean))).slice(
+    0,
+    10,
+  );
 
   const toggleFilter = (category: "unitNames" | "industries", value: string) => {
-    console.log('[Units] Toggle filter:', category, value);
+    console.log("[Units] Toggle filter:", category, value);
     setFilters((prev) => ({
       ...prev,
       [category]: prev[category].includes(value)
@@ -40,7 +43,7 @@ const Units = () => {
   };
 
   const toggleAuroville = (checked: boolean) => {
-    console.log('[Units] Toggle Auroville:', checked);
+    console.log("[Units] Toggle Auroville:", checked);
     setFilters((prev) => ({
       ...prev,
       isAurovillian: checked ? true : null,
@@ -48,7 +51,7 @@ const Units = () => {
   };
 
   const resetFilters = () => {
-    console.log('[Units] Reset all filters');
+    console.log("[Units] Reset all filters");
     setFilters({ unitNames: [], industries: [], isAurovillian: null });
   };
 
@@ -69,7 +72,7 @@ const Units = () => {
     return true;
   });
 
-  console.log('[Units] Filtered units:', filteredUnits.length);
+  console.log("[Units] Filtered units:", filteredUnits.length);
 
   const getUnitGradient = (index: number) => {
     const gradients = [
@@ -126,10 +129,7 @@ const Units = () => {
                     checked={filters.unitNames.includes(unitName)}
                     onCheckedChange={() => toggleFilter("unitNames", unitName)}
                   />
-                  <label
-                    htmlFor={`unit-${unitName}`}
-                    className="text-sm font-medium cursor-pointer line-clamp-1"
-                  >
+                  <label htmlFor={`unit-${unitName}`} className="text-sm font-medium cursor-pointer line-clamp-1">
                     {unitName}
                   </label>
                 </div>
@@ -153,10 +153,7 @@ const Units = () => {
                     checked={filters.industries.includes(industry)}
                     onCheckedChange={() => toggleFilter("industries", industry)}
                   />
-                  <label
-                    htmlFor={`industry-${industry}`}
-                    className="text-sm font-medium cursor-pointer line-clamp-1"
-                  >
+                  <label htmlFor={`industry-${industry}`} className="text-sm font-medium cursor-pointer line-clamp-1">
                     {industry}
                   </label>
                 </div>
@@ -181,9 +178,7 @@ const Units = () => {
         {/* Main Content */}
         <div className="flex-1">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold">
-              Explore {filteredUnits.length}+ Units just for you
-            </h1>
+            <h1 className="text-3xl font-bold">Explore {filteredUnits.length} Units</h1>
           </div>
 
           {error && (
@@ -215,9 +210,10 @@ const Units = () => {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredUnits.map((unit, index) => {
                 const gradient = getUnitGradient(index);
-                const focusAreas = typeof unit.focus_areas === 'object' && unit.focus_areas !== null
-                  ? Object.entries(unit.focus_areas as Record<string, any>).slice(0, 2)
-                  : [];
+                const focusAreas =
+                  typeof unit.focus_areas === "object" && unit.focus_areas !== null
+                    ? Object.entries(unit.focus_areas as Record<string, any>).slice(0, 2)
+                    : [];
 
                 return (
                   <Card
@@ -226,15 +222,15 @@ const Units = () => {
                     onClick={() => navigate(`/units/${unit.id}`)}
                   >
                     {/* Unit Header */}
-                    <div className={`${gradient} h-48 relative flex flex-col items-center justify-center p-6 text-white`}>
+                    <div
+                      className={`${gradient} h-48 relative flex flex-col items-center justify-center p-6 text-white`}
+                    >
                       <Badge className="absolute top-3 left-3 bg-white/90 text-foreground">
                         {formatDistanceToNow(new Date(unit.created_at), { addSuffix: true })}
                       </Badge>
 
                       {unit.is_aurovillian && (
-                        <Badge className="absolute top-3 right-3 bg-green-500 text-white">
-                          Auroville
-                        </Badge>
+                        <Badge className="absolute top-3 right-3 bg-green-500 text-white">Auroville</Badge>
                       )}
 
                       <h3 className="text-xl font-bold text-center mb-2">{unit.unit_name}</h3>
