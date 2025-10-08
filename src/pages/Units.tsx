@@ -261,7 +261,7 @@ const Units = () => {
 
                         <Button
                           size="sm"
-                          className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
+                          className="bg-orange-500 hover:bg-orange-600 text-white rounded-[50%]"
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/units/${unit.id}`);
