@@ -254,7 +254,6 @@ const Units = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
-                            {unit.unit_name.charAt(0)}
                             <img src={unit.image} alt={`${unit.unit_name} logo`} />
                           </div>
                           <span className="text-sm font-medium line-clamp-1">{unit.unit_name}</span>
