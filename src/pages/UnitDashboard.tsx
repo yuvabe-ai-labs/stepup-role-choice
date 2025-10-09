@@ -12,6 +12,10 @@ import {
   ArrowRight,
   Filter,
   Plus,
+  Eye,
+  MessageSquare,
+  Ban,
+  CheckCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,10 +26,24 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useUnitApplications } from "@/hooks/useUnitApplications";
 import { useInternships } from "@/hooks/useInternships";
 import CreateInternshipDialog from "@/components/CreateInternshipDialog";
+import { supabase } from "@/integrations/supabase/client";
+import InternshipDetailsView from "@/components/InternshipDetailsView";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -43,10 +61,55 @@ const UnitDashboard = () => {
   const { internships, loading: internshipsLoading } = useInternships();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [jobFilter, setJobFilter] = useState("all");
+  const [updating, setUpdating] = useState<string | null>(null);
+  const [selectedInternship, setSelectedInternship] = useState<any>(null); // ADD THIS
+
+  if (selectedInternship) {
+    return (
+      <InternshipDetailsView
+        internship={selectedInternship}
+        onClose={() => setSelectedInternship(null)}
+      />
+    );
+  }
 
   const handleInternshipCreated = () => {
     // Refresh the page to reload internships
     window.location.reload();
+  };
+
+  const handleViewDetails = (internshipId: string) => {
+    const internship = internships.find((i) => i.id === internshipId);
+    if (internship) {
+      setSelectedInternship(internship);
+    }
+  };
+
+  const handleAddComments = (internshipId: string) => {
+    // Navigate to comments page or open comments modal
+    console.log("Add comments for internship:", internshipId);
+    // You can implement a modal or navigation here
+  };
+
+  const handleToggleStatus = async (id: string, currentStatus: string) => {
+    try {
+      setUpdating(id);
+      const newStatus = currentStatus === "active" ? "closed" : "active";
+
+      const { error: updateError } = await supabase
+        .from("internships")
+        .update({ status: newStatus })
+        .eq("id", id);
+
+      if (updateError) throw updateError;
+
+      window.location.reload(); // Refresh the list after update
+    } catch (err: any) {
+      console.error("Error updating job status:", err);
+      alert("Failed to update job status");
+    } finally {
+      setUpdating(null);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -105,7 +168,11 @@ const UnitDashboard = () => {
           <div className="flex-1 max-w-md mx-8">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input type="text" placeholder="Search" className="pl-10 bg-muted/30 border-muted" />
+              <Input
+                type="text"
+                placeholder="Search"
+                className="pl-10 bg-muted/30 border-muted"
+              />
             </div>
           </div>
 
@@ -137,7 +204,9 @@ const UnitDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Applications</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Total Applications
+                  </p>
                   {loading ? (
                     <Skeleton className="h-10 w-16 my-1" />
                   ) : (
@@ -158,13 +227,17 @@ const UnitDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Job Descriptions</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Total Job Descriptions
+                  </p>
                   {loading ? (
                     <Skeleton className="h-10 w-16 my-1" />
                   ) : (
                     <>
                       <p className="text-3xl font-bold">{stats.totalJobs}</p>
-                      <p className="text-xs text-muted-foreground">Active & Closed</p>
+                      <p className="text-xs text-muted-foreground">
+                        Active & Closed
+                      </p>
                     </>
                   )}
                 </div>
@@ -179,13 +252,17 @@ const UnitDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Interview Scheduled</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Interview Scheduled
+                  </p>
                   {loading ? (
                     <Skeleton className="h-10 w-16 my-1" />
                   ) : (
                     <>
                       <p className="text-3xl font-bold">{stats.interviews}</p>
-                      <p className="text-xs text-muted-foreground">Candidates</p>
+                      <p className="text-xs text-muted-foreground">
+                        Candidates
+                      </p>
                     </>
                   )}
                 </div>
@@ -200,12 +277,16 @@ const UnitDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Hired This Month</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Hired This Month
+                  </p>
                   {loading ? (
                     <Skeleton className="h-10 w-16 my-1" />
                   ) : (
                     <>
-                      <p className="text-3xl font-bold">{stats.hiredThisMonth}</p>
+                      <p className="text-3xl font-bold">
+                        {stats.hiredThisMonth}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {new Date().toLocaleString("default", {
                           month: "long",
@@ -223,7 +304,11 @@ const UnitDashboard = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-4 bg-muted/30 p-1 rounded-full">
             <TabsTrigger
               value="applications"
@@ -285,8 +370,12 @@ const UnitDashboard = () => {
             ) : applications.length === 0 ? (
               <div className="text-center py-12">
                 <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="text-lg font-medium mb-2">No Applications Yet</h3>
-                <p className="text-muted-foreground">Applications for your internships will appear here.</p>
+                <h3 className="text-lg font-medium mb-2">
+                  No Applications Yet
+                </h3>
+                <p className="text-muted-foreground">
+                  Applications for your internships will appear here.
+                </p>
               </div>
             ) : (
               <>
@@ -295,16 +384,25 @@ const UnitDashboard = () => {
                     const skills = application.profile?.skills || [];
                     const displaySkills = skills
                       .slice(0, 3)
-                      .map((s: any) => (typeof s === "string" ? s : s?.name || s || ""));
-                    const matchScore = application.profile_match_score || Math.floor(Math.random() * 40 + 60);
+                      .map((s: any) =>
+                        typeof s === "string" ? s : s?.name || s || ""
+                      );
+                    const matchScore =
+                      application.profile_match_score ||
+                      Math.floor(Math.random() * 40 + 60);
 
                     return (
-                      <Card key={application.id} className="border border-border/50 hover:shadow-md transition-shadow">
+                      <Card
+                        key={application.id}
+                        className="border border-border/50 hover:shadow-md transition-shadow"
+                      >
                         <CardContent className="p-6">
                           <div className="flex flex-col items-center text-center">
                             <Avatar className="w-20 h-20 mb-4 ring-2 ring-primary/10">
                               <AvatarImage
-                                src={application.profile?.avatar_url || undefined}
+                                src={
+                                  application.profile?.avatar_url || undefined
+                                }
                                 alt={application.profile?.full_name || "User"}
                               />
                               <AvatarFallback className="text-lg">
@@ -322,7 +420,11 @@ const UnitDashboard = () => {
                               {application.internship?.title || "No Title"}
                             </p>
 
-                            <Badge className={`${getStatusColor(application.status)} mb-4`}>
+                            <Badge
+                              className={`${getStatusColor(
+                                application.status
+                              )} mb-4`}
+                            >
                               {getStatusLabel(application.status)}
                             </Badge>
 
@@ -332,13 +434,22 @@ const UnitDashboard = () => {
                             </p>
 
                             <div className="flex flex-wrap gap-2 justify-center mb-4">
-                              {displaySkills.map((skill: string, index: number) => (
-                                <Badge key={index} variant="outline" className="text-xs bg-muted/50">
-                                  {skill}
-                                </Badge>
-                              ))}
+                              {displaySkills.map(
+                                (skill: string, index: number) => (
+                                  <Badge
+                                    key={index}
+                                    variant="outline"
+                                    className="text-xs bg-muted/50"
+                                  >
+                                    {skill}
+                                  </Badge>
+                                )
+                              )}
                               {skills.length > 3 && (
-                                <Badge variant="outline" className="text-xs bg-muted/50">
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs bg-muted/50"
+                                >
                                   +{skills.length - 3}
                                 </Badge>
                               )}
@@ -348,21 +459,29 @@ const UnitDashboard = () => {
                               <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-2">
                                   <Sparkles className="w-4 h-4 text-purple-500" />
-                                  <span className="text-xs font-medium">AI Analysis for the profile</span>
+                                  <span className="text-xs font-medium">
+                                    AI Analysis for the profile
+                                  </span>
                                 </div>
                                 <div
                                   className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${
                                     matchScore >= 80
                                       ? "border-green-500"
                                       : matchScore >= 60
-                                        ? "border-orange-500"
-                                        : "border-red-500"
+                                      ? "border-orange-500"
+                                      : "border-red-500"
                                   }`}
                                 >
-                                  <span className="text-xs font-bold">{matchScore}%</span>
+                                  <span className="text-xs font-bold">
+                                    {matchScore}%
+                                  </span>
                                 </div>
                               </div>
-                              <p className={`text-xs ${getMatchColor(matchScore)}`}>
+                              <p
+                                className={`text-xs ${getMatchColor(
+                                  matchScore
+                                )}`}
+                              >
                                 {matchScore}% Skill matches for this role
                               </p>
                             </div>
@@ -371,7 +490,9 @@ const UnitDashboard = () => {
                               variant="outline"
                               size="sm"
                               className="w-full"
-                              onClick={() => navigate(`/candidate/${application.id}`)}
+                              onClick={() =>
+                                navigate(`/candidate/${application.id}`)
+                              }
                             >
                               View Profile
                             </Button>
@@ -385,7 +506,11 @@ const UnitDashboard = () => {
                 {/* View All button - always show if there are applications */}
                 {applications.length > 0 && (
                   <div className="flex justify-center mt-8">
-                    <Button variant="outline" className="px-8" onClick={() => navigate("/all-applications")}>
+                    <Button
+                      variant="outline"
+                      className="px-8"
+                      onClick={() => navigate("/all-applications")}
+                    >
                       View All
                     </Button>
                   </div>
@@ -409,7 +534,10 @@ const UnitDashboard = () => {
                     <SelectItem value="closed">Closed</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => setShowCreateDialog(true)}>
+                <Button
+                  className="bg-teal-600 hover:bg-teal-700"
+                  onClick={() => setShowCreateDialog(true)}
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Create New JD
                 </Button>
@@ -432,8 +560,12 @@ const UnitDashboard = () => {
             ) : internships.length === 0 ? (
               <div className="text-center py-12">
                 <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="text-lg font-medium mb-2">No Job Descriptions</h3>
-                <p className="text-muted-foreground">Create your first job posting to start receiving applications.</p>
+                <h3 className="text-lg font-medium mb-2">
+                  No Job Descriptions
+                </h3>
+                <p className="text-muted-foreground">
+                  Create your first job posting to start receiving applications.
+                </p>
               </div>
             ) : (
               <>
@@ -441,46 +573,117 @@ const UnitDashboard = () => {
                   {internships
                     .filter((internship) => {
                       if (jobFilter === "all") return true;
-                      if (jobFilter === "active") return internship.status === "active";
-                      if (jobFilter === "closed") return internship.status !== "active";
+                      if (jobFilter === "active")
+                        return internship.status === "active";
+                      if (jobFilter === "closed")
+                        return internship.status !== "active";
                       return true;
                     })
                     .slice(0, 6)
                     .map((internship) => {
-                      const applicationCount = applications.filter((app) => app.internship_id === internship.id).length;
+                      const applicationCount = applications.filter(
+                        (app) => app.internship_id === internship.id
+                      ).length;
 
                       return (
                         <Card key={internship.id} className="relative">
                           <CardContent className="p-6">
                             <div className="flex items-start justify-between mb-4">
-                              <h3 className="font-semibold text-lg">{internship.title}</h3>
+                              <h3 className="font-semibold text-lg">
+                                {internship.title}
+                              </h3>
                               <div className="flex items-center gap-2">
                                 <Badge
                                   className={
-                                    internship.status === "active" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                                    internship.status === "active"
+                                      ? "bg-green-500 text-white hover:bg-green-500"
+                                      : "bg-red-500 text-white hover:bg-red-500"
                                   }
                                 >
-                                  {internship.status === "active" ? "Active" : "Closed"}
+                                  {internship.status === "active"
+                                    ? "Active"
+                                    : "Closed"}
                                 </Badge>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                  <Settings className="w-4 h-4" />
-                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-8 w-8 p-0"
+                                    >
+                                      <Settings className="w-4 h-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent
+                                    align="end"
+                                    className="w-48"
+                                  >
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        setSelectedInternship(internship)
+                                      }
+                                    >
+                                      <Eye className="w-4 h-4 mr-2" />
+                                      View Details
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleAddComments(internship.id)
+                                      }
+                                    >
+                                      <MessageSquare className="w-4 h-4 mr-2" />
+                                      Add Comments
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleToggleStatus(
+                                          internship.id,
+                                          internship.status
+                                        )
+                                      }
+                                    >
+                                      {internship.status === "active" ? (
+                                        <span className="flex items-center text-red-500">
+                                          <Ban className="w-4 h-4 mr-2" />
+                                          Close JD
+                                        </span>
+                                      ) : (
+                                        <span className="flex items-center text-green-500">
+                                          <CheckCircle className="w-4 h-4 mr-2" />
+                                          Activate JD
+                                        </span>
+                                      )}
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
                             </div>
 
                             <div className="space-y-2 mb-4">
                               <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Applications:</span>
-                                <span className="font-medium">{applicationCount} Applied</span>
-                              </div>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Duration:</span>
-                                <span className="font-medium">{internship.duration || "Not specified"}</span>
-                              </div>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Created on:</span>
+                                <span className="text-muted-foreground">
+                                  Applications:
+                                </span>
                                 <span className="font-medium">
-                                  {new Date(internship.created_at).toLocaleDateString("en-GB", {
+                                  {applicationCount} Applied
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">
+                                  Duration:
+                                </span>
+                                <span className="font-medium">
+                                  {internship.duration || "Not specified"}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">
+                                  Created on:
+                                </span>
+                                <span className="font-medium">
+                                  {new Date(
+                                    internship.created_at
+                                  ).toLocaleDateString("en-GB", {
                                     day: "2-digit",
                                     month: "2-digit",
                                     year: "numeric",
@@ -492,7 +695,11 @@ const UnitDashboard = () => {
                             <Button
                               variant="outline"
                               className="w-full"
-                              onClick={() => navigate(`/internship-applicants/${internship.id}`)}
+                              onClick={() =>
+                                navigate(
+                                  `/internship-applicants/${internship.id}`
+                                )
+                              }
                             >
                               View Applicants
                               <ArrowRight className="w-4 h-4 ml-2" />
@@ -520,7 +727,11 @@ const UnitDashboard = () => {
               <h2 className="text-2xl font-semibold">Candidate Management</h2>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input type="text" placeholder="Select by names" className="pl-10 w-[250px]" />
+                <Input
+                  type="text"
+                  placeholder="Select by names"
+                  className="pl-10 w-[250px]"
+                />
               </div>
             </div>
 
@@ -539,8 +750,12 @@ const UnitDashboard = () => {
             ) : hiredCandidates.length === 0 ? (
               <div className="text-center py-12">
                 <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="text-lg font-medium mb-2">No Hired Candidates</h3>
-                <p className="text-muted-foreground">Candidates you hire will appear here for management.</p>
+                <h3 className="text-lg font-medium mb-2">
+                  No Hired Candidates
+                </h3>
+                <p className="text-muted-foreground">
+                  Candidates you hire will appear here for management.
+                </p>
               </div>
             ) : (
               <>
@@ -552,9 +767,12 @@ const UnitDashboard = () => {
                       <Card key={candidate.id}>
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between mb-4">
-                            <div className="text-sm text-muted-foreground">{candidate.internship.title}</div>
                             <div className="text-sm text-muted-foreground">
-                              {candidate.internship.duration || "6 Months"} | Full time
+                              {candidate.internship.title}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {candidate.internship.duration || "6 Months"} |
+                              Full time
                             </div>
                           </div>
 
@@ -572,7 +790,9 @@ const UnitDashboard = () => {
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <h3 className="font-semibold text-lg">{candidate.profile.full_name}</h3>
+                              <h3 className="font-semibold text-lg">
+                                {candidate.profile.full_name}
+                              </h3>
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
                                 Available now
@@ -582,11 +802,17 @@ const UnitDashboard = () => {
 
                           <div className="space-y-2 mb-4">
                             <div className="flex items-center justify-between text-sm">
-                              <span className="font-medium">Projects Progress</span>
-                              <span className="text-muted-foreground">Due on Oct 10</span>
+                              <span className="font-medium">
+                                Projects Progress
+                              </span>
+                              <span className="text-muted-foreground">
+                                Due on Oct 10
+                              </span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className="text-2xl font-bold">{progress}%</span>
+                              <span className="text-2xl font-bold">
+                                {progress}%
+                              </span>
                               <Progress value={progress} className="flex-1" />
                             </div>
                           </div>
@@ -595,14 +821,19 @@ const UnitDashboard = () => {
                             <div className="flex items-center gap-2">
                               <div className="flex -space-x-2">
                                 <Avatar className="w-8 h-8 border-2 border-background">
-                                  <AvatarFallback className="text-xs">D</AvatarFallback>
+                                  <AvatarFallback className="text-xs">
+                                    D
+                                  </AvatarFallback>
                                 </Avatar>
                                 <Avatar className="w-8 h-8 border-2 border-background">
-                                  <AvatarFallback className="text-xs">A</AvatarFallback>
+                                  <AvatarFallback className="text-xs">
+                                    A
+                                  </AvatarFallback>
                                 </Avatar>
                               </div>
                               <span className="text-xs text-muted-foreground">
-                                Guided by <span className="font-medium">Darshini</span> &{" "}
+                                Guided by{" "}
+                                <span className="font-medium">Darshini</span> &{" "}
                                 <span className="font-medium">Abinesh</span>
                               </span>
                             </div>
@@ -651,11 +882,15 @@ const UnitDashboard = () => {
                   <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-cyan-300"></div>
-                      <span className="text-sm text-muted-foreground">Previous Week</span>
+                      <span className="text-sm text-muted-foreground">
+                        Previous Week
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-teal-600"></div>
-                      <span className="text-sm text-muted-foreground">This Week</span>
+                      <span className="text-sm text-muted-foreground">
+                        This Week
+                      </span>
                     </div>
                     <Select defaultValue="week">
                       <SelectTrigger className="w-[130px]">
@@ -670,26 +905,36 @@ const UnitDashboard = () => {
                 </div>
 
                 <div className="h-[400px] flex items-end justify-between gap-4 border-l border-b border-border p-4">
-                  {["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"].map((day, index) => {
-                    const prevWeekHeight = Math.random() * 60 + 20;
-                    const thisWeekHeight = Math.random() * 60 + 20;
+                  {["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"].map(
+                    (day, index) => {
+                      const prevWeekHeight = Math.random() * 60 + 20;
+                      const thisWeekHeight = Math.random() * 60 + 20;
 
-                    return (
-                      <div key={day} className="flex-1 flex flex-col items-center gap-2">
-                        <div className="w-full flex gap-1 items-end" style={{ height: "300px" }}>
+                      return (
+                        <div
+                          key={day}
+                          className="flex-1 flex flex-col items-center gap-2"
+                        >
                           <div
-                            className="flex-1 bg-cyan-300 rounded-t-lg transition-all hover:opacity-80"
-                            style={{ height: `${prevWeekHeight}%` }}
-                          ></div>
-                          <div
-                            className="flex-1 bg-teal-600 rounded-t-lg transition-all hover:opacity-80"
-                            style={{ height: `${thisWeekHeight}%` }}
-                          ></div>
+                            className="w-full flex gap-1 items-end"
+                            style={{ height: "300px" }}
+                          >
+                            <div
+                              className="flex-1 bg-cyan-300 rounded-t-lg transition-all hover:opacity-80"
+                              style={{ height: `${prevWeekHeight}%` }}
+                            ></div>
+                            <div
+                              className="flex-1 bg-teal-600 rounded-t-lg transition-all hover:opacity-80"
+                              style={{ height: `${thisWeekHeight}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-sm text-muted-foreground">
+                            {day}
+                          </span>
                         </div>
-                        <span className="text-sm text-muted-foreground">{day}</span>
-                      </div>
-                    );
-                  })}
+                      );
+                    }
+                  )}
                 </div>
 
                 <div className="flex justify-center mt-8">
