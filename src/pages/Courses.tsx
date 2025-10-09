@@ -174,7 +174,7 @@ const Courses = () => {
               return (
                 <Card key={course.id} className="overflow-hidden rounded-3xl hover:shadow-lg transition-all">
                   {/* Course Image/Gradient Header */}
-                  <div className={`h-40 ${gradient} relative flex items-center justify-center p-4`}>
+                  <div className={`h-40 ${gradient} relative flex items-center justify-center`}>
                     {course.image_url ? (
                       <img src={course.image_url} alt={course.title} className="w-full h-full object-cover" />
                     ) : (
