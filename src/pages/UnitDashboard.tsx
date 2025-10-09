@@ -134,13 +134,13 @@ const UnitDashboard = () => {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "shortlisted":
-        return "Shortlist Candidate";
+        return "Shortlisted";
       case "rejected":
-        return "Not Shortlisted";
+        return "Not Shortlist";
       case "interviewed":
-        return "Schedule Interview";
+        return "Interviewed";
       case "hired":
-        return "Select Candidate";
+        return "Shortlisted";
       default:
         return "Applied";
     }
@@ -384,11 +384,12 @@ const UnitDashboard = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {applications.slice(0, 9).map((application) => {
-                    const rawSkills = application.studentProfile?.skills ?? application.profile?.skills ?? [];
-                    const skills = Array.isArray(rawSkills)
-                      ? rawSkills
-                      : safeParse(rawSkills, []);
-                    const displaySkills = (skills as any[])
+                    // Get skills from studentProfile, parse if needed
+                    const skillsData = application.studentProfile?.skills || [];
+                    const skills = Array.isArray(skillsData) 
+                      ? skillsData 
+                      : safeParse(skillsData, []);
+                    const displaySkills = skills
                       .slice(0, 3)
                       .map((s: any) =>
                         typeof s === "string" ? s : s?.name || s || ""
