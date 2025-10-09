@@ -381,7 +381,11 @@ const UnitDashboard = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {applications.slice(0, 9).map((application) => {
-                    const skills = application.profile?.skills || [];
+                    // Get skills from studentProfile, parse if needed
+                    const skillsData = application.studentProfile?.skills || [];
+                    const skills = Array.isArray(skillsData) 
+                      ? skillsData 
+                      : safeParse(skillsData, []);
                     const displaySkills = skills
                       .slice(0, 3)
                       .map((s: any) =>
@@ -491,7 +495,7 @@ const UnitDashboard = () => {
                               size="sm"
                               className="w-full"
                               onClick={() =>
-                                navigate(`/candidate/${application.id}`)
+                                navigate(`/candidate-profile/${application.id}`)
                               }
                             >
                               View Profile

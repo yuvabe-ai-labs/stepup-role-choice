@@ -5,8 +5,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import Navbar from '@/components/Navbar';
 import { useCandidateProfile } from '@/hooks/useCandidateProfile';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -28,11 +30,34 @@ const CandidateProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data, loading, error } = useCandidateProfile(id || '');
+  const [updating, setUpdating] = useState(false);
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!id) return;
+    
+    try {
+      setUpdating(true);
+      const { error: updateError } = await supabase
+        .from('applications')
+        .update({ status: newStatus as any })
+        .eq('id', id);
+
+      if (updateError) throw updateError;
+
+      toast.success('Application status updated successfully');
+      // Refresh the page to show updated status
+      window.location.reload();
+    } catch (err) {
+      console.error('Error updating status:', err);
+      toast.error('Failed to update application status');
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="max-w-7xl mx-auto px-6 py-8">
           <Skeleton className="h-8 w-32 mb-6" />
           <Skeleton className="h-64 w-full mb-8" />
@@ -48,7 +73,6 @@ const CandidateProfile = () => {
   if (error || !data) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="max-w-7xl mx-auto px-6 py-8 text-center">
           <h1 className="text-2xl font-bold mb-4">Candidate Not Found</h1>
           <p className="text-muted-foreground mb-6">{error || 'The candidate profile could not be found.'}</p>
@@ -65,8 +89,6 @@ const CandidateProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -154,15 +176,20 @@ const CandidateProfile = () => {
                     <Download className="w-4 h-4" />
                     Download Profile
                   </Button>
-                  <Select defaultValue={data.application.status}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue placeholder="Status" />
+                  <Select 
+                    value={data.application.status} 
+                    onValueChange={handleStatusChange}
+                    disabled={updating}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="applied">Applied</SelectItem>
-                      <SelectItem value="shortlisted">Shortlisted</SelectItem>
-                      <SelectItem value="rejected">Rejected</SelectItem>
-                      <SelectItem value="accepted">Accepted</SelectItem>
+                      <SelectItem value="shortlisted">Shortlist Candidate</SelectItem>
+                      <SelectItem value="interviewed">Schedule Interview</SelectItem>
+                      <SelectItem value="hired">Select Candidate</SelectItem>
+                      <SelectItem value="rejected">Not Shortlisted</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

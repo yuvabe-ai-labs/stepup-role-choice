@@ -432,7 +432,7 @@ const InternshipApplicants = () => {
                           variant="outline"
                           size="sm"
                           className="w-full border-primary text-primary hover:bg-primary/10"
-                          onClick={() => navigate(`/candidate/${application.id}`)}
+                          onClick={() => navigate(`/candidate-profile/${application.id}`)}
                         >
                           View Profile
                         </Button>
