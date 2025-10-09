@@ -359,13 +359,13 @@ const Units = () => {
               <div className="flex flex-wrap gap-2">
                 {interestAreas.slice(0, 10).map((area) => (
                   <Button
-                    key={area}
-                    variant={filters.interestAreas.includes(area) ? "default" : "outline"}
+                    key={String(area)}
+                    variant={filters.interestAreas.includes(String(area)) ? "default" : "outline"}
                     size="sm"
                     className="rounded-full"
-                    onClick={() => toggleFilter("interestAreas", area)}
+                    onClick={() => toggleFilter("interestAreas", String(area))}
                   >
-                    {area}
+                    {String(area)}
                   </Button>
                 ))}
                 {interestAreas.length > 10 && (
