@@ -127,12 +127,11 @@ const AllApplications = () => {
             </div>
           ) : (
             filteredApplications.map((application) => {
-              const skillsSource = application.studentProfile?.skills ?? application.profile?.skills;
-              const skills = Array.isArray(skillsSource) 
-                ? skillsSource.slice(0, 3)
+              const skills = Array.isArray(application.studentProfile.skills) 
+                ? application.studentProfile.skills.slice(0, 3)
                 : [];
-              const additionalSkills = Array.isArray(skillsSource)
-                ? Math.max(0, skillsSource.length - 3)
+              const additionalSkills = Array.isArray(application.studentProfile.skills)
+                ? Math.max(0, application.studentProfile.skills.length - 3)
                 : 0;
 
               return (
@@ -158,10 +157,9 @@ const AllApplications = () => {
                         <p className="text-muted-foreground text-sm">{application.internship.title}</p>
                       </div>
 
+                      {/* Description */}
                       <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                        {Array.isArray(application.studentProfile?.bio)
-                          ? (application.studentProfile?.bio as string[]).join(', ')
-                          : (application.studentProfile?.bio as string) || 'No bio available'}
+                        {application.studentProfile.bio || 'No bio available'}
                       </p>
 
                       {/* Skills */}
@@ -182,7 +180,7 @@ const AllApplications = () => {
                       <Button 
                         variant="outline" 
                         className="w-full mt-4"
-                        onClick={() => navigate(`/candidate-profile/${application.id}`)}
+                        onClick={() => navigate(`/candidate/${application.student_id}`)}
                       >
                         View Profile
                       </Button>

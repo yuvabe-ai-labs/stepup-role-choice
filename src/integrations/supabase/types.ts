@@ -123,7 +123,6 @@ export type Database = {
           duration: string | null
           enrolled_count: number | null
           id: string
-          image_url: string | null
           provider: string | null
           status: Database["public"]["Enums"]["course_status"]
           title: string
@@ -138,7 +137,6 @@ export type Database = {
           duration?: string | null
           enrolled_count?: number | null
           id?: string
-          image_url?: string | null
           provider?: string | null
           status?: Database["public"]["Enums"]["course_status"]
           title: string
@@ -153,7 +151,6 @@ export type Database = {
           duration?: string | null
           enrolled_count?: number | null
           id?: string
-          image_url?: string | null
           provider?: string | null
           status?: Database["public"]["Enums"]["course_status"]
           title?: string
@@ -462,7 +459,7 @@ export type Database = {
           achievements: Json | null
           avatar_url: string | null
           behance_url: string | null
-          bio: Json[] | null
+          bio: string | null
           completed_courses: Json | null
           cover_letter: string | null
           created_at: string
@@ -474,7 +471,7 @@ export type Database = {
           languages: Json | null
           linkedin_url: string | null
           location: string | null
-          looking_for: string[] | null
+          looking_for: Json | null
           portfolio_url: string | null
           preferred_language: string | null
           profile_id: string
@@ -489,7 +486,7 @@ export type Database = {
           achievements?: Json | null
           avatar_url?: string | null
           behance_url?: string | null
-          bio?: Json[] | null
+          bio?: string | null
           completed_courses?: Json | null
           cover_letter?: string | null
           created_at?: string
@@ -501,7 +498,7 @@ export type Database = {
           languages?: Json | null
           linkedin_url?: string | null
           location?: string | null
-          looking_for?: string[] | null
+          looking_for?: Json | null
           portfolio_url?: string | null
           preferred_language?: string | null
           profile_id: string
@@ -516,7 +513,7 @@ export type Database = {
           achievements?: Json | null
           avatar_url?: string | null
           behance_url?: string | null
-          bio?: Json[] | null
+          bio?: string | null
           completed_courses?: Json | null
           cover_letter?: string | null
           created_at?: string
@@ -528,7 +525,7 @@ export type Database = {
           languages?: Json | null
           linkedin_url?: string | null
           location?: string | null
-          looking_for?: string[] | null
+          looking_for?: Json | null
           portfolio_url?: string | null
           preferred_language?: string | null
           profile_id?: string
@@ -557,19 +554,15 @@ export type Database = {
           created_at: string
           description: string | null
           focus_areas: Json | null
-          focus_areas_backup: Json | null
           id: string
           image: string | null
-          industry: string | null
           is_aurovillian: boolean | null
           mission: string | null
           opportunities_offered: Json | null
-          opportunities_offered_backup: Json | null
           profile_id: string
           recent_projects: Json | null
           skills_offered: Json | null
-          skills_offered_backup: Json | null
-          unit_name: string | null
+          unit_name: string
           unit_type: string | null
           updated_at: string
           values: Json | null
@@ -582,19 +575,15 @@ export type Database = {
           created_at?: string
           description?: string | null
           focus_areas?: Json | null
-          focus_areas_backup?: Json | null
           id?: string
           image?: string | null
-          industry?: string | null
           is_aurovillian?: boolean | null
           mission?: string | null
           opportunities_offered?: Json | null
-          opportunities_offered_backup?: Json | null
           profile_id: string
           recent_projects?: Json | null
           skills_offered?: Json | null
-          skills_offered_backup?: Json | null
-          unit_name?: string | null
+          unit_name: string
           unit_type?: string | null
           updated_at?: string
           values?: Json | null
@@ -607,19 +596,15 @@ export type Database = {
           created_at?: string
           description?: string | null
           focus_areas?: Json | null
-          focus_areas_backup?: Json | null
           id?: string
           image?: string | null
-          industry?: string | null
           is_aurovillian?: boolean | null
           mission?: string | null
           opportunities_offered?: Json | null
-          opportunities_offered_backup?: Json | null
           profile_id?: string
           recent_projects?: Json | null
           skills_offered?: Json | null
-          skills_offered_backup?: Json | null
-          unit_name?: string | null
+          unit_name?: string
           unit_type?: string | null
           updated_at?: string
           values?: Json | null

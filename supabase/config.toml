@@ -2,6 +2,3 @@ project_id = "gldmszykmzbbsljxtnyp"
 
 [functions.gemini-chat]
 verify_jwt = false
-
-[functions.secure-auth]
-verify_jwt = false

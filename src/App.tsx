@@ -149,7 +149,7 @@ const App = () => (
                 <UnitView />
               </ProtectedRoute>
             } />
-            <Route path="/candidate-profile/:id" element={
+            <Route path="/candidate/:id" element={
               <ProtectedRoute>
                 <CandidateProfile />
               </ProtectedRoute>

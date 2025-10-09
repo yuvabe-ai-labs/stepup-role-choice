@@ -3,255 +3,304 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Clock } from "lucide-react";
+import { ChevronDown, ChevronRight, Clock, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { useInfiniteCourses } from "@/hooks/useInfiniteCourses";
-import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
-import { formatDistanceToNow } from "date-fns";
+import { useCourses } from "@/hooks/useCourses";
+import type { Tables } from "@/integrations/supabase/types";
+
+type Course = Tables<"courses">;
 
 const Courses = () => {
-  const [filters, setFilters] = useState({
-    difficulty: [] as string[],
-    duration: [] as string[],
-    postedDate: "",
+  const [expandedSections, setExpandedSections] = useState({
+    units: true,
+    industry: false,
+    interest: false,
   });
 
-  const { courses, loading, error, hasMore, loadMore } = useInfiniteCourses(filters);
-  const { observerTarget } = useInfiniteScroll({ loading, hasMore, onLoadMore: loadMore });
+  const [selectedFilters, setSelectedFilters] = useState({
+    units: [] as string[],
+    industry: [] as string[],
+    interest: [] as string[],
+  });
 
-  const difficultyLevels = ["Beginner", "Intermediate", "Advanced"];
-  const durations = ["1-4 weeks", "5-8 weeks", "9-12 weeks", "12+ weeks"];
-  const postedDates = [
-    { value: "today", label: "Today" },
-    { value: "week", label: "Past Week" },
-    { value: "month", label: "Past Month" },
-    { value: "", label: "All Time" },
-  ];
+  const { courses, loading, error } = useCourses();
 
-  const toggleFilter = (category: "difficulty" | "duration", value: string) => {
-    console.log("[Courses] Toggle filter:", category, value);
-    setFilters((prev) => ({
+  // Dynamic filters
+  const filterOptions = {
+    units: Array.from(new Set(courses.map((c) => c.provider).filter(Boolean))),
+    industry: Array.from(
+      new Set(courses.map((c) => c.category).filter(Boolean))
+    ),
+    interest: Array.from(
+      new Set(courses.map((c) => c.difficulty_level).filter(Boolean))
+    ),
+  };
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections((prev) => ({
       ...prev,
-      [category]: prev[category].includes(value)
-        ? prev[category].filter((v) => v !== value)
-        : [...prev[category], value],
+      [section]: !prev[section],
     }));
   };
 
-  const setPostedDateFilter = (value: string) => {
-    console.log("[Courses] Set posted date filter:", value);
-    setFilters((prev) => ({ ...prev, postedDate: value }));
+  // Toggle filter selection
+  const toggleFilter = (
+    section: keyof typeof selectedFilters,
+    value: string
+  ) => {
+    setSelectedFilters((prev) => {
+      const isSelected = prev[section].includes(value);
+      return {
+        ...prev,
+        [section]: isSelected
+          ? prev[section].filter((v) => v !== value)
+          : [...prev[section], value],
+      };
+    });
   };
 
-  const resetFilters = () => {
-    console.log("[Courses] Reset all filters");
-    setFilters({ difficulty: [], duration: [], postedDate: "" });
-  };
+  // Apply filtering
+  const filteredCourses = courses.filter((course) => {
+    const matchUnit =
+      selectedFilters.units.length === 0 ||
+      (course.provider && selectedFilters.units.includes(course.provider));
 
-  const getDifficultyColor = (level: string) => {
-    switch (level?.toLowerCase()) {
-      case "beginner":
-        return "bg-green-500";
-      case "intermediate":
-        return "bg-orange-500";
-      case "advanced":
-        return "bg-red-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
+    const matchIndustry =
+      selectedFilters.industry.length === 0 ||
+      (course.category && selectedFilters.industry.includes(course.category));
+
+    const matchInterest =
+      selectedFilters.interest.length === 0 ||
+      (course.difficulty_level &&
+        selectedFilters.interest.includes(course.difficulty_level));
+
+    return matchUnit && matchIndustry && matchInterest;
+  });
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="flex gap-6 p-6">
-        {/* Left Sidebar - Filters */}
-        <div className="w-80 bg-card border rounded-3xl p-6 h-fit sticky top-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold">Filters</h2>
-            <Button
-              variant="ghost"
-              className="text-primary hover:text-primary/80 text-sm font-medium"
-              onClick={resetFilters}
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="w-80 bg-background border border-border rounded-2xl shadow-md p-6 m-6 h-auto">
+          <h2 className="text-lg font-semibold mb-6">All Filters</h2>
+
+          {/* Units Filter */}
+          <div className="mb-6">
+            <button
+              onClick={() => toggleSection("units")}
+              className="flex items-center justify-between w-full text-left font-medium mb-3"
             >
-              Reset all
-            </Button>
+              <span>Units</span>
+              {expandedSections.units ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+            {expandedSections.units && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {filterOptions.units.map((option) => (
+                    <Badge
+                      key={option}
+                      variant={
+                        selectedFilters.units.includes(option)
+                          ? "default"
+                          : "outline"
+                      }
+                      className="cursor-pointer hover:bg-accent"
+                      onClick={() => toggleFilter("units", option)}
+                    >
+                      {option}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Course Level Filter */}
+          {/* Industry Filter */}
           <div className="mb-6">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-3">Course Level</h3>
-            <div className="space-y-3">
-              {difficultyLevels.map((level) => (
-                <div key={level} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`difficulty-${level}`}
-                    checked={filters.difficulty.includes(level)}
-                    onCheckedChange={() => toggleFilter("difficulty", level)}
-                  />
-                  <label htmlFor={`difficulty-${level}`} className="text-sm font-medium cursor-pointer">
-                    {level}
-                  </label>
+            <button
+              onClick={() => toggleSection("industry")}
+              className="flex items-center justify-between w-full text-left font-medium mb-3"
+            >
+              <span>Industry</span>
+              {expandedSections.industry ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+            {expandedSections.industry && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {filterOptions.industry.map((option) => (
+                    <Badge
+                      key={option}
+                      variant={
+                        selectedFilters.industry.includes(option)
+                          ? "default"
+                          : "outline"
+                      }
+                      className="cursor-pointer hover:bg-accent"
+                      onClick={() => toggleFilter("industry", option)}
+                    >
+                      {option}
+                    </Badge>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
 
-          {/* Posted Date Filter */}
+          {/* Interest Filter */}
           <div className="mb-6">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-3">Posted Date</h3>
-            <div className="space-y-3">
-              {postedDates.map((date) => (
-                <div key={date.value} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`posted-${date.value}`}
-                    checked={filters.postedDate === date.value}
-                    onCheckedChange={() => setPostedDateFilter(date.value)}
-                  />
-                  <label htmlFor={`posted-${date.value}`} className="text-sm font-medium cursor-pointer">
-                    {date.label}
-                  </label>
+            <button
+              onClick={() => toggleSection("interest")}
+              className="flex items-center justify-between w-full text-left font-medium mb-3"
+            >
+              <span>Interest</span>
+              {expandedSections.interest ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+            {expandedSections.interest && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {filterOptions.interest.map((option) => (
+                    <Badge
+                      key={option}
+                      variant={
+                        selectedFilters.interest.includes(option)
+                          ? "default"
+                          : "outline"
+                      }
+                      className="cursor-pointer hover:bg-accent"
+                      onClick={() => toggleFilter("interest", option)}
+                    >
+                      {option}
+                    </Badge>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Duration Filter */}
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-3">Duration</h3>
-            <div className="space-y-3">
-              {durations.map((duration) => (
-                <div key={duration} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`duration-${duration}`}
-                    checked={filters.duration.includes(duration)}
-                    onCheckedChange={() => toggleFilter("duration", duration)}
-                  />
-                  <label htmlFor={`duration-${duration}`} className="text-sm font-medium cursor-pointer">
-                    {duration}
-                  </label>
-                </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
 
           <Button
-            className="w-full rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all"
-            variant="outline"
-            onClick={resetFilters}
+            className="w-full text-sm font-medium py-2 border-2 border-teal-500 rounded-3xl bg-transparent hover:bg-teal-50 text-teal-500"
+            onClick={() =>
+              setSelectedFilters({ units: [], industry: [], interest: [] })
+            }
           >
-            Apply
+            Clear Filters
           </Button>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold">Explore {courses.length} Courses</h1>
+        <div className="flex-1 p-6">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold mb-2">
+              Explore {loading ? "..." : filteredCourses.length} Courses just
+              for you
+            </h1>
           </div>
-
-          {error && (
-            <div className="text-center py-8">
-              <p className="text-destructive">{error}</p>
-            </div>
-          )}
 
           {/* Courses Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {courses.map((course) => {
-              const gradients = [
-                "bg-gradient-to-br from-lime-400 to-green-600",
-                "bg-gradient-to-br from-purple-500 to-pink-600",
-                "bg-gradient-to-br from-blue-500 to-cyan-400",
-                "bg-gradient-to-br from-orange-500 to-red-600",
-                "bg-gradient-to-br from-teal-500 to-blue-600",
-                "bg-gradient-to-br from-yellow-500 to-orange-600",
-              ];
-              const gradient = gradients[Math.floor(Math.random() * gradients.length)];
-
-              return (
-                <Card key={course.id} className="overflow-hidden rounded-3xl hover:shadow-lg transition-all">
-                  {/* Course Image/Gradient Header */}
-                  <div className={`h-40 ${gradient} relative flex items-center justify-center`}>
-                    {course.image_url ? (
-                      <img src={course.image_url} alt={course.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="text-white text-center">
-                        <h3 className="text-2xl font-bold">{course.category || "Course"}</h3>
-                      </div>
-                    )}
-                    {/* Time ago badge */}
-                    <Badge className="absolute top-3 right-3 bg-white/90 text-foreground hover:bg-white">
-                      {formatDistanceToNow(new Date(course.created_at), { addSuffix: true })}
-                    </Badge>
-                  </div>
-
+            {loading ? (
+              Array.from({ length: 6 }).map((_, index) => (
+                <Card key={index} className="overflow-hidden shadow-sm">
+                  <Skeleton className="h-32 w-full" />
                   <CardContent className="p-4 space-y-3">
-                    {/* Duration and Level */}
+                    <Skeleton className="h-6 w-3/4" />
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Clock className="w-4 h-4" />
-                        <span>{course.duration || "8 weeks"}</span>
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                    <Skeleton className="h-4 w-16" />
+                  </CardContent>
+                </Card>
+              ))
+            ) : error ? (
+              <div className="col-span-full text-center py-8">
+                <p className="text-muted-foreground">
+                  Error loading courses: {error}
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => window.location.reload()}
+                  className="mt-4"
+                >
+                  Try Again
+                </Button>
+              </div>
+            ) : filteredCourses.length === 0 ? (
+              <div className="col-span-full text-center py-8">
+                <p className="text-muted-foreground">
+                  No courses available at the moment.
+                </p>
+              </div>
+            ) : (
+              filteredCourses.map((course, index) => {
+                const gradients = [
+                  "bg-gradient-to-br from-indigo-900 to-purple-800",
+                  "bg-gradient-to-br from-purple-700 to-pink-600",
+                  "bg-gradient-to-br from-blue-600 to-cyan-500",
+                  "bg-gradient-to-br from-blue-500 to-teal-600",
+                  "bg-gradient-to-br from-green-700 to-teal-800",
+                  "bg-gradient-to-br from-orange-600 to-red-600",
+                  "bg-gradient-to-br from-yellow-600 to-orange-600",
+                  "bg-gradient-to-br from-pink-600 to-rose-600",
+                  "bg-gradient-to-br from-slate-700 to-slate-800",
+                ];
+                const gradient = gradients[index % gradients.length];
+
+                return (
+                  <Card
+                    key={course.id}
+                    className="overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                  >
+                    <div
+                      className={`h-32 ${gradient} relative flex items-center justify-center`}
+                    >
+                      <div className="text-white text-center">
+                        <div className="text-lg font-bold">
+                          {course.category || "Course"}
+                        </div>
                       </div>
-                      {course.difficulty_level && (
-                        <Badge className={`${getDifficultyColor(course.difficulty_level)} text-white`}>
-                          {course.difficulty_level}
-                        </Badge>
-                      )}
                     </div>
 
-                    {/* Title */}
-                    <h3 className="font-bold text-lg line-clamp-2">{course.title}</h3>
+                    <CardContent className="p-4 space-y-3">
+                      <h3 className="font-semibold text-lg">{course.title}</h3>
 
-                    {/* Description */}
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                      {course.description || "Build your skills with this comprehensive course..."}
-                    </p>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{course.duration}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Users className="w-3 h-3" />
+                          <span>{course.enrolled_count} enrolled</span>
+                        </div>
+                      </div>
 
-                    {/* Know More Button */}
-                    <Button
-                      className="w-full rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all"
-                      variant="outline"
-                    >
-                      Know more
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
-
-            {/* Loading Skeletons */}
-            {loading &&
-              Array.from({ length: 6 }).map((_, i) => (
-                <Card key={`skeleton-${i}`} className="overflow-hidden rounded-3xl">
-                  <Skeleton className="h-40 w-full" />
-                  <CardContent className="p-4 space-y-3">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-20 w-full" />
-                    <Skeleton className="h-10 w-full rounded-full" />
-                  </CardContent>
-                </Card>
-              ))}
+                      <Button
+                        variant="link"
+                        className="text-primary p-0 h-auto text-sm"
+                      >
+                        Know more →
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
           </div>
-
-          {/* Infinite scroll trigger */}
-          <div ref={observerTarget} className="h-10 mt-8" />
-
-          {!loading && !hasMore && courses.length > 0 && (
-            <p className="text-center text-muted-foreground mt-8">No more courses to load</p>
-          )}
-
-          {!loading && courses.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No courses found matching your filters.</p>
-              <Button variant="outline" onClick={resetFilters} className="mt-4">
-                Clear Filters
-              </Button>
-            </div>
-          )}
         </div>
       </div>
     </div>

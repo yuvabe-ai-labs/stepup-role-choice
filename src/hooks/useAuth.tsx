@@ -18,7 +18,7 @@ interface AuthContextType {
     fullName: string,
     role: string
   ) => Promise<{ error: any }>;
-  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   signInWithOAuth: (provider: "google" | "apple") => Promise<{ error: any }>;
@@ -120,35 +120,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
           } else {
             console.log("Profile created successfully:", newProfile);
-            
-            // Initialize role-specific table
-            if (userRole === "student") {
-              const { error: studentError } = await supabase
-                .from("student_profiles")
-                .insert({
-                  profile_id: newProfile.id,
-                });
-              
-              if (studentError) {
-                console.error("Student profile initialization failed:", studentError);
-              } else {
-                console.log("Student profile initialized successfully");
-              }
-            } else if (userRole === "unit") {
-              const { error: unitError } = await supabase
-                .from("units")
-                .insert({
-                  profile_id: newProfile.id,
-                  unit_name: fullName, // Use signup name as initial unit name
-                });
-              
-              if (unitError) {
-                console.error("Unit profile initialization failed:", unitError);
-              } else {
-                console.log("Unit profile initialized successfully");
-              }
-            }
-            
             toast({
               title: "Welcome!",
               description: "Your account has been set up successfully.",
@@ -209,77 +180,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signIn = async (email: string, password: string, rememberMe: boolean = false) => {
+  const signIn = async (email: string, password: string) => {
     try {
-      console.log('[useAuth] Signing in with rememberMe:', rememberMe);
-      
-      // Use secure-auth Edge Function for HttpOnly cookie auth
-      const { data, error } = await supabase.functions.invoke('secure-auth', {
-        body: {
-          action: 'signIn',
-          email,
-          password,
-          rememberMe,
-        },
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
       if (error) {
-        console.error('[useAuth] Sign in error:', error);
-        return { error };
-      }
-
-      if (data.error) {
-        console.error('[useAuth] Sign in error:', data.error);
+        console.error("Sign in error:", error);
         // Handle specific error for unconfirmed email
-        if (data.error.includes("Email not confirmed")) {
+        if (error.message.includes("Email not confirmed")) {
           return {
             error: {
-              message: "Please check your email and click the confirmation link before signing in.",
+              ...error,
+              message:
+                "Please check your email and click the confirmation link before signing in.",
             },
           };
         }
-        return { error: { message: data.error } };
       }
 
-      // Set session in Supabase client
-      if (data.session) {
-        await supabase.auth.setSession({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-        });
-      }
-
-      console.log('[useAuth] Sign in successful');
-      return { error: null };
+      return { error };
     } catch (error: any) {
-      console.error('[useAuth] Sign in failed:', error);
+      console.error("Sign in failed:", error);
       return { error };
     }
   };
 
   const signOut = async () => {
-    try {
-      console.log('[useAuth] Signing out...');
-      
-      // Call secure-auth Edge Function to clear HttpOnly cookies
-      await supabase.functions.invoke('secure-auth', {
-        body: { action: 'signOut' },
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Sign out failed",
+        description: error.message,
+        variant: "destructive",
       });
-
-      // Sign out from Supabase client
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('[useAuth] Sign out error:', error);
-        toast({
-          title: "Sign out failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        console.log('[useAuth] Sign out successful');
-      }
-    } catch (error: any) {
-      console.error('[useAuth] Sign out failed:', error);
     }
   };
 

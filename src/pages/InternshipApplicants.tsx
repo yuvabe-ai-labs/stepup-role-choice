@@ -348,7 +348,7 @@ const InternshipApplicants = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredApplications.slice(0, displayCount).map((application) => {
-                const skills = safeParse(application.studentProfile?.skills ?? application.profile?.skills, []);
+                const skills = safeParse(application.studentProfile?.skills, []);
                 const displaySkills = skills.slice(0, 3).map((s: any) =>
                   typeof s === 'string' ? s : s.name || s
                 );
@@ -386,10 +386,8 @@ const InternshipApplicants = () => {
                         </Badge>
 
                         <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                          {Array.isArray(application.studentProfile?.bio)
-                            ? (application.studentProfile?.bio as string[]).join(', ')
-                            : (application.studentProfile?.bio as string) ||
-                              'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.'}
+                          {application.studentProfile?.bio ||
+                            'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.'}
                         </p>
 
                         <div className="flex flex-wrap gap-2 justify-center mb-4">
@@ -434,7 +432,7 @@ const InternshipApplicants = () => {
                           variant="outline"
                           size="sm"
                           className="w-full border-primary text-primary hover:bg-primary/10"
-                          onClick={() => navigate(`/candidate-profile/${application.id}`)}
+                          onClick={() => navigate(`/candidate/${application.id}`)}
                         >
                           View Profile
                         </Button>
