@@ -12,8 +12,8 @@ type StudentInternship = Tables<'student_internships'>;
 export interface CandidateData {
   application: Application;
   internship: Internship;
-  profile: Profile;
-  studentProfile: StudentProfile;
+  profile: Profile | null;
+  studentProfile: StudentProfile | null;
   education: StudentEducation[];
   internships: StudentInternship[];
 }
@@ -51,22 +51,18 @@ export const useCandidateProfile = (applicationId: string) => {
         if (internshipError) throw internshipError;
 
         // Fetch student profile
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', application.student_id)
-          .single();
-
-        if (profileError) throw profileError;
+          .maybeSingle();
 
         // Fetch student details
-        const { data: studentProfile, error: studentProfileError } = await supabase
+        const { data: studentProfile } = await supabase
           .from('student_profiles')
           .select('*')
           .eq('profile_id', application.student_id)
-          .single();
-
-        if (studentProfileError) throw studentProfileError;
+          .maybeSingle();
 
         // Fetch education records
         const { data: education, error: educationError } = await supabase

@@ -462,7 +462,7 @@ export type Database = {
           achievements: Json | null
           avatar_url: string | null
           behance_url: string | null
-          bio: string | null
+          bio: Json[] | null
           completed_courses: Json | null
           cover_letter: string | null
           created_at: string
@@ -489,7 +489,7 @@ export type Database = {
           achievements?: Json | null
           avatar_url?: string | null
           behance_url?: string | null
-          bio?: string | null
+          bio?: Json[] | null
           completed_courses?: Json | null
           cover_letter?: string | null
           created_at?: string
@@ -516,7 +516,7 @@ export type Database = {
           achievements?: Json | null
           avatar_url?: string | null
           behance_url?: string | null
-          bio?: string | null
+          bio?: Json[] | null
           completed_courses?: Json | null
           cover_letter?: string | null
           created_at?: string
