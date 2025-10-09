@@ -37,14 +37,14 @@ All colors MUST be HSL.
     --ring: 218 89% 60%;
 
     --radius: 0.5rem;
-    
+
     /* Design colors matching the specification */
-    --signup-text-primary: 206 20% 14%;    /* #1F2A37 */
-    --signup-text-muted: 218 11% 65%;      /* #9CA3AF */
-    --signup-text-secondary: 218 11% 29%;  /* #4B5563 */
-    --signup-border: 220 13% 82%;          /* #D1D5DB */
-    --signup-button: 218 89% 74%;          /* #76A9FA */
-    --signup-link: 218 89% 60%;            /* #3F83F8 */
+    --signup-text-primary: 206 20% 14%; /* #1F2A37 */
+    --signup-text-muted: 218 11% 65%; /* #9CA3AF */
+    --signup-text-secondary: 218 11% 29%; /* #4B5563 */
+    --signup-border: 220 13% 82%; /* #D1D5DB */
+    --signup-button: 218 89% 74%; /* #76A9FA */
+    --signup-link: 218 89% 60%; /* #3F83F8 */
     --signup-card-shadow: 0px 2px 25px rgba(0, 0, 0, 0.15);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 

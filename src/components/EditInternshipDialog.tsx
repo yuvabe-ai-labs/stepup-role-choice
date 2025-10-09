@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,27 +23,16 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { X, Upload, Sparkles } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
-import { ChevronDown } from "lucide-react";
+import { X, Sparkles, ChevronDown } from "lucide-react";
 
-interface CreateInternshipDialogProps {
+interface EditInternshipDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  internship: any;
 }
 
-// Language proficiency type
 interface LanguageProficiency {
   language: string;
   read: boolean;
@@ -51,7 +40,6 @@ interface LanguageProficiency {
   speak: boolean;
 }
 
-// Validation schema
 const languageSchema = z
   .object({
     language: z.string().min(1, "Language is required"),
@@ -79,9 +67,6 @@ const formSchema = z
     language_requirements: z
       .array(languageSchema)
       .min(1, "At least one language is required"),
-    application_deadline: z.date({
-      required_error: "Application deadline is required",
-    }),
   })
   .refine(
     (data) => {
@@ -118,27 +103,29 @@ const LANGUAGES = [
   "Korean",
 ];
 
-const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
+const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  internship,
 }) => {
-  const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [aiLoading, setAiLoading] = useState<string | null>(null);
   const [languages, setLanguages] = useState<LanguageProficiency[]>([
     { language: "", read: false, write: false, speak: false },
   ]);
-
-  // This is where conversationHistory is created and initialized as an empty array:
   const [conversationHistory, setConversationHistory] = useState<any[]>([]);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
 
   const {
     control,
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors, isValid },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -155,11 +142,51 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
       language_requirements: [
         { language: "", read: false, write: false, speak: false },
       ],
-      application_deadline: undefined,
     },
   });
 
   const isPaid = watch("isPaid");
+
+  useEffect(() => {
+    if (internship && isOpen) {
+      const responsibilitiesText = Array.isArray(internship.responsibilities)
+        ? internship.responsibilities.join("\n")
+        : internship.responsibilities || "";
+
+      const benefitsText = Array.isArray(internship.benefits)
+        ? internship.benefits.join("\n")
+        : internship.benefits || "";
+
+      const skillsText = Array.isArray(internship.skills_required)
+        ? internship.skills_required.join(", ")
+        : internship.skills_required || "";
+
+      const languageReqs = Array.isArray(internship.language_requirements)
+        ? internship.language_requirements
+        : [{ language: "", read: false, write: false, speak: false }];
+
+      setLanguages(languageReqs);
+
+      if (internship.application_deadline) {
+        const deadline = new Date(internship.application_deadline);
+        setSelectedDate(deadline.getDate().toString());
+        setSelectedMonth((deadline.getMonth() + 1).toString());
+        setSelectedYear(deadline.getFullYear().toString());
+      }
+
+      reset({
+        title: internship.title || "",
+        duration: internship.duration || "",
+        isPaid: internship.is_paid || false,
+        payment: internship.payment || "",
+        description: internship.description || "",
+        responsibilities: responsibilitiesText,
+        benefits: benefitsText,
+        skills_required: skillsText,
+        language_requirements: languageReqs,
+      });
+    }
+  }, [internship, isOpen, reset]);
 
   const handleAddLanguage = () => {
     const newLanguages = [
@@ -190,78 +217,52 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
   };
 
   const onSubmit = async (data: FormData) => {
-    if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to create an internship",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
     try {
-      // Get profile ID
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
-
-      if (!profile) {
-        throw new Error("Profile not found");
-      }
-
-      // Parse skills and responsibilities into arrays
       const skillsArray = data.skills_required.split(",").map((s) => s.trim());
       const responsibilitiesArray = data.responsibilities
         .split("\n")
         .filter((r) => r.trim());
       const benefitsArray = data.benefits.split("\n").filter((b) => b.trim());
 
-      // Get unit name from units table
-      const { data: units, error: unitsError } = await supabase
-        .from("units")
-        .select("unit_name")
-        .eq("profile_id", profile.id)
-        .maybeSingle();
-
-      if (unitsError) {
-        console.error("Error fetching unit:", unitsError);
+      let deadlineDate = internship.application_deadline;
+      if (selectedDate && selectedMonth && selectedYear) {
+        deadlineDate = `${selectedYear}-${selectedMonth.padStart(
+          2,
+          "0"
+        )}-${selectedDate.padStart(2, "0")}`;
       }
 
-      // Create internship
-      console.log("Creating internship with profile ID:", profile.id);
-      const { error } = await supabase.from("internships").insert({
-        title: data.title,
-        duration: data.duration,
-        is_paid: data.isPaid,
-        payment: data.isPaid ? data.payment : null,
-        description: data.description,
-        responsibilities: responsibilitiesArray,
-        benefits: benefitsArray,
-        skills_required: skillsArray,
-        language_requirements: data.language_requirements,
-        application_deadline: format(data.application_deadline, "yyyy-MM-dd"),
-        created_by: profile.id,
-        status: "active",
-        company_name: units?.unit_name || "Unit",
-      });
+      const { error } = await supabase
+        .from("internships")
+        .update({
+          title: data.title,
+          duration: data.duration,
+          is_paid: data.isPaid,
+          payment: data.isPaid ? data.payment : null,
+          description: data.description,
+          responsibilities: responsibilitiesArray,
+          benefits: benefitsArray,
+          skills_required: skillsArray,
+          language_requirements: data.language_requirements,
+          application_deadline: deadlineDate,
+        })
+        .eq("id", internship.id);
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Internship posted successfully!",
+        description: "Internship updated successfully!",
       });
 
       onSuccess();
       onClose();
     } catch (error) {
-      console.error("Error creating internship:", error);
+      console.error("Error updating internship:", error);
       toast({
         title: "Error",
-        description: "Failed to create internship. Please try again.",
+        description: "Failed to update internship. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -269,10 +270,8 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
     }
   };
 
-  // AI Assistant function
   const handleAIAssist = async (fieldName: keyof FormData) => {
-    console.log("AI Assist triggered for:", fieldName);
-    setAiLoading(fieldName as string); // Cast to string for state
+    setAiLoading(fieldName as string);
 
     try {
       const currentValue = watch(fieldName) as string;
@@ -313,7 +312,6 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
           prompt = `Help improve the following text for a ${jobTitle} internship: ${currentValue}`;
       }
 
-      // Add user message to history BEFORE sending
       const updatedHistory = [
         ...conversationHistory,
         { role: "user", content: prompt },
@@ -325,27 +323,23 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
         {
           body: {
             message: prompt,
-            conversationHistory: updatedHistory, // Pass the updated history state
-            userRole: "unit", // Assuming this dialog is always for a unit
+            conversationHistory: updatedHistory,
+            userRole: "unit",
           },
         }
       );
-      console.log(prompt);
-      console.log("AI Response:", aiResponse);
 
       if (error) throw error;
 
       if (aiResponse?.response) {
-        // Clean up the response (remove markdown formatting if present)
         let cleanResponse = aiResponse.response
-          .replace(/\*\*/g, "") // Remove bold markdown
-          .replace(/\*/g, "") // Remove asterisk markdown
-          .replace(/^#+\s/gm, "") // Remove heading markdown
+          .replace(/\*\*/g, "")
+          .replace(/\*/g, "")
+          .replace(/^#+\s/gm, "")
           .trim();
 
         setValue(fieldName, cleanResponse, { shouldValidate: true });
 
-        // Add AI response to history AFTER receiving and processing
         setConversationHistory((prevHistory) => [
           ...prevHistory,
           { role: "ai", content: cleanResponse },
@@ -355,20 +349,6 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
           title: "AI Suggestion Applied",
           description: "The content has been generated successfully!",
         });
-      } else {
-        // Handle cases where AI response is not in the expected format
-        console.error("AI response in unexpected format:", aiResponse);
-        toast({
-          title: "AI Assist Failed",
-          description:
-            "Received unexpected response from AI. Please try again.",
-          variant: "destructive",
-        });
-        // Optionally add an error message to history for debugging
-        setConversationHistory((prevHistory) => [
-          ...prevHistory,
-          { role: "ai", content: `Error: Unexpected AI response format.` },
-        ]);
       }
     } catch (error) {
       console.error("AI Assist error:", error);
@@ -377,19 +357,10 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
         description: "Unable to generate AI suggestion. Please try again.",
         variant: "destructive",
       });
-      // Optionally add an error message to history
-      setConversationHistory((prevHistory) => [
-        ...prevHistory,
-        { role: "ai", content: `Error generating response: ${error.message}` },
-      ]);
     } finally {
       setAiLoading(null);
     }
   };
-
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
 
   const dates = Array.from({ length: 31 }, (_, i) => i + 1);
   const months = [
@@ -413,42 +384,16 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] p-0">
         <DialogHeader className="px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-xl font-semibold">
-                Create new Job Description
-              </DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground mt-1">
-                This information is important for candidates to know better
-                about Job/Internship
-              </DialogDescription>
-            </div>
-          </div>
+          <DialogTitle className="text-xl font-semibold">
+            Edit Job Description
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground mt-1">
+            Update the information about this Job/Internship
+          </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(70vh-140px)]">
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="px-6 py-4 space-y-6"
-          >
-            {/* File Upload Section */}
-            <div className="border-2 border-dashed border-primary/30 rounded-2xl p-8 bg-primary/5">
-              <div className="flex flex-col items-center justify-center text-center space-y-3">
-                <Upload className="w-12 h-12 text-primary" />
-                <div>
-                  <p className="font-semibold text-lg">
-                    Upload Job Description
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    File should be PDF, Word, Google Docs
-                  </p>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Drag and Drop your files here
-                </p>
-              </div>
-            </div>
-
+        <ScrollArea className="max-h-[calc(70vh-140px)] px-6">
+          <div className="space-y-6 ">
             {/* Job/Intern Role */}
             <div className="space-y-2">
               <Label htmlFor="title" className="text-sm font-medium">
@@ -508,20 +453,18 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                   control={control}
                   render={({ field }) => (
                     <>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => field.onChange(true)}
-                          className={`rounded-full px-6 border border-black ${
-                            field.value
-                              ? "bg-gray-200 text-black hover:bg-gray-300 hover:!text-black"
-                              : "bg-white text-black hover:bg-gray-100 hover:!text-black"
-                          }`}
-                        >
-                          Paid
-                        </Button>
-                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => field.onChange(true)}
+                        className={`rounded-full px-6 border border-black ${
+                          field.value
+                            ? "bg-gray-200 text-black hover:bg-gray-300"
+                            : "bg-white text-black hover:bg-gray-100"
+                        }`}
+                      >
+                        Paid
+                      </Button>
                       {isPaid && (
                         <Controller
                           name="payment"
@@ -536,20 +479,18 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                           )}
                         />
                       )}
-                      <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => field.onChange(false)}
-                          className={`rounded-full px-6 border border-black ${
-                            !field.value
-                              ? "bg-gray-200 text-black hover:bg-gray-300 hover:!text-black"
-                              : "bg-white text-black hover:bg-gray-100 hover:!text-black"
-                          }`}
-                        >
-                          Unpaid
-                        </Button>
-                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => field.onChange(false)}
+                        className={`rounded-full px-6 border border-black ${
+                          !field.value
+                            ? "bg-gray-200 text-black hover:bg-gray-300"
+                            : "bg-white text-black hover:bg-gray-100"
+                        }`}
+                      >
+                        Unpaid
+                      </Button>
                     </>
                   )}
                 />
@@ -747,10 +688,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                         handleLanguageChange(index, "read", checked === true)
                       }
                     />
-                    <label
-                      htmlFor={`read-${index}`}
-                      className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
+                    <label htmlFor={`read-${index}`} className="text-sm">
                       Read
                     </label>
                   </div>
@@ -763,10 +701,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                         handleLanguageChange(index, "write", checked === true)
                       }
                     />
-                    <label
-                      htmlFor={`write-${index}`}
-                      className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
+                    <label htmlFor={`write-${index}`} className="text-sm">
                       Write
                     </label>
                   </div>
@@ -779,10 +714,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                         handleLanguageChange(index, "speak", checked === true)
                       }
                     />
-                    <label
-                      htmlFor={`speak-${index}`}
-                      className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
+                    <label htmlFor={`speak-${index}`} className="text-sm">
                       Speak
                     </label>
                   </div>
@@ -815,6 +747,64 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
             </div>
 
             {/* Last date to apply */}
+            {/* <div className="space-y-3">
+              <Label className="text-sm font-medium">Last date to apply</Label>
+              <div className="flex gap-3">
+                <div className="relative flex-1">
+                  <select
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border rounded-full bg-white"
+                  >
+                    <option value="">Date</option>
+                    {dates.map((date) => (
+                      <option key={date} value={date}>
+                        {date}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" />
+                </div>
+
+                <div className="relative flex-1">
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border rounded-full bg-white"
+                  >
+                    <option value="">Month</option>
+                    {months.map((month, index) => (
+                      <option key={month} value={index + 1}>
+                        {month}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" />
+                </div>
+
+                <div className="relative flex-1">
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border rounded-full bg-white"
+                  >
+                    <option value="">Year</option>
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" />
+                </div>
+              </div>
+              {selectedDate && selectedMonth && selectedYear && (
+                <p className="text-sm text-gray-600">
+                  Selected: {selectedDate}/{selectedMonth}/{selectedYear}
+                </p>
+              )}
+            </div> */}
+
             <div className="space-y-3">
               <label className="block text-sm font-normal text-gray-700">
                 Last date to apply
@@ -879,20 +869,28 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
 
               {/* Display selected date */}
               {selectedDate && selectedMonth && selectedYear && (
-                <p className="text-sm text-gray-600 mt-2">
+                <p className="text-sm text-gray-600">
                   Selected: {selectedDate}/{selectedMonth}/{selectedYear}
                 </p>
               )}
             </div>
-          </form>
+          </div>
 
-          <div className="px-6 py-4 flex justify-end">
+          <div className="px-6 py-4 flex justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="rounded-3xl"
+            >
+              Cancel
+            </Button>
             <Button
               onClick={handleSubmit(onSubmit)}
               disabled={isSubmitting || !isValid}
               className="rounded-3xl bg-primary hover:bg-primary/90"
             >
-              {isSubmitting ? "Saving..." : "Save"}
+              {isSubmitting ? "Updating..." : "Update"}
             </Button>
           </div>
         </ScrollArea>
@@ -901,4 +899,4 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
   );
 };
 
-export default CreateInternshipDialog;
+export default EditInternshipDialog;
