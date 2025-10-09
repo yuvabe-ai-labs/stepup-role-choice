@@ -12,6 +12,10 @@ import {
   ArrowRight,
   Filter,
   Plus,
+  Eye,
+  MessageSquare,
+  Ban,
+  CheckCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,9 +27,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useUnitApplications } from "@/hooks/useUnitApplications";
 import { useInternships } from "@/hooks/useInternships";
 import CreateInternshipDialog from "@/components/CreateInternshipDialog";
+import { supabase } from "@/integrations/supabase/client";
+import InternshipDetailsView from "@/components/InternshipDetailsView";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -43,10 +55,47 @@ const UnitDashboard = () => {
   const { internships, loading: internshipsLoading } = useInternships();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [jobFilter, setJobFilter] = useState("all");
+  const [updating, setUpdating] = useState<string | null>(null);
+  const [selectedInternship, setSelectedInternship] = useState<any>(null); // ADD THIS
+
+  if (selectedInternship) {
+    return <InternshipDetailsView internship={selectedInternship} onClose={() => setSelectedInternship(null)} />;
+  }
 
   const handleInternshipCreated = () => {
     // Refresh the page to reload internships
     window.location.reload();
+  };
+
+  const handleViewDetails = (internshipId: string) => {
+    const internship = internships.find((i) => i.id === internshipId);
+    if (internship) {
+      setSelectedInternship(internship);
+    }
+  };
+
+  const handleAddComments = (internshipId: string) => {
+    // Navigate to comments page or open comments modal
+    console.log("Add comments for internship:", internshipId);
+    // You can implement a modal or navigation here
+  };
+
+  const handleToggleStatus = async (id: string, currentStatus: string) => {
+    try {
+      setUpdating(id);
+      const newStatus = currentStatus === "active" ? "closed" : "active";
+
+      const { error: updateError } = await supabase.from("internships").update({ status: newStatus }).eq("id", id);
+
+      if (updateError) throw updateError;
+
+      window.location.reload(); // Refresh the list after update
+    } catch (err: any) {
+      console.error("Error updating job status:", err);
+      alert("Failed to update job status");
+    } finally {
+      setUpdating(null);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -457,14 +506,45 @@ const UnitDashboard = () => {
                               <div className="flex items-center gap-2">
                                 <Badge
                                   className={
-                                    internship.status === "active" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                                    internship.status === "active"
+                                      ? "bg-green-500 text-white hover:bg-green-500"
+                                      : "bg-red-500 text-white hover:bg-red-500"
                                   }
                                 >
                                   {internship.status === "active" ? "Active" : "Closed"}
                                 </Badge>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                  <Settings className="w-4 h-4" />
-                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                      <Settings className="w-4 h-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="w-48">
+                                    <DropdownMenuItem onClick={() => setSelectedInternship(internship)}>
+                                      <Eye className="w-4 h-4 mr-2" />
+                                      View Details
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleAddComments(internship.id)}>
+                                      <MessageSquare className="w-4 h-4 mr-2" />
+                                      Add Comments
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => handleToggleStatus(internship.id, internship.status)}
+                                    >
+                                      {internship.status === "active" ? (
+                                        <span className="flex items-center text-red-500">
+                                          <Ban className="w-4 h-4 mr-2" />
+                                          Close JD
+                                        </span>
+                                      ) : (
+                                        <span className="flex items-center text-green-500">
+                                          <CheckCircle className="w-4 h-4 mr-2" />
+                                          Activate JD
+                                        </span>
+                                      )}
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
                             </div>
 
