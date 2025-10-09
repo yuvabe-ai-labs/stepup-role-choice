@@ -20,15 +20,18 @@ const SignIn = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    console.log('[SignIn] Submitting with keepLoggedIn:', keepLoggedIn);
+    const { error } = await signIn(email, password, keepLoggedIn);
 
     if (error) {
+      console.error('[SignIn] Sign in failed:', error);
       toast({
         title: "Sign in failed",
         description: error.message,
         variant: "destructive",
       });
     } else {
+      console.log('[SignIn] Sign in successful');
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
@@ -57,11 +60,7 @@ const SignIn = () => {
       {/* Left Side - Illustration */}
       <div className="flex-1 hidden lg:flex items-center justify-center bg-gray-50">
         <div className="max-w-lg">
-          <img
-            src={signupIllustration}
-            alt="Signin Illustration"
-            className="w-full h-auto"
-          />
+          <img src={signupIllustration} alt="Signin Illustration" className="w-full h-auto" />
         </div>
       </div>
 
@@ -78,8 +77,7 @@ const SignIn = () => {
                 className="text-[20px] font-medium leading-[35px] mb-2"
                 style={{
                   color: "#1F2A37",
-                  fontFamily:
-                    "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
+                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
                 }}
               >
                 Sign in to your account
@@ -88,8 +86,7 @@ const SignIn = () => {
                 className="text-[12px] leading-[15px]"
                 style={{
                   color: "#9CA3AF",
-                  fontFamily:
-                    "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
+                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
                 }}
               >
                 Welcome back! Please enter your details below
@@ -102,12 +99,7 @@ const SignIn = () => {
                 onClick={() => handleOAuthSignIn("google")}
                 className="flex-1 h-8 bg-white border border-[#D1D5DB] rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
               >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  className="rounded-sm"
-                >
+                <svg width="15" height="15" viewBox="0 0 24 24" className="rounded-sm">
                   <path
                     fill="#4285F4"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -129,8 +121,7 @@ const SignIn = () => {
                   className="text-[10px] font-medium"
                   style={{
                     color: "#1F2A37",
-                    fontFamily:
-                      "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                    fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                   }}
                 >
                   Google
@@ -148,8 +139,7 @@ const SignIn = () => {
                   className="text-[10px] font-medium"
                   style={{
                     color: "#1F2A37",
-                    fontFamily:
-                      "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                    fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                   }}
                 >
                   Sign in with Apple
@@ -160,10 +150,7 @@ const SignIn = () => {
             {/* Divider */}
             <div className="flex items-center mb-6">
               <div className="flex-1 h-px bg-[#D1D5DB]"></div>
-              <span
-                className="px-3 text-[10px] leading-3"
-                style={{ color: "#9CA3AF" }}
-              >
+              <span className="px-3 text-[10px] leading-3" style={{ color: "#9CA3AF" }}>
                 or
               </span>
               <div className="flex-1 h-px bg-[#D1D5DB]"></div>
@@ -173,11 +160,7 @@ const SignIn = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email */}
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-[12px] mb-2"
-                  style={{ color: "#4B5563" }}
-                >
+                <label htmlFor="email" className="block text-[12px] mb-2" style={{ color: "#4B5563" }}>
                   Email Address *
                 </label>
                 <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center">
@@ -187,7 +170,7 @@ const SignIn = () => {
                     placeholder="Enter email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full text-[10px] outline-none bg-transparent placeholder-[#9CA3AF]"
+                    className="w-full text-[12px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     required
                   />
                 </div>
@@ -195,11 +178,7 @@ const SignIn = () => {
 
               {/* Password */}
               <div>
-                <label
-                  htmlFor="password"
-                  className="block text-[12px] mb-2"
-                  style={{ color: "#4B5563" }}
-                >
+                <label htmlFor="password" className="block text-[12px] mb-2" style={{ color: "#4B5563" }}>
                   Password *
                 </label>
                 <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center gap-2">
@@ -209,7 +188,7 @@ const SignIn = () => {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full text-[10px] outline-none bg-transparent placeholder-[#9CA3AF]"
+                    className="w-full text-[12px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     required
                   />
                   <button
@@ -231,11 +210,7 @@ const SignIn = () => {
                   onChange={(e) => setKeepLoggedIn(e.target.checked)}
                   className="w-3 h-3 rounded border-[#D1D5DB] text-[#76A9FA] focus:ring-[#76A9FA] focus:ring-1"
                 />
-                <label
-                  htmlFor="keepLoggedIn"
-                  className="text-[12px] cursor-pointer"
-                  style={{ color: "#4B5563" }}
-                >
+                <label htmlFor="keepLoggedIn" className="text-[12px] cursor-pointer" style={{ color: "#4B5563" }}>
                   Keep me logged in
                 </label>
               </div>
@@ -255,11 +230,7 @@ const SignIn = () => {
             <div className="text-center mt-6">
               <span className="text-[12px]" style={{ color: "#9CA3AF" }}>
                 Don’t have an account?{" "}
-                <Link
-                  to={`/auth/${role}/signup`}
-                  className="font-medium hover:underline"
-                  style={{ color: "#3F83F8" }}
-                >
+                <Link to={`/auth/${role}/signup`} className="font-medium hover:underline" style={{ color: "#3F83F8" }}>
                   Sign Up
                 </Link>
               </span>
