@@ -7,13 +7,13 @@ import {
   FileText,
   Calendar,
   Briefcase,
-  Settings,
+  EllipsisIcon,
   Sparkles,
   ArrowRight,
   Filter,
   Plus,
   Eye,
-  MessageSquare,
+  Pencil,
   Ban,
   CheckCircle,
 } from "lucide-react";
@@ -44,6 +44,7 @@ import { useInternships } from "@/hooks/useInternships";
 import CreateInternshipDialog from "@/components/CreateInternshipDialog";
 import { supabase } from "@/integrations/supabase/client";
 import InternshipDetailsView from "@/components/InternshipDetailsView";
+import EditInternshipDialog from "@/components/EditInternshipDialog";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -62,7 +63,8 @@ const UnitDashboard = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [jobFilter, setJobFilter] = useState("all");
   const [updating, setUpdating] = useState<string | null>(null);
-  const [selectedInternship, setSelectedInternship] = useState<any>(null); // ADD THIS
+  const [selectedInternship, setSelectedInternship] = useState<any>(null);
+  const [editingInternship, setEditingInternship] = useState<any>(null);
 
   if (selectedInternship) {
     return (
@@ -85,10 +87,12 @@ const UnitDashboard = () => {
     }
   };
 
+  // Update the handleAddComments function to open edit dialog (around line 80)
   const handleAddComments = (internshipId: string) => {
-    // Navigate to comments page or open comments modal
-    console.log("Add comments for internship:", internshipId);
-    // You can implement a modal or navigation here
+    const internship = internships.find((i) => i.id === internshipId);
+    if (internship) {
+      setEditingInternship(internship);
+    }
   };
 
   const handleToggleStatus = async (id: string, currentStatus: string) => {
@@ -130,13 +134,13 @@ const UnitDashboard = () => {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "shortlisted":
-        return "Shortlisted";
+        return "Shortlist Candidate";
       case "rejected":
-        return "Not Shortlist";
+        return "Not Shortlisted";
       case "interviewed":
-        return "Interviewed";
+        return "Schedule Interview";
       case "hired":
-        return "Shortlisted";
+        return "Select Candidate";
       default:
         return "Applied";
     }
@@ -195,7 +199,6 @@ const UnitDashboard = () => {
           </div>
         </div>
       </header>
-
       {/* Main Content */}
       <main className="p-6">
         {/* Stats Cards */}
@@ -381,12 +384,11 @@ const UnitDashboard = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {applications.slice(0, 9).map((application) => {
-                    // Get skills from studentProfile, parse if needed
-                    const skillsData = application.studentProfile?.skills || [];
-                    const skills = Array.isArray(skillsData) 
-                      ? skillsData 
-                      : safeParse(skillsData, []);
-                    const displaySkills = skills
+                    const rawSkills = application.studentProfile?.skills ?? application.profile?.skills ?? [];
+                    const skills = Array.isArray(rawSkills)
+                      ? rawSkills
+                      : safeParse(rawSkills, []);
+                    const displaySkills = (skills as any[])
                       .slice(0, 3)
                       .map((s: any) =>
                         typeof s === "string" ? s : s?.name || s || ""
@@ -615,7 +617,7 @@ const UnitDashboard = () => {
                                       size="sm"
                                       className="h-8 w-8 p-0"
                                     >
-                                      <Settings className="w-4 h-4" />
+                                      <EllipsisIcon className="w-4 h-4" />
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent
@@ -635,8 +637,8 @@ const UnitDashboard = () => {
                                         handleAddComments(internship.id)
                                       }
                                     >
-                                      <MessageSquare className="w-4 h-4 mr-2" />
-                                      Add Comments
+                                      <Pencil className="w-4 h-4 mr-2" />
+                                      Edit JD
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       onClick={() =>
@@ -951,8 +953,17 @@ const UnitDashboard = () => {
           </TabsContent>
         </Tabs>
       </main>
-
-      {/* Create Internship Dialog */}
+      {/* Edit Internship Dialog */}
+      <EditInternshipDialog
+        isOpen={!!editingInternship}
+        onClose={() => setEditingInternship(null)}
+        onSuccess={() => {
+          setEditingInternship(null);
+          window.location.reload();
+        }}
+        internship={editingInternship}
+      />
+      ;{/* Create Internship Dialog */}
       <CreateInternshipDialog
         isOpen={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}

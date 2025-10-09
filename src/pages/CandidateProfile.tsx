@@ -82,10 +82,13 @@ const CandidateProfile = () => {
     );
   }
 
-  const skills = safeParse(data.studentProfile.skills, []);
-  const interests = safeParse(data.studentProfile.interests, []);
-  const achievements = safeParse(data.studentProfile.achievements, []);
-  const matchScore = data.application.profile_match_score || 0;
+  const skills = safeParse(data.studentProfile?.skills, []);
+  const interests = safeParse(data.studentProfile?.interests, []);
+  const achievements = safeParse(data.studentProfile?.achievements, []);
+  const matchScore = data.application.profile_match_score ?? 0;
+  const bioText = Array.isArray(data.studentProfile?.bio)
+    ? (data.studentProfile?.bio as string[]).join(', ')
+    : (data.studentProfile?.bio as string | undefined);
 
   return (
     <div className="min-h-screen bg-background">
@@ -138,32 +141,32 @@ const CandidateProfile = () => {
           <CardContent className="p-8">
             <div className="flex items-start gap-6">
               <Avatar className="w-24 h-24">
-                <AvatarImage src={data.studentProfile.avatar_url || undefined} alt={data.profile.full_name} />
+                <AvatarImage src={data.studentProfile?.avatar_url || undefined} alt={data.profile?.full_name || 'User'} />
                 <AvatarFallback className="text-2xl">
-                  {data.profile.full_name.split(' ').map(n => n[0]).join('')}
+                  {(data.profile?.full_name || '?').split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
 
               <div className="flex-1">
-                <h2 className="text-2xl font-bold mb-2">{data.profile.full_name}</h2>
+                <h2 className="text-2xl font-bold mb-2">{data.profile?.full_name || 'Unknown'}</h2>
                 <p className="text-muted-foreground mb-4">
-                  {data.studentProfile.bio || 'Passionate professional with experience creating meaningful impact.'}
+                  {bioText || 'Passionate professional with experience creating meaningful impact.'}
                 </p>
 
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
-                  {data.profile.email && (
+                  {data.profile?.email && (
                     <div className="flex items-center gap-2">
                       <Mail className="w-4 h-4" />
                       <span>{data.profile.email}</span>
                     </div>
                   )}
-                  {data.profile.phone && (
+                  {data.profile?.phone && (
                     <div className="flex items-center gap-2">
                       <Phone className="w-4 h-4" />
                       <span>{data.profile.phone}</span>
                     </div>
                   )}
-                  {data.studentProfile.location && (
+                  {data.studentProfile?.location && (
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4" />
                       <span>{data.studentProfile.location}</span>
@@ -323,7 +326,7 @@ const CandidateProfile = () => {
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold mb-4">Links</h3>
                 <div className="flex flex-wrap gap-3">
-                  {data.studentProfile.linkedin_url && (
+                  {data.studentProfile?.linkedin_url && (
                     <Button variant="outline" size="sm" className="gap-2" asChild>
                       <a href={data.studentProfile.linkedin_url} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="w-4 h-4" />
@@ -331,7 +334,7 @@ const CandidateProfile = () => {
                       </a>
                     </Button>
                   )}
-                  {data.studentProfile.behance_url && (
+                  {data.studentProfile?.behance_url && (
                     <Button variant="outline" size="sm" className="gap-2" asChild>
                       <a href={data.studentProfile.behance_url} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="w-4 h-4" />
@@ -339,7 +342,7 @@ const CandidateProfile = () => {
                       </a>
                     </Button>
                   )}
-                  {data.studentProfile.dribbble_url && (
+                  {data.studentProfile?.dribbble_url && (
                     <Button variant="outline" size="sm" className="gap-2" asChild>
                       <a href={data.studentProfile.dribbble_url} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="w-4 h-4" />
@@ -347,7 +350,7 @@ const CandidateProfile = () => {
                       </a>
                     </Button>
                   )}
-                  {data.studentProfile.website_url && (
+                  {data.studentProfile?.website_url && (
                     <Button variant="outline" size="sm" className="gap-2" asChild>
                       <a href={data.studentProfile.website_url} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="w-4 h-4" />
@@ -355,8 +358,8 @@ const CandidateProfile = () => {
                       </a>
                     </Button>
                   )}
-                  {!data.studentProfile.linkedin_url && !data.studentProfile.behance_url && 
-                   !data.studentProfile.dribbble_url && !data.studentProfile.website_url && (
+                  {!data.studentProfile?.linkedin_url && !data.studentProfile?.behance_url && 
+                   !data.studentProfile?.dribbble_url && !data.studentProfile?.website_url && (
                     <p className="text-sm text-muted-foreground">No links provided</p>
                   )}
                 </div>
