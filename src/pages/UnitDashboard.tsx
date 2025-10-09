@@ -7,13 +7,13 @@ import {
   FileText,
   Calendar,
   Briefcase,
-  EllipsisIcon,
+  Settings,
   Sparkles,
   ArrowRight,
   Filter,
   Plus,
   Eye,
-  Pencil,
+  MessageSquare,
   Ban,
   CheckCircle,
 } from "lucide-react";
@@ -44,7 +44,6 @@ import { useInternships } from "@/hooks/useInternships";
 import CreateInternshipDialog from "@/components/CreateInternshipDialog";
 import { supabase } from "@/integrations/supabase/client";
 import InternshipDetailsView from "@/components/InternshipDetailsView";
-import EditInternshipDialog from "@/components/EditInternshipDialog";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -63,8 +62,7 @@ const UnitDashboard = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [jobFilter, setJobFilter] = useState("all");
   const [updating, setUpdating] = useState<string | null>(null);
-  const [selectedInternship, setSelectedInternship] = useState<any>(null);
-  const [editingInternship, setEditingInternship] = useState<any>(null);
+  const [selectedInternship, setSelectedInternship] = useState<any>(null); // ADD THIS
 
   if (selectedInternship) {
     return (
@@ -87,12 +85,10 @@ const UnitDashboard = () => {
     }
   };
 
-  // Update the handleAddComments function to open edit dialog (around line 80)
   const handleAddComments = (internshipId: string) => {
-    const internship = internships.find((i) => i.id === internshipId);
-    if (internship) {
-      setEditingInternship(internship);
-    }
+    // Navigate to comments page or open comments modal
+    console.log("Add comments for internship:", internshipId);
+    // You can implement a modal or navigation here
   };
 
   const handleToggleStatus = async (id: string, currentStatus: string) => {
@@ -199,6 +195,7 @@ const UnitDashboard = () => {
           </div>
         </div>
       </header>
+
       {/* Main Content */}
       <main className="p-6">
         {/* Stats Cards */}
@@ -618,7 +615,7 @@ const UnitDashboard = () => {
                                       size="sm"
                                       className="h-8 w-8 p-0"
                                     >
-                                      <EllipsisIcon className="w-4 h-4" />
+                                      <Settings className="w-4 h-4" />
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent
@@ -638,8 +635,8 @@ const UnitDashboard = () => {
                                         handleAddComments(internship.id)
                                       }
                                     >
-                                      <Pencil className="w-4 h-4 mr-2" />
-                                      Edit JD
+                                      <MessageSquare className="w-4 h-4 mr-2" />
+                                      Add Comments
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       onClick={() =>
@@ -954,17 +951,8 @@ const UnitDashboard = () => {
           </TabsContent>
         </Tabs>
       </main>
-      {/* Edit Internship Dialog */}
-      <EditInternshipDialog
-        isOpen={!!editingInternship}
-        onClose={() => setEditingInternship(null)}
-        onSuccess={() => {
-          setEditingInternship(null);
-          window.location.reload();
-        }}
-        internship={editingInternship}
-      />
-      ;{/* Create Internship Dialog */}
+
+      {/* Create Internship Dialog */}
       <CreateInternshipDialog
         isOpen={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
