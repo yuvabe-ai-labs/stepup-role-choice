@@ -1,3 +1,4 @@
+// <-- same imports as before -->
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { useState } from "react";
@@ -44,6 +45,34 @@ const Units = () => {
     });
     setActiveDateRange("");
   };
+
+  // ------------------ NEW: parse helper ------------------
+  const parsePgTimestamp = (ts: any): Date => {
+    // If it's already a Date, return early
+    if (ts instanceof Date) return ts;
+
+    if (!ts) return new Date(NaN);
+
+    let s = String(ts).trim();
+
+    // Replace space between date & time with 'T' for ISO compatibility
+    s = s.replace(" ", "T");
+
+    // Trim microseconds to milliseconds (convert .123456 -> .123)
+    s = s.replace(/\.(\d{3})\d+/, ".$1");
+
+    // If timezone is '+00' or '+00:00', convert to 'Z'
+    s = s.replace(/\+00:00?$|Z$/i, "Z");
+
+    // If there's no timezone offset (e.g., ends with seconds), append Z
+    if (!/[zZ]|[+\-]\d{2}:?\d{2}$/.test(s)) {
+      s = s + "Z";
+    }
+
+    const d = new Date(s);
+    return d;
+  };
+  // -------------------------------------------------------
 
   // Extract unique filter data
   const uniqueUnits = [...new Set(units.map((u) => u.unit_name).filter(Boolean))];
@@ -95,7 +124,7 @@ const Units = () => {
       from.setHours(0, 0, 0, 0);
     } else if (range === "week") {
       const firstDay = new Date(now);
-      firstDay.setDate(now.getDate() - now.getDay());
+      firstDay.setDate(now.getDate() - now.getDay()); // week starts Sunday; adjust if you want Monday
       firstDay.setHours(0, 0, 0, 0);
       from = firstDay;
     } else if (range === "month") {
@@ -113,7 +142,7 @@ const Units = () => {
     });
   };
 
-  // ✅ Core filtering
+  // ✅ Core filtering (uses parsePgTimestamp for created_at)
   const filteredUnits = units.filter((unit) => {
     if (filters.units.length && !filters.units.includes(unit.unit_name)) return false;
     if (filters.industries.length) {
@@ -133,9 +162,13 @@ const Units = () => {
     }
 
     if (filters.postingDate.from || filters.postingDate.to) {
-      const unitDate = new Date(unit.created_at).getTime();
+      const unitDate = parsePgTimestamp(unit.created_at).getTime();
       const from = filters.postingDate.from ? new Date(filters.postingDate.from).getTime() : -Infinity;
       const to = filters.postingDate.to ? new Date(filters.postingDate.to).getTime() : Infinity;
+
+      // If unitDate is invalid, exclude it (could also decide to include)
+      if (Number.isNaN(unitDate)) return false;
+
       if (unitDate < from || unitDate > to) return false;
     }
 
@@ -273,7 +306,7 @@ const Units = () => {
                       className={`${gradient} h-48 relative flex flex-col items-center justify-center p-6 text-white`}
                     >
                       <Badge className="absolute top-3 left-3 bg-white/90 text-foreground">
-                        {formatDistanceToNow(new Date(unit.created_at), {
+                        {formatDistanceToNow(parsePgTimestamp(unit.created_at), {
                           addSuffix: true,
                         })}
                       </Badge>
