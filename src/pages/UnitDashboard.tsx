@@ -349,7 +349,7 @@ const UnitDashboard = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Applications</SelectItem>
-                  <SelectItem value="shortlisted">Shortlisted</SelectItem>
+                  <SelectItem value="shortlisted">Shortlist</SelectItem>
                   <SelectItem value="interviewed">Interviewed</SelectItem>
                   <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
