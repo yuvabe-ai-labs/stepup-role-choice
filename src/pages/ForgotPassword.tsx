@@ -18,34 +18,24 @@ const ForgotPassword = () => {
     setError("");
 
     try {
-      // Check if user exists in auth.users
-      const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .eq('email', email)
-        .maybeSingle();
-
-      if (profileError) {
-        console.error('Error checking user:', profileError);
-      }
-
-      if (!profiles) {
-        setError("User not found. Please enter the correct email address.");
-        setLoading(false);
-        return;
-      }
-
-      // Send password reset email
+      // Send password reset email - Supabase will only send if user exists
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (resetError) {
-        toast({
-          title: "Error",
-          description: resetError.message,
-          variant: "destructive",
-        });
+        // Check if it's a user not found error
+        if (resetError.message.toLowerCase().includes("user") || 
+            resetError.message.toLowerCase().includes("not found") ||
+            resetError.message.toLowerCase().includes("invalid")) {
+          setError("User not found. Please enter the correct email address.");
+        } else {
+          toast({
+            title: "Error",
+            description: resetError.message,
+            variant: "destructive",
+          });
+        }
         setLoading(false);
         return;
       }
