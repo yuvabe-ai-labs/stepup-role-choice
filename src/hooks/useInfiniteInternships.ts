@@ -27,8 +27,7 @@ export const useInfiniteInternships = (filters: InternshipFilters) => {
 
   const fetchInternships = async (pageNum: number) => {
     try {
-      console.log('[useInfiniteInternships] Fetching page:', pageNum);
-      setLoading(true);
+      setLoading(pageNum === 0);
       setError(null);
 
       let query = supabase
@@ -42,12 +41,7 @@ export const useInfiniteInternships = (filters: InternshipFilters) => {
       }
 
       if (filters.industries.length > 0) {
-        query = query.in('location', filters.industries); // Using location as industry proxy
-      }
-
-      if (filters.departments.length > 0) {
-        // Department filter - we'll use title/description search
-        // Since there's no explicit department field, we can use contains on title
+        query = query.in('location', filters.industries);
       }
 
       if (filters.postingDate.from) {
@@ -62,13 +56,11 @@ export const useInfiniteInternships = (filters: InternshipFilters) => {
       const from = pageNum * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
 
-      const { data, error: fetchError, count } = await query
+      const { data, error: fetchError } = await query
         .order('posted_date', { ascending: false })
         .range(from, to);
 
       if (fetchError) throw fetchError;
-
-      console.log('[useInfiniteInternships] Fetched:', data?.length, 'internships');
 
       if (pageNum === 0) {
         setInternships(data || []);
@@ -87,7 +79,6 @@ export const useInfiniteInternships = (filters: InternshipFilters) => {
 
   // Reset when filters change
   useEffect(() => {
-    console.log('[useInfiniteInternships] Filters changed, resetting...');
     setPage(0);
     setInternships([]);
     setHasMore(true);
@@ -106,7 +97,6 @@ export const useInfiniteInternships = (filters: InternshipFilters) => {
   const loadMore = useCallback(() => {
     if (!loading && hasMore) {
       const nextPage = page + 1;
-      console.log('[useInfiniteInternships] Loading more, page:', nextPage);
       setPage(nextPage);
       fetchInternships(nextPage);
     }

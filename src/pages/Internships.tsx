@@ -8,11 +8,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Search, Clock } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useInfiniteInternships } from "@/hooks/useInfiniteInternships";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
-import { formatDistanceToNow, subDays, startOfDay } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 
 const Internships = () => {
   const navigate = useNavigate();
@@ -26,6 +28,7 @@ const Internships = () => {
     interestAreas: [] as string[],
   });
 
+  const [activeDateRange, setActiveDateRange] = useState("");
   const [searchUnits, setSearchUnits] = useState("");
   const [searchIndustries, setSearchIndustries] = useState("");
   const [searchDepartments, setSearchDepartments] = useState("");
@@ -42,7 +45,6 @@ const Internships = () => {
   console.log('[Internships] Has more:', hasMore);
 
   const resetFilters = () => {
-    console.log('[Internships] Resetting filters');
     setFilters({
       units: [],
       industries: [],
@@ -51,6 +53,7 @@ const Internships = () => {
       postingDate: { from: "", to: "" },
       interestAreas: [],
     });
+    setActiveDateRange("");
   };
 
   // Extract unique values from internships
@@ -89,26 +92,40 @@ const Internships = () => {
   const toggleFilter = (category: keyof typeof filters, value: string) => {
     if (category === "postingDate" || category === "coursePeriod") return;
     const list = filters[category] as string[];
-    console.log('[Internships] Toggle filter:', category, value);
     setFilters({
       ...filters,
       [category]: list.includes(value) ? list.filter((v) => v !== value) : [...list, value],
     });
   };
 
-  const setDateRange = (type: "today" | "week" | "month") => {
-    const today = new Date();
-    let fromDate = today;
-    if (type === "week") fromDate = subDays(today, 7);
-    else if (type === "month") fromDate = subDays(today, 30);
+  const DateRange = (range: "today" | "week" | "month") => {
+    if (activeDateRange === range) {
+      setActiveDateRange("");
+      setFilters({ ...filters, postingDate: { from: "", to: "" } });
+      return;
+    }
 
-    console.log('[Internships] Setting date range:', type);
+    const now = new Date();
+    let from = new Date();
+
+    if (range === "today") {
+      from.setHours(0, 0, 0, 0);
+    } else if (range === "week") {
+      const firstDay = new Date(now);
+      firstDay.setDate(now.getDate() - now.getDay());
+      firstDay.setHours(0, 0, 0, 0);
+      from = firstDay;
+    } else if (range === "month") {
+      from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    }
+
+    const to = new Date();
+    to.setHours(23, 59, 59, 999);
+
+    setActiveDateRange(range);
     setFilters({
       ...filters,
-      postingDate: {
-        from: startOfDay(fromDate).toISOString(),
-        to: startOfDay(today).toISOString(),
-      },
+      postingDate: { from: from.toISOString(), to: to.toISOString() },
     });
   };
 
@@ -309,70 +326,58 @@ const Internships = () => {
 
             {/* Posting Date */}
             <div>
-              <Label className="text-sm font-semibold text-muted-foreground mb-3 block">
-                Posting Date
-              </Label>
-              <div className="flex gap-3 mb-3">
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground mb-1 block">From</Label>
-                  <div className="flex items-center border rounded-full px-3 py-2 bg-background">
-                    <CalendarIcon className="w-4 h-4 text-muted-foreground mr-2" />
-                    <Input
-                      type="date"
-                      className="border-0 p-0 h-auto focus-visible:ring-0 text-sm"
-                      value={filters.postingDate.from}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          postingDate: { ...filters.postingDate, from: e.target.value },
-                        })
-                      }
-                    />
-                  </div>
+              <Label className="text-sm font-semibold text-muted-foreground mb-3 block">Posting Date</Label>
+              <div className="flex flex-col space-y-3">
+                <div className="flex flex-wrap gap-2 justify-between">
+                  {["from", "to"].map((key) => (
+                    <Popover key={key}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="flex-1 justify-start rounded-full px-4 text-left font-normal truncate"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                          {filters.postingDate[key as keyof typeof filters.postingDate]
+                            ? new Date(filters.postingDate[key as keyof typeof filters.postingDate]).toLocaleDateString()
+                            : key === "from"
+                              ? "From"
+                              : "To"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={filters.postingDate[key as keyof typeof filters.postingDate] ? new Date(filters.postingDate[key as keyof typeof filters.postingDate]) : undefined}
+                          onSelect={(date) =>
+                            setFilters({
+                              ...filters,
+                              postingDate: {
+                                ...filters.postingDate,
+                                [key]: date ? date.toISOString() : "",
+                              },
+                            })
+                          }
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ))}
                 </div>
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground mb-1 block">To</Label>
-                  <div className="flex items-center border rounded-full px-3 py-2 bg-background">
-                    <CalendarIcon className="w-4 h-4 text-muted-foreground mr-2" />
-                    <Input
-                      type="date"
-                      className="border-0 p-0 h-auto focus-visible:ring-0 text-sm"
-                      value={filters.postingDate.to}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          postingDate: { ...filters.postingDate, to: e.target.value },
-                        })
-                      }
-                    />
-                  </div>
+
+                <div className="flex justify-between gap-2 flex-wrap mt-2">
+                  {["today", "week", "month"].map((range) => (
+                    <Button
+                      key={range}
+                      variant={activeDateRange === range ? "default" : "outline"}
+                      size="sm"
+                      className="rounded-full flex-1"
+                      onClick={() => DateRange(range as "today" | "week" | "month")}
+                    >
+                      {range === "today" ? "Today" : range === "week" ? "This Week" : "This Month"}
+                    </Button>
+                  ))}
                 </div>
-              </div>
-              <div className="flex justify-between mt-2 gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full px-3 flex-1"
-                  onClick={() => setDateRange("today")}
-                >
-                  Today
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full px-3 flex-1"
-                  onClick={() => setDateRange("week")}
-                >
-                  This Week
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full px-3 flex-1"
-                  onClick={() => setDateRange("month")}
-                >
-                  This Month
-                </Button>
               </div>
             </div>
 
