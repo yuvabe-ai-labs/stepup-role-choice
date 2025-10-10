@@ -265,7 +265,7 @@ const Units = () => {
           </div>
         </div>
 
-        {/* Main Content */}
+        {/* Main Content (Units Grid) */}
         <div className="flex-1">
           <div className="mb-6">
             <h1 className="text-3xl font-bold">Explore {filteredUnits.length} Units</h1>
@@ -294,40 +294,67 @@ const Units = () => {
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredUnits.map((unit, i) => {
-                const gradient = getUnitGradient(i);
+              {filteredUnits.map((unit, index) => {
+                const gradient = getUnitGradient(index);
+
                 return (
                   <Card
                     key={unit.id}
                     className="overflow-hidden rounded-3xl hover:shadow-lg transition-all cursor-pointer"
                     onClick={() => navigate(`/units/${unit.id}`)}
                   >
+                    {/* Card Header with Gradient */}
                     <div
                       className={`${gradient} h-48 relative flex flex-col items-center justify-center p-6 text-white`}
                     >
                       <Badge className="absolute top-3 left-3 bg-white/90 text-foreground">
-                        {formatDistanceToNow(parsePgTimestamp(unit.created_at), {
+                        {formatDistanceToNow(new Date(unit.created_at), {
                           addSuffix: true,
                         })}
                       </Badge>
+
                       {unit.is_aurovillian && (
                         <Badge className="absolute top-3 right-3 bg-green-500 text-white">Auroville</Badge>
                       )}
-                      <h3 className="text-xl font-bold text-center mb-2">{unit.unit_name.toLocaleUpperCase()}</h3>
+
+                      <h3 className="text-xl font-bold text-center mb-2">{unit.unit_name.toUpperCase()}</h3>
                       <ChevronRight className="absolute right-4 bottom-4 w-6 h-6" />
                     </div>
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <span className="text-sm font-medium line-clamp-1">{unit.unit_name}</span>
-                      <Button
-                        size="sm"
-                        className="bg-orange-500 hover:bg-orange-600 text-white rounded-3xl"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/units/${unit.id}`);
-                        }}
-                      >
-                        View
-                      </Button>
+
+                    {/* Card Content with Logo */}
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-full overflow-hidden border bg-white flex items-center justify-center">
+                            {unit.image ? (
+                              <img
+                                src={unit.image}
+                                alt={`${unit.unit_name} logo`}
+                                className="object-contain w-10 h-10"
+                              />
+                            ) : (
+                              <span className="text-xs text-muted-foreground">No Logo</span>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold line-clamp-1">{unit.unit_name}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-1">
+                              {unit.industry || unit.unit_type || "General"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <Button
+                          size="sm"
+                          className="bg-orange-500 hover:bg-orange-600 text-white rounded-3xl"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/units/${unit.id}`);
+                          }}
+                        >
+                          View
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 );
