@@ -368,14 +368,15 @@ const UnitDashboard = () => {
                   })}
                 </div>
 
-                {applications.length > 9 && (
+                {/* View All button - always show if there are applications */}
+                {applications.length > 0 && (
                   <div className="flex justify-center mt-8">
                     <Button 
-                      variant="link" 
-                      className="text-primary font-medium"
+                      variant="outline"
+                      className="px-8"
                       onClick={() => navigate('/all-applications')}
                     >
-                      View More
+                      View All
                     </Button>
                   </div>
                 )}

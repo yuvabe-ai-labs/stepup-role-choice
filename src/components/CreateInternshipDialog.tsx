@@ -154,6 +154,17 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
       const skillsArray = data.skills_required.split(',').map(s => s.trim());
       const responsibilitiesArray = data.responsibilities.split('\n').filter(r => r.trim());
       const benefitsArray = data.benefits.split('\n').filter(b => b.trim());
+      
+      // Get unit name from units table
+      const { data: units, error: unitsError } = await supabase
+        .from('units')
+        .select('unit_name')
+        .eq('profile_id', profile.id)
+        .maybeSingle();
+      
+      if (unitsError) {
+        console.error('Error fetching unit:', unitsError);
+      }
 
       // Create internship
       console.log('Creating internship with profile ID:', profile.id);
@@ -170,7 +181,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
         application_deadline: format(data.application_deadline, 'yyyy-MM-dd'),
         created_by: profile.id,
         status: 'active',
-        company_name: 'YuvaNext', // Default company name
+        company_name: units?.unit_name || 'Unit',
       });
 
       if (error) throw error;
@@ -207,7 +218,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
       
       switch (fieldName) {
         case 'description':
-          prompt = `Write a clear and professional "About Internship" description for a ${jobTitle} internship position. The description should be 2-3 paragraphs explaining what the internship is about, what the intern will be doing, and what they will learn. Make it engaging and suitable for all types of internship roles.${currentValue ? ` Current description: "${currentValue}". Please improve and rewrite it.` : ''}`;
+          prompt = `Write a clear and professional "About Internship" description for a ${jobTitle} internship position. The description should be 1-2 paragraphs explaining what the internship is about, what the intern will be doing. Make it engaging and suitable for all types of internship roles.${currentValue ? ` Current description: "${currentValue}". Please improve and rewrite it.` : ''}`;
           break;
         case 'responsibilities':
           prompt = `List 5-7 key responsibilities for a ${jobTitle} internship. Format as bullet points, one per line. Make them clear, actionable, and relevant to the role.${currentValue ? ` Current responsibilities: "${currentValue}". Please improve and expand on them.` : ''}`;
@@ -229,8 +240,9 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
           userRole: 'unit'
         }
       });
-
+      console.log(prompt);
       console.log('AI Response:', aiResponse);
+
 
       if (error) throw error;
 
@@ -446,11 +458,11 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                       type="button"
                       size="sm"
                       className="absolute bottom-2 right-2 bg-teal-600 hover:bg-teal-700"
-                      onClick={() => handleAIAssist('skills_required')}
-                      disabled={aiLoading === 'skills_required'}
+                      onClick={() => handleAIAssist('responsibilities')}
+                      disabled={aiLoading === 'responsibilities'}
                     >
                       <Sparkles className="w-4 h-4 mr-1" />
-                      {aiLoading === 'skills_required' ? 'Generating...' : 'AI Assistant'}
+                      {aiLoading === 'responsibilities' ? 'Generating...' : 'AI Assistant'}
                     </Button>
                   </div>
                 )}
@@ -514,11 +526,11 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                       type="button"
                       size="sm"
                       className="absolute bottom-2 right-2 bg-teal-600 hover:bg-teal-700"
-                      onClick={() => handleAIAssist('responsibilities')}
-                      disabled={aiLoading === 'responsibilities'}
+                      onClick={() => handleAIAssist('skills_required')}
+                      disabled={aiLoading === 'skills_required'}
                     >
                       <Sparkles className="w-4 h-4 mr-1" />
-                      {aiLoading === 'responsibilities' ? 'Generating...' : 'AI Assistant'}
+                      {aiLoading === 'skills_required' ? 'Generating...' : 'AI Assistant'}
                     </Button>
                   </div>
                 )}
