@@ -1,8 +1,8 @@
-import { Link } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { GraduationCap, Building } from 'lucide-react';
-import yuvanextIllustration from '@/assets/stepup-illustration.jpg';
+import { Link } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { GraduationCap, Building } from "lucide-react";
+import yuvanextIllustration from "@/assets/stepup-illustration.jpg";
 
 const Landing = () => {
   return (
@@ -23,8 +23,8 @@ const Landing = () => {
           {/* Left Side - Illustration */}
           <div className="order-2 lg:order-1">
             <div className="relative">
-              <img 
-                src={yuvanextIllustration} 
+              <img
+                src={yuvanextIllustration}
                 alt="YuvaNext Progress Illustration"
                 className="w-full h-auto rounded-2xl shadow-lg"
               />
@@ -39,7 +39,8 @@ const Landing = () => {
                 Choose Your Role
               </h2>
               <p className="text-muted-foreground text-lg">
-                Select the option that best describes you to access your personalized dashboard.
+                Select the option that best describes you to access your
+                personalized dashboard.
               </p>
             </div>
 
@@ -47,7 +48,7 @@ const Landing = () => {
               {/* Student Card */}
               <Card className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/20 hover:scale-[1.02]">
                 <CardContent className="p-6">
-                  <Link to="/auth/student/signin" className="block">
+                  <Link to="/auth/student/signup" className="block">
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
                         <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -59,12 +60,11 @@ const Landing = () => {
                           Student
                         </h3>
                         <p className="text-muted-foreground">
-                          Access your courses, assignments, and track your progress
+                          Access your courses, assignments, and track your
+                          progress
                         </p>
                       </div>
-                      <div className="text-muted-foreground group-hover:text-primary transition-colors">
-                        →
-                      </div>
+                      <div className="text-muted-foreground group-hover:text-primary transition-colors"></div>
                     </div>
                   </Link>
                 </CardContent>
@@ -73,7 +73,7 @@ const Landing = () => {
               {/* Unit Card */}
               <Card className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/20 hover:scale-[1.02]">
                 <CardContent className="p-6">
-                  <Link to="/auth/unit/signin" className="block">
+                  <Link to="/auth/unit/signup" className="block">
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
                         <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center group-hover:bg-accent/20 transition-colors">
@@ -88,9 +88,7 @@ const Landing = () => {
                           Manage courses, students, and institutional resources
                         </p>
                       </div>
-                      <div className="text-muted-foreground group-hover:text-primary transition-colors">
-                        →
-                      </div>
+                      <div className="text-muted-foreground group-hover:text-primary transition-colors"></div>
                     </div>
                   </Link>
                 </CardContent>

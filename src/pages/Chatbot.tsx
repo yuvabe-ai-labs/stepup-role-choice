@@ -35,6 +35,8 @@ const Chatbot = () => {
   const navigate = useNavigate();
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [isMultiSelect, setIsMultiSelect] = useState(false);
+  const [accumulatedUnitData, setAccumulatedUnitData] = useState<any>({});
+  const [accumulatedStudentData, setAccumulatedStudentData] = useState<any>({});
 
   // Fetch user profile data
   useEffect(() => {
@@ -279,6 +281,9 @@ const Chatbot = () => {
     }
   };
 
+  // Updated storeUserData function for better unit data collection
+  // Replace the existing storeUserData function with this improved version
+
   const storeUserData = async (userResponse: string) => {
     if (!user?.id) return;
 
@@ -288,51 +293,48 @@ const Chatbot = () => {
     const isUnit = userProfile?.role === "unit";
 
     try {
-      let updateData: any = {};
+      let profileUpdateData: any = {}; // For profiles table (basic info only)
+      let roleSpecificData: any = {}; // For student_profiles or units table
 
       // For students
       if (!isUnit) {
         // STUDENT DATA COLLECTION
 
-        // Phone number (question 3)
+        // Phone number (question 3) - store in profiles
         if (
-          lastBotMessage.includes("Phone Number") ||
-          lastBotMessage.includes("phone number")
+          lastBotMessage.toLowerCase().includes("phone number") ||
+          lastBotMessage.toLowerCase().includes("phone") ||
+          lastBotMessage.toLowerCase().includes("number")
         ) {
-          updateData.phone = userResponse.trim();
+          profileUpdateData.phone = userResponse.trim();
           console.log("Storing phone number:", userResponse);
         }
 
-        // Gender (question 4)
-        if (
-          lastBotMessage.includes("Gender") ||
-          lastBotMessage.includes("gender")
-        ) {
-          updateData.gender = userResponse.trim();
+        // Gender (question 4) - store in profiles
+        if (lastBotMessage.toLowerCase().includes("gender")) {
+          profileUpdateData.gender = userResponse.trim();
           console.log("Storing gender:", userResponse);
         }
 
-        // Profile Type (question 5)
-        if (
-          lastBotMessage.includes("Profile Type") ||
-          lastBotMessage.includes("profile type")
-        ) {
-          updateData.profile_type = userResponse.trim();
+        // Profile Type (question 5) - store in student_profiles
+        if (lastBotMessage.toLowerCase().includes("profile type")) {
+          roleSpecificData.profile_type = userResponse.trim();
           console.log("Storing profile type:", userResponse);
         }
 
-        // Interest Area (question 6)
+        // Interest Area (question 6) - store in student_profiles
         if (
-          lastBotMessage.includes(
-            "Which area of interest excites you the most"
-          ) ||
-          lastBotMessage.includes("area of interest")
+          lastBotMessage.toLowerCase().includes("area of interest") ||
+          lastBotMessage.toLowerCase().includes("which area")
         ) {
-          updateData.interest_area = stringToArray(userResponse);
-          console.log("Storing skills as array:", updateData.interest_area);
+          roleSpecificData.interests = stringToArray(userResponse);
+          console.log(
+            "Storing interests as array:",
+            roleSpecificData.interests
+          );
         }
 
-        // Skills (after area of interest selection)
+        // Skills (after area of interest selection) - store in student_profiles
         if (
           lastBotMessage.includes("Technology & Digital") ||
           lastBotMessage.includes("Creative & Design") ||
@@ -340,151 +342,287 @@ const Chatbot = () => {
           lastBotMessage.includes("Business & Entrepreneurship") ||
           lastBotMessage.includes("Personal Growth & Soft Skills")
         ) {
-          updateData.skills = stringToArray(userResponse);
-          console.log("Storing skills as array:", updateData.skills);
+          roleSpecificData.skills = stringToArray(userResponse);
+          console.log("Storing skills as array:", roleSpecificData.skills);
         }
 
-        if (lastBotMessage.includes("looking for right now")) {
-          updateData.looking_for = stringToArray(userResponse);
-          console.log("Storing purpose:", updateData.looking_for);
+        // Looking for - store in student_profiles
+        if (lastBotMessage.toLowerCase().includes("looking for right now")) {
+          roleSpecificData.looking_for = stringToArray(userResponse);
+          console.log("Storing looking_for:", roleSpecificData.looking_for);
         }
 
-        // Education Level
+        // Education Level - store in student_profiles
         if (
-          lastBotMessage.includes("education") ||
-          lastBotMessage.includes("studying") ||
-          lastBotMessage.includes("grade")
+          lastBotMessage.toLowerCase().includes("education") ||
+          lastBotMessage.toLowerCase().includes("studying") ||
+          lastBotMessage.toLowerCase().includes("grade")
         ) {
-          updateData.education_level = userResponse.trim();
+          roleSpecificData.experience_level = userResponse.trim();
           console.log("Storing education level:", userResponse);
         }
 
-        // Bio/About
+        // Bio/About - store in student_profiles
         if (
-          lastBotMessage.includes("about yourself") ||
-          lastBotMessage.includes("tell me more") ||
-          lastBotMessage.includes("describe yourself")
+          lastBotMessage.toLowerCase().includes("about yourself") ||
+          lastBotMessage.toLowerCase().includes("tell me more") ||
+          lastBotMessage.toLowerCase().includes("describe yourself")
         ) {
-          updateData.bio = userResponse.trim();
+          roleSpecificData.bio = userResponse.trim();
           console.log("Storing bio:", userResponse);
-        }
-      }
-
-      // Save to database
-      if (Object.keys(updateData).length > 0 && user) {
-        console.log("Updating profile with data:", updateData);
-
-        const { data: updatedProfile, error } = await supabase
-          .from("profiles")
-          .update(updateData)
-          .eq("user_id", user.id)
-          .select()
-          .single();
-
-        if (error) {
-          console.error("Failed to update profile:", error);
-        } else {
-          console.log("Profile updated successfully:", updatedProfile);
         }
       } else {
         // UNIT DATA COLLECTION
 
-        // Unit Name (question 2)
+        // Unit Name - FIRST PROFESSIONAL QUESTION
         if (
-          lastBotMessage.includes("name of your unit") ||
-          lastBotMessage.includes("unit name") ||
-          lastBotMessage.includes("organization name")
+          lastBotMessage.toLowerCase().includes("name of your unit") ||
+          lastBotMessage.toLowerCase().includes("what is your unit called") ||
+          lastBotMessage.toLowerCase().includes("unit name") ||
+          lastBotMessage.toLowerCase().includes("organization name") ||
+          lastBotMessage.toLowerCase().includes("what's the name")
         ) {
-          updateData.unit_name = userResponse.trim();
-          console.log("Storing unit name:", userResponse);
+          roleSpecificData.unit_name = userResponse.trim();
+          console.log("✅ Storing unit name:", userResponse);
         }
 
-        // Unit Type/Category (question 3)
+        // Unit Type/Category - SECOND PROFESSIONAL QUESTION
         if (
-          lastBotMessage.includes("type of unit") ||
-          lastBotMessage.includes("category") ||
-          lastBotMessage.includes("what kind of unit")
+          lastBotMessage.toLowerCase().includes("type of unit") ||
+          lastBotMessage.toLowerCase().includes("category") ||
+          lastBotMessage.toLowerCase().includes("what kind of unit") ||
+          lastBotMessage.toLowerCase().includes("unit's type")
         ) {
-          updateData.unit_type = userResponse.trim();
-          console.log("Storing unit type:", userResponse);
+          roleSpecificData.unit_type = userResponse.trim();
+          console.log("✅ Storing unit type:", userResponse);
         }
 
-        // Unit Description (question 4)
+        // Unit Description - store in units
         if (
-          lastBotMessage.includes("describe your unit") ||
-          lastBotMessage.includes("what does your unit do") ||
-          lastBotMessage.includes("about your unit")
+          lastBotMessage.toLowerCase().includes("describe your unit") ||
+          lastBotMessage.toLowerCase().includes("what does your unit do") ||
+          lastBotMessage.toLowerCase().includes("about your unit")
         ) {
-          updateData.unit_description = userResponse.trim();
+          roleSpecificData.description = userResponse.trim();
           console.log("Storing unit description:", userResponse);
         }
 
-        // Phone number (question 5)
+        // Phone number - store in units
         if (
-          lastBotMessage.includes("number to reach") ||
-          lastBotMessage.includes("phone") ||
-          lastBotMessage.includes("contact number")
+          lastBotMessage.includes("number") ||
+          lastBotMessage.toLowerCase().includes("number to reach") ||
+          (lastBotMessage.toLowerCase().includes("phone") &&
+            lastBotMessage.toLowerCase().includes("unit")) ||
+          lastBotMessage.toLowerCase().includes("contact number")
         ) {
-          updateData.phone = userResponse.trim();
+          roleSpecificData.contact_phone = userResponse.trim();
           console.log("Storing unit phone number:", userResponse);
         }
 
-        // Unit Address/Location (question 6)
+        if (lastBotMessage.includes("email")) {
+          roleSpecificData.contact_email = userResponse.trim();
+          console.log("Storing unit email:", userResponse);
+        }
+
+        if (lastBotMessage.includes("city")) {
+          roleSpecificData.address = userResponse.trim();
+          console.log("Storing unit location:", userResponse);
+        }
+
+        // Unit Address/Location - store in units
         if (
-          lastBotMessage.includes("location") ||
-          lastBotMessage.includes("address") ||
-          lastBotMessage.includes("where is your unit")
+          lastBotMessage.toLowerCase().includes("location") ||
+          lastBotMessage.toLowerCase().includes("address") ||
+          lastBotMessage.toLowerCase().includes("where is your unit")
         ) {
-          updateData.unit_address = userResponse.trim();
+          roleSpecificData.address = userResponse.trim();
           console.log("Storing unit address:", userResponse);
         }
 
-        // Unit Website
+        // Unit Website - store in units
         if (
-          lastBotMessage.includes("website") ||
-          lastBotMessage.includes("web address") ||
-          lastBotMessage.includes("URL")
+          lastBotMessage.toLowerCase().includes("website") ||
+          lastBotMessage.toLowerCase().includes("web address") ||
+          lastBotMessage.toLowerCase().includes("url")
         ) {
-          updateData.website = userResponse.trim();
+          roleSpecificData.website_url = userResponse.trim();
           console.log("Storing website:", userResponse);
         }
 
-        // Services Offered
+        // Focus Areas/Interests - store in units
         if (
-          lastBotMessage.includes("services") ||
-          lastBotMessage.includes("what do you offer") ||
-          lastBotMessage.includes("programs")
+          lastBotMessage.toLowerCase().includes("what your unit focuses on") ||
+          lastBotMessage.toLowerCase().includes("focus areas") ||
+          lastBotMessage.toLowerCase().includes("areas of focus")
         ) {
-          updateData.services_offered = userResponse.trim();
-          console.log("Storing services offered:", userResponse);
+          roleSpecificData.focus_areas = stringToArray(userResponse);
+          console.log("Storing unit Focus area", roleSpecificData.focus_areas);
         }
 
-        // Target Audience
+        // Skills offered by unit
         if (
-          lastBotMessage.includes("target audience") ||
-          lastBotMessage.includes("who do you serve") ||
-          lastBotMessage.includes("participants")
+          lastBotMessage.includes("Technology & IT") ||
+          lastBotMessage.includes("Creative & Design") ||
+          lastBotMessage.includes("Marketing & Communications") ||
+          lastBotMessage.includes("Business & Management") ||
+          lastBotMessage.includes("Research & Innovation") ||
+          lastBotMessage.includes("Community & Social Impact") ||
+          lastBotMessage.includes("Education & Training")
         ) {
-          updateData.target_audience = userResponse.trim();
-          console.log("Storing target audience:", userResponse);
+          roleSpecificData.skills_offered = stringToArray(userResponse);
+          console.log(
+            "Storing skills offered:",
+            roleSpecificData.skills_offered
+          );
+        }
+
+        // Services Offered - store in units as opportunities_offered
+        if (
+          lastBotMessage
+            .toLowerCase()
+            .includes("opportunities can your unit offer") ||
+          lastBotMessage.includes("opportunities") ||
+          lastBotMessage.toLowerCase().includes("services") ||
+          lastBotMessage.toLowerCase().includes("what do you offer") ||
+          lastBotMessage.toLowerCase().includes("programs")
+        ) {
+          roleSpecificData.opportunities_offered = stringToArray(userResponse);
+          console.log(
+            "Storing opportunities offered:",
+            roleSpecificData.opportunities_offered
+          );
+        }
+
+        // Mission - store in units
+        if (
+          lastBotMessage.toLowerCase().includes("mission") ||
+          lastBotMessage.toLowerCase().includes("purpose") ||
+          lastBotMessage.toLowerCase().includes("goal")
+        ) {
+          roleSpecificData.mission = userResponse.trim();
+          console.log("Storing mission:", userResponse);
+        }
+
+        // Aurovillian status
+        if (
+          lastBotMessage.toLowerCase().includes("aurovillian unit") ||
+          lastBotMessage.includes("Aurovillian Unit")
+        ) {
+          const response = userResponse.toLowerCase();
+
+          if (response.includes("non-aurovillian")) {
+            roleSpecificData.is_aurovillian = false;
+          } else if (response.includes("aurovillian")) {
+            roleSpecificData.is_aurovillian = true;
+          } else {
+            // fallback if response unclear
+            roleSpecificData.is_aurovillian = null;
+          }
+
+          console.log(
+            "Storing Aurovillian status:",
+            roleSpecificData.is_aurovillian
+          );
         }
       }
 
-      // Update profile if we have data to store
-      if (Object.keys(updateData).length > 0) {
+      // Update profiles table if we have basic profile data
+      if (Object.keys(profileUpdateData).length > 0) {
+        console.log("Updating profiles table with:", profileUpdateData);
         const { data, error } = await supabase
           .from("profiles")
-          .update(updateData)
+          .update(profileUpdateData)
           .eq("user_id", user.id)
           .select();
 
         if (error) {
-          console.error("Error updating profile data:", error);
+          console.error("Error updating profiles data:", error);
         } else {
-          console.log("Successfully updated profile data:", data);
-          // Update local state
-          setUserProfile((prev: any) => ({ ...prev, ...updateData }));
+          console.log("Successfully updated profiles data:", data);
         }
+      }
+
+      // Update role-specific table if we have role-specific data
+      if (Object.keys(roleSpecificData).length > 0) {
+        // Get profile_id first
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+          return;
+        }
+
+        const profileId = profileData.id;
+
+        if (!isUnit) {
+          // STUDENT: Accumulate data
+          const updatedStudentData = {
+            ...accumulatedStudentData,
+            ...roleSpecificData,
+          };
+          setAccumulatedStudentData(updatedStudentData);
+
+          console.log(
+            "📝 Updating student_profiles with accumulated data:",
+            updatedStudentData
+          );
+          const { data, error } = await supabase
+            .from("student_profiles")
+            .upsert(
+              { profile_id: profileId, ...updatedStudentData },
+              { onConflict: "profile_id" }
+            )
+            .select();
+
+          if (error) {
+            console.error("❌ Error updating student_profiles:", error);
+          } else {
+            console.log("✅ Successfully updated student_profiles:", data);
+          }
+        } else {
+          // UNIT: Accumulate data to avoid null constraint violations
+          const updatedUnitData = {
+            ...accumulatedUnitData,
+            ...roleSpecificData,
+          };
+          setAccumulatedUnitData(updatedUnitData);
+
+          console.log("📝 Updating units table with accumulated data:", {
+            profile_id: profileId,
+            ...updatedUnitData,
+          });
+
+          const { data, error } = await supabase
+            .from("units")
+            .upsert(
+              { profile_id: profileId, ...updatedUnitData },
+              { onConflict: "profile_id" }
+            )
+            .select();
+
+          if (error) {
+            console.error("❌ Error updating units:", error);
+            console.error("Full error details:", {
+              code: error.code,
+              message: error.message,
+              details: error.details,
+              hint: error.hint,
+            });
+          } else {
+            console.log("✅ Successfully updated units:", data);
+          }
+        }
+
+        // Update local state
+        setUserProfile((prev: any) => ({
+          ...prev,
+          ...profileUpdateData,
+          ...roleSpecificData,
+        }));
       }
     } catch (error) {
       console.error("Error storing user data:", error);
@@ -494,7 +632,6 @@ const Chatbot = () => {
   const getQuestionType = (lastBotMessage: string) => {
     const multiSelectQuestions = [
       "opportunities can your unit offer",
-      "looking for right now",
       "Technology & IT",
       "Creative & Design",
       "Marketing & Communications",
@@ -708,7 +845,7 @@ const Chatbot = () => {
       if (lastBotMessage.includes("Aurovillian Unit")) {
         return ["Aurovillian Unit", "Non-Aurovillian Unit"];
       }
-      if (lastBotMessage.includes("opportunities can your unit offer")) {
+      if (lastBotMessage.includes("opportunities")) {
         return [
           "Internship Opportunities",
           "Courses",
@@ -1339,4 +1476,3 @@ const Chatbot = () => {
 };
 
 export default Chatbot;
-  
