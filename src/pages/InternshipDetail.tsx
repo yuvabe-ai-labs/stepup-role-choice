@@ -144,7 +144,7 @@ const InternshipDetail = () => {
                   <span>Share</span>
                 </Button>
                 <Button
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-6"
+                  className="bg-orange-500 hover:bg-orange-600 rounded-full text-white px-6"
                   disabled={hasApplied || isCheckingStatus}
                   onClick={() => setShowApplicationDialog(true)}
                 >
