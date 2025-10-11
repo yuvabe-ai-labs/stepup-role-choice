@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Clock, DollarSign, Bookmark, Share2, CheckCircle2, ArrowLeft } from "lucide-react";
+import { MapPin, Clock, DollarSign, Download, Share2, CircleCheckBig } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
 import ApplicationSuccessDialog from "@/components/ApplicationSuccessDialog";
@@ -89,20 +89,14 @@ const InternshipDetail = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        {/* Back Button */}
-        <Button variant="ghost" className="mb-6 gap-2" onClick={() => navigate("/internships")}>
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </Button>
-
+      <div className="max-w-5xl mx-auto rounded-3xl border my-8 p-10">
         {/* Header Card */}
-        <Card className="mb-6 border-2">
-          <CardContent className="p-8">
+        <Card className="mb-6  border-0 border-b">
+          <CardContent className="p-8 border-0">
             <div className="flex items-start justify-between gap-6">
               {/* Left Side - Company Logo & Info */}
               <div className="flex gap-6 flex-1">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-[6.25rem] h-[6.25rem] rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0">
                   <span className="text-3xl text-white font-bold">{internship.company_name.charAt(0)}</span>
                 </div>
 
@@ -135,11 +129,19 @@ const InternshipDetail = () => {
 
               {/* Right Side - Action Buttons */}
               <div className="flex gap-2 items-start">
-                <Button variant="outline" size="icon" className="rounded-full">
-                  <Bookmark className="w-4 h-4" />
+                <Button
+                  size="sm"
+                  className="flex items-center space-x-1.5 px-4 py-2 text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Save</span>
                 </Button>
-                <Button variant="outline" size="icon" className="rounded-full">
+                <Button
+                  size="sm"
+                  className="flex items-center space-x-1.5 px-4 py-2 text-gray-700 bg-white hover:bg-gray-50"
+                >
                   <Share2 className="w-4 h-4" />
+                  <span>Share</span>
                 </Button>
                 <Button
                   className="bg-orange-500 hover:bg-orange-600 text-white px-6"
@@ -158,10 +160,12 @@ const InternshipDetail = () => {
           {/* About the Internship */}
           <section>
             <h2 className="text-2xl font-bold mb-4">About the Internship</h2>
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed text-justify">
               {internship.description || "No description available."}
             </p>
           </section>
+
+          {internship.description && <hr />}
 
           {/* Key Responsibilities */}
           {responsibilities.length > 0 && (
@@ -170,13 +174,15 @@ const InternshipDetail = () => {
               <ul className="space-y-3">
                 {responsibilities.map((item: string, idx: number) => (
                   <li key={idx} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-teal-500 flex-shrink-0 mt-0.5" />
+                    <CircleCheckBig className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5" />
                     <span className="text-muted-foreground">{item}</span>
                   </li>
                 ))}
               </ul>
             </section>
           )}
+
+          {responsibilities.length > 0 && <hr />}
 
           {/* Requirements from the Candidates */}
           {requirements.length > 0 && (
@@ -185,13 +191,15 @@ const InternshipDetail = () => {
               <ul className="space-y-3">
                 {requirements.map((item: string, idx: number) => (
                   <li key={idx} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                    <CircleCheckBig className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                     <span className="text-muted-foreground">{item}</span>
                   </li>
                 ))}
               </ul>
             </section>
           )}
+
+          {requirements.length > 0 && <hr />}
 
           {/* What You Will Get */}
           {benefits.length > 0 && (
@@ -200,13 +208,15 @@ const InternshipDetail = () => {
               <ul className="space-y-3">
                 {benefits.map((item: string, idx: number) => (
                   <li key={idx} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <CircleCheckBig className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
                     <span className="text-muted-foreground">{item}</span>
                   </li>
                 ))}
               </ul>
             </section>
           )}
+
+          {benefits.length > 0 && <hr />}
 
           {/* Required Skills */}
           {skillsRequired.length > 0 && (
@@ -222,8 +232,10 @@ const InternshipDetail = () => {
             </section>
           )}
 
+          {skillsRequired.length > 0 && <hr />}
+
           {/* Ready to Apply */}
-          <Card className="bg-muted/50 border-2">
+          <Card className="border-0">
             <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
@@ -233,7 +245,7 @@ const InternshipDetail = () => {
                   </p>
                 </div>
                 <Button
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-8"
+                  className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-8"
                   disabled={hasApplied || isCheckingStatus}
                   onClick={() => setShowApplicationDialog(true)}
                 >
@@ -243,11 +255,13 @@ const InternshipDetail = () => {
             </CardContent>
           </Card>
 
+          <hr />
+
           {/* Company Info */}
-          <Card className="border-2">
+          <Card className="border-0">
             <CardContent className="p-8">
               <div className="flex gap-6 items-start">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-[6.25rem] h-[6.25rem] rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0">
                   <span className="text-3xl text-white font-bold">{internship.company_name.charAt(0)}</span>
                 </div>
 
@@ -260,13 +274,21 @@ const InternshipDetail = () => {
                       <span>{internship.location}</span>
                     </div>
                   )}
-
-                  <h3 className="text-lg font-semibold mb-2">About the company</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {internship.company_description ||
-                      `${internship.company_name} is a creative collective focused on sustainable design practices and conscious living solutions. We work with various Auroville units to create meaningful digital experiences that reflect the community's mission.`}
-                  </p>
                 </div>
+
+                <hr />
+
+                {/* About Company */}
+                {internship.company_description && (
+                  <section>
+                    <h2 className="text-2xl font-bold mb-4">About the company</h2>
+
+                    <p className="text-muted-foreground leading-relaxed">
+                      {internship.company_description ||
+                        `${internship.company_name} is a creative collective focused on sustainable design practices and conscious living solutions. We work with various Auroville units to create meaningful digital experiences that reflect the community's mission.`}
+                    </p>
+                  </section>
+                )}
 
                 <Button
                   variant="outline"
