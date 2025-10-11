@@ -12,7 +12,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Search, Clock } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { useInternships } from "@/hooks/useInternships";
+import { useInfiniteInternships } from "@/hooks/useInfiniteInternships";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { formatDistanceToNow } from "date-fns";
 
 const Internships = () => {
@@ -37,7 +38,11 @@ const Internships = () => {
   const [showAllDepartments, setShowAllDepartments] = useState(false);
   const [showAllInterestAreas, setShowAllInterestAreas] = useState(false);
 
-  const { internships, loading, error } = useInternships();
+  const { internships, loading, error, hasMore, loadMore } = useInfiniteInternships(filters);
+  const { observerTarget } = useInfiniteScroll({ loading, hasMore, onLoadMore: loadMore });
+
+  console.log('[Internships] Total internships loaded:', internships.length);
+  console.log('[Internships] Has more:', hasMore);
 
   const resetFilters = () => {
     setFilters({
@@ -51,20 +56,6 @@ const Internships = () => {
     setActiveDateRange("");
   };
 
-  // Parse Postgres timestamp helper
-  const parsePgTimestamp = (ts: any): Date => {
-    if (ts instanceof Date) return ts;
-    if (!ts) return new Date(NaN);
-    let s = String(ts).trim();
-    s = s.replace(" ", "T");
-    s = s.replace(/\.(\d{3})\d+/, ".$1");
-    s = s.replace(/\+00:00?$|Z$/i, "Z");
-    if (!/[zZ]|[+\-]\d{2}:?\d{2}$/.test(s)) {
-      s = s + "Z";
-    }
-    return new Date(s);
-  };
-
   // Extract unique values from internships
   const uniqueUnits = Array.from(new Set(internships.map((i) => i.company_name).filter(Boolean)));
   const uniqueIndustries = Array.from(new Set(internships.map((i) => i.location).filter(Boolean)));
@@ -72,17 +63,20 @@ const Internships = () => {
     new Set(internships.map((i) => i.title?.split(" ")[0]).filter(Boolean))
   );
 
-  // Extract interest areas from skills_required
-  const interestAreas = Array.from(
-    new Set(
-      internships.flatMap((i) => {
-        if (Array.isArray(i.skills_required)) {
-          return i.skills_required.map(skill => String(skill));
-        }
-        return [];
-      })
-    )
-  ).slice(0, 20); // Limit to 20 interest areas
+  // Sample interest areas - ideally these would come from database
+  const interestAreas = [
+    "Air conditioning",
+    "Assisted living",
+    "Disability Access",
+    "Cable Ready",
+    "Controlled access",
+    "Available now",
+    "College",
+    "Corporate",
+    "Elevator",
+    "High speed internet",
+    "Garage",
+  ];
 
   // Filtered lists
   const filteredUnitsList = uniqueUnits.filter((u) =>
@@ -134,34 +128,6 @@ const Internships = () => {
       postingDate: { from: from.toISOString(), to: to.toISOString() },
     });
   };
-
-  // Client-side filtering (like Units page)
-  const filteredInternships = internships.filter((internship) => {
-    if (filters.units.length && !filters.units.includes(internship.company_name)) return false;
-    if (filters.industries.length && !filters.industries.includes(internship.location)) return false;
-    if (filters.departments.length) {
-      const dept = internship.title?.split(" ")[0];
-      if (!dept || !filters.departments.includes(dept)) return false;
-    }
-
-    if (filters.interestAreas.length) {
-      const skills = Array.isArray(internship.skills_required) 
-        ? internship.skills_required.map(s => String(s))
-        : [];
-      if (!filters.interestAreas.some((area) => skills.includes(area))) return false;
-    }
-
-    if (filters.postingDate.from || filters.postingDate.to) {
-      const internshipDate = parsePgTimestamp(internship.posted_date).getTime();
-      const from = filters.postingDate.from ? new Date(filters.postingDate.from).getTime() : -Infinity;
-      const to = filters.postingDate.to ? new Date(filters.postingDate.to).getTime() : Infinity;
-
-      if (Number.isNaN(internshipDate)) return false;
-      if (internshipDate < from || internshipDate > to) return false;
-    }
-
-    return true;
-  });
 
   const getInternshipGradient = (index: number) => {
     const gradients = [
@@ -450,36 +416,16 @@ const Internships = () => {
         <div className="flex-1">
           <div className="mb-6">
             <h1 className="text-3xl font-bold">
-              Explore {filteredInternships.length} Internship{filteredInternships.length !== 1 ? "s" : ""}
+              Explore {internships.length} Internship{internships.length !== 1 ? "s" : ""} just for you
             </h1>
           </div>
 
           {error ? (
             <p className="text-destructive">{error}</p>
-          ) : loading ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={`skeleton-${i}`} className="overflow-hidden rounded-3xl">
-                  <Skeleton className="h-48 w-full" />
-                  <CardContent className="p-5">
-                    <Skeleton className="h-6 w-full mb-2" />
-                    <Skeleton className="h-4 w-3/4 mb-1" />
-                    <Skeleton className="h-4 w-2/3 mb-4" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : filteredInternships.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No internships found matching your filters.</p>
-              <Button variant="outline" onClick={resetFilters} className="mt-4">
-                Clear Filters
-              </Button>
-            </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredInternships.map((internship, index) => {
+            <>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {internships.map((internship, index) => {
                   const gradient = getInternshipGradient(index);
                   return (
                     <Card
@@ -513,10 +459,38 @@ const Internships = () => {
                           {internship.duration || "Duration not specified"}
                         </div>
                       </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                    </Card>
+                  );
+                })}
+
+                {/* Loading skeletons */}
+                {loading &&
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <Card key={`skeleton-${i}`} className="overflow-hidden rounded-3xl">
+                      <Skeleton className="h-48 w-full" />
+                      <CardContent className="p-5">
+                        <Skeleton className="h-6 w-full mb-2" />
+                        <Skeleton className="h-4 w-3/4 mb-1" />
+                        <Skeleton className="h-4 w-2/3 mb-4" />
+                        <Skeleton className="h-4 w-1/2" />
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+
+              {/* Infinite scroll trigger */}
+              {!loading && internships.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No internships found matching your filters.</p>
+                  <Button variant="outline" onClick={resetFilters} className="mt-4">
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
+
+              {/* Observer target for infinite scroll */}
+              <div ref={observerTarget} className="h-10" />
+            </>
           )}
         </div>
       </div>

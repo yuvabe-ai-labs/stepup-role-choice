@@ -15,7 +15,6 @@ import Dashboard from "./pages/Dashboard";
 import UnitDashboard from "./pages/UnitDashboard";
 import Chatbot from "./pages/Chatbot";
 import Internships from "./pages/Internships";
-import InternshipDetail from "./pages/InternshipDetail";
 import Courses from "./pages/Courses";
 import Units from "./pages/Units";
 import UnitView from "./pages/UnitView";
@@ -137,11 +136,6 @@ const App = () => (
             <Route path="/internships" element={
               <ProtectedRoute>
                 <Internships />
-              </ProtectedRoute>
-            } />
-            <Route path="/internships/:id" element={
-              <ProtectedRoute>
-                <InternshipDetail />
               </ProtectedRoute>
             } />
             <Route path="/courses" element={
