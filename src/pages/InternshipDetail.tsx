@@ -30,7 +30,6 @@ const InternshipDetail = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const [loading, setLoading] = useState(true);
-  // const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { hasApplied, isLoading: isCheckingStatus, markAsApplied } = useApplicationStatus(id || "");
 
   useEffect(() => {
