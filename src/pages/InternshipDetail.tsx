@@ -292,7 +292,7 @@ const InternshipDetail = () => {
 
                 <Button
                   variant="outline"
-                  className="border-orange-500 text-orange-500 hover:bg-orange-50"
+                  className="border-orange-500 rounded-full text-orange-500 hover:bg-orange-50"
                   onClick={() => {
                     // Navigate to company/unit page if it exists
                     toast({
