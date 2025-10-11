@@ -1,6 +1,3 @@
-import ApplicationSuccessDialog from "@/components/ApplicationSuccessDialog";
-import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, Clock, DollarSign, Bookmark, Share2, CheckCircle2, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import ApplicationDialog from "@/components/ApplicationDialog";
+import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
+import ApplicationSuccessDialog from "@/components/ApplicationSuccessDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useApplicationStatus } from "@/hooks/useApplicationStatus";
 import { useToast } from "@/hooks/use-toast";
@@ -32,7 +30,7 @@ const InternshipDetail = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { hasApplied, isLoading: isCheckingStatus, markAsApplied } = useApplicationStatus(id || "");
 
   useEffect(() => {
@@ -146,8 +144,8 @@ const InternshipDetail = () => {
                 </Button>
                 <Button
                   className="bg-orange-500 hover:bg-orange-600 text-white px-6"
-                  disabled={isCheckingStatus}
-                  onClick={() => setIsDialogOpen(true)}
+                  disabled={hasApplied || isCheckingStatus}
+                  onClick={() => setShowApplicationDialog(true)}
                 >
                   {hasApplied ? "Applied" : "Apply Now"}
                 </Button>
@@ -238,7 +236,7 @@ const InternshipDetail = () => {
                 <Button
                   className="bg-orange-500 hover:bg-orange-600 text-white px-8"
                   disabled={hasApplied || isCheckingStatus}
-                  onClick={() => setIsDialogOpen(true)}
+                  onClick={() => setShowApplicationDialog(true)}
                 >
                   {hasApplied ? "Applied" : "Apply Now"}
                 </Button>
@@ -291,25 +289,9 @@ const InternshipDetail = () => {
       </div>
 
       {/* Application Dialog */}
-      {/* {internship && (
-        <ApplicationDialog
-          isOpen={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
-          internship={internship}
-          onSuccess={() => {
-            markAsApplied();
-            toast({
-              title: "Application Submitted",
-              description: "Your application has been successfully submitted!",
-            });
-          }}
-        />
-      )} */}
-
-      {/* Application Dialog */}
       {internship && (
         <ProfileSummaryDialog
-          isOpen={isDialogOpen}
+          isOpen={showApplicationDialog}
           onClose={() => setShowApplicationDialog(false)}
           internship={internship}
           onSuccess={() => {
