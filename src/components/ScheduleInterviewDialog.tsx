@@ -10,26 +10,103 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+interface ScheduleInterviewDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  candidateName: string;
+  candidateEmail: string;
+  applicationId: string;
+  onSuccess?: () => void;
+}
 
 export default function ScheduleInterviewDialog({
   open,
   onOpenChange,
   candidateName,
   candidateEmail,
-}) {
+  applicationId,
+  onSuccess,
+}: ScheduleInterviewDialogProps) {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     guests: candidateEmail || "",
     date: "",
     time: "",
-    meetingType: "",
+    meetingType: "google",
   });
 
-  const handleSubmit = () => {
-    console.log("Schedule Interview:", formData);
-    // Handle the interview scheduling logic here
-    onOpenChange(false);
+  const handleSubmit = async () => {
+    if (!formData.date || !formData.time) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide date and time for the interview",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.title) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide a title for the interview",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Combine date and time into ISO string
+      const scheduledDate = new Date(`${formData.date}T${formData.time}:00Z`).toISOString();
+
+      const { data, error } = await supabase.functions.invoke("schedule-interview", {
+        body: {
+          applicationId,
+          candidateName,
+          candidateEmail: formData.guests,
+          scheduledDate,
+          title: formData.title,
+          description: formData.description,
+          durationMinutes: 60,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Interview Scheduled",
+        description: `Google Meet link has been sent to ${candidateName}`,
+      });
+
+      onOpenChange(false);
+      onSuccess?.();
+
+      // Reset form
+      setFormData({
+        title: "",
+        description: "",
+        guests: candidateEmail || "",
+        date: "",
+        time: "",
+        meetingType: "google",
+      });
+    } catch (error: any) {
+      console.error("Error scheduling interview:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to schedule interview. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -158,24 +235,6 @@ export default function ScheduleInterviewDialog({
                   Add Google Meet video conferencing
                 </span>
               </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData({ ...formData, meetingType: "zoom" })
-                }
-                className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-                  formData.meetingType === "zoom"
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:bg-gray-50"
-                }`}
-              >
-                <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
-                  <Video className="w-4 h-4 text-white" />
-                </div>
-                <span className="text-sm text-gray-700">
-                  Add Zoom Meeting video conferencing
-                </span>
-              </button>
             </div>
           </div>
 
@@ -183,9 +242,10 @@ export default function ScheduleInterviewDialog({
           <div className="flex justify-end pt-2">
             <Button
               onClick={handleSubmit}
+              disabled={isLoading}
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 h-11"
             >
-              Save
+              {isLoading ? "Scheduling..." : "Save"}
             </Button>
           </div>
         </div>
