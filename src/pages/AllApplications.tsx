@@ -180,7 +180,7 @@ const AllApplications = () => {
                       <Button 
                         variant="outline" 
                         className="w-full mt-4"
-                        onClick={() => navigate(`/candidate/${application.student_id}`)}
+                        onClick={() => navigate(`/candidate-profile/${application.id}`)}
                       >
                         View Profile
                       </Button>
