@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import ScheduleInterviewDialog from "@/components/ScheduleInterviewDialog";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -45,6 +46,7 @@ const CandidateProfile = () => {
   const { toast } = useToast();
   const { data, loading, error, refetch } = useCandidateProfile(id || "");
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
 
   const getStatusLabel = (status: string) => {
     const statusMap: Record<string, string> = {
@@ -61,6 +63,12 @@ const CandidateProfile = () => {
     newStatus: "applied" | "shortlisted" | "rejected" | "interviewed" | "hired"
   ) => {
     if (!data?.application.id) return;
+
+    // If status is "interviewed", open the schedule dialog instead
+    if (newStatus === "interviewed") {
+      setShowScheduleDialog(true);
+      return;
+    }
 
     setIsUpdatingStatus(true);
     try {
@@ -540,6 +548,14 @@ const CandidateProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* Schedule Interview Dialog */}
+      <ScheduleInterviewDialog
+        open={showScheduleDialog}
+        onOpenChange={setShowScheduleDialog}
+        candidateName={data.profile.full_name}
+        candidateEmail={data.profile.email}
+      />
     </div>
   );
 };
