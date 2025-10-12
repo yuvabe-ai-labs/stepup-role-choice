@@ -91,8 +91,8 @@ const InternshipDetail = () => {
 
       <div className="max-w-5xl mx-auto rounded-3xl border my-8 p-10">
         {/* Header Card */}
-        <Card className="mb-6  border-0 border-b">
-          <CardContent className="p-8 border-0">
+        <Card className="mb-6  border-0 shadow-none">
+          <CardContent className="border-0 p-0">
             <div className="flex items-start justify-between gap-6">
               {/* Left Side - Company Logo & Info */}
               <div className="flex gap-6 flex-1">
@@ -155,6 +155,7 @@ const InternshipDetail = () => {
           </CardContent>
         </Card>
 
+        <hr className="my-8" />
         {/* Main Content */}
         <div className="space-y-8">
           {/* About the Internship */}
