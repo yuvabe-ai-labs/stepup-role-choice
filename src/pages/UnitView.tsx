@@ -10,7 +10,7 @@ import { useUnitView } from "@/hooks/useUnitView";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
 import ApplicationSuccessDialog from "@/components/ApplicationSuccessDialog";
 import type { Tables } from "@/integrations/supabase/types";
-import yuvabe from "@/assets/yuvabe-img.png";
+// import yuvabe from "@/assets/yuvabe-img.png";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
