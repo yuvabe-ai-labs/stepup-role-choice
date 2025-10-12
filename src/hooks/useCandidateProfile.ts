@@ -60,12 +60,11 @@ export const useCandidateProfile = (applicationId: string) => {
       if (profileError) throw profileError;
 
       // Fetch student details
-      const { data: studentProfile, error: studentProfileError } =
-        await supabase
-          .from("student_profiles")
-          .select("*")
-          .eq("profile_id", application.student_id)
-          .single();
+      const { data: studentProfile, error: studentProfileError } = await supabase
+        .from("student_profiles")
+        .select("*")
+        .eq("profile_id", application.student_id)
+        .single();
 
       if (studentProfileError) throw studentProfileError;
 
