@@ -10,7 +10,6 @@ import { useUnitView } from "@/hooks/useUnitView";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
 import ApplicationSuccessDialog from "@/components/ApplicationSuccessDialog";
 import type { Tables } from "@/integrations/supabase/types";
-// import yuvabe from "@/assets/yuvabe-img.png";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -75,9 +74,7 @@ const UnitView = () => {
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="h-48 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10">
-          {<img src={yuvabe} alt="" /> && ""}
-        </div>
+        <div className="h-48 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10"></div>
 
         <div className="mt-[-20px] pt-0 p-20">
           {/* Hero Section with Unit Info */}
