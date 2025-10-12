@@ -9,8 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
-import ForgotPassword from "./pages/ForgotPassword";
-import CheckEmail from "./pages/CheckEmail";
 import Dashboard from "./pages/Dashboard";
 import UnitDashboard from "./pages/UnitDashboard";
 import Chatbot from "./pages/Chatbot";
@@ -22,7 +20,6 @@ import CandidateProfile from "./pages/CandidateProfile";
 import Profile from "./pages/Profile";
 import AllApplications from "./pages/AllApplications";
 import InternshipApplicants from "./pages/InternshipApplicants";
-import InternshipDetail from "./pages/InternshipDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -117,8 +114,6 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/auth/:role/signin" element={<SignIn />} />
             <Route path="/auth/:role/signup" element={<SignUp />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/check-email" element={<CheckEmail />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
@@ -139,11 +134,6 @@ const App = () => (
                 <Internships />
               </ProtectedRoute>
             } />
-            <Route path="/internships/:id" element={
-              <ProtectedRoute>
-                <InternshipDetail />
-              </ProtectedRoute>
-            } />
             <Route path="/courses" element={
               <ProtectedRoute>
                 <Courses />
@@ -159,7 +149,7 @@ const App = () => (
                 <UnitView />
               </ProtectedRoute>
             } />
-            <Route path="/candidate-profile/:id" element={
+            <Route path="/candidate/:id" element={
               <ProtectedRoute>
                 <CandidateProfile />
               </ProtectedRoute>
