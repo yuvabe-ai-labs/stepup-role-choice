@@ -76,7 +76,7 @@ const UnitView = () => {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="h-48 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10">
-          <img src={yuvabe} alt="" />
+          {<img src={yuvabe} alt="" /> && ""}
         </div>
 
         <div className="mt-[-20px] pt-0 p-20">
