@@ -45,6 +45,8 @@ import CreateInternshipDialog from "@/components/CreateInternshipDialog";
 import { supabase } from "@/integrations/supabase/client";
 import InternshipDetailsView from "@/components/InternshipDetailsView";
 import EditInternshipDialog from "@/components/EditInternshipDialog";
+import Navbar from "@/components/Navbar";
+import ProfileSidebar from "@/components/ProfileSidebar";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -157,50 +159,9 @@ const UnitDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card px-6 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full"></div>
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-teal-400 to-teal-600 rounded-full"></div>
-            </div>
-          </div>
-
-          {/* Search Bar */}
-          <div className="flex-1 max-w-md mx-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Search"
-                className="pl-10 bg-muted/30 border-muted"
-              />
-            </div>
-          </div>
-
-          {/* Right Section */}
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
-              <Bell className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <Menu className="w-4 h-4" />
-            </Button>
-            <div className="flex items-center space-x-2">
-              <div className="grid grid-cols-2 gap-1">
-                <div className="w-2 h-2 bg-orange-400 rounded-sm"></div>
-                <div className="w-2 h-2 bg-teal-400 rounded-sm"></div>
-                <div className="w-2 h-2 bg-blue-400 rounded-sm"></div>
-                <div className="w-2 h-2 bg-green-400 rounded-sm"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
       {/* Main Content */}
-      <main className="p-6">
+      <div className="p-6 lg:p-10 w-full">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
@@ -349,7 +310,7 @@ const UnitDashboard = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Applications</SelectItem>
-                  <SelectItem value="shortlisted">Shortlist</SelectItem>
+                  <SelectItem value="shortlisted">Shortlisted</SelectItem>
                   <SelectItem value="interviewed">Interviewed</SelectItem>
                   <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
@@ -384,11 +345,14 @@ const UnitDashboard = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {applications.slice(0, 9).map((application) => {
-                    const skills = application.profile?.skills || [];
+                    const skills = safeParse(
+                      application.studentProfile?.skills,
+                      []
+                    );
                     const displaySkills = skills
                       .slice(0, 3)
                       .map((s: any) =>
-                        typeof s === "string" ? s : s?.name || s || ""
+                        typeof s === "string" ? s : s.name || s
                       );
                     const matchScore =
                       application.profile_match_score ||
@@ -404,23 +368,24 @@ const UnitDashboard = () => {
                             <Avatar className="w-20 h-20 mb-4 ring-2 ring-primary/10">
                               <AvatarImage
                                 src={
-                                  application.profile?.avatar_url || undefined
+                                  application.studentProfile?.avatar_url ||
+                                  undefined
                                 }
-                                alt={application.profile?.full_name || "User"}
+                                alt={application.profile.full_name}
                               />
                               <AvatarFallback className="text-lg">
-                                {application.profile?.full_name
-                                  ?.split(" ")
+                                {application.profile.full_name
+                                  .split(" ")
                                   .map((n) => n[0])
-                                  .join("") || "?"}
+                                  .join("")}
                               </AvatarFallback>
                             </Avatar>
 
                             <h3 className="font-semibold text-lg mb-1">
-                              {application.profile?.full_name || "Unknown"}
+                              {application.profile.full_name}
                             </h3>
                             <p className="text-sm text-muted-foreground mb-3">
-                              {application.internship?.title || "No Title"}
+                              {application.internship.title}
                             </p>
 
                             <Badge
@@ -432,7 +397,7 @@ const UnitDashboard = () => {
                             </Badge>
 
                             <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                              {application.profile?.bio ||
+                              {application.studentProfile?.bio ||
                                 "Passionate about creating user-centered digital experiences."}
                             </p>
 
@@ -949,7 +914,7 @@ const UnitDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
-      </main>
+      </div>
       {/* Edit Internship Dialog */}
       <EditInternshipDialog
         isOpen={!!editingInternship}

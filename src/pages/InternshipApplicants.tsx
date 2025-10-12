@@ -1,23 +1,27 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Search, Bell, Menu, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
-import type { ApplicationWithDetails } from '@/hooks/useUnitApplications';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ChevronLeft, Search, Bell, Menu, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import type { ApplicationWithDetails } from "@/hooks/useUnitApplications";
 
 const InternshipApplicants = () => {
   const { internshipId } = useParams();
   const navigate = useNavigate();
-  const [applications, setApplications] = useState<ApplicationWithDetails[]>([]);
-  const [filteredApplications, setFilteredApplications] = useState<ApplicationWithDetails[]>([]);
-  const [internshipTitle, setInternshipTitle] = useState('');
+  const [applications, setApplications] = useState<ApplicationWithDetails[]>(
+    []
+  );
+  const [filteredApplications, setFilteredApplications] = useState<
+    ApplicationWithDetails[]
+  >([]);
+  const [internshipTitle, setInternshipTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [displayCount, setDisplayCount] = useState(6);
   const [filters, setFilters] = useState({
@@ -31,7 +35,7 @@ const InternshipApplicants = () => {
   const safeParse = (data: any, fallback: any) => {
     if (!data) return fallback;
     try {
-      return typeof data === 'string' ? JSON.parse(data) : data;
+      return typeof data === "string" ? JSON.parse(data) : data;
     } catch {
       return fallback;
     }
@@ -44,31 +48,44 @@ const InternshipApplicants = () => {
 
         // Fetch internship details
         const { data: internship, error: internshipError } = await supabase
-          .from('internships')
-          .select('title')
-          .eq('id', internshipId)
+          .from("internships")
+          .select("title")
+          .eq("id", internshipId)
           .maybeSingle();
 
         if (internshipError) throw internshipError;
-        setInternshipTitle(internship?.title || '');
+        setInternshipTitle(internship?.title || "");
 
         // Fetch applications for this internship
         const { data: applicationsData, error: appsError } = await supabase
-          .from('applications')
-          .select('*')
-          .eq('internship_id', internshipId)
-          .order('applied_date', { ascending: false });
+          .from("applications")
+          .select("*")
+          .eq("internship_id", internshipId)
+          .order("applied_date", { ascending: false });
 
         if (appsError) throw appsError;
 
         // Fetch related data for each application
         const applicationsWithDetails = await Promise.all(
           (applicationsData || []).map(async (app) => {
-            const [internshipRes, profileRes, studentProfileRes] = await Promise.all([
-              supabase.from('internships').select('*').eq('id', app.internship_id).maybeSingle(),
-              supabase.from('profiles').select('*').eq('id', app.student_id).maybeSingle(),
-              supabase.from('student_profiles').select('*').eq('profile_id', app.student_id).maybeSingle(),
-            ]);
+            const [internshipRes, profileRes, studentProfileRes] =
+              await Promise.all([
+                supabase
+                  .from("internships")
+                  .select("*")
+                  .eq("id", app.internship_id)
+                  .maybeSingle(),
+                supabase
+                  .from("profiles")
+                  .select("*")
+                  .eq("id", app.student_id)
+                  .maybeSingle(),
+                supabase
+                  .from("student_profiles")
+                  .select("*")
+                  .eq("profile_id", app.student_id)
+                  .maybeSingle(),
+              ]);
 
             if (!internshipRes.data || !profileRes.data) {
               return null;
@@ -79,7 +96,7 @@ const InternshipApplicants = () => {
               internship: internshipRes.data,
               profile: profileRes.data,
               studentProfile: studentProfileRes.data || {
-                id: '',
+                id: "",
                 profile_id: app.student_id,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
@@ -108,11 +125,13 @@ const InternshipApplicants = () => {
           })
         );
 
-        const validApplications = applicationsWithDetails.filter(app => app !== null) as ApplicationWithDetails[];
+        const validApplications = applicationsWithDetails.filter(
+          (app) => app !== null
+        ) as ApplicationWithDetails[];
         setApplications(validApplications);
         setFilteredApplications(validApplications);
       } catch (error) {
-        console.error('Error fetching applications:', error);
+        console.error("Error fetching applications:", error);
       } finally {
         setLoading(false);
       }
@@ -125,19 +144,27 @@ const InternshipApplicants = () => {
 
   // Filter applications based on match score
   useEffect(() => {
-    if (!filters.exact && !filters.above90 && !filters.between80and90 && !filters.between60and80) {
+    if (
+      !filters.exact &&
+      !filters.above90 &&
+      !filters.between80and90 &&
+      !filters.between60and80
+    ) {
       setFilteredApplications(applications);
       return;
     }
 
     const filtered = applications.filter((app) => {
-      const matchScore = app.profile_match_score || Math.floor(Math.random() * 40 + 60);
-      
+      const matchScore =
+        app.profile_match_score || Math.floor(Math.random() * 40 + 60);
+
       if (filters.exact && matchScore === 100) return true;
       if (filters.above90 && matchScore > 90 && matchScore < 100) return true;
-      if (filters.between80and90 && matchScore >= 80 && matchScore <= 90) return true;
-      if (filters.between60and80 && matchScore >= 60 && matchScore < 80) return true;
-      
+      if (filters.between80and90 && matchScore >= 80 && matchScore <= 90)
+        return true;
+      if (filters.between60and80 && matchScore >= 60 && matchScore < 80)
+        return true;
+
       return false;
     });
 
@@ -146,12 +173,17 @@ const InternshipApplicants = () => {
   }, [filters, applications]);
 
   // Infinite scroll
-  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
-    const [target] = entries;
-    if (target.isIntersecting && displayCount < filteredApplications.length) {
-      setDisplayCount((prev) => Math.min(prev + 6, filteredApplications.length));
-    }
-  }, [displayCount, filteredApplications.length]);
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [target] = entries;
+      if (target.isIntersecting && displayCount < filteredApplications.length) {
+        setDisplayCount((prev) =>
+          Math.min(prev + 6, filteredApplications.length)
+        );
+      }
+    },
+    [displayCount, filteredApplications.length]
+  );
 
   useEffect(() => {
     const element = observerTarget.current;
@@ -166,19 +198,19 @@ const InternshipApplicants = () => {
   }, [handleObserver]);
 
   const getMatchColor = (score: number) => {
-    if (score === 100) return 'border-purple-500';
-    if (score > 90) return 'border-green-500';
-    if (score >= 80) return 'border-blue-500';
-    if (score >= 60) return 'border-orange-500';
-    return 'border-red-500';
+    if (score === 100) return "border-purple-500";
+    if (score > 90) return "border-green-500";
+    if (score >= 80) return "border-blue-500";
+    if (score >= 60) return "border-orange-500";
+    return "border-red-500";
   };
 
   const getMatchTextColor = (score: number) => {
-    if (score === 100) return 'text-purple-600';
-    if (score > 90) return 'text-green-600';
-    if (score >= 80) return 'text-blue-600';
-    if (score >= 60) return 'text-orange-600';
-    return 'text-red-600';
+    if (score === 100) return "text-purple-600";
+    if (score > 90) return "text-green-600";
+    if (score >= 80) return "text-blue-600";
+    if (score >= 60) return "text-orange-600";
+    return "text-red-600";
   };
 
   const getDaysAgo = (date: string) => {
@@ -239,7 +271,7 @@ const InternshipApplicants = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/unit-dashboard')}
+              onClick={() => navigate("/unit-dashboard")}
               className="gap-2"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -253,7 +285,9 @@ const InternshipApplicants = () => {
           {/* Filter Dropdown */}
           <div className="relative">
             <div className="border rounded-lg p-4 bg-card min-w-[250px]">
-              <Label className="text-sm font-medium mb-3 block">Select Matches</Label>
+              <Label className="text-sm font-medium mb-3 block">
+                Select Matches
+              </Label>
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -290,7 +324,10 @@ const InternshipApplicants = () => {
                     id="between80and90"
                     checked={filters.between80and90}
                     onCheckedChange={(checked) =>
-                      setFilters({ ...filters, between80and90: checked as boolean })
+                      setFilters({
+                        ...filters,
+                        between80and90: checked as boolean,
+                      })
                     }
                   />
                   <label
@@ -305,7 +342,10 @@ const InternshipApplicants = () => {
                     id="between60and80"
                     checked={filters.between60and80}
                     onCheckedChange={(checked) =>
-                      setFilters({ ...filters, between60and80: checked as boolean })
+                      setFilters({
+                        ...filters,
+                        between60and80: checked as boolean,
+                      })
                     }
                   />
                   <label
@@ -340,112 +380,144 @@ const InternshipApplicants = () => {
             <h3 className="text-lg font-medium mb-2">No Applicants Found</h3>
             <p className="text-muted-foreground">
               {applications.length === 0
-                ? 'No one has applied to this internship yet.'
-                : 'No applicants match the selected filters.'}
+                ? "No one has applied to this internship yet."
+                : "No applicants match the selected filters."}
             </p>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredApplications.slice(0, displayCount).map((application) => {
-                const skills = safeParse(application.studentProfile?.skills, []);
-                const displaySkills = skills.slice(0, 3).map((s: any) =>
-                  typeof s === 'string' ? s : s.name || s
-                );
-                const matchScore = application.profile_match_score || Math.floor(Math.random() * 40 + 60);
-                const daysAgo = getDaysAgo(application.applied_date);
+              {filteredApplications
+                .slice(0, displayCount)
+                .map((application) => {
+                  const skills = safeParse(
+                    application.studentProfile?.skills,
+                    []
+                  );
+                  const displaySkills = skills
+                    .slice(0, 3)
+                    .map((s: any) => (typeof s === "string" ? s : s.name || s));
+                  const matchScore =
+                    application.profile_match_score ||
+                    Math.floor(Math.random() * 40 + 60);
+                  const daysAgo = getDaysAgo(application.applied_date);
 
-                return (
-                  <Card
-                    key={application.id}
-                    className="border border-border/50 hover:shadow-lg transition-shadow"
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex flex-col items-center text-center">
-                        <Avatar
-                          className={`w-20 h-20 mb-3 ring-4 ${getMatchColor(matchScore)}`}
-                        >
-                          <AvatarImage
-                            src={application.studentProfile?.avatar_url || undefined}
-                            alt={application.profile.full_name}
-                          />
-                          <AvatarFallback className="text-lg">
-                            {application.profile.full_name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
+                  return (
+                    <Card
+                      key={application.id}
+                      className="border border-border/50 hover:shadow-lg transition-shadow"
+                    >
+                      <CardContent className="p-6">
+                        <div className="flex flex-col items-center text-center">
+                          <Avatar
+                            className={`w-20 h-20 mb-3 ring-4 ${getMatchColor(
+                              matchScore
+                            )}`}
+                          >
+                            <AvatarImage
+                              src={
+                                application.studentProfile?.avatar_url ||
+                                undefined
+                              }
+                              alt={application.profile.full_name}
+                            />
+                            <AvatarFallback className="text-lg">
+                              {application.profile.full_name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
 
-                        <h3 className="font-semibold text-lg mb-1">
-                          {application.profile.full_name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {application.profile.role || 'Professional'}
-                        </p>
+                          <h3 className="font-semibold text-lg mb-1">
+                            {application.profile.full_name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {application.profile.role || "Professional"}
+                          </p>
 
-                        <Badge className="bg-yellow-500 text-white hover:bg-yellow-500 mb-4">
-                          Applied {daysAgo} {daysAgo === 1 ? 'day' : 'days'} ago
-                        </Badge>
+                          <Badge className="bg-yellow-500 text-white hover:bg-yellow-500 mb-4">
+                            Applied {daysAgo} {daysAgo === 1 ? "day" : "days"}{" "}
+                            ago
+                          </Badge>
 
-                        <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                          {application.studentProfile?.bio ||
-                            'Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences.'}
-                        </p>
+                          <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
+                            {application.studentProfile?.bio ||
+                              "Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences."}
+                          </p>
 
-                        <div className="flex flex-wrap gap-2 justify-center mb-4">
-                          {displaySkills.map((skill: string, index: number) => (
-                            <Badge
-                              key={index}
-                              variant="outline"
-                              className="text-xs bg-muted/50"
-                            >
-                              {skill}
-                            </Badge>
-                          ))}
-                          {skills.length > 3 && (
-                            <Badge variant="outline" className="text-xs bg-muted/50">
-                              +{skills.length - 3}
-                            </Badge>
-                          )}
-                        </div>
+                          <div className="flex flex-wrap gap-2 justify-center mb-4">
+                            {displaySkills.map(
+                              (skill: string, index: number) => (
+                                <Badge
+                                  key={index}
+                                  variant="outline"
+                                  className="text-xs bg-muted/50"
+                                >
+                                  {skill}
+                                </Badge>
+                              )
+                            )}
+                            {skills.length > 3 && (
+                              <Badge
+                                variant="outline"
+                                className="text-xs bg-muted/50"
+                              >
+                                +{skills.length - 3}
+                              </Badge>
+                            )}
+                          </div>
 
-                        <div className="w-full bg-muted/30 rounded-lg p-3 mb-4">
-                          <div className="flex items-center justify-between mb-1">
-                            <div className="flex items-center gap-2">
-                              <Sparkles className="w-4 h-4 text-purple-500" />
-                              <span className="text-xs font-medium">
-                                AI Analysis for the profile
-                              </span>
+                          <div className="w-full bg-muted/30 rounded-lg p-3 mb-4">
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-purple-500" />
+                                <span className="text-xs font-medium">
+                                  AI Analysis for the profile
+                                </span>
+                              </div>
+                              <div
+                                className={`w-10 h-10 rounded-full border-4 flex items-center justify-center ${getMatchColor(
+                                  matchScore
+                                )}`}
+                              >
+                                <span className="text-xs font-bold">
+                                  {matchScore}%
+                                </span>
+                              </div>
                             </div>
-                            <div
-                              className={`w-10 h-10 rounded-full border-4 flex items-center justify-center ${getMatchColor(
+                            <p
+                              className={`text-xs font-medium ${getMatchTextColor(
                                 matchScore
                               )}`}
                             >
-                              <span className="text-xs font-bold">{matchScore}%</span>
-                            </div>
+                              {matchScore}% Skill matches for this role
+                            </p>
                           </div>
-                          <p className={`text-xs font-medium ${getMatchTextColor(matchScore)}`}>
-                            {matchScore}% Skill matches for this role
-                          </p>
-                        </div>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full border-primary text-primary hover:bg-primary/10"
-                          onClick={() => navigate(`/candidate/${application.id}`)}
-                        >
-                          View Profile
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full border-primary text-primary hover:bg-primary/10"
+                            onClick={() =>
+                              navigate(`/candidate/${application.id}`)
+                            }
+                          >
+                            View Profile
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
             </div>
 
             {/* Infinite Scroll Target */}
             {displayCount < filteredApplications.length && (
-              <div ref={observerTarget} className="flex justify-center mt-8 py-4">
+              <div
+                ref={observerTarget}
+                className="flex justify-center mt-8 py-4"
+              >
                 <Button variant="link" className="text-primary font-medium">
                   View More
                 </Button>
