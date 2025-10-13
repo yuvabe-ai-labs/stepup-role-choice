@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,9 @@ import { InterestDialog } from "@/components/profile/InterestDialog";
 import { LanguageDialog } from "@/components/profile/LanguageDialog";
 import { InternshipDialog } from "@/components/profile/InternshipDialog";
 import { ProfileSummaryDialog } from "@/components/profile/ProfileSummaryDialog";
+import { AvatarUploadDialog } from "@/components/AvatarUploadDialog";
+import { CircularProgress } from "@/components/CircularProgress";
+import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { format } from "date-fns";
 
 const Profile = () => {
@@ -41,7 +45,20 @@ const Profile = () => {
     removeInternshipEntry,
     removeInterest,
     removeSkill,
+    refetch,
   } = useProfileData();
+
+  const [showAvatarDialog, setShowAvatarDialog] = useState(false);
+  const profileSummaryRef = useRef<HTMLButtonElement>(null);
+  const coursesRef = useRef<HTMLButtonElement>(null);
+  const skillsRef = useRef<HTMLButtonElement>(null);
+  const educationRef = useRef<HTMLButtonElement>(null);
+  const projectsRef = useRef<HTMLButtonElement>(null);
+  const interestsRef = useRef<HTMLButtonElement>(null);
+  const internshipsRef = useRef<HTMLButtonElement>(null);
+  const personalDetailsRef = useRef<HTMLButtonElement>(null);
+
+  const profileCompletion = useProfileCompletion({ profile, studentProfile });
 
   if (loading) {
     return (
@@ -69,15 +86,22 @@ const Profile = () => {
   }
 
   const quickLinks = [
-    { name: "Profile Summary", action: "Update" },
-    { name: "Courses", action: "Add" },
-    { name: "Key Skills", action: "" },
-    { name: "Education", action: "" },
-    { name: "Projects", action: "Add" },
-    { name: "Interests", action: "Add" },
-    { name: "Internships", action: "Add" },
-    { name: "Personal Details", action: "Add" },
+    { name: "Profile Summary", action: "Update", ref: profileSummaryRef },
+    { name: "Courses", action: "Add", ref: coursesRef },
+    { name: "Key Skills", action: "", ref: skillsRef },
+    { name: "Education", action: "", ref: educationRef },
+    { name: "Projects", action: "Add", ref: projectsRef },
+    { name: "Interests", action: "Add", ref: interestsRef },
+    { name: "Internships", action: "Add", ref: internshipsRef },
+    { name: "Personal Details", action: "Add", ref: personalDetailsRef },
   ];
+
+  const handleQuickLinkClick = (linkName: string) => {
+    const link = quickLinks.find(l => l.name === linkName);
+    if (link?.ref?.current) {
+      link.ref.current.click();
+    }
+  };
 
   const renderProficiencyDots = (level: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -108,12 +132,19 @@ const Profile = () => {
         <Card className="mb-8 bg-white rounded-3xl">
           <CardContent className="p-6">
             <div className="flex items-start space-x-6">
-              <Avatar className="h-24 w-24 ring-4 ring-white">
-                <AvatarImage src="" />
-                <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                  {profile?.full_name?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || "U"}
-                </AvatarFallback>
-              </Avatar>
+              <div 
+                className="cursor-pointer" 
+                onClick={() => setShowAvatarDialog(true)}
+              >
+              <CircularProgress percentage={profileCompletion} size={110} strokeWidth={3}>
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage src={(studentProfile as any)?.avatar_url || ""} />
+                    <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
+                      {profile?.full_name?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                </CircularProgress>
+              </div>
 
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
@@ -157,12 +188,16 @@ const Profile = () => {
                 <h3 className="font-semibold mb-4">Quick Links</h3>
                 <div className="space-y-3">
                   {quickLinks.map((link, index) => (
-                    <div key={index} className="flex items-center justify-between">
+                    <div 
+                      key={index} 
+                      className="flex items-center justify-between cursor-pointer hover:bg-accent/50 rounded px-2 py-1"
+                      onClick={() => handleQuickLinkClick(link.name)}
+                    >
                       <span className="text-sm">{link.name}</span>
                       {link.action && (
-                        <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                        <span className="text-primary text-sm">
                           {link.action}
-                        </Button>
+                        </span>
                       )}
                     </div>
                   ))}
@@ -179,6 +214,7 @@ const Profile = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Profile Summary</h3>
                   <ProfileSummaryDialog summary={studentProfile?.cover_letter || ""} onSave={updateCoverLetter}>
+                    <button ref={profileSummaryRef} className="hidden" />
                     <Edit className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
                   </ProfileSummaryDialog>
                 </div>
@@ -204,6 +240,7 @@ const Profile = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Completed Courses</h3>
                   <CourseDialog onSave={addCourseEntry}>
+                    <button ref={coursesRef} className="hidden" />
                     <Button variant="ghost" size="sm" className="text-primary">
                       Add Completed Course
                     </Button>
@@ -254,6 +291,7 @@ const Profile = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Key Skills</h3>
                   <SkillsDialog studentProfile={studentProfile} onUpdate={updateStudentProfile}>
+                    <button ref={skillsRef} className="hidden" />
                     <Edit className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
                   </SkillsDialog>
                 </div>
@@ -283,6 +321,7 @@ const Profile = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Education</h3>
                   <EducationDialog onSave={addEducationEntry}>
+                    <button ref={educationRef} className="hidden" />
                     <Button variant="ghost" size="sm" className="text-primary">
                       Add Education
                     </Button>
@@ -336,6 +375,7 @@ const Profile = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Projects</h3>
                   <ProjectDialog onSave={addProjectEntry}>
+                    <button ref={projectsRef} className="hidden" />
                     <Button variant="ghost" size="sm" className="text-primary">
                       Add Project
                     </Button>
@@ -393,6 +433,7 @@ const Profile = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Interests</h3>
                   <InterestDialog interests={interests} onSave={updateInterests}>
+                    <button ref={interestsRef} className="hidden" />
                     <Button variant="ghost" size="sm" className="text-primary">
                       Add Interest
                     </Button>
@@ -422,6 +463,7 @@ const Profile = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Internships</h3>
                   <InternshipDialog onSave={addInternshipEntry}>
+                    <button ref={internshipsRef} className="hidden" />
                     <Button variant="ghost" size="sm" className="text-primary">
                       Add Internship
                     </Button>
@@ -475,6 +517,7 @@ const Profile = () => {
                   <h3 className="font-semibold">Personal Details</h3>
                   {profile && (
                     <PersonalDetailsDialog profile={profile} onUpdate={updateProfile}>
+                      <button ref={personalDetailsRef} className="hidden" />
                       <Edit className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
                     </PersonalDetailsDialog>
                   )}
@@ -554,6 +597,21 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* Avatar Upload Dialog */}
+      {user && profile && (
+        <AvatarUploadDialog
+          isOpen={showAvatarDialog}
+          onClose={() => setShowAvatarDialog(false)}
+          currentAvatarUrl={(studentProfile as any)?.avatar_url}
+          userId={profile.id}
+          userName={profile.full_name}
+          onSuccess={(url) => {
+            refetch();
+            setShowAvatarDialog(false);
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -255,123 +255,92 @@ export type Database = {
           },
         ]
       }
+      interviews: {
+        Row: {
+          application_id: string | null
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          meeting_link: string
+          scheduled_date: string
+          status: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          meeting_link: string
+          scheduled_date: string
+          status?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          meeting_link?: string
+          scheduled_date?: string
+          status?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interviews_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
-          achievements: Json | null
-          address: string | null
-          age: number | null
-          avatar_url: string | null
-          behance_url: string | null
-          bio: string | null
-          completed_courses: Json | null
-          cover_letter: string | null
           created_at: string
           date_of_birth: string | null
-          differently_abled: boolean | null
-          dribbble_url: string | null
-          education: Json | null
-          education_level: string | null
           email: string | null
-          experience_level: string | null
           full_name: string
           gender: string | null
           id: string
-          interest_area: string[] | null
-          languages: string[] | null
-          linkedin_url: string | null
-          location: string | null
-          looking_for: string[] | null
-          marital_status: string | null
           onboarding_completed: boolean | null
           phone: string | null
-          portfolio_url: string | null
-          profile_type: string | null
-          projects: Json | null
-          purpose: string[] | null
-          resume_url: string | null
           role: string
-          skills: string[] | null
           updated_at: string
           user_id: string
-          website_url: string | null
         }
         Insert: {
-          achievements?: Json | null
-          address?: string | null
-          age?: number | null
-          avatar_url?: string | null
-          behance_url?: string | null
-          bio?: string | null
-          completed_courses?: Json | null
-          cover_letter?: string | null
           created_at?: string
           date_of_birth?: string | null
-          differently_abled?: boolean | null
-          dribbble_url?: string | null
-          education?: Json | null
-          education_level?: string | null
           email?: string | null
-          experience_level?: string | null
           full_name: string
           gender?: string | null
           id?: string
-          interest_area?: string[] | null
-          languages?: string[] | null
-          linkedin_url?: string | null
-          location?: string | null
-          looking_for?: string[] | null
-          marital_status?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
-          portfolio_url?: string | null
-          profile_type?: string | null
-          projects?: Json | null
-          purpose?: string[] | null
-          resume_url?: string | null
           role: string
-          skills?: string[] | null
           updated_at?: string
           user_id: string
-          website_url?: string | null
         }
         Update: {
-          achievements?: Json | null
-          address?: string | null
-          age?: number | null
-          avatar_url?: string | null
-          behance_url?: string | null
-          bio?: string | null
-          completed_courses?: Json | null
-          cover_letter?: string | null
           created_at?: string
           date_of_birth?: string | null
-          differently_abled?: boolean | null
-          dribbble_url?: string | null
-          education?: Json | null
-          education_level?: string | null
           email?: string | null
-          experience_level?: string | null
           full_name?: string
           gender?: string | null
           id?: string
-          interest_area?: string[] | null
-          languages?: string[] | null
-          linkedin_url?: string | null
-          location?: string | null
-          looking_for?: string[] | null
-          marital_status?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
-          portfolio_url?: string | null
-          profile_type?: string | null
-          projects?: Json | null
-          purpose?: string[] | null
-          resume_url?: string | null
           role?: string
-          skills?: string[] | null
           updated_at?: string
           user_id?: string
-          website_url?: string | null
         }
         Relationships: []
       }
@@ -462,7 +431,7 @@ export type Database = {
           achievements: Json | null
           avatar_url: string | null
           behance_url: string | null
-          bio: string | null
+          bio: Json[] | null
           completed_courses: Json | null
           cover_letter: string | null
           created_at: string
@@ -489,7 +458,7 @@ export type Database = {
           achievements?: Json | null
           avatar_url?: string | null
           behance_url?: string | null
-          bio?: string | null
+          bio?: Json[] | null
           completed_courses?: Json | null
           cover_letter?: string | null
           created_at?: string
@@ -516,7 +485,7 @@ export type Database = {
           achievements?: Json | null
           avatar_url?: string | null
           behance_url?: string | null
-          bio?: string | null
+          bio?: Json[] | null
           completed_courses?: Json | null
           cover_letter?: string | null
           created_at?: string
@@ -542,6 +511,125 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "student_profiles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unit_profiles: {
+        Row: {
+          achievements: Json | null
+          address: string | null
+          certifications: Json | null
+          city: string | null
+          company_size: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          country: string | null
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          facebook_url: string | null
+          founded_year: number | null
+          gallery_images: Json | null
+          id: string
+          industry: string | null
+          instagram_url: string | null
+          linkedin_url: string | null
+          logo_url: string | null
+          mission: string | null
+          officers: Json | null
+          postal_code: string | null
+          profile_id: string
+          projects: Json | null
+          quick_links: Json | null
+          social_links: Json | null
+          state: string | null
+          twitter_url: string | null
+          unit_name: string | null
+          unit_type: string | null
+          updated_at: string
+          values: Json | null
+          vision: string | null
+          website_url: string | null
+        }
+        Insert: {
+          achievements?: Json | null
+          address?: string | null
+          certifications?: Json | null
+          city?: string | null
+          company_size?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          facebook_url?: string | null
+          founded_year?: number | null
+          gallery_images?: Json | null
+          id?: string
+          industry?: string | null
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          logo_url?: string | null
+          mission?: string | null
+          officers?: Json | null
+          postal_code?: string | null
+          profile_id: string
+          projects?: Json | null
+          quick_links?: Json | null
+          social_links?: Json | null
+          state?: string | null
+          twitter_url?: string | null
+          unit_name?: string | null
+          unit_type?: string | null
+          updated_at?: string
+          values?: Json | null
+          vision?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          achievements?: Json | null
+          address?: string | null
+          certifications?: Json | null
+          city?: string | null
+          company_size?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          facebook_url?: string | null
+          founded_year?: number | null
+          gallery_images?: Json | null
+          id?: string
+          industry?: string | null
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          logo_url?: string | null
+          mission?: string | null
+          officers?: Json | null
+          postal_code?: string | null
+          profile_id?: string
+          projects?: Json | null
+          quick_links?: Json | null
+          social_links?: Json | null
+          state?: string | null
+          twitter_url?: string | null
+          unit_name?: string | null
+          unit_type?: string | null
+          updated_at?: string
+          values?: Json | null
+          vision?: string | null
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unit_profiles_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
             referencedRelation: "profiles"
@@ -640,7 +728,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_unit_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "student" | "unit" | "admin"

@@ -27,6 +27,7 @@ const InternshipDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [internship, setInternship] = useState<Tables<"internships"> | null>(null);
+  const [unitId, setUnitId] = useState<string | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -41,6 +42,19 @@ const InternshipDetail = () => {
 
         if (error) throw error;
         setInternship(data);
+
+        // Fetch unit ID from the creator's profile
+        if (data.created_by) {
+          const { data: unitData } = await supabase
+            .from("units")
+            .select("id")
+            .eq("profile_id", data.created_by)
+            .maybeSingle();
+
+          if (unitData) {
+            setUnitId(unitData.id);
+          }
+        }
       } catch (error) {
         console.error("Error fetching internship:", error);
         toast({
@@ -295,11 +309,15 @@ const InternshipDetail = () => {
                   variant="outline"
                   className="border-orange-500 rounded-full text-orange-500 hover:bg-orange-50"
                   onClick={() => {
-                    // Navigate to company/unit page if it exists
-                    toast({
-                      title: "Coming Soon",
-                      description: "Company profile page is under development.",
-                    });
+                    if (unitId) {
+                      navigate(`/unit-profile/${unitId}`);
+                    } else {
+                      toast({
+                        title: "Not Available",
+                        description: "Company profile not found.",
+                        variant: "destructive",
+                      });
+                    }
                   }}
                 >
                   View Company Profile

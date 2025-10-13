@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronRight, HelpCircle } from "lucide-react";
+import { CircularProgress } from "@/components/CircularProgress";
+import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 
 interface Profile {
   id: string;
@@ -18,6 +20,9 @@ const ProfileSidebar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [studentProfile, setStudentProfile] = useState<any>(null);
+
+  const profileCompletion = useProfileCompletion({ profile, studentProfile });
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -32,6 +37,17 @@ const ProfileSidebar = () => {
 
         if (!error && data) {
           setProfile(data);
+
+          // Fetch student profile for completion calculation
+          const { data: studentData } = await supabase
+            .from("student_profiles")
+            .select("*")
+            .eq("profile_id", data.id)
+            .maybeSingle();
+
+          if (studentData) {
+            setStudentProfile(studentData);
+          }
         }
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -49,15 +65,15 @@ const ProfileSidebar = () => {
         <div className="text-center mb-6">
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
-              <Avatar className="h-20 w-20 ring-4 ring-green-400">
-                <AvatarImage src="" />
-                <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-                  {profile?.full_name?.charAt(0) ||
-                    user?.email?.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              {/* Green status indicator */}
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></div>
+              <CircularProgress percentage={profileCompletion} size={90} strokeWidth={3}>
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={(studentProfile as any)?.avatar_url || ""} />
+                  <AvatarFallback className="text-lg bg-primary text-primary-foreground">
+                    {profile?.full_name?.charAt(0) ||
+                      user?.email?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </CircularProgress>
             </div>
 
             <div>

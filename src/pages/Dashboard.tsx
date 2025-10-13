@@ -10,24 +10,61 @@ import {
   Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import { useInternships } from "@/hooks/useInternships";
 import { useCourses } from "@/hooks/useCourses";
+import { useInternshipRecommendations, useCourseRecommendations } from "@/hooks/useRecommendations";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentInternshipIndex, setCurrentInternshipIndex] = useState(0);
   const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
+  const [userSkills, setUserSkills] = useState<string[]>([]);
 
   const { internships, loading: internshipsLoading } = useInternships();
   const { courses, loading: coursesLoading } = useCourses();
 
-  // Take only the first 6 items for recommendations
-  const recommendedInternships = internships.slice(0, 6);
-  const recommendedCourses = courses.slice(0, 6);
+  // Fetch user skills for recommendations
+  useEffect(() => {
+    const fetchUserSkills = async () => {
+      if (!user) return;
+
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (profile) {
+          const { data: studentProfile } = await supabase
+            .from("student_profiles")
+            .select("skills")
+            .eq("profile_id", profile.id)
+            .maybeSingle();
+
+          if (studentProfile?.skills) {
+            const skills = typeof studentProfile.skills === 'string'
+              ? JSON.parse(studentProfile.skills)
+              : studentProfile.skills;
+            setUserSkills(Array.isArray(skills) ? skills : []);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user skills:", error);
+      }
+    };
+
+    fetchUserSkills();
+  }, [user]);
+
+  // Use recommendation hooks
+  const recommendedInternships = useInternshipRecommendations(internships, userSkills);
+  const recommendedCourses = useCourseRecommendations(courses, userSkills);
 
   const heroCards = [
     {
@@ -190,7 +227,7 @@ const Dashboard = () => {
                             <Card
                               key={internship.id}
                               className={`${colorClass} shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
-                              onClick={() => navigate("/internships")}
+                              onClick={() => navigate(`/internship/${internship.id}`)}
                             >
                               <CardHeader className="pb-3">
                                 <div className="flex justify-between items-start mb-2">
