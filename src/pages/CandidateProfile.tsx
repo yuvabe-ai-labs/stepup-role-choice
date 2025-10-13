@@ -188,7 +188,11 @@ const CandidateProfile = () => {
               <div className="flex-1">
                 <h2 className="text-2xl font-bold mb-2">{data.profile.full_name}</h2>
                 <p className="text-muted-foreground mb-4">
-                  {data.studentProfile.bio || "Passionate professional with experience creating meaningful impact."}
+                  {typeof data.studentProfile.bio === 'string'
+                    ? data.studentProfile.bio
+                    : Array.isArray(data.studentProfile.bio)
+                    ? data.studentProfile.bio.join(' ')
+                    : "Passionate professional with experience creating meaningful impact."}
                 </p>
 
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">

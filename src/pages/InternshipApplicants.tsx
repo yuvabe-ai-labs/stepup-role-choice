@@ -442,8 +442,11 @@ const InternshipApplicants = () => {
                           </Badge>
 
                           <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                            {application.studentProfile?.bio ||
-                              "Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences."}
+                            {typeof application.studentProfile?.bio === 'string'
+                              ? application.studentProfile.bio
+                              : Array.isArray(application.studentProfile?.bio)
+                              ? application.studentProfile.bio.join(' ')
+                              : "Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences."}
                           </p>
 
                           <div className="flex flex-wrap gap-2 justify-center mb-4">

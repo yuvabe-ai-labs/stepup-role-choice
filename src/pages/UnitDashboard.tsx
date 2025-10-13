@@ -392,8 +392,11 @@ const UnitDashboard = () => {
                             </Badge>
 
                             <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                              {application.studentProfile?.bio ||
-                                "Passionate about creating user-centered digital experiences."}
+                              {typeof application.studentProfile?.bio === 'string'
+                                ? application.studentProfile.bio
+                                : Array.isArray(application.studentProfile?.bio)
+                                ? application.studentProfile.bio.join(' ')
+                                : "Passionate about creating user-centered digital experiences."}
                             </p>
 
                             <div className="flex flex-wrap gap-2 justify-center mb-4">
@@ -742,7 +745,7 @@ const UnitDashboard = () => {
                           <div className="flex items-center gap-4 mb-4">
                             <Avatar className="w-16 h-16">
                               <AvatarImage
-                                src={candidate.profile?.avatar_url || undefined}
+                                src=""
                                 alt={candidate.profile.full_name}
                               />
                               <AvatarFallback>

@@ -159,7 +159,11 @@ const AllApplications = () => {
 
                       {/* Description */}
                       <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                        {application.studentProfile.bio || 'No bio available'}
+                        {typeof application.studentProfile.bio === 'string' 
+                          ? application.studentProfile.bio 
+                          : Array.isArray(application.studentProfile.bio)
+                          ? application.studentProfile.bio.join(' ')
+                          : 'No bio available'}
                       </p>
 
                       {/* Skills */}
