@@ -555,6 +555,8 @@ const CandidateProfile = () => {
         onOpenChange={setShowScheduleDialog}
         candidateName={data.profile.full_name}
         candidateEmail={data.profile.email}
+        applicationId={data.application.id}
+        onSuccess={refetch}
       />
     </div>
   );
