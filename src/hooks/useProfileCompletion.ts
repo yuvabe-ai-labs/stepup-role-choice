@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 interface ProfileCompletionProps {
   profile: any;
@@ -17,12 +17,12 @@ export const useProfileCompletion = ({ profile, studentProfile }: ProfileComplet
       profile.gender,
       studentProfile.avatar_url,
       studentProfile.cover_letter,
-      studentProfile.skills && JSON.parse(studentProfile.skills || '[]').length > 0,
-      studentProfile.education && JSON.parse(studentProfile.education || '[]').length > 0,
-      studentProfile.projects && JSON.parse(studentProfile.projects || '[]').length > 0,
-      studentProfile.interests && JSON.parse(studentProfile.interests || '[]').length > 0,
-      studentProfile.languages && JSON.parse(studentProfile.languages || '[]').length > 0,
-      studentProfile.completed_courses && JSON.parse(studentProfile.completed_courses || '[]').length > 0,
+      Array.isArray(studentProfile.skills) && studentProfile.skills.length > 0,
+      Array.isArray(studentProfile.education) && studentProfile.education.length > 0,
+      Array.isArray(studentProfile.projects) && studentProfile.projects.length > 0,
+      Array.isArray(studentProfile.interests) && studentProfile.interests.length > 0,
+      Array.isArray(studentProfile.languages) && studentProfile.languages.length > 0,
+      Array.isArray(studentProfile.completed_courses) && studentProfile.completed_courses.length > 0,
     ];
 
     const filledFields = fields.filter(Boolean).length;
