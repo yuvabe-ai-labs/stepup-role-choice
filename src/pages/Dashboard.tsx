@@ -2,13 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  MapPin,
-  Loader2,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, MapPin, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
@@ -34,11 +28,7 @@ const Dashboard = () => {
       if (!user) return;
 
       try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
+        const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle();
 
         if (profile) {
           const { data: studentProfile } = await supabase
@@ -47,11 +37,29 @@ const Dashboard = () => {
             .eq("profile_id", profile.id)
             .maybeSingle();
 
+          // if (studentProfile?.skills) {
+          //   const skills = typeof studentProfile.skills === 'string'
+          //     ? JSON.parse(studentProfile.skills)
+          //     : studentProfile.skills;
+          //   setUserSkills(Array.isArray(skills) ? skills : []);
+          // }
           if (studentProfile?.skills) {
-            const skills = typeof studentProfile.skills === 'string'
-              ? JSON.parse(studentProfile.skills)
-              : studentProfile.skills;
-            setUserSkills(Array.isArray(skills) ? skills : []);
+            let skills: any[] = [];
+
+            if (typeof studentProfile.skills === "string") {
+              try {
+                // Try to parse JSON
+                const parsed = JSON.parse(studentProfile.skills);
+                skills = Array.isArray(parsed) ? parsed : studentProfile.skills.split(",").map((s) => s.trim());
+              } catch {
+                // If invalid JSON, fallback to comma-separated
+                skills = studentProfile.skills.split(",").map((s) => s.trim());
+              }
+            } else if (Array.isArray(studentProfile.skills)) {
+              skills = studentProfile.skills;
+            }
+
+            setUserSkills(skills);
           }
         }
       } catch (error) {
@@ -90,27 +98,19 @@ const Dashboard = () => {
   ];
 
   const nextInternship = () => {
-    setCurrentInternshipIndex((prev) =>
-      prev === recommendedInternships.length - 1 ? 0 : prev + 1
-    );
+    setCurrentInternshipIndex((prev) => (prev === recommendedInternships.length - 1 ? 0 : prev + 1));
   };
 
   const prevInternship = () => {
-    setCurrentInternshipIndex((prev) =>
-      prev === 0 ? recommendedInternships.length - 1 : prev - 1
-    );
+    setCurrentInternshipIndex((prev) => (prev === 0 ? recommendedInternships.length - 1 : prev - 1));
   };
 
   const nextCourse = () => {
-    setCurrentCourseIndex((prev) =>
-      prev === recommendedCourses.length - 1 ? 0 : prev + 1
-    );
+    setCurrentCourseIndex((prev) => (prev === recommendedCourses.length - 1 ? 0 : prev + 1));
   };
 
   const prevCourse = () => {
-    setCurrentCourseIndex((prev) =>
-      prev === 0 ? recommendedCourses.length - 1 : prev - 1
-    );
+    setCurrentCourseIndex((prev) => (prev === 0 ? recommendedCourses.length - 1 : prev - 1));
   };
 
   return (
@@ -129,28 +129,14 @@ const Dashboard = () => {
             {/* Hero Section */}
             <div className="grid md:grid-cols-3 gap-4">
               {heroCards.map((card) => (
-                <Card
-                  key={card.id}
-                  className={`${card.color} border-0 shadow-sm`}
-                >
+                <Card key={card.id} className={`${card.color} border-0 shadow-sm`}>
                   <CardContent className="p-6">
                     <div className="min-h-[120px] flex flex-col justify-center">
                       <h3 className="font-bold text-sm mb-2">{card.title}</h3>
-                      {card.subtitle && (
-                        <p className="text-xs text-muted-foreground mb-1">
-                          {card.subtitle}
-                        </p>
-                      )}
-                      {card.speaker && (
-                        <p className="text-xs text-muted-foreground">
-                          {card.speaker}
-                        </p>
-                      )}
+                      {card.subtitle && <p className="text-xs text-muted-foreground mb-1">{card.subtitle}</p>}
+                      {card.speaker && <p className="text-xs text-muted-foreground">{card.speaker}</p>}
                       {card.type && (
-                        <Badge
-                          variant="secondary"
-                          className="w-fit text-xs mt-2"
-                        >
+                        <Badge variant="secondary" className="w-fit text-xs mt-2">
                           {card.type}
                         </Badge>
                       )}
@@ -165,11 +151,7 @@ const Dashboard = () => {
               <Card className="p-6 bg-white shadow-sm border border-gray-200 rounded-3xl">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold">Recommended for you</h2>
-                  <Button
-                    variant="link"
-                    className="text-primary p-0 h-auto"
-                    onClick={() => navigate("/internships")}
-                  >
+                  <Button variant="link" className="text-primary p-0 h-auto" onClick={() => navigate("/internships")}>
                     View all
                   </Button>
                 </div>
@@ -179,26 +161,17 @@ const Dashboard = () => {
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
                 ) : recommendedInternships.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">
-                    No internships available
-                  </p>
+                  <p className="text-center text-muted-foreground py-8">No internships available</p>
                 ) : (
                   <div className="relative">
                     <div className="flex items-center space-x-4">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={prevInternship}
-                        className="flex-shrink-0"
-                      >
+                      <Button variant="outline" size="icon" onClick={prevInternship} className="flex-shrink-0">
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
 
                       <div className="flex-1 grid md:grid-cols-3 gap-4">
                         {[0, 1, 2].map((offset) => {
-                          const index =
-                            (currentInternshipIndex + offset) %
-                            recommendedInternships.length;
+                          const index = (currentInternshipIndex + offset) % recommendedInternships.length;
                           const internship = recommendedInternships[index];
 
                           if (!internship) return null;
@@ -209,49 +182,34 @@ const Dashboard = () => {
                             "bg-purple-100 border-purple-200",
                           ];
                           const colorClass = colors[offset % colors.length];
-                          const initial =
-                            internship.company_name?.charAt(0) || "C";
+                          const initial = internship.company_name?.charAt(0) || "C";
                           const daysAgo = Math.floor(
-                            (Date.now() -
-                              new Date(internship.created_at).getTime()) /
-                              (1000 * 60 * 60 * 24)
+                            (Date.now() - new Date(internship.created_at).getTime()) / (1000 * 60 * 60 * 24),
                           );
-                          const timeText =
-                            daysAgo === 0
-                              ? "Today"
-                              : daysAgo === 1
-                              ? "1d ago"
-                              : `${daysAgo}d ago`;
+                          const timeText = daysAgo === 0 ? "Today" : daysAgo === 1 ? "1d ago" : `${daysAgo}d ago`;
 
                           return (
                             <Card
-                              key={internship.id}
+                              key={`${internship.id}-${index}`}
                               className={`${colorClass} shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
                               onClick={() => navigate(`/internship/${internship.id}`)}
                             >
                               <CardHeader className="pb-3">
                                 <div className="flex justify-between items-start mb-2">
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
+                                  <Badge variant="secondary" className="text-xs">
                                     {timeText}
                                   </Badge>
                                   <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center text-background font-bold text-sm">
                                     {initial}
                                   </div>
                                 </div>
-                                <CardTitle className="text-base font-semibold">
-                                  {internship.title}
-                                </CardTitle>
+                                <CardTitle className="text-base font-semibold">{internship.title}</CardTitle>
                               </CardHeader>
 
                               <CardContent className="space-y-3">
                                 <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                                   <Clock className="w-3 h-3" />
-                                  <span>
-                                    {internship.duration || "Not specified"}
-                                  </span>
+                                  <span>{internship.duration || "Not specified"}</span>
                                 </div>
 
                                 <div className="flex items-center space-x-1 text-xs text-muted-foreground">
@@ -264,12 +222,7 @@ const Dashboard = () => {
                         })}
                       </div>
 
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={nextInternship}
-                        className="flex-shrink-0"
-                      >
+                      <Button variant="outline" size="icon" onClick={nextInternship} className="flex-shrink-0">
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     </div>
@@ -282,9 +235,7 @@ const Dashboard = () => {
             <Card className="bg-gradient-to-r from-blue-100 to-blue-200 border-0">
               <CardContent className="p-8 text-center">
                 <h3 className="text-lg font-bold mb-2">Advertisement Space</h3>
-                <p className="text-sm text-muted-foreground">
-                  Featured content and promotions
-                </p>
+                <p className="text-sm text-muted-foreground">Featured content and promotions</p>
               </CardContent>
             </Card>
 
@@ -292,14 +243,8 @@ const Dashboard = () => {
             <section>
               <Card className="p-6 bg-white shadow-sm border border-gray-200 rounded-3xl">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold">
-                    Certified Courses for you
-                  </h2>
-                  <Button
-                    variant="link"
-                    className="text-primary p-0 h-auto"
-                    onClick={() => navigate("/courses")}
-                  >
+                  <h2 className="text-xl font-semibold">Certified Courses for you</h2>
+                  <Button variant="link" className="text-primary p-0 h-auto" onClick={() => navigate("/courses")}>
                     View all
                   </Button>
                 </div>
@@ -309,26 +254,17 @@ const Dashboard = () => {
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
                 ) : recommendedCourses.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">
-                    No courses available
-                  </p>
+                  <p className="text-center text-muted-foreground py-8">No courses available</p>
                 ) : (
                   <div className="relative">
                     <div className="flex items-center space-x-4">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={prevCourse}
-                        className="flex-shrink-0"
-                      >
+                      <Button variant="outline" size="icon" onClick={prevCourse} className="flex-shrink-0">
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
 
                       <div className="flex-1 grid md:grid-cols-3 gap-4">
                         {[0, 1, 2].map((offset) => {
-                          const index =
-                            (currentCourseIndex + offset) %
-                            recommendedCourses.length;
+                          const index = (currentCourseIndex + offset) % recommendedCourses.length;
                           const course = recommendedCourses[index];
 
                           if (!course) return null;
@@ -338,35 +274,23 @@ const Dashboard = () => {
                             "bg-gradient-to-br from-purple-800 to-orange-600",
                             "bg-gradient-to-br from-cyan-500 to-blue-600",
                           ];
-                          const gradientClass =
-                            gradients[offset % gradients.length];
+                          const gradientClass = gradients[offset % gradients.length];
 
                           return (
                             <Card
-                              key={course.id}
+                              key={`${course.id}-${index}-${Math.random()}`}
                               className="shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
                               onClick={() => navigate("/courses")}
                             >
-                              <div
-                                className={`h-32 ${gradientClass} flex items-center justify-center`}
-                              >
-                                <div className="text-white text-sm font-bold text-center px-4">
-                                  {course.title}
-                                </div>
+                              <div className={`h-32 ${gradientClass} flex items-center justify-center`}>
+                                <div className="text-white text-sm font-bold text-center px-4">{course.title}</div>
                               </div>
 
                               <CardContent className="p-4">
-                                <h3 className="font-semibold text-sm mb-1">
-                                  {course.title}
-                                </h3>
-                                <p className="text-xs text-muted-foreground">
-                                  {course.provider || "Online Course"}
-                                </p>
+                                <h3 className="font-semibold text-sm mb-1">{course.title}</h3>
+                                <p className="text-xs text-muted-foreground">{course.provider || "Online Course"}</p>
                                 {course.difficulty_level && (
-                                  <Badge
-                                    variant="secondary"
-                                    className="mt-2 text-xs"
-                                  >
+                                  <Badge variant="secondary" className="mt-2 text-xs">
                                     {course.difficulty_level}
                                   </Badge>
                                 )}
@@ -376,12 +300,7 @@ const Dashboard = () => {
                         })}
                       </div>
 
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={nextCourse}
-                        className="flex-shrink-0"
-                      >
+                      <Button variant="outline" size="icon" onClick={nextCourse} className="flex-shrink-0">
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     </div>
