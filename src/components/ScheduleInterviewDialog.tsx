@@ -64,19 +64,24 @@ export default function ScheduleInterviewDialog({
 
     try {
       // Combine date and time into ISO string
-      const scheduledDate = new Date(`${formData.date}T${formData.time}:00Z`).toISOString();
+      const scheduledDate = new Date(
+        `${formData.date}T${formData.time}:00Z`
+      ).toISOString();
 
-      const { data, error } = await supabase.functions.invoke("schedule-interview", {
-        body: {
-          applicationId,
-          candidateName,
-          candidateEmail: formData.guests,
-          scheduledDate,
-          title: formData.title,
-          description: formData.description,
-          durationMinutes: 60,
-        },
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "schedule-interview",
+        {
+          body: {
+            applicationId,
+            candidateName,
+            candidateEmail: formData.guests,
+            scheduledDate,
+            title: formData.title,
+            description: formData.description,
+            durationMinutes: 60,
+          },
+        }
+      );
 
       if (error) throw error;
 
@@ -101,7 +106,8 @@ export default function ScheduleInterviewDialog({
       console.error("Error scheduling interview:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to schedule interview. Please try again.",
+        description:
+          error.message || "Failed to schedule interview. Please try again.",
         variant: "destructive",
       });
     } finally {
