@@ -21,68 +21,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo-2.png";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [userRole, setUserRole] = useState<string | null>(null);
 
-  // Fetch user role from profile
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      if (!user) {
-        setUserRole(null);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (error) {
-          console.error("Error fetching user role:", error);
-          return;
-        }
-
-        setUserRole(data?.role || null);
-      } catch (error) {
-        console.error("Failed to fetch user role:", error);
-      }
-    };
-
-    fetchUserRole();
-  }, [user]);
-
-  const allNavItems = [
+  const navItems = [
     { name: "Internships", path: "/internships" },
     { name: "Courses", path: "/courses" },
     { name: "Units", path: "/units" },
   ];
-
-  // Filter navigation items based on user role
-  const navItems = userRole === "unit" ? [] : allNavItems;
 
   const isActive = (path: string) => location.pathname === path;
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
-  };
-
-  // Handle profile navigation based on user role
-  const handleProfileClick = () => {
-    if (userRole === "unit") {
-      navigate("/unit-profile");
-    } else {
-      navigate("/profile");
-    }
   };
 
   return (
@@ -99,25 +55,23 @@ const Navbar = () => {
           </a>
         </div>
 
-        {/* Navigation Links - Only show if user is not a unit */}
-        {navItems.length > 0 && (
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <Button
-                key={item.name}
-                variant="ghost"
-                className={`text-sm font-medium ${
-                  isActive(item.path)
-                    ? "text-primary border-b-2 border-primary rounded-none"
-                    : "text-black"
-                }`}
-                onClick={() => navigate(item.path)}
-              >
-                {item.name}
-              </Button>
-            ))}
-          </div>
-        )}
+        {/* Navigation Links */}
+        <div className="hidden md:flex items-center space-x-8">
+          {navItems.map((item) => (
+            <Button
+              key={item.name}
+              variant="ghost"
+              className={`text-sm font-medium ${
+                isActive(item.path)
+                  ? "text-primary border-b-2 border-primary rounded-none"
+                  : "text-black"
+              }`}
+              onClick={() => navigate(item.path)}
+            >
+              {item.name}
+            </Button>
+          ))}
+        </div>
 
         {/* Search and User Actions */}
         <div className="flex items-center space-x-4">
@@ -161,7 +115,7 @@ const Navbar = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40 rounded-lg">
               <DropdownMenuItem
-                onClick={handleProfileClick}
+                onClick={() => navigate("/profile")}
                 className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
               >
                 <User className="mr-2 h-4 w-4" />

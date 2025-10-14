@@ -1,34 +1,24 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Download, Mail, Phone, MapPin, ExternalLink, Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import Navbar from '@/components/Navbar';
+import { useCandidateProfile } from '@/hooks/useCandidateProfile';
 import {
-  ArrowLeft,
-  Download,
-  Mail,
-  Phone,
-  MapPin,
-  ExternalLink,
-  Star,
-  Heart,
-  XCircle,
-  UserCheck,
-  Calendar,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
-import Navbar from "@/components/Navbar";
-import { useCandidateProfile } from "@/hooks/useCandidateProfile";
-import { supabase } from "@/integrations/supabase/client";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
-import ScheduleInterviewDialog from "@/components/ScheduleInterviewDialog";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
   try {
-    return typeof data === "string" ? JSON.parse(data) : data;
+    return typeof data === 'string' ? JSON.parse(data) : data;
   } catch {
     return fallback;
   }
@@ -37,61 +27,7 @@ const safeParse = (data: any, fallback: any) => {
 const CandidateProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { data, loading, error, refetch } = useCandidateProfile(id || "");
-  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
-
-  const getStatusLabel = (status: string) => {
-    const statusMap: Record<string, string> = {
-      applied: "Not Shortlisted",
-      shortlisted: "Shortlisted",
-      rejected: "Not Shortlisted",
-      interviewed: "Schedule Interview",
-      hired: "Select Candidate",
-    };
-    return statusMap[status] || status;
-  };
-
-  const handleStatusChange = async (newStatus: "applied" | "shortlisted" | "rejected" | "interviewed" | "hired") => {
-    if (!data?.application.id) return;
-
-    // If status is "interviewed", open the schedule dialog instead
-    if (newStatus === "interviewed") {
-      setShowScheduleDialog(true);
-      return;
-    }
-
-    setIsUpdatingStatus(true);
-    try {
-      const { error: updateError } = await supabase
-        .from("applications")
-        .update({ status: newStatus })
-        .eq("id", data.application.id);
-
-      if (updateError) throw updateError;
-
-      // Refresh the data
-      await refetch();
-
-      // Show success toast
-      toast({
-        title: "Status Updated",
-        description: `Application status changed to ${getStatusLabel(newStatus)}`,
-        duration: 3000,
-      });
-    } catch (err) {
-      console.error("Error updating status:", err);
-      toast({
-        title: "Update Failed",
-        description: "Failed to update application status. Please try again.",
-        variant: "destructive",
-        duration: 3000,
-      });
-    } finally {
-      setIsUpdatingStatus(false);
-    }
-  };
+  const { data, loading, error } = useCandidateProfile(id || '');
 
   if (loading) {
     return (
@@ -115,8 +51,8 @@ const CandidateProfile = () => {
         <Navbar />
         <div className="max-w-7xl mx-auto px-6 py-8 text-center">
           <h1 className="text-2xl font-bold mb-4">Candidate Not Found</h1>
-          <p className="text-muted-foreground mb-6">{error || "The candidate profile could not be found."}</p>
-          <Button onClick={() => navigate("/unit-dashboard")}>Back to Dashboard</Button>
+          <p className="text-muted-foreground mb-6">{error || 'The candidate profile could not be found.'}</p>
+          <Button onClick={() => navigate('/unit-dashboard')}>Back to Dashboard</Button>
         </div>
       </div>
     );
@@ -125,8 +61,6 @@ const CandidateProfile = () => {
   const skills = safeParse(data.studentProfile.skills, []);
   const interests = safeParse(data.studentProfile.interests, []);
   const achievements = safeParse(data.studentProfile.achievements, []);
-  const education = safeParse(data.studentProfile.education, []);
-
   const matchScore = data.application.profile_match_score || 0;
 
   return (
@@ -136,7 +70,11 @@ const CandidateProfile = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" onClick={() => navigate("/unit-dashboard")} className="gap-2">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/unit-dashboard')}
+            className="gap-2"
+          >
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
@@ -164,7 +102,9 @@ const CandidateProfile = () => {
                   className="text-green-500"
                 />
               </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">{matchScore}%</span>
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
+                {matchScore}%
+              </span>
             </div>
           </div>
         </div>
@@ -178,21 +118,14 @@ const CandidateProfile = () => {
               <Avatar className="w-24 h-24">
                 <AvatarImage src={data.studentProfile.avatar_url || undefined} alt={data.profile.full_name} />
                 <AvatarFallback className="text-2xl">
-                  {data.profile.full_name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
+                  {data.profile.full_name.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
 
               <div className="flex-1">
                 <h2 className="text-2xl font-bold mb-2">{data.profile.full_name}</h2>
                 <p className="text-muted-foreground mb-4">
-                  {typeof data.studentProfile.bio === 'string'
-                    ? data.studentProfile.bio
-                    : Array.isArray(data.studentProfile.bio)
-                    ? data.studentProfile.bio.join(' ')
-                    : "Passionate professional with experience creating meaningful impact."}
+                  {data.studentProfile.bio || 'Passionate professional with experience creating meaningful impact.'}
                 </p>
 
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
@@ -221,39 +154,15 @@ const CandidateProfile = () => {
                     <Download className="w-4 h-4" />
                     Download Profile
                   </Button>
-                  <Select
-                    value={data.application.status}
-                    onValueChange={handleStatusChange}
-                    disabled={isUpdatingStatus}
-                  >
-                    <SelectTrigger className="w-48">
-                      <SelectValue />
+                  <Select defaultValue={data.application.status}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="shortlisted">
-                        <div className="flex items-center gap-2">
-                          <Heart className="w-4 h-4" />
-                          Shortlisted
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="applied">
-                        <div className="flex items-center gap-2">
-                          <XCircle className="w-4 h-4" />
-                          Not Shortlisted
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="hired">
-                        <div className="flex items-center gap-2">
-                          <UserCheck className="w-4 h-4" />
-                          Select Candidate
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="interviewed">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4" />
-                          Schedule Interview
-                        </div>
-                      </SelectItem>
+                      <SelectItem value="applied">Applied</SelectItem>
+                      <SelectItem value="shortlisted">Shortlisted</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="accepted">Accepted</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -273,8 +182,8 @@ const CandidateProfile = () => {
                 <div className="space-y-4">
                   {skills.length > 0 ? (
                     skills.map((skill: any, idx: number) => {
-                      const skillName = typeof skill === "string" ? skill : skill.name;
-                      const skillLevel = typeof skill === "object" ? skill.level : "Intermediate";
+                      const skillName = typeof skill === 'string' ? skill : skill.name;
+                      const skillLevel = typeof skill === 'object' ? skill.level : 'Intermediate';
                       return (
                         <div key={idx} className="flex items-center justify-between">
                           <span className="font-medium">{skillName}</span>
@@ -303,9 +212,7 @@ const CandidateProfile = () => {
                           <h4 className="font-semibold">{internship.role}</h4>
                           <p className="text-sm text-muted-foreground">{internship.company}</p>
                         </div>
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
+                        <Button variant="outline" size="sm">View</Button>
                       </div>
                     ))}
                   </div>
@@ -359,27 +266,21 @@ const CandidateProfile = () => {
             <Card>
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold mb-6">Education</h3>
-                {education.length > 0 ? (
+                {data.education.length > 0 ? (
                   <div className="space-y-4">
-                    {education.map((edu: any, idx: number) => (
-                      <div key={idx} className="flex items-start justify-between pb-4 border-b last:border-0">
+                    {data.education.map((edu) => (
+                      <div key={edu.id} className="flex items-start justify-between pb-4 border-b last:border-0">
                         <div>
-                          <h4 className="font-semibold">{edu.degree || edu.name || "Education"}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {edu.institution || edu.school || edu.college || "Educational Institution"}
-                          </p>
-                          {edu.field_of_study && (
-                            <p className="text-sm text-muted-foreground mt-1">{edu.field_of_study}</p>
-                          )}
-                          {edu.description && <p className="text-sm mt-2">{edu.description}</p>}
+                          <h4 className="font-semibold">{edu.degree}</h4>
+                          <p className="text-sm text-muted-foreground">{edu.institution}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-medium">
-                            {edu.start_year || edu.start_date} - {edu.end_year || edu.end_date || "Present"}
+                            {edu.start_year} - {edu.end_year}
                           </p>
-                          {edu.score && <p className="text-sm text-primary font-semibold">{edu.score}</p>}
-                          {edu.grade && <p className="text-sm text-primary font-semibold">{edu.grade}</p>}
-                          {edu.gpa && <p className="text-sm text-primary font-semibold">GPA: {edu.gpa}</p>}
+                          {edu.score && (
+                            <p className="text-sm text-primary font-semibold">{edu.score}</p>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -427,28 +328,16 @@ const CandidateProfile = () => {
                       </a>
                     </Button>
                   )}
-                  {!data.studentProfile.linkedin_url &&
-                    !data.studentProfile.behance_url &&
-                    !data.studentProfile.dribbble_url &&
-                    !data.studentProfile.website_url && (
-                      <p className="text-sm text-muted-foreground">No links provided</p>
-                    )}
+                  {!data.studentProfile.linkedin_url && !data.studentProfile.behance_url && 
+                   !data.studentProfile.dribbble_url && !data.studentProfile.website_url && (
+                    <p className="text-sm text-muted-foreground">No links provided</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
-
-      {/* Schedule Interview Dialog */}
-      <ScheduleInterviewDialog
-        open={showScheduleDialog}
-        onOpenChange={setShowScheduleDialog}
-        candidateName={data.profile.full_name}
-        candidateEmail={data.profile.email}
-        applicationId={data.application.id}
-        onSuccess={refetch}
-      />
     </div>
   );
 };

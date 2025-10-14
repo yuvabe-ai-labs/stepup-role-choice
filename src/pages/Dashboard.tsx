@@ -4,75 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Clock, MapPin, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import { useInternships } from "@/hooks/useInternships";
 import { useCourses } from "@/hooks/useCourses";
-import { useInternshipRecommendations, useCourseRecommendations } from "@/hooks/useRecommendations";
-import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentInternshipIndex, setCurrentInternshipIndex] = useState(0);
   const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
-  const [userSkills, setUserSkills] = useState<string[]>([]);
 
   const { internships, loading: internshipsLoading } = useInternships();
   const { courses, loading: coursesLoading } = useCourses();
 
-  // Fetch user skills for recommendations
-  useEffect(() => {
-    const fetchUserSkills = async () => {
-      if (!user) return;
-
-      try {
-        const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle();
-
-        if (profile) {
-          const { data: studentProfile } = await supabase
-            .from("student_profiles")
-            .select("skills")
-            .eq("profile_id", profile.id)
-            .maybeSingle();
-
-          // if (studentProfile?.skills) {
-          //   const skills = typeof studentProfile.skills === 'string'
-          //     ? JSON.parse(studentProfile.skills)
-          //     : studentProfile.skills;
-          //   setUserSkills(Array.isArray(skills) ? skills : []);
-          // }
-          if (studentProfile?.skills) {
-            let skills: any[] = [];
-
-            if (typeof studentProfile.skills === "string") {
-              try {
-                // Try to parse JSON
-                const parsed = JSON.parse(studentProfile.skills);
-                skills = Array.isArray(parsed) ? parsed : studentProfile.skills.split(",").map((s) => s.trim());
-              } catch {
-                // If invalid JSON, fallback to comma-separated
-                skills = studentProfile.skills.split(",").map((s) => s.trim());
-              }
-            } else if (Array.isArray(studentProfile.skills)) {
-              skills = studentProfile.skills;
-            }
-
-            setUserSkills(skills);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching user skills:", error);
-      }
-    };
-
-    fetchUserSkills();
-  }, [user]);
-
-  // Use recommendation hooks
-  const recommendedInternships = useInternshipRecommendations(internships, userSkills);
-  const recommendedCourses = useCourseRecommendations(courses, userSkills);
+  // Take only the first 6 items for recommendations
+  const recommendedInternships = internships.slice(0, 6);
+  const recommendedCourses = courses.slice(0, 6);
 
   const heroCards = [
     {
@@ -190,9 +139,9 @@ const Dashboard = () => {
 
                           return (
                             <Card
-                              key={`${internship.id}-${index}`}
+                              key={internship.id}
                               className={`${colorClass} shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
-                              onClick={() => navigate(`/internship/${internship.id}`)}
+                              onClick={() => navigate("/internships")}
                             >
                               <CardHeader className="pb-3">
                                 <div className="flex justify-between items-start mb-2">
@@ -278,7 +227,7 @@ const Dashboard = () => {
 
                           return (
                             <Card
-                              key={`${course.id}-${index}-${Math.random()}`}
+                              key={course.id}
                               className="shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
                               onClick={() => navigate("/courses")}
                             >

@@ -61,7 +61,8 @@ export const useProfileData = () => {
           const { data: newStudent, error: insertError } = await supabase
             .from("student_profiles")
             .insert({
-              profile_id: profileData.id
+              profile_id: profileData.id,
+              profile_type: profileData.profile_type || "Student",
             })
             .select()
             .single();

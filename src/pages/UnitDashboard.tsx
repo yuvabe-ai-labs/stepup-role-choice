@@ -7,13 +7,13 @@ import {
   FileText,
   Calendar,
   Briefcase,
-  EllipsisIcon,
+  Settings,
   Sparkles,
   ArrowRight,
   Filter,
   Plus,
   Eye,
-  Pencil,
+  MessageSquare,
   Ban,
   CheckCircle,
 } from "lucide-react";
@@ -44,8 +44,6 @@ import { useInternships } from "@/hooks/useInternships";
 import CreateInternshipDialog from "@/components/CreateInternshipDialog";
 import { supabase } from "@/integrations/supabase/client";
 import InternshipDetailsView from "@/components/InternshipDetailsView";
-import Navbar from "@/components/Navbar";
-import ProfileSidebar from "@/components/ProfileSidebar";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -64,7 +62,7 @@ const UnitDashboard = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [jobFilter, setJobFilter] = useState("all");
   const [updating, setUpdating] = useState<string | null>(null);
-  const [selectedInternship, setSelectedInternship] = useState<any>(null);
+  const [selectedInternship, setSelectedInternship] = useState<any>(null); // ADD THIS
 
   if (selectedInternship) {
     return (
@@ -88,8 +86,9 @@ const UnitDashboard = () => {
   };
 
   const handleAddComments = (internshipId: string) => {
-    // TODO: Implement edit functionality
-    console.log("Edit internship:", internshipId);
+    // Navigate to comments page or open comments modal
+    console.log("Add comments for internship:", internshipId);
+    // You can implement a modal or navigation here
   };
 
   const handleToggleStatus = async (id: string, currentStatus: string) => {
@@ -154,9 +153,51 @@ const UnitDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      {/* Header */}
+      <header className="border-b bg-card px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full"></div>
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-teal-400 to-teal-600 rounded-full"></div>
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div className="flex-1 max-w-md mx-8">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Search"
+                className="pl-10 bg-muted/30 border-muted"
+              />
+            </div>
+          </div>
+
+          {/* Right Section */}
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm">
+              <Bell className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="sm">
+              <Menu className="w-4 h-4" />
+            </Button>
+            <div className="flex items-center space-x-2">
+              <div className="grid grid-cols-2 gap-1">
+                <div className="w-2 h-2 bg-orange-400 rounded-sm"></div>
+                <div className="w-2 h-2 bg-teal-400 rounded-sm"></div>
+                <div className="w-2 h-2 bg-blue-400 rounded-sm"></div>
+                <div className="w-2 h-2 bg-green-400 rounded-sm"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
       {/* Main Content */}
-      <div className="p-6 lg:p-10 w-full">
+      <main className="p-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
@@ -340,14 +381,11 @@ const UnitDashboard = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {applications.slice(0, 9).map((application) => {
-                    const skills = safeParse(
-                      application.studentProfile?.skills,
-                      []
-                    );
+                    const skills = application.profile?.skills || [];
                     const displaySkills = skills
                       .slice(0, 3)
                       .map((s: any) =>
-                        typeof s === "string" ? s : s.name || s
+                        typeof s === "string" ? s : s?.name || s || ""
                       );
                     const matchScore =
                       application.profile_match_score ||
@@ -363,24 +401,23 @@ const UnitDashboard = () => {
                             <Avatar className="w-20 h-20 mb-4 ring-2 ring-primary/10">
                               <AvatarImage
                                 src={
-                                  application.studentProfile?.avatar_url ||
-                                  undefined
+                                  application.profile?.avatar_url || undefined
                                 }
-                                alt={application.profile.full_name}
+                                alt={application.profile?.full_name || "User"}
                               />
                               <AvatarFallback className="text-lg">
-                                {application.profile.full_name
-                                  .split(" ")
+                                {application.profile?.full_name
+                                  ?.split(" ")
                                   .map((n) => n[0])
-                                  .join("")}
+                                  .join("") || "?"}
                               </AvatarFallback>
                             </Avatar>
 
                             <h3 className="font-semibold text-lg mb-1">
-                              {application.profile.full_name}
+                              {application.profile?.full_name || "Unknown"}
                             </h3>
                             <p className="text-sm text-muted-foreground mb-3">
-                              {application.internship.title}
+                              {application.internship?.title || "No Title"}
                             </p>
 
                             <Badge
@@ -392,11 +429,8 @@ const UnitDashboard = () => {
                             </Badge>
 
                             <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                              {typeof application.studentProfile?.bio === 'string'
-                                ? application.studentProfile.bio
-                                : Array.isArray(application.studentProfile?.bio)
-                                ? application.studentProfile.bio.join(' ')
-                                : "Passionate about creating user-centered digital experiences."}
+                              {application.profile?.bio ||
+                                "Passionate about creating user-centered digital experiences."}
                             </p>
 
                             <div className="flex flex-wrap gap-2 justify-center mb-4">
@@ -577,7 +611,7 @@ const UnitDashboard = () => {
                                       size="sm"
                                       className="h-8 w-8 p-0"
                                     >
-                                      <EllipsisIcon className="w-4 h-4" />
+                                      <Settings className="w-4 h-4" />
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent
@@ -597,8 +631,8 @@ const UnitDashboard = () => {
                                         handleAddComments(internship.id)
                                       }
                                     >
-                                      <Pencil className="w-4 h-4 mr-2" />
-                                      Edit JD
+                                      <MessageSquare className="w-4 h-4 mr-2" />
+                                      Add Comments
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       onClick={() =>
@@ -745,7 +779,7 @@ const UnitDashboard = () => {
                           <div className="flex items-center gap-4 mb-4">
                             <Avatar className="w-16 h-16">
                               <AvatarImage
-                                src=""
+                                src={candidate.profile?.avatar_url || undefined}
                                 alt={candidate.profile.full_name}
                               />
                               <AvatarFallback>
@@ -912,7 +946,8 @@ const UnitDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
+
       {/* Create Internship Dialog */}
       <CreateInternshipDialog
         isOpen={showCreateDialog}
