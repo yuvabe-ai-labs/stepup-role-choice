@@ -201,18 +201,23 @@ const SignIn = () => {
                 </div>
               </div>
 
-              {/* Keep me logged in */}
-              <div className="flex items-center gap-2">
-                <input
-                  id="keepLoggedIn"
-                  type="checkbox"
-                  checked={keepLoggedIn}
-                  onChange={(e) => setKeepLoggedIn(e.target.checked)}
-                  className="w-3 h-3 rounded border-[#D1D5DB] text-[#76A9FA] focus:ring-[#76A9FA] focus:ring-1"
-                />
-                <label htmlFor="keepLoggedIn" className="text-[12px] cursor-pointer" style={{ color: "#4B5563" }}>
-                  Keep me logged in
-                </label>
+              {/* Keep me logged in and Forgot Password */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <input
+                    id="keepLoggedIn"
+                    type="checkbox"
+                    checked={keepLoggedIn}
+                    onChange={(e) => setKeepLoggedIn(e.target.checked)}
+                    className="w-3 h-3 rounded border-[#D1D5DB] text-[#76A9FA] focus:ring-[#76A9FA] focus:ring-1"
+                  />
+                  <label htmlFor="keepLoggedIn" className="text-[12px] cursor-pointer" style={{ color: "#4B5563" }}>
+                    Keep me logged in
+                  </label>
+                </div>
+                <Link to="/forgot-password" className="text-[12px] hover:underline" style={{ color: "#3F83F8" }}>
+                  Forgot Password?
+                </Link>
               </div>
 
               {/* Button */}

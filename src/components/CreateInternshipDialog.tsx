@@ -412,21 +412,9 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] p-0">
-        <DialogHeader className="px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-xl font-semibold">
-                Create new Job Description
-              </DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground mt-1">
-                This information is important for candidates to know better
-                about Job/Internship
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
+        <DialogHeader className="px-6 py-3"></DialogHeader>
 
-        <ScrollArea className="max-h-[calc(70vh-140px)]">
+        <ScrollArea className="max-h-[calc(90vh-140px)]">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="px-6 py-4 space-y-6"
@@ -449,6 +437,17 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
               </div>
             </div>
 
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle className="text-xl font-semibold">
+                  Create new Job Description
+                </DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground mt-1">
+                  This information is important for candidates to know better
+                  about Job/Internship
+                </DialogDescription>
+              </div>
+            </div>
             {/* Job/Intern Role */}
             <div className="space-y-2">
               <Label htmlFor="title" className="text-sm font-medium">

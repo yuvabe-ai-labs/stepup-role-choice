@@ -14,6 +14,7 @@ export interface DatabaseProfile {
 }
 
 export interface StudentProfile {
+  location: string;
   id: string;
   profile_id: string;
   created_at: string;

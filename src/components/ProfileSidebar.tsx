@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronRight, HelpCircle } from "lucide-react";
+import { CircularProgress } from "@/components/CircularProgress";
+import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 
 interface Profile {
   id: string;
@@ -18,20 +20,45 @@ const ProfileSidebar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [studentProfile, setStudentProfile] = useState<any>(null);
+  const [appliedCount, setAppliedCount] = useState<number>(0);
+
+  const profileCompletion = useProfileCompletion({ profile, studentProfile });
 
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
 
       try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("user_id", user.id)
-          .maybeSingle();
+        const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
 
         if (!error && data) {
           setProfile(data);
+
+          // Fetch student profile for completion calculation
+          const { data: studentData } = await supabase
+            .from("student_profiles")
+            .select("*")
+            .eq("profile_id", data.id)
+            .maybeSingle();
+
+          if (studentData) {
+            setStudentProfile(studentData);
+          }
+
+          // Fetch applications table for applied counts
+          const { data: applicationsData, error } = await supabase
+            .from("applications")
+            .select("*")
+            .eq("student_id", data.id);
+
+          if (error) {
+            console.error("Error fetching applications:", error);
+          } else if (applicationsData) {
+            console.log(applicationsData);
+            const appliedCount = applicationsData.length;
+            setAppliedCount(appliedCount);
+          }
         }
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -49,21 +76,18 @@ const ProfileSidebar = () => {
         <div className="text-center mb-6">
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
-              <Avatar className="h-20 w-20 ring-4 ring-green-400">
-                <AvatarImage src="" />
-                <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-                  {profile?.full_name?.charAt(0) ||
-                    user?.email?.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              {/* Green status indicator */}
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></div>
+              <CircularProgress percentage={profileCompletion} size={90} strokeWidth={3}>
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={(studentProfile as any)?.avatar_url || ""} />
+                  <AvatarFallback className="text-lg bg-primary text-primary-foreground">
+                    {profile?.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </CircularProgress>
             </div>
 
             <div>
-              <h3 className="font-semibold text-lg text-gray-900">
-                {profile?.full_name}
-              </h3>
+              <h3 className="font-semibold text-lg text-gray-900">{profile?.full_name}</h3>
               <p className="text-sm text-gray-500">{profile?.role}</p>
             </div>
 
@@ -87,7 +111,7 @@ const ProfileSidebar = () => {
             <div>
               <p className="text-sm text-gray-500 mb-1">Applied</p>
               <div className="flex items-center space-x-2">
-                <span className="text-2xl font-bold text-gray-900">15</span>
+                <span className="text-2xl font-bold text-gray-900">{appliedCount}</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
             </div>
@@ -106,19 +130,14 @@ const ProfileSidebar = () => {
             <div className="flex items-center space-x-3">
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                  <svg
-                    className="w-4 h-4"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
                 </div>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium leading-5">
-                  Get noticed by top Units with a resume built by AI Resume
-                  Builder
+                  Get noticed by top Units with a resume built by AI Resume Builder
                 </p>
               </div>
               <ChevronRight className="w-4 h-4 flex-shrink-0" />

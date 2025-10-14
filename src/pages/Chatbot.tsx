@@ -26,8 +26,7 @@ const Chatbot = () => {
   const [showChat, setShowChat] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [showProfessionalTransition, setShowProfessionalTransition] =
-    useState(false);
+  const [showProfessionalTransition, setShowProfessionalTransition] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -46,11 +45,7 @@ const Chatbot = () => {
         setProfileLoading(true);
         setProfileError(null);
 
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("user_id", user.id)
-          .single();
+        const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
 
         if (error) {
           console.error("Error fetching profile:", error);
@@ -84,8 +79,7 @@ const Chatbot = () => {
     // Add the professional transition message to chat history
     const transitionMessage: Message = {
       id: Date.now().toString(),
-      content:
-        "Thanks! Now let's know you professionally. Help me with all your professional details here",
+      content: "Thanks! Now let's know you professionally. Help me with all your professional details here",
       role: "assistant",
       timestamp: new Date(),
     };
@@ -96,8 +90,7 @@ const Chatbot = () => {
       // Ask the first professional question
       const professionalQuestion: Message = {
         id: (Date.now() + 1).toString(),
-        content:
-          "To know the best opportunities, which area of interest excites you the most?",
+        content: "To know the best opportunities, which area of interest excites you the most?",
         role: "assistant",
         timestamp: new Date(),
       };
@@ -121,11 +114,7 @@ const Chatbot = () => {
 
     setTimeout(() => {
       // Prefer full_name from userProfile, fallback to user_metadata, then email, then generic greeting
-      const name =
-        userProfile.full_name ||
-        user?.user_metadata?.full_name ||
-        user?.email?.split("@")[0] ||
-        "there";
+      const name = userProfile.full_name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "there";
 
       const initialMessage: Message = {
         id: "1",
@@ -218,16 +207,11 @@ const Chatbot = () => {
                 console.error("Error updating onboarding status:", updateError);
                 toast({
                   title: "Update Error",
-                  description:
-                    "Failed to update onboarding status: " +
-                    updateError.message,
+                  description: "Failed to update onboarding status: " + updateError.message,
                   variant: "destructive",
                 });
               } else {
-                console.log(
-                  "Successfully updated onboarding status:",
-                  updateData
-                );
+                console.log("Successfully updated onboarding status:", updateData);
               }
             } catch (error) {
               console.error("Error updating onboarding status:", error);
@@ -265,8 +249,7 @@ const Chatbot = () => {
       if (error.message && error.message.includes("quota")) {
         toast({
           title: "Daily Limit Reached",
-          description:
-            "The AI service has reached its daily limit. Please try again tomorrow.",
+          description: "The AI service has reached its daily limit. Please try again tomorrow.",
           variant: "destructive",
         });
       } else {
@@ -287,9 +270,7 @@ const Chatbot = () => {
   const storeUserData = async (userResponse: string) => {
     if (!user?.id) return;
 
-    const lastBotMessage =
-      messages.filter((m) => m.role === "assistant").slice(-1)[0]?.content ||
-      "";
+    const lastBotMessage = messages.filter((m) => m.role === "assistant").slice(-1)[0]?.content || "";
     const isUnit = userProfile?.role === "unit";
 
     try {
@@ -328,10 +309,7 @@ const Chatbot = () => {
           lastBotMessage.toLowerCase().includes("which area")
         ) {
           roleSpecificData.interests = stringToArray(userResponse);
-          console.log(
-            "Storing interests as array:",
-            roleSpecificData.interests
-          );
+          console.log("Storing interests as array:", roleSpecificData.interests);
         }
 
         // Skills (after area of interest selection) - store in student_profiles
@@ -411,8 +389,7 @@ const Chatbot = () => {
         if (
           lastBotMessage.includes("number") ||
           lastBotMessage.toLowerCase().includes("number to reach") ||
-          (lastBotMessage.toLowerCase().includes("phone") &&
-            lastBotMessage.toLowerCase().includes("unit")) ||
+          (lastBotMessage.toLowerCase().includes("phone") && lastBotMessage.toLowerCase().includes("unit")) ||
           lastBotMessage.toLowerCase().includes("contact number")
         ) {
           roleSpecificData.contact_phone = userResponse.trim();
@@ -470,27 +447,19 @@ const Chatbot = () => {
           lastBotMessage.includes("Education & Training")
         ) {
           roleSpecificData.skills_offered = stringToArray(userResponse);
-          console.log(
-            "Storing skills offered:",
-            roleSpecificData.skills_offered
-          );
+          console.log("Storing skills offered:", roleSpecificData.skills_offered);
         }
 
         // Services Offered - store in units as opportunities_offered
         if (
-          lastBotMessage
-            .toLowerCase()
-            .includes("opportunities can your unit offer") ||
+          lastBotMessage.toLowerCase().includes("opportunities can your unit offer") ||
           lastBotMessage.includes("opportunities") ||
           lastBotMessage.toLowerCase().includes("services") ||
           lastBotMessage.toLowerCase().includes("what do you offer") ||
           lastBotMessage.toLowerCase().includes("programs")
         ) {
           roleSpecificData.opportunities_offered = stringToArray(userResponse);
-          console.log(
-            "Storing opportunities offered:",
-            roleSpecificData.opportunities_offered
-          );
+          console.log("Storing opportunities offered:", roleSpecificData.opportunities_offered);
         }
 
         // Mission - store in units
@@ -504,10 +473,7 @@ const Chatbot = () => {
         }
 
         // Aurovillian status
-        if (
-          lastBotMessage.toLowerCase().includes("aurovillian unit") ||
-          lastBotMessage.includes("Aurovillian Unit")
-        ) {
+        if (lastBotMessage.toLowerCase().includes("aurovillian unit") || lastBotMessage.includes("Aurovillian Unit")) {
           const response = userResponse.toLowerCase();
 
           if (response.includes("non-aurovillian")) {
@@ -519,10 +485,7 @@ const Chatbot = () => {
             roleSpecificData.is_aurovillian = null;
           }
 
-          console.log(
-            "Storing Aurovillian status:",
-            roleSpecificData.is_aurovillian
-          );
+          console.log("Storing Aurovillian status:", roleSpecificData.is_aurovillian);
         }
       }
 
@@ -566,16 +529,10 @@ const Chatbot = () => {
           };
           setAccumulatedStudentData(updatedStudentData);
 
-          console.log(
-            "📝 Updating student_profiles with accumulated data:",
-            updatedStudentData
-          );
+          console.log("📝 Updating student_profiles with accumulated data:", updatedStudentData);
           const { data, error } = await supabase
             .from("student_profiles")
-            .upsert(
-              { profile_id: profileId, ...updatedStudentData },
-              { onConflict: "profile_id" }
-            )
+            .upsert({ profile_id: profileId, ...updatedStudentData }, { onConflict: "profile_id" })
             .select();
 
           if (error) {
@@ -598,10 +555,7 @@ const Chatbot = () => {
 
           const { data, error } = await supabase
             .from("units")
-            .upsert(
-              { profile_id: profileId, ...updatedUnitData },
-              { onConflict: "profile_id" }
-            )
+            .upsert({ profile_id: profileId, ...updatedUnitData }, { onConflict: "profile_id" })
             .select();
 
           if (error) {
@@ -642,9 +596,7 @@ const Chatbot = () => {
       "Technology & Digital",
     ];
 
-    return multiSelectQuestions.some((q) => lastBotMessage.includes(q))
-      ? "multi"
-      : "single";
+    return multiSelectQuestions.some((q) => lastBotMessage.includes(q)) ? "multi" : "single";
   };
 
   useEffect(() => {
@@ -694,9 +646,7 @@ const Chatbot = () => {
                 onClick={() => handleOptionClick(option)}
                 disabled={isLoading}
                 className={`px-4 py-2 border rounded-full text-sm transition-colors ${
-                  isSelected
-                    ? "border-blue-500 bg-blue-500 text-white"
-                    : "border-blue-500 text-blue-600"
+                  isSelected ? "border-blue-500 bg-blue-500 text-white" : "border-blue-500 text-blue-600"
                 }`}
                 variant="ghost"
                 size="sm"
@@ -932,12 +882,7 @@ const Chatbot = () => {
         ];
       }
       if (lastBotMessage.includes("looking for right now")) {
-        return [
-          "Courses",
-          "Internships",
-          "Job Opportunities",
-          "Just Exploring",
-        ];
+        return ["Courses", "Internships", "Job Opportunities", "Just Exploring"];
       }
     }
     return null;
@@ -947,12 +892,8 @@ const Chatbot = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg font-medium mb-2">
-            Loading your profile...
-          </div>
-          <div className="text-sm text-muted-foreground">
-            Setting up your personalized experience
-          </div>
+          <div className="text-lg font-medium mb-2">Loading your profile...</div>
+          <div className="text-sm text-muted-foreground">Setting up your personalized experience</div>
         </div>
       </div>
     );
@@ -962,12 +903,8 @@ const Chatbot = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg font-medium mb-2 text-destructive">
-            Profile Error
-          </div>
-          <div className="text-sm text-muted-foreground mb-4">
-            {profileError}
-          </div>
+          <div className="text-lg font-medium mb-2 text-destructive">Profile Error</div>
+          <div className="text-sm text-muted-foreground mb-4">{profileError}</div>
           <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
@@ -988,20 +925,14 @@ const Chatbot = () => {
           {/* Logo */}
           <div className="flex justify-center">
             <a href="/">
-              <img
-                src={logo}
-                alt="Company Logo"
-                className="h-30 w-auto cursor-pointer"
-              />
+              <img src={logo} alt="Company Logo" className="h-30 w-auto cursor-pointer" />
             </a>
           </div>
 
           {/* Header */}
           <div className="space-y-4">
             <h1 className="text-2xl font-bold text-foreground">
-              {isUnit
-                ? "Welcome to YuvaNext Unit Portal"
-                : "Welcome to YuvaNext Internships"}
+              {isUnit ? "Welcome to YuvaNext Unit Portal" : "Welcome to YuvaNext Internships"}
             </h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
               {isUnit
@@ -1013,22 +944,14 @@ const Chatbot = () => {
           {/* Bot Avatar */}
           <div className="relative">
             <div className="w-32 h-32 mx-auto mb-4 relative">
-              <img
-                src={chatbotAvatar}
-                alt="AI Assistant"
-                className="w-full h-full rounded-full object-cover"
-              />
+              <img src={chatbotAvatar} alt="AI Assistant" className="w-full h-full rounded-full object-cover" />
             </div>
             <div className="space-y-2">
               <h2 className="text-xl font-semibold text-foreground">
-                {isUnit
-                  ? "Hey there! Let's know your unit better"
-                  : "Hey mate! Let's know you better"}
+                {isUnit ? "Hey there! Let's know your unit better" : "Hey mate! Let's know you better"}
               </h2>
               <p className="text-muted-foreground text-sm">
-                {isUnit
-                  ? "Help me with all your unit details here"
-                  : "Help me with all your personal details here"}
+                {isUnit ? "Help me with all your unit details here" : "Help me with all your personal details here"}
               </p>
             </div>
           </div>
@@ -1056,20 +979,14 @@ const Chatbot = () => {
           {/* Logo */}
           <div className="flex justify-center">
             <a href="/">
-              <img
-                src={logo}
-                alt="Company Logo"
-                className="h-30 w-auto cursor-pointer"
-              />
+              <img src={logo} alt="Company Logo" className="h-30 w-auto cursor-pointer" />
             </a>
           </div>
 
           {/* Header */}
           <div className="space-y-4">
             <h1 className="text-2xl font-bold text-foreground">
-              {isUnit
-                ? "Welcome to YuvaNext Unit Portal"
-                : "Welcome to YuvaNext Internships"}
+              {isUnit ? "Welcome to YuvaNext Unit Portal" : "Welcome to YuvaNext Internships"}
             </h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
               {isUnit
@@ -1081,18 +998,12 @@ const Chatbot = () => {
           {/* Bot Avatar */}
           <div className="relative">
             <div className="w-32 h-32 mx-auto mb-4 relative">
-              <img
-                src={chatbotAvatar}
-                alt="AI Assistant"
-                className="w-full h-full rounded-full object-cover"
-              />
+              <img src={chatbotAvatar} alt="AI Assistant" className="w-full h-full rounded-full object-cover" />
             </div>
             <div className="space-y-2">
               <h2 className="text-xl font-semibold text-foreground">
                 Thanks {userProfile.full_name?.split(" ")[0] || "there"}!{" "}
-                {isUnit
-                  ? "Now let's know your unit professionally"
-                  : "Now let's know you professionally"}
+                {isUnit ? "Now let's know your unit professionally" : "Now let's know you professionally"}
               </h2>
               <p className="text-muted-foreground text-sm">
                 {isUnit
@@ -1125,23 +1036,15 @@ const Chatbot = () => {
           {/* Logo */}
           <div className="flex justify-center">
             <a href="/">
-              <img
-                src={logo}
-                alt="Company Logo"
-                className="h-30 w-auto cursor-pointer"
-              />
+              <img src={logo} alt="Company Logo" className="h-30 w-auto cursor-pointer" />
             </a>
           </div>
 
           {/* Header */}
           <div className="space-y-4">
-            <h1 className="text-2xl font-bold text-foreground">
-              🎉 You're All Set!
-            </h1>
+            <h1 className="text-2xl font-bold text-foreground">🎉 You're All Set!</h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              {isUnit
-                ? "Here's your unit profile summary:"
-                : "Here's your personalized profile summary:"}
+              {isUnit ? "Here's your unit profile summary:" : "Here's your personalized profile summary:"}
             </p>
           </div>
 
@@ -1165,15 +1068,9 @@ const Chatbot = () => {
                       <span className="text-2xl">👥</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        25
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Potential Candidates
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Matching your requirements
-                      </div>
+                      <div className="text-2xl font-bold text-foreground">25</div>
+                      <div className="text-sm text-muted-foreground">Potential Candidates</div>
+                      <div className="text-xs text-muted-foreground">Matching your requirements</div>
                     </div>
                   </Card>
 
@@ -1182,15 +1079,9 @@ const Chatbot = () => {
                       <span className="text-2xl">🎯</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        8
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Skill Matches
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Perfect for your unit
-                      </div>
+                      <div className="text-2xl font-bold text-foreground">8</div>
+                      <div className="text-sm text-muted-foreground">Skill Matches</div>
+                      <div className="text-xs text-muted-foreground">Perfect for your unit</div>
                     </div>
                   </Card>
 
@@ -1199,15 +1090,9 @@ const Chatbot = () => {
                       <span className="text-2xl">📋</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        3
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Active Listings
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Ready to post
-                      </div>
+                      <div className="text-2xl font-bold text-foreground">3</div>
+                      <div className="text-sm text-muted-foreground">Active Listings</div>
+                      <div className="text-xs text-muted-foreground">Ready to post</div>
                     </div>
                   </Card>
                 </>
@@ -1218,15 +1103,9 @@ const Chatbot = () => {
                       <span className="text-2xl">📅</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        5
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Matching Internships
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Found in business domain
-                      </div>
+                      <div className="text-2xl font-bold text-foreground">5</div>
+                      <div className="text-sm text-muted-foreground">Matching Internships</div>
+                      <div className="text-xs text-muted-foreground">Found in business domain</div>
                     </div>
                   </Card>
 
@@ -1235,15 +1114,9 @@ const Chatbot = () => {
                       <span className="text-2xl">🏢</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        12
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Auroville Units
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Relevant to your skills
-                      </div>
+                      <div className="text-2xl font-bold text-foreground">12</div>
+                      <div className="text-sm text-muted-foreground">Auroville Units</div>
+                      <div className="text-xs text-muted-foreground">Relevant to your skills</div>
                     </div>
                   </Card>
 
@@ -1252,15 +1125,9 @@ const Chatbot = () => {
                       <span className="text-2xl">🎯</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        3
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Skill Courses
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        To boost your profile
-                      </div>
+                      <div className="text-2xl font-bold text-foreground">3</div>
+                      <div className="text-sm text-muted-foreground">Skill Courses</div>
+                      <div className="text-xs text-muted-foreground">To boost your profile</div>
                     </div>
                   </Card>
                 </>
@@ -1276,10 +1143,7 @@ const Chatbot = () => {
                   setIsLoading(true);
 
                   try {
-                    console.log(
-                      "Updating onboarding completion for user:",
-                      user?.id
-                    );
+                    console.log("Updating onboarding completion for user:", user?.id);
                     // Update onboarding status in database
                     const { data: updateData, error } = await supabase
                       .from("profiles")
@@ -1291,26 +1155,18 @@ const Chatbot = () => {
                       console.error("Error updating onboarding status:", error);
                       toast({
                         title: "Update Error",
-                        description:
-                          "Failed to update onboarding status: " +
-                          error.message,
+                        description: "Failed to update onboarding status: " + error.message,
                         variant: "destructive",
                       });
                     } else {
-                      console.log(
-                        "Successfully updated onboarding status:",
-                        updateData
-                      );
+                      console.log("Successfully updated onboarding status:", updateData);
                       toast({
                         title: "Profile Complete!",
-                        description:
-                          "Your onboarding has been completed successfully.",
+                        description: "Your onboarding has been completed successfully.",
                         variant: "default",
                       });
                       // Navigate to appropriate dashboard based on user role
-                      const dashboardPath = isUnit
-                        ? "/unit-dashboard"
-                        : "/dashboard";
+                      const dashboardPath = isUnit ? "/unit-dashboard" : "/dashboard";
                       navigate(dashboardPath, { replace: true });
                     }
                   } catch (error: any) {
@@ -1327,11 +1183,7 @@ const Chatbot = () => {
                 className="bg-gradient-to-br from-[#07636C] to-[#0694A2] hover:opacity-90 text-white px-8 py-3 rounded-full font-medium transition-opacity"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
-                {isLoading
-                  ? "Setting up..."
-                  : isUnit
-                  ? "Explore Dashboard"
-                  : "Explore My Dashboard"}
+                {isLoading ? "Setting up..." : isUnit ? "Explore Dashboard" : "Explore My Dashboard"}
               </Button>
             </div>
           </div>
@@ -1340,8 +1192,7 @@ const Chatbot = () => {
     );
   }
 
-  const lastBotMessage =
-    messages.filter((m) => m.role === "assistant").slice(-1)[0]?.content || "";
+  const lastBotMessage = messages.filter((m) => m.role === "assistant").slice(-1)[0]?.content || "";
   const quickOptions = getQuickOptions(lastBotMessage);
 
   return (
@@ -1351,20 +1202,13 @@ const Chatbot = () => {
         <div className="text-center mb-6">
           <div className="flex justify-center">
             <a href="/">
-              <img
-                src={logo}
-                alt="Company Logo"
-                className="h-30 w-auto cursor-pointer"
-              />
+              <img src={logo} alt="Company Logo" className="h-30 w-auto cursor-pointer" />
             </a>
           </div>
-          <h1 className="text-xl font-bold text-foreground mb-2">
-            Welcome to YuvaNext Internships
-          </h1>
+          <h1 className="text-xl font-bold text-foreground my-4">Welcome to YuvaNext Internships</h1>
           <p className="text-muted-foreground text-sm">
-            Let's have a quick chat to personalize your internship journey! Our
-            AI assistant will help you discover opportunities that match your
-            passions.
+            Let's have a quick chat to personalize your internship journey! Our AI assistant will help you discover
+            opportunities that match your passions.
           </p>
         </div>
 
@@ -1375,26 +1219,15 @@ const Chatbot = () => {
         >
           {" "}
           {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
+            <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
                 className={`flex items-start space-x-3 max-w-[80%] ${
-                  message.role === "user"
-                    ? "flex-row-reverse space-x-reverse"
-                    : ""
+                  message.role === "user" ? "flex-row-reverse space-x-reverse" : ""
                 }`}
               >
                 {message.role === "assistant" && (
                   <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                    <img
-                      src={chatbotAvatar}
-                      alt="AI Assistant"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={chatbotAvatar} alt="AI Assistant" className="w-full h-full object-cover" />
                   </div>
                 )}
                 <Card
@@ -1404,9 +1237,7 @@ const Chatbot = () => {
                       : "bg-transparent border-blue-500 text-blue-600"
                   }`}
                 >
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {message.content}
-                  </p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                 </Card>
               </div>
             </div>
@@ -1414,9 +1245,7 @@ const Chatbot = () => {
           {/* Quick Options */}
           {quickOptions && messages.length > 0 && !isTyping && !isLoading && (
             <div className="flex justify-start">
-              <div className="max-w-[80%]">
-                {renderQuickOptions(quickOptions)}
-              </div>
+              <div className="max-w-[80%]">{renderQuickOptions(quickOptions)}</div>
             </div>
           )}
           {/* Typing Indicator */}
@@ -1424,11 +1253,7 @@ const Chatbot = () => {
             <div className="flex justify-start">
               <div className="flex items-start space-x-3 max-w-[80%]">
                 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                  <img
-                    src={chatbotAvatar}
-                    alt="AI Assistant"
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={chatbotAvatar} alt="AI Assistant" className="w-full h-full object-cover" />
                 </div>
                 <div className="px-4 py-2 border border-blue-500 text-blue-600 rounded-full">
                   <div className="flex space-x-1">

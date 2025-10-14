@@ -1,15 +1,20 @@
-import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useToast } from '@/hooks/use-toast';
+import React from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useToast } from "@/hooks/use-toast";
+import { Pencil, Sparkle } from "lucide-react";
+import { log } from "console";
 
 const summarySchema = z.object({
-  cover_letter: z.string().min(10, 'Profile summary should be at least 10 characters long').max(1000, 'Profile summary should not exceed 1000 characters'),
+  cover_letter: z
+    .string()
+    .min(10, "Profile summary should be at least 10 characters long")
+    .max(1000, "Profile summary should not exceed 1000 characters"),
 });
 
 type SummaryFormData = z.infer<typeof summarySchema>;
@@ -20,22 +25,23 @@ interface ProfileSummaryDialogProps {
   onSave: (summary: string) => Promise<void>;
 }
 
-export const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({
-  children,
-  summary,
-  onSave,
-}) => {
+export const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ children, summary, onSave }) => {
   const [open, setOpen] = React.useState(false);
   const { toast } = useToast();
-  
-  const { register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm<SummaryFormData>({
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch,
+  } = useForm<SummaryFormData>({
     resolver: zodResolver(summarySchema),
     defaultValues: {
-      cover_letter: summary || '',
+      cover_letter: summary || "",
     },
   });
 
-  const coverLetter = watch('cover_letter');
+  const coverLetter = watch("cover_letter");
   const characterCount = coverLetter?.length || 0;
 
   const onSubmit = async (data: SummaryFormData) => {
@@ -57,42 +63,50 @@ export const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit Profile Summary</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-gray-900 mb-4">Profile Summary</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <Label htmlFor="cover_letter">Profile Summary</Label>
-            <Textarea
-              id="cover_letter"
-              {...register('cover_letter')}
-              placeholder="Write a brief summary about yourself, your skills, and what you're looking for..."
-              rows={6}
-              className="mt-1"
-            />
-            <div className="flex justify-between mt-1">
-              <div>
-                {errors.cover_letter && (
-                  <p className="text-sm text-destructive">{errors.cover_letter.message}</p>
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {characterCount}/1000 characters
-              </p>
-            </div>
-          </div>
+            {/*  AI Assistance Textarea */}
+            <div className="border rounded-xl overflow-hidden">
+              {/* Gradient Header  */}
+              <div className="bg-gradient-to-r from-[#DF10FF] to-[#005EFF] text-white px-[2px] py-[1px] text-sm">
+                <span className="p-4">AI Assistance - Type something which you want to enhance</span>
+                {/* Textarea  */}
+                <div className="relative">
+                  <Textarea
+                    id="cover_letter"
+                    {...register("cover_letter")}
+                    placeholder="Get AI assistance to write your Profile Summary"
+                    rows={6}
+                    className="mt-2 w-full p-4 resize-y border-0 outline-none text-gray-500 placeholder-gray-400 focus:outline-none focus:ring-0"
+                  />
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
-            </Button>
+                  {errors.cover_letter && <p className="text-sm">{errors.cover_letter.message}</p>}
+
+                  {/* Create Button  */}
+                  <button
+                    className="absolute bottom-2 right-2 bg-white text-gray-500 border rounded-full px-3 py-1 text-sm hover:bg-gray-100"
+                    // disabled={submi}
+                  >
+                    Create
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 text-right">
+              <Button
+                className="bg-white border text-gray-500 rounded-full px-6 py-2 text-sm hover:bg-gray-50"
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Saving..." : "Save"}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

@@ -44,7 +44,6 @@ import { useInternships } from "@/hooks/useInternships";
 import CreateInternshipDialog from "@/components/CreateInternshipDialog";
 import { supabase } from "@/integrations/supabase/client";
 import InternshipDetailsView from "@/components/InternshipDetailsView";
-import EditInternshipDialog from "@/components/EditInternshipDialog";
 import Navbar from "@/components/Navbar";
 import ProfileSidebar from "@/components/ProfileSidebar";
 
@@ -66,7 +65,6 @@ const UnitDashboard = () => {
   const [jobFilter, setJobFilter] = useState("all");
   const [updating, setUpdating] = useState<string | null>(null);
   const [selectedInternship, setSelectedInternship] = useState<any>(null);
-  const [editingInternship, setEditingInternship] = useState<any>(null);
 
   if (selectedInternship) {
     return (
@@ -89,12 +87,9 @@ const UnitDashboard = () => {
     }
   };
 
-  // Update the handleAddComments function to open edit dialog (around line 80)
   const handleAddComments = (internshipId: string) => {
-    const internship = internships.find((i) => i.id === internshipId);
-    if (internship) {
-      setEditingInternship(internship);
-    }
+    // TODO: Implement edit functionality
+    console.log("Edit internship:", internshipId);
   };
 
   const handleToggleStatus = async (id: string, currentStatus: string) => {
@@ -397,8 +392,11 @@ const UnitDashboard = () => {
                             </Badge>
 
                             <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                              {application.studentProfile?.bio ||
-                                "Passionate about creating user-centered digital experiences."}
+                              {typeof application.studentProfile?.bio === 'string'
+                                ? application.studentProfile.bio
+                                : Array.isArray(application.studentProfile?.bio)
+                                ? application.studentProfile.bio.join(' ')
+                                : "Passionate about creating user-centered digital experiences."}
                             </p>
 
                             <div className="flex flex-wrap gap-2 justify-center mb-4">
@@ -747,7 +745,7 @@ const UnitDashboard = () => {
                           <div className="flex items-center gap-4 mb-4">
                             <Avatar className="w-16 h-16">
                               <AvatarImage
-                                src={candidate.profile?.avatar_url || undefined}
+                                src=""
                                 alt={candidate.profile.full_name}
                               />
                               <AvatarFallback>
@@ -915,17 +913,7 @@ const UnitDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
-      {/* Edit Internship Dialog */}
-      <EditInternshipDialog
-        isOpen={!!editingInternship}
-        onClose={() => setEditingInternship(null)}
-        onSuccess={() => {
-          setEditingInternship(null);
-          window.location.reload();
-        }}
-        internship={editingInternship}
-      />
-      ;{/* Create Internship Dialog */}
+      {/* Create Internship Dialog */}
       <CreateInternshipDialog
         isOpen={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
