@@ -120,7 +120,9 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
       const { calculateMatchScore } = await import("@/utils/matchScore");
       const studentSkills = profileData.studentProfile?.skills || [];
       const internshipSkills = internship.skills_required || [];
+      console.log("Calculating match score:", { studentSkills, internshipSkills });
       const matchScore = calculateMatchScore(studentSkills, internshipSkills);
+      console.log("Match score calculated:", matchScore);
 
       // Create application record
       const applicationData = {
