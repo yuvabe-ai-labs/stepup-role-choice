@@ -307,10 +307,10 @@ const InternshipDetail = () => {
 
                 <Button
                   variant="outline"
-                  className="border-none bg-orange-500 hover:bg-orange-600 text-white rounded-full px-8"
+                  className="border-orange-500 rounded-full text-orange-500 hover:bg-orange-50"
                   onClick={() => {
                     if (unitId) {
-                      navigate(`/units/${unitId}`);
+                      navigate(`/unit-profile/${unitId}`);
                     } else {
                       toast({
                         title: "Not Available",
