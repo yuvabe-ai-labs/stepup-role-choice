@@ -2,14 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -81,8 +74,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
             }
             // Redirect from chatbot to appropriate dashboard after onboarding
             else if (location.pathname === "/chatbot") {
-              const targetDashboard =
-                role === "unit" ? "/unit-dashboard" : "/dashboard";
+              const targetDashboard = role === "unit" ? "/unit-dashboard" : "/dashboard";
               navigate(targetDashboard, { replace: true });
             }
           }
@@ -151,6 +143,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Internships />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/internships/:id"
+              element={
+                <ProtectedRoute>
+                  <InternshipDetail />
                 </ProtectedRoute>
               }
             />
