@@ -1,401 +1,356 @@
-import React, { useState, useEffect } from "react";
+// <-- same imports as before -->
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ChevronRight, CalendarIcon, Search } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { supabase } from "@/integrations/supabase/client";
-type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | {
-      [key: string]: Json;
-    }
-  | Json[];
-interface Unit {
-  id: string;
-  unit_name: string;
-  unit_type: string;
-  focus_areas: Json;
-  opportunities_offered: Json;
-  skills_offered: Json;
-  profile_id: string;
-  contact_email: string;
-  contact_phone: string;
-  address: string;
-  is_aurovillian: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import { useUnits } from "@/hooks/useUnits";
+import { formatDistanceToNow } from "date-fns";
 
-// --- Helpers ---
-function safeParse<T>(data: any, fallback: T): T {
-  if (!data) return fallback;
-  try {
-    return typeof data === "string" ? JSON.parse(data) : data;
-  } catch {
-    return fallback;
-  }
-}
-function getUnitGradient(unitName: string, unitType: string): string {
-  const gradients = [
-    "bg-gradient-to-br from-gray-900 to-purple-900",
-    "bg-gradient-to-br from-teal-600 to-blue-700",
-    "bg-gradient-to-br from-gray-800 to-orange-900",
-    "bg-gradient-to-br from-blue-600 to-teal-700",
-    "bg-gradient-to-br from-gray-700 to-gray-900",
-    "bg-gradient-to-br from-teal-700 to-blue-800",
-    "bg-gradient-to-br from-purple-600 to-indigo-700",
-    "bg-gradient-to-br from-green-600 to-teal-700",
-    "bg-gradient-to-br from-red-600 to-pink-700",
-  ];
-  const hash = unitName
-    .split("")
-    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return gradients[hash % gradients.length];
-}
-function getTimeAgo(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInDays = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
-  );
-  if (diffInDays === 0) return "Today";
-  if (diffInDays === 1) return "1d ago";
-  if (diffInDays < 7) return `${diffInDays}d ago`;
-  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)}w ago`;
-  return `${Math.floor(diffInDays / 30)}m ago`;
-}
 const Units = () => {
   const navigate = useNavigate();
-  const [units, setUnits] = useState<Unit[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [expandedSections, setExpandedSections] = useState({
-    units: true,
-    industry: false,
-    interest: false,
+  const { units, loading, error } = useUnits();
+
+  const [filters, setFilters] = useState({
+    units: [] as string[],
+    industries: [] as string[],
+    departments: [] as string[],
+    interestAreas: [] as string[],
+    postingDate: { from: "", to: "" },
   });
 
-  // filter states
-  const [selectedUnits, setSelectedUnits] = useState<string[]>([]);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedFocusAreas, setSelectedFocusAreas] = useState<string[]>([]);
+  const [activeDateRange, setActiveDateRange] = useState("");
+  const [searchUnits, setSearchUnits] = useState("");
+  const [searchIndustries, setSearchIndustries] = useState("");
+  const [searchDepartments, setSearchDepartments] = useState("");
+  const [showAllUnits, setShowAllUnits] = useState(false);
+  const [showAllIndustries, setShowAllIndustries] = useState(false);
+  const [showAllDepartments, setShowAllDepartments] = useState(false);
 
-  // Fetch units
-  useEffect(() => {
-    const fetchUnits = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from("units")
-          .select("*")
-          .order("created_at", {
-            ascending: false,
-          });
-        if (error) {
-          console.error("Error fetching units:", error);
-          setError(error.message);
-        } else {
-          setUnits(data || []);
-        }
-      } catch (err) {
-        console.error("Error:", err);
-        setError("Failed to fetch units");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUnits();
-  }, []);
-
-  // Helpers for filters
-  const getUniqueUnitNames = () => [
-    ...new Set(units.map((unit) => unit.unit_name)),
-  ];
-  const getUniqueUnitTypes = () => [
-    ...new Set(units.map((unit) => unit.unit_type)),
-  ];
-  const getUniqueFocusAreas = () => {
-    const allFocusAreas = units.flatMap((unit) => {
-      const focusAreas = safeParse(unit.focus_areas, {});
-      return Object.keys(focusAreas);
+  const resetFilters = () => {
+    setFilters({
+      units: [],
+      industries: [],
+      departments: [],
+      interestAreas: [],
+      postingDate: { from: "", to: "" },
     });
-    return [...new Set(allFocusAreas)];
-  };
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-  const toggleFilter = (
-    value: string,
-    setState: React.Dispatch<React.SetStateAction<string[]>>
-  ) => {
-    setState((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
-    );
-  };
-  const clearFilters = () => {
-    setSelectedUnits([]);
-    setSelectedTypes([]);
-    setSelectedFocusAreas([]);
+    setActiveDateRange("");
   };
 
-  // Apply filters
+  // ------------------ NEW: parse helper ------------------
+  const parsePgTimestamp = (ts: any): Date => {
+    // If it's already a Date, return early
+    if (ts instanceof Date) return ts;
+
+    if (!ts) return new Date(NaN);
+
+    let s = String(ts).trim();
+
+    // Replace space between date & time with 'T' for ISO compatibility
+    s = s.replace(" ", "T");
+
+    // Trim microseconds to milliseconds (convert .123456 -> .123)
+    s = s.replace(/\.(\d{3})\d+/, ".$1");
+
+    // If timezone is '+00' or '+00:00', convert to 'Z'
+    s = s.replace(/\+00:00?$|Z$/i, "Z");
+
+    // If there's no timezone offset (e.g., ends with seconds), append Z
+    if (!/[zZ]|[+\-]\d{2}:?\d{2}$/.test(s)) {
+      s = s + "Z";
+    }
+
+    const d = new Date(s);
+    return d;
+  };
+  // -------------------------------------------------------
+
+  // Extract unique filter data
+  const uniqueUnits = [...new Set(units.map((u) => u.unit_name).filter(Boolean))];
+  const uniqueIndustries = [...new Set(units.map((u) => u.industry || u.unit_type).filter(Boolean))];
+  const uniqueDepartments = [...new Set(units.map((u) => u.unit_type).filter(Boolean))];
+
+  const interestAreas = [
+    ...new Set(
+      units.flatMap((u) =>
+        typeof u.focus_areas === "object" && u.focus_areas
+          ? Object.values(u.focus_areas)
+          : typeof u.focus_areas_backup === "object" && u.focus_areas_backup
+            ? Object.keys(u.focus_areas_backup)
+            : [],
+      ),
+    ),
+  ];
+
+  // Search filtering
+  const filteredUnitsList = uniqueUnits.filter((u) => u.toLowerCase().includes(searchUnits.toLowerCase()));
+  const filteredIndustriesList = uniqueIndustries.filter((i) =>
+    i.toLowerCase().includes(searchIndustries.toLowerCase()),
+  );
+  const filteredDepartmentsList = uniqueDepartments.filter((d) =>
+    d.toLowerCase().includes(searchDepartments.toLowerCase()),
+  );
+
+  const toggleFilter = (category: keyof typeof filters, value: string) => {
+    if (category === "postingDate") return;
+    const list = filters[category] as string[];
+    setFilters({
+      ...filters,
+      [category]: list.includes(value) ? list.filter((v) => v !== value) : [...list, value],
+    });
+  };
+
+  // ✅ Fixed & simplified date range logic
+  const DateRange = (range: "today" | "week" | "month") => {
+    if (activeDateRange === range) {
+      setActiveDateRange("");
+      setFilters({ ...filters, postingDate: { from: "", to: "" } });
+      return;
+    }
+
+    const now = new Date();
+    let from = new Date();
+
+    if (range === "today") {
+      from.setHours(0, 0, 0, 0);
+    } else if (range === "week") {
+      const firstDay = new Date(now);
+      firstDay.setDate(now.getDate() - now.getDay()); // week starts Sunday; adjust if you want Monday
+      firstDay.setHours(0, 0, 0, 0);
+      from = firstDay;
+    } else if (range === "month") {
+      from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    }
+
+    // End of current day in local time
+    const to = new Date();
+    to.setHours(23, 59, 59, 999);
+
+    setActiveDateRange(range);
+    setFilters({
+      ...filters,
+      postingDate: { from: from.toISOString(), to: to.toISOString() },
+    });
+  };
+
+  // ✅ Core filtering (uses parsePgTimestamp for created_at)
   const filteredUnits = units.filter((unit) => {
-    const focusAreas = safeParse(unit.focus_areas, {});
-    const focusAreaKeys = Object.keys(focusAreas);
-    if (selectedUnits.length > 0 && !selectedUnits.includes(unit.unit_name)) {
-      return false;
+    if (filters.units.length && !filters.units.includes(unit.unit_name)) return false;
+    if (filters.industries.length) {
+      const ind = unit.industry || unit.unit_type;
+      if (!ind || !filters.industries.includes(ind)) return false;
     }
-    if (selectedTypes.length > 0 && !selectedTypes.includes(unit.unit_type)) {
-      return false;
+    if (filters.departments.length && !filters.departments.includes(unit.unit_type)) return false;
+
+    if (filters.interestAreas.length) {
+      const areas: string[] = [];
+      if (typeof unit.focus_areas === "object" && unit.focus_areas)
+        areas.push(...Object.values(unit.focus_areas).map(String));
+      if (typeof unit.focus_areas_backup === "object" && unit.focus_areas_backup)
+        areas.push(...Object.keys(unit.focus_areas_backup).map(String));
+
+      if (!filters.interestAreas.some((a) => areas.includes(a))) return false;
     }
-    if (
-      selectedFocusAreas.length > 0 &&
-      !selectedFocusAreas.some((f) => focusAreaKeys.includes(f))
-    ) {
-      return false;
+
+    if (filters.postingDate.from || filters.postingDate.to) {
+      const unitDate = parsePgTimestamp(unit.created_at).getTime();
+      const from = filters.postingDate.from ? new Date(filters.postingDate.from).getTime() : -Infinity;
+      const to = filters.postingDate.to ? new Date(filters.postingDate.to).getTime() : Infinity;
+
+      // If unitDate is invalid, exclude it (could also decide to include)
+      if (Number.isNaN(unitDate)) return false;
+
+      if (unitDate < from || unitDate > to) return false;
     }
+
     return true;
   });
+
+  const getUnitGradient = (i: number) => {
+    const g = [
+      "bg-gradient-to-br from-purple-600 to-blue-600",
+      "bg-gradient-to-br from-teal-600 to-green-600",
+      "bg-gradient-to-br from-orange-600 to-red-600",
+      "bg-gradient-to-br from-blue-600 to-cyan-500",
+      "bg-gradient-to-br from-pink-600 to-purple-600",
+      "bg-gradient-to-br from-gray-700 to-gray-900",
+    ];
+    return g[i % g.length];
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navbar />
-
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-80 bg-background border border-border rounded-2xl shadow-md p-6 m-6 h-auto">
-          <h2 className="text-base font-semibold text-gray-800 mb-6">
-            All Filters
-          </h2>
-
-          {/* Units Filter */}
-          <div className="mb-6">
-            <button
-              onClick={() => toggleSection("units")}
-              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
-            >
-              <span>Units</span>
-              {expandedSections.units ? (
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-gray-500" />
-              )}
-            </button>
-            {expandedSections.units && (
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {getUniqueUnitNames().map((unitName) => (
-                    <span
-                      key={unitName}
-                      onClick={() => toggleFilter(unitName, setSelectedUnits)}
-                      className={`px-3 py-1 text-sm border rounded-full cursor-pointer ${
-                        selectedUnits.includes(unitName)
-                          ? "bg-sky-500 text-white border-sky-500"
-                          : "border-gray-300 text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      {unitName}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Unit Type Filter */}
-          <div className="mb-6">
-            <button
-              onClick={() => toggleSection("industry")}
-              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
-            >
-              <span>Unit Type</span>
-              {expandedSections.industry ? (
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-gray-500" />
-              )}
-            </button>
-            {expandedSections.industry && (
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {getUniqueUnitTypes().map((unitType) => (
-                    <span
-                      key={unitType}
-                      onClick={() => toggleFilter(unitType, setSelectedTypes)}
-                      className={`px-3 py-1 text-sm border rounded-full cursor-pointer ${
-                        selectedTypes.includes(unitType)
-                          ? "bg-sky-500 text-white border-sky-500"
-                          : "border-gray-300 text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      {unitType}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Focus Areas Filter */}
-          <div className="mb-6">
-            <button
-              onClick={() => toggleSection("interest")}
-              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3"
-            >
-              <span>Focus Areas</span>
-              {expandedSections.interest ? (
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-gray-500" />
-              )}
-            </button>
-            {expandedSections.interest && (
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {getUniqueFocusAreas().map((focusArea) => (
-                    <span
-                      key={focusArea}
-                      onClick={() =>
-                        toggleFilter(focusArea, setSelectedFocusAreas)
-                      }
-                      className={`px-3 py-1 text-sm border rounded-full cursor-pointer ${
-                        selectedFocusAreas.includes(focusArea)
-                          ? "bg-sky-500 text-white border-sky-500"
-                          : "border-gray-300 text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      {focusArea}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Apply + Clear */}
-          <div className="space-y-2">
-            <Button
-              variant="outline"
-              className="w-full text-sm font-medium py-2 border-2 border-teal-500 rounded-3xl bg-transparent hover:bg-teal-50 text-teal-500"
-              onClick={clearFilters}
-            >
-              Clear Filters
+      <div className="flex gap-6 p-6">
+        {/* Sidebar Filters */}
+        <div className="w-80 bg-card pt-5 border rounded-3xl flex flex-col h-[90vh] sticky top-6">
+          <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
+            <h2 className="text-lg font-bold">Filters</h2>
+            <Button variant="ghost" className="text-primary text-sm font-medium" onClick={resetFilters}>
+              Reset all
             </Button>
+          </div>
+
+          <div className="px-6 pb-6 overflow-y-auto flex-1 space-y-6">
+            {/* Units Filter */}
+            <FilterSection
+              label="Units"
+              searchValue={searchUnits}
+              onSearch={setSearchUnits}
+              list={filteredUnitsList}
+              selected={filters.units}
+              onToggle={(v) => toggleFilter("units", v)}
+              showAll={showAllUnits}
+              setShowAll={setShowAllUnits}
+            />
+
+            {/* Industry Filter */}
+            <FilterSection
+              label="Industry"
+              searchValue={searchIndustries}
+              onSearch={setSearchIndustries}
+              list={filteredIndustriesList}
+              selected={filters.industries}
+              onToggle={(v) => toggleFilter("industries", v)}
+              showAll={showAllIndustries}
+              setShowAll={setShowAllIndustries}
+            />
+
+            {/* Department Filter */}
+            <FilterSection
+              label="Department"
+              searchValue={searchDepartments}
+              onSearch={setSearchDepartments}
+              list={filteredDepartmentsList}
+              selected={filters.departments}
+              onToggle={(v) => toggleFilter("departments", v)}
+              showAll={showAllDepartments}
+              setShowAll={setShowAllDepartments}
+            />
+
+            {/* Posting Date */}
+            <PostingDateFilter
+              filters={filters}
+              activeDateRange={activeDateRange}
+              onSelectDate={(range) => DateRange(range)}
+              onDateChange={setFilters}
+            />
+
+            {/* Interest Areas */}
+            <div>
+              <Label className="text-sm font-semibold text-muted-foreground mb-3 block">Interest Areas</Label>
+              <div className="flex flex-wrap gap-2">
+                {interestAreas.slice(0, 10).map((a) => (
+                  <Button
+                    key={String(a)}
+                    variant={filters.interestAreas.includes(String(a)) ? "default" : "outline"}
+                    size="sm"
+                    className="rounded-full"
+                    onClick={() => toggleFilter("interestAreas", String(a))}
+                  >
+                    {String(a)}
+                  </Button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 p-6">
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-2">
-              Explore {filteredUnits.length} Units just for you
-            </h1>
+        {/* Main Content (Units Grid) */}
+        <div className="flex-1">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold">Explore {filteredUnits.length} Units</h1>
           </div>
 
-          {loading ? (
-            // Loading Skeleton
+          {error ? (
+            <p className="text-destructive">{error}</p>
+          ) : loading ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({
-                length: 6,
-              }).map((_, index) => (
-                <Card key={index} className="overflow-hidden shadow-sm">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="overflow-hidden rounded-3xl">
                   <Skeleton className="h-48 w-full" />
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Skeleton className="w-6 h-6 rounded-full" />
-                        <Skeleton className="h-4 w-20" />
-                      </div>
-                      <Skeleton className="h-8 w-16" />
-                    </div>
+                    <Skeleton className="h-6 w-full mb-2" />
+                    <Skeleton className="h-4 w-3/4" />
                   </CardContent>
                 </Card>
               ))}
             </div>
-          ) : error ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500">Error loading units: {error}</p>
-            </div>
           ) : filteredUnits.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500">No units available.</p>
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No units found matching your filters.</p>
+              <Button variant="outline" onClick={resetFilters} className="mt-4">
+                Clear Filters
+              </Button>
             </div>
           ) : (
-            // Units Grid
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredUnits.map((unit) => {
-                const focusAreas = safeParse(unit.focus_areas, {});
-                const gradient = getUnitGradient(
-                  unit.unit_name,
-                  unit.unit_type
-                );
-                const timeAgo = getTimeAgo(unit.created_at);
+              {filteredUnits.map((unit, index) => {
+                const gradient = getUnitGradient(index);
+
                 return (
                   <Card
                     key={unit.id}
-                    className="overflow-hidden shadow border border-gray-200 rounded-xl hover:shadow-md transition-shadow cursor-pointer"
+                    className="overflow-hidden rounded-3xl hover:shadow-lg transition-all cursor-pointer"
+                    onClick={() => navigate(`/units/${unit.id}`)}
                   >
-                    {/* Top section with gradient */}
+                    {/* Card Header with Gradient */}
                     <div
-                      className={`h-48 ${gradient} relative flex items-center justify-center`}
+                      className={`${gradient} h-48 relative flex flex-col items-center justify-center p-6 text-white`}
                     >
-                      <Badge className="absolute top-3 left-3 bg-white text-gray-800 text-xs font-semibold px-2 py-0.5 rounded-md">
-                        {timeAgo}
+                      <Badge className="absolute top-3 left-3 bg-white/90 text-foreground">
+                        {formatDistanceToNow(new Date(unit.created_at), {
+                          addSuffix: true,
+                        })}
                       </Badge>
 
-                      <div className="text-white text-center px-4">
-                        <h3 className="text-lg font-semibold mb-1">
-                          {unit.unit_name}
-                        </h3>
-                        <p className="text-white/80 text-sm">
-                          {unit.unit_type}
-                        </p>
+                      {unit.is_aurovillian && (
+                        <Badge className="absolute top-3 right-3 bg-green-500 text-white">Auroville</Badge>
+                      )}
 
-                        {Object.keys(focusAreas).length > 0 && (
-                          <div className="mt-2 flex flex-wrap justify-center gap-1">
-                            {Object.entries(
-                              focusAreas as Record<string, string>
-                            )
-                              .slice(0, 2)
-                              .map(([key, value]) => (
-                                <Badge
-                                  key={key}
-                                  className="bg-white/20 text-white text-xs font-medium px-2 py-0.5 rounded-md"
-                                >
-                                  {key}: {value}
-                                </Badge>
-                              ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-white w-5 h-5" />
+                      <h3 className="text-xl font-bold text-center mb-2">{unit.unit_name.toUpperCase()}</h3>
+                      <ChevronRight className="absolute right-4 bottom-4 w-6 h-6" />
                     </div>
 
-                    {/* Bottom content */}
+                    {/* Card Content with Logo */}
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                            {unit.unit_name.charAt(0)}
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-full overflow-hidden border bg-white flex items-center justify-center">
+                            {unit.image ? (
+                              <img
+                                src={unit.image}
+                                alt={`${unit.unit_name} logo`}
+                                className="object-contain w-10 h-10"
+                              />
+                            ) : (
+                              <span className="text-xs text-muted-foreground">No Logo</span>
+                            )}
                           </div>
-                          <span className="text-sm font-medium">
-                            {unit.unit_name}
-                          </span>
+                          <div>
+                            <p className="text-sm font-semibold line-clamp-1">{unit.unit_name}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-1">
+                              {unit.industry || unit.unit_type || "General"}
+                            </p>
+                          </div>
                         </div>
 
                         <Button
                           size="sm"
-                          className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-md px-3 py-1.5"
-                          onClick={() => navigate(`/units/${unit.id}`)}
+                          className="bg-orange-500 hover:bg-orange-600 text-white rounded-3xl"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/units/${unit.id}`);
+                          }}
                         >
                           View
                         </Button>
@@ -411,4 +366,91 @@ const Units = () => {
     </div>
   );
 };
+
+/* ------------------ Helper Subcomponents ------------------ */
+const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle, showAll, setShowAll }: any) => (
+  <div>
+    <Label className="text-sm font-semibold text-muted-foreground mb-3 block">{label}</Label>
+    <div className="relative mb-3">
+      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+      <Input
+        placeholder={`Search ${label}...`}
+        value={searchValue}
+        onChange={(e) => onSearch(e.target.value)}
+        className="pl-8 rounded-3xl"
+      />
+    </div>
+    <div className="space-y-3">
+      {(showAll ? list : list.slice(0, 4)).map((item: string) => (
+        <div key={item} className="flex items-center space-x-2">
+          <Checkbox checked={selected.includes(item)} onCheckedChange={() => onToggle(item)} />
+          <span className="text-sm">{item}</span>
+        </div>
+      ))}
+      {list.length > 4 && (
+        <Button variant="link" className="p-0 text-primary text-sm" onClick={() => setShowAll(!showAll)}>
+          {showAll ? "Show Less" : `+${list.length - 4} More`}
+        </Button>
+      )}
+    </div>
+  </div>
+);
+
+const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChange }: any) => (
+  <div>
+    <Label className="text-sm font-semibold text-muted-foreground mb-3 block">Posting Date</Label>
+    <div className="flex flex-col space-y-3">
+      <div className="flex flex-wrap gap-2 justify-between">
+        {["from", "to"].map((key) => (
+          <Popover key={key}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex-1 justify-start rounded-full px-4 text-left font-normal truncate"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                {filters.postingDate[key]
+                  ? new Date(filters.postingDate[key]).toLocaleDateString()
+                  : key === "from"
+                    ? "From"
+                    : "To"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={filters.postingDate[key] ? new Date(filters.postingDate[key]) : undefined}
+                onSelect={(date) =>
+                  onDateChange({
+                    ...filters,
+                    postingDate: {
+                      ...filters.postingDate,
+                      [key]: date ? date.toISOString() : "",
+                    },
+                  })
+                }
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        ))}
+      </div>
+
+      <div className="flex justify-between gap-2 flex-wrap mt-2">
+        {["today", "week", "month"].map((range) => (
+          <Button
+            key={range}
+            variant={activeDateRange === range ? "default" : "outline"}
+            size="sm"
+            className="rounded-full flex-1"
+            onClick={() => onSelectDate(range)}
+          >
+            {range === "today" ? "Today" : range === "week" ? "This Week" : "This Month"}
+          </Button>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 export default Units;

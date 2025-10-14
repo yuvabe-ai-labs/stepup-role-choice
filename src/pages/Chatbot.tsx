@@ -26,8 +26,7 @@ const Chatbot = () => {
   const [showChat, setShowChat] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [showProfessionalTransition, setShowProfessionalTransition] =
-    useState(false);
+  const [showProfessionalTransition, setShowProfessionalTransition] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -35,6 +34,8 @@ const Chatbot = () => {
   const navigate = useNavigate();
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [isMultiSelect, setIsMultiSelect] = useState(false);
+  const [accumulatedUnitData, setAccumulatedUnitData] = useState<any>({});
+  const [accumulatedStudentData, setAccumulatedStudentData] = useState<any>({});
 
   // Fetch user profile data
   useEffect(() => {
@@ -44,11 +45,7 @@ const Chatbot = () => {
         setProfileLoading(true);
         setProfileError(null);
 
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("user_id", user.id)
-          .single();
+        const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
 
         if (error) {
           console.error("Error fetching profile:", error);
@@ -82,8 +79,7 @@ const Chatbot = () => {
     // Add the professional transition message to chat history
     const transitionMessage: Message = {
       id: Date.now().toString(),
-      content:
-        "Thanks! Now let's know you professionally. Help me with all your professional details here",
+      content: "Thanks! Now let's know you professionally. Help me with all your professional details here",
       role: "assistant",
       timestamp: new Date(),
     };
@@ -94,8 +90,7 @@ const Chatbot = () => {
       // Ask the first professional question
       const professionalQuestion: Message = {
         id: (Date.now() + 1).toString(),
-        content:
-          "To know the best opportunities, which area of interest excites you the most?",
+        content: "To know the best opportunities, which area of interest excites you the most?",
         role: "assistant",
         timestamp: new Date(),
       };
@@ -119,11 +114,7 @@ const Chatbot = () => {
 
     setTimeout(() => {
       // Prefer full_name from userProfile, fallback to user_metadata, then email, then generic greeting
-      const name =
-        userProfile.full_name ||
-        user?.user_metadata?.full_name ||
-        user?.email?.split("@")[0] ||
-        "there";
+      const name = userProfile.full_name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "there";
 
       const initialMessage: Message = {
         id: "1",
@@ -216,16 +207,11 @@ const Chatbot = () => {
                 console.error("Error updating onboarding status:", updateError);
                 toast({
                   title: "Update Error",
-                  description:
-                    "Failed to update onboarding status: " +
-                    updateError.message,
+                  description: "Failed to update onboarding status: " + updateError.message,
                   variant: "destructive",
                 });
               } else {
-                console.log(
-                  "Successfully updated onboarding status:",
-                  updateData
-                );
+                console.log("Successfully updated onboarding status:", updateData);
               }
             } catch (error) {
               console.error("Error updating onboarding status:", error);
@@ -263,8 +249,7 @@ const Chatbot = () => {
       if (error.message && error.message.includes("quota")) {
         toast({
           title: "Daily Limit Reached",
-          description:
-            "The AI service has reached its daily limit. Please try again tomorrow.",
+          description: "The AI service has reached its daily limit. Please try again tomorrow.",
           variant: "destructive",
         });
       } else {
@@ -279,12 +264,13 @@ const Chatbot = () => {
     }
   };
 
+  // Updated storeUserData function for better unit data collection
+  // Replace the existing storeUserData function with this improved version
+
   const storeUserData = async (userResponse: string) => {
     if (!user?.id) return;
 
-    const lastBotMessage =
-      messages.filter((m) => m.role === "assistant").slice(-1)[0]?.content ||
-      "";
+    const lastBotMessage = messages.filter((m) => m.role === "assistant").slice(-1)[0]?.content || "";
     const isUnit = userProfile?.role === "unit";
 
     try {
@@ -297,37 +283,30 @@ const Chatbot = () => {
 
         // Phone number (question 3) - store in profiles
         if (
-          lastBotMessage.includes("Phone Number") ||
-          lastBotMessage.includes("phone number")
+          lastBotMessage.toLowerCase().includes("phone number") ||
+          lastBotMessage.toLowerCase().includes("phone") ||
+          lastBotMessage.toLowerCase().includes("number")
         ) {
           profileUpdateData.phone = userResponse.trim();
           console.log("Storing phone number:", userResponse);
         }
 
         // Gender (question 4) - store in profiles
-        if (
-          lastBotMessage.includes("Gender") ||
-          lastBotMessage.includes("gender")
-        ) {
+        if (lastBotMessage.toLowerCase().includes("gender")) {
           profileUpdateData.gender = userResponse.trim();
           console.log("Storing gender:", userResponse);
         }
 
         // Profile Type (question 5) - store in student_profiles
-        if (
-          lastBotMessage.includes("Profile Type") ||
-          lastBotMessage.includes("profile type")
-        ) {
+        if (lastBotMessage.toLowerCase().includes("profile type")) {
           roleSpecificData.profile_type = userResponse.trim();
           console.log("Storing profile type:", userResponse);
         }
 
         // Interest Area (question 6) - store in student_profiles
         if (
-          lastBotMessage.includes(
-            "Which area of interest excites you the most"
-          ) ||
-          lastBotMessage.includes("area of interest")
+          lastBotMessage.toLowerCase().includes("area of interest") ||
+          lastBotMessage.toLowerCase().includes("which area")
         ) {
           roleSpecificData.interests = stringToArray(userResponse);
           console.log("Storing interests as array:", roleSpecificData.interests);
@@ -346,16 +325,16 @@ const Chatbot = () => {
         }
 
         // Looking for - store in student_profiles
-        if (lastBotMessage.includes("looking for right now")) {
+        if (lastBotMessage.toLowerCase().includes("looking for right now")) {
           roleSpecificData.looking_for = stringToArray(userResponse);
           console.log("Storing looking_for:", roleSpecificData.looking_for);
         }
 
         // Education Level - store in student_profiles
         if (
-          lastBotMessage.includes("education") ||
-          lastBotMessage.includes("studying") ||
-          lastBotMessage.includes("grade")
+          lastBotMessage.toLowerCase().includes("education") ||
+          lastBotMessage.toLowerCase().includes("studying") ||
+          lastBotMessage.toLowerCase().includes("grade")
         ) {
           roleSpecificData.experience_level = userResponse.trim();
           console.log("Storing education level:", userResponse);
@@ -363,9 +342,9 @@ const Chatbot = () => {
 
         // Bio/About - store in student_profiles
         if (
-          lastBotMessage.includes("about yourself") ||
-          lastBotMessage.includes("tell me more") ||
-          lastBotMessage.includes("describe yourself")
+          lastBotMessage.toLowerCase().includes("about yourself") ||
+          lastBotMessage.toLowerCase().includes("tell me more") ||
+          lastBotMessage.toLowerCase().includes("describe yourself")
         ) {
           roleSpecificData.bio = userResponse.trim();
           console.log("Storing bio:", userResponse);
@@ -373,51 +352,65 @@ const Chatbot = () => {
       } else {
         // UNIT DATA COLLECTION
 
-        // Unit Name (question 2) - store in units
+        // Unit Name - FIRST PROFESSIONAL QUESTION
         if (
-          lastBotMessage.includes("name of your unit") ||
-          lastBotMessage.includes("unit name") ||
-          lastBotMessage.includes("organization name")
+          lastBotMessage.toLowerCase().includes("name of your unit") ||
+          lastBotMessage.toLowerCase().includes("what is your unit called") ||
+          lastBotMessage.toLowerCase().includes("unit name") ||
+          lastBotMessage.toLowerCase().includes("organization name") ||
+          lastBotMessage.toLowerCase().includes("what's the name")
         ) {
           roleSpecificData.unit_name = userResponse.trim();
-          console.log("Storing unit name:", userResponse);
+          console.log("✅ Storing unit name:", userResponse);
         }
 
-        // Unit Type/Category (question 3) - store in units
+        // Unit Type/Category - SECOND PROFESSIONAL QUESTION
         if (
-          lastBotMessage.includes("type of unit") ||
-          lastBotMessage.includes("category") ||
-          lastBotMessage.includes("what kind of unit")
+          lastBotMessage.toLowerCase().includes("type of unit") ||
+          lastBotMessage.toLowerCase().includes("category") ||
+          lastBotMessage.toLowerCase().includes("what kind of unit") ||
+          lastBotMessage.toLowerCase().includes("unit's type")
         ) {
           roleSpecificData.unit_type = userResponse.trim();
-          console.log("Storing unit type:", userResponse);
+          console.log("✅ Storing unit type:", userResponse);
         }
 
-        // Unit Description (question 4) - store in units
+        // Unit Description - store in units
         if (
-          lastBotMessage.includes("describe your unit") ||
-          lastBotMessage.includes("what does your unit do") ||
-          lastBotMessage.includes("about your unit")
+          lastBotMessage.toLowerCase().includes("describe your unit") ||
+          lastBotMessage.toLowerCase().includes("what does your unit do") ||
+          lastBotMessage.toLowerCase().includes("about your unit")
         ) {
           roleSpecificData.description = userResponse.trim();
           console.log("Storing unit description:", userResponse);
         }
 
-        // Phone number (question 5) - store in units
+        // Phone number - store in units
         if (
-          lastBotMessage.includes("number to reach") ||
-          lastBotMessage.includes("phone") ||
-          lastBotMessage.includes("contact number")
+          lastBotMessage.includes("number") ||
+          lastBotMessage.toLowerCase().includes("number to reach") ||
+          (lastBotMessage.toLowerCase().includes("phone") && lastBotMessage.toLowerCase().includes("unit")) ||
+          lastBotMessage.toLowerCase().includes("contact number")
         ) {
           roleSpecificData.contact_phone = userResponse.trim();
           console.log("Storing unit phone number:", userResponse);
         }
 
-        // Unit Address/Location (question 6) - store in units
+        if (lastBotMessage.includes("email")) {
+          roleSpecificData.contact_email = userResponse.trim();
+          console.log("Storing unit email:", userResponse);
+        }
+
+        if (lastBotMessage.includes("city")) {
+          roleSpecificData.address = userResponse.trim();
+          console.log("Storing unit location:", userResponse);
+        }
+
+        // Unit Address/Location - store in units
         if (
-          lastBotMessage.includes("location") ||
-          lastBotMessage.includes("address") ||
-          lastBotMessage.includes("where is your unit")
+          lastBotMessage.toLowerCase().includes("location") ||
+          lastBotMessage.toLowerCase().includes("address") ||
+          lastBotMessage.toLowerCase().includes("where is your unit")
         ) {
           roleSpecificData.address = userResponse.trim();
           console.log("Storing unit address:", userResponse);
@@ -425,32 +418,74 @@ const Chatbot = () => {
 
         // Unit Website - store in units
         if (
-          lastBotMessage.includes("website") ||
-          lastBotMessage.includes("web address") ||
-          lastBotMessage.includes("URL")
+          lastBotMessage.toLowerCase().includes("website") ||
+          lastBotMessage.toLowerCase().includes("web address") ||
+          lastBotMessage.toLowerCase().includes("url")
         ) {
           roleSpecificData.website_url = userResponse.trim();
           console.log("Storing website:", userResponse);
         }
 
+        // Focus Areas/Interests - store in units
+        if (
+          lastBotMessage.toLowerCase().includes("what your unit focuses on") ||
+          lastBotMessage.toLowerCase().includes("focus areas") ||
+          lastBotMessage.toLowerCase().includes("areas of focus")
+        ) {
+          roleSpecificData.focus_areas = stringToArray(userResponse);
+          console.log("Storing unit Focus area", roleSpecificData.focus_areas);
+        }
+
+        // Skills offered by unit
+        if (
+          lastBotMessage.includes("Technology & IT") ||
+          lastBotMessage.includes("Creative & Design") ||
+          lastBotMessage.includes("Marketing & Communications") ||
+          lastBotMessage.includes("Business & Management") ||
+          lastBotMessage.includes("Research & Innovation") ||
+          lastBotMessage.includes("Community & Social Impact") ||
+          lastBotMessage.includes("Education & Training")
+        ) {
+          roleSpecificData.skills_offered = stringToArray(userResponse);
+          console.log("Storing skills offered:", roleSpecificData.skills_offered);
+        }
+
         // Services Offered - store in units as opportunities_offered
         if (
-          lastBotMessage.includes("services") ||
-          lastBotMessage.includes("what do you offer") ||
-          lastBotMessage.includes("programs")
+          lastBotMessage.toLowerCase().includes("opportunities can your unit offer") ||
+          lastBotMessage.includes("opportunities") ||
+          lastBotMessage.toLowerCase().includes("services") ||
+          lastBotMessage.toLowerCase().includes("what do you offer") ||
+          lastBotMessage.toLowerCase().includes("programs")
         ) {
           roleSpecificData.opportunities_offered = stringToArray(userResponse);
-          console.log("Storing opportunities offered:", userResponse);
+          console.log("Storing opportunities offered:", roleSpecificData.opportunities_offered);
         }
 
         // Mission - store in units
         if (
-          lastBotMessage.includes("mission") ||
-          lastBotMessage.includes("purpose") ||
-          lastBotMessage.includes("goal")
+          lastBotMessage.toLowerCase().includes("mission") ||
+          lastBotMessage.toLowerCase().includes("purpose") ||
+          lastBotMessage.toLowerCase().includes("goal")
         ) {
           roleSpecificData.mission = userResponse.trim();
           console.log("Storing mission:", userResponse);
+        }
+
+        // Aurovillian status
+        if (lastBotMessage.toLowerCase().includes("aurovillian unit") || lastBotMessage.includes("Aurovillian Unit")) {
+          const response = userResponse.toLowerCase();
+
+          if (response.includes("non-aurovillian")) {
+            roleSpecificData.is_aurovillian = false;
+          } else if (response.includes("aurovillian")) {
+            roleSpecificData.is_aurovillian = true;
+          } else {
+            // fallback if response unclear
+            roleSpecificData.is_aurovillian = null;
+          }
+
+          console.log("Storing Aurovillian status:", roleSpecificData.is_aurovillian);
         }
       }
 
@@ -487,36 +522,52 @@ const Chatbot = () => {
         const profileId = profileData.id;
 
         if (!isUnit) {
-          // Update student_profiles
-          console.log("Updating student_profiles with:", roleSpecificData);
+          // STUDENT: Accumulate data
+          const updatedStudentData = {
+            ...accumulatedStudentData,
+            ...roleSpecificData,
+          };
+          setAccumulatedStudentData(updatedStudentData);
+
+          console.log("📝 Updating student_profiles with accumulated data:", updatedStudentData);
           const { data, error } = await supabase
             .from("student_profiles")
-            .upsert(
-              { profile_id: profileId, ...roleSpecificData },
-              { onConflict: "profile_id" }
-            )
+            .upsert({ profile_id: profileId, ...updatedStudentData }, { onConflict: "profile_id" })
             .select();
 
           if (error) {
-            console.error("Error updating student_profiles:", error);
+            console.error("❌ Error updating student_profiles:", error);
           } else {
-            console.log("Successfully updated student_profiles:", data);
+            console.log("✅ Successfully updated student_profiles:", data);
           }
         } else {
-          // Update units
-          console.log("Updating units table with:", roleSpecificData);
+          // UNIT: Accumulate data to avoid null constraint violations
+          const updatedUnitData = {
+            ...accumulatedUnitData,
+            ...roleSpecificData,
+          };
+          setAccumulatedUnitData(updatedUnitData);
+
+          console.log("📝 Updating units table with accumulated data:", {
+            profile_id: profileId,
+            ...updatedUnitData,
+          });
+
           const { data, error } = await supabase
             .from("units")
-            .upsert(
-              { profile_id: profileId, ...roleSpecificData },
-              { onConflict: "profile_id" }
-            )
+            .upsert({ profile_id: profileId, ...updatedUnitData }, { onConflict: "profile_id" })
             .select();
 
           if (error) {
-            console.error("Error updating units:", error);
+            console.error("❌ Error updating units:", error);
+            console.error("Full error details:", {
+              code: error.code,
+              message: error.message,
+              details: error.details,
+              hint: error.hint,
+            });
           } else {
-            console.log("Successfully updated units:", data);
+            console.log("✅ Successfully updated units:", data);
           }
         }
 
@@ -535,7 +586,6 @@ const Chatbot = () => {
   const getQuestionType = (lastBotMessage: string) => {
     const multiSelectQuestions = [
       "opportunities can your unit offer",
-      "looking for right now",
       "Technology & IT",
       "Creative & Design",
       "Marketing & Communications",
@@ -546,9 +596,7 @@ const Chatbot = () => {
       "Technology & Digital",
     ];
 
-    return multiSelectQuestions.some((q) => lastBotMessage.includes(q))
-      ? "multi"
-      : "single";
+    return multiSelectQuestions.some((q) => lastBotMessage.includes(q)) ? "multi" : "single";
   };
 
   useEffect(() => {
@@ -598,9 +646,7 @@ const Chatbot = () => {
                 onClick={() => handleOptionClick(option)}
                 disabled={isLoading}
                 className={`px-4 py-2 border rounded-full text-sm transition-colors ${
-                  isSelected
-                    ? "border-blue-500 bg-blue-500 text-white"
-                    : "border-blue-500 text-blue-600"
+                  isSelected ? "border-blue-500 bg-blue-500 text-white" : "border-blue-500 text-blue-600"
                 }`}
                 variant="ghost"
                 size="sm"
@@ -749,7 +795,7 @@ const Chatbot = () => {
       if (lastBotMessage.includes("Aurovillian Unit")) {
         return ["Aurovillian Unit", "Non-Aurovillian Unit"];
       }
-      if (lastBotMessage.includes("opportunities can your unit offer")) {
+      if (lastBotMessage.includes("opportunities")) {
         return [
           "Internship Opportunities",
           "Courses",
@@ -836,12 +882,7 @@ const Chatbot = () => {
         ];
       }
       if (lastBotMessage.includes("looking for right now")) {
-        return [
-          "Courses",
-          "Internships",
-          "Job Opportunities",
-          "Just Exploring",
-        ];
+        return ["Courses", "Internships", "Job Opportunities", "Just Exploring"];
       }
     }
     return null;
@@ -851,12 +892,8 @@ const Chatbot = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg font-medium mb-2">
-            Loading your profile...
-          </div>
-          <div className="text-sm text-muted-foreground">
-            Setting up your personalized experience
-          </div>
+          <div className="text-lg font-medium mb-2">Loading your profile...</div>
+          <div className="text-sm text-muted-foreground">Setting up your personalized experience</div>
         </div>
       </div>
     );
@@ -866,12 +903,8 @@ const Chatbot = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg font-medium mb-2 text-destructive">
-            Profile Error
-          </div>
-          <div className="text-sm text-muted-foreground mb-4">
-            {profileError}
-          </div>
+          <div className="text-lg font-medium mb-2 text-destructive">Profile Error</div>
+          <div className="text-sm text-muted-foreground mb-4">{profileError}</div>
           <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
@@ -892,20 +925,14 @@ const Chatbot = () => {
           {/* Logo */}
           <div className="flex justify-center">
             <a href="/">
-              <img
-                src={logo}
-                alt="Company Logo"
-                className="h-30 w-auto cursor-pointer"
-              />
+              <img src={logo} alt="Company Logo" className="h-30 w-auto cursor-pointer" />
             </a>
           </div>
 
           {/* Header */}
           <div className="space-y-4">
             <h1 className="text-2xl font-bold text-foreground">
-              {isUnit
-                ? "Welcome to YuvaNext Unit Portal"
-                : "Welcome to YuvaNext Internships"}
+              {isUnit ? "Welcome to YuvaNext Unit Portal" : "Welcome to YuvaNext Internships"}
             </h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
               {isUnit
@@ -917,22 +944,14 @@ const Chatbot = () => {
           {/* Bot Avatar */}
           <div className="relative">
             <div className="w-32 h-32 mx-auto mb-4 relative">
-              <img
-                src={chatbotAvatar}
-                alt="AI Assistant"
-                className="w-full h-full rounded-full object-cover"
-              />
+              <img src={chatbotAvatar} alt="AI Assistant" className="w-full h-full rounded-full object-cover" />
             </div>
             <div className="space-y-2">
               <h2 className="text-xl font-semibold text-foreground">
-                {isUnit
-                  ? "Hey there! Let's know your unit better"
-                  : "Hey mate! Let's know you better"}
+                {isUnit ? "Hey there! Let's know your unit better" : "Hey mate! Let's know you better"}
               </h2>
               <p className="text-muted-foreground text-sm">
-                {isUnit
-                  ? "Help me with all your unit details here"
-                  : "Help me with all your personal details here"}
+                {isUnit ? "Help me with all your unit details here" : "Help me with all your personal details here"}
               </p>
             </div>
           </div>
@@ -960,20 +979,14 @@ const Chatbot = () => {
           {/* Logo */}
           <div className="flex justify-center">
             <a href="/">
-              <img
-                src={logo}
-                alt="Company Logo"
-                className="h-30 w-auto cursor-pointer"
-              />
+              <img src={logo} alt="Company Logo" className="h-30 w-auto cursor-pointer" />
             </a>
           </div>
 
           {/* Header */}
           <div className="space-y-4">
             <h1 className="text-2xl font-bold text-foreground">
-              {isUnit
-                ? "Welcome to YuvaNext Unit Portal"
-                : "Welcome to YuvaNext Internships"}
+              {isUnit ? "Welcome to YuvaNext Unit Portal" : "Welcome to YuvaNext Internships"}
             </h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
               {isUnit
@@ -985,18 +998,12 @@ const Chatbot = () => {
           {/* Bot Avatar */}
           <div className="relative">
             <div className="w-32 h-32 mx-auto mb-4 relative">
-              <img
-                src={chatbotAvatar}
-                alt="AI Assistant"
-                className="w-full h-full rounded-full object-cover"
-              />
+              <img src={chatbotAvatar} alt="AI Assistant" className="w-full h-full rounded-full object-cover" />
             </div>
             <div className="space-y-2">
               <h2 className="text-xl font-semibold text-foreground">
                 Thanks {userProfile.full_name?.split(" ")[0] || "there"}!{" "}
-                {isUnit
-                  ? "Now let's know your unit professionally"
-                  : "Now let's know you professionally"}
+                {isUnit ? "Now let's know your unit professionally" : "Now let's know you professionally"}
               </h2>
               <p className="text-muted-foreground text-sm">
                 {isUnit
@@ -1029,23 +1036,15 @@ const Chatbot = () => {
           {/* Logo */}
           <div className="flex justify-center">
             <a href="/">
-              <img
-                src={logo}
-                alt="Company Logo"
-                className="h-30 w-auto cursor-pointer"
-              />
+              <img src={logo} alt="Company Logo" className="h-30 w-auto cursor-pointer" />
             </a>
           </div>
 
           {/* Header */}
           <div className="space-y-4">
-            <h1 className="text-2xl font-bold text-foreground">
-              🎉 You're All Set!
-            </h1>
+            <h1 className="text-2xl font-bold text-foreground">🎉 You're All Set!</h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              {isUnit
-                ? "Here's your unit profile summary:"
-                : "Here's your personalized profile summary:"}
+              {isUnit ? "Here's your unit profile summary:" : "Here's your personalized profile summary:"}
             </p>
           </div>
 
@@ -1069,15 +1068,9 @@ const Chatbot = () => {
                       <span className="text-2xl">👥</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        25
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Potential Candidates
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Matching your requirements
-                      </div>
+                      <div className="text-2xl font-bold text-foreground">25</div>
+                      <div className="text-sm text-muted-foreground">Potential Candidates</div>
+                      <div className="text-xs text-muted-foreground">Matching your requirements</div>
                     </div>
                   </Card>
 
@@ -1086,15 +1079,9 @@ const Chatbot = () => {
                       <span className="text-2xl">🎯</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        8
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Skill Matches
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Perfect for your unit
-                      </div>
+                      <div className="text-2xl font-bold text-foreground">8</div>
+                      <div className="text-sm text-muted-foreground">Skill Matches</div>
+                      <div className="text-xs text-muted-foreground">Perfect for your unit</div>
                     </div>
                   </Card>
 
@@ -1103,15 +1090,9 @@ const Chatbot = () => {
                       <span className="text-2xl">📋</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        3
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Active Listings
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Ready to post
-                      </div>
+                      <div className="text-2xl font-bold text-foreground">3</div>
+                      <div className="text-sm text-muted-foreground">Active Listings</div>
+                      <div className="text-xs text-muted-foreground">Ready to post</div>
                     </div>
                   </Card>
                 </>
@@ -1122,15 +1103,9 @@ const Chatbot = () => {
                       <span className="text-2xl">📅</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        5
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Matching Internships
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Found in business domain
-                      </div>
+                      <div className="text-2xl font-bold text-foreground">5</div>
+                      <div className="text-sm text-muted-foreground">Matching Internships</div>
+                      <div className="text-xs text-muted-foreground">Found in business domain</div>
                     </div>
                   </Card>
 
@@ -1139,15 +1114,9 @@ const Chatbot = () => {
                       <span className="text-2xl">🏢</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        12
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Auroville Units
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Relevant to your skills
-                      </div>
+                      <div className="text-2xl font-bold text-foreground">12</div>
+                      <div className="text-sm text-muted-foreground">Auroville Units</div>
+                      <div className="text-xs text-muted-foreground">Relevant to your skills</div>
                     </div>
                   </Card>
 
@@ -1156,15 +1125,9 @@ const Chatbot = () => {
                       <span className="text-2xl">🎯</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        3
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Skill Courses
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        To boost your profile
-                      </div>
+                      <div className="text-2xl font-bold text-foreground">3</div>
+                      <div className="text-sm text-muted-foreground">Skill Courses</div>
+                      <div className="text-xs text-muted-foreground">To boost your profile</div>
                     </div>
                   </Card>
                 </>
@@ -1180,10 +1143,7 @@ const Chatbot = () => {
                   setIsLoading(true);
 
                   try {
-                    console.log(
-                      "Updating onboarding completion for user:",
-                      user?.id
-                    );
+                    console.log("Updating onboarding completion for user:", user?.id);
                     // Update onboarding status in database
                     const { data: updateData, error } = await supabase
                       .from("profiles")
@@ -1195,26 +1155,18 @@ const Chatbot = () => {
                       console.error("Error updating onboarding status:", error);
                       toast({
                         title: "Update Error",
-                        description:
-                          "Failed to update onboarding status: " +
-                          error.message,
+                        description: "Failed to update onboarding status: " + error.message,
                         variant: "destructive",
                       });
                     } else {
-                      console.log(
-                        "Successfully updated onboarding status:",
-                        updateData
-                      );
+                      console.log("Successfully updated onboarding status:", updateData);
                       toast({
                         title: "Profile Complete!",
-                        description:
-                          "Your onboarding has been completed successfully.",
+                        description: "Your onboarding has been completed successfully.",
                         variant: "default",
                       });
                       // Navigate to appropriate dashboard based on user role
-                      const dashboardPath = isUnit
-                        ? "/unit-dashboard"
-                        : "/dashboard";
+                      const dashboardPath = isUnit ? "/unit-dashboard" : "/dashboard";
                       navigate(dashboardPath, { replace: true });
                     }
                   } catch (error: any) {
@@ -1231,11 +1183,7 @@ const Chatbot = () => {
                 className="bg-gradient-to-br from-[#07636C] to-[#0694A2] hover:opacity-90 text-white px-8 py-3 rounded-full font-medium transition-opacity"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
-                {isLoading
-                  ? "Setting up..."
-                  : isUnit
-                  ? "Explore Dashboard"
-                  : "Explore My Dashboard"}
+                {isLoading ? "Setting up..." : isUnit ? "Explore Dashboard" : "Explore My Dashboard"}
               </Button>
             </div>
           </div>
@@ -1244,8 +1192,7 @@ const Chatbot = () => {
     );
   }
 
-  const lastBotMessage =
-    messages.filter((m) => m.role === "assistant").slice(-1)[0]?.content || "";
+  const lastBotMessage = messages.filter((m) => m.role === "assistant").slice(-1)[0]?.content || "";
   const quickOptions = getQuickOptions(lastBotMessage);
 
   return (
@@ -1255,20 +1202,13 @@ const Chatbot = () => {
         <div className="text-center mb-6">
           <div className="flex justify-center">
             <a href="/">
-              <img
-                src={logo}
-                alt="Company Logo"
-                className="h-30 w-auto cursor-pointer"
-              />
+              <img src={logo} alt="Company Logo" className="h-30 w-auto cursor-pointer" />
             </a>
           </div>
-          <h1 className="text-xl font-bold text-foreground mb-2">
-            Welcome to YuvaNext Internships
-          </h1>
+          <h1 className="text-xl font-bold text-foreground my-4">Welcome to YuvaNext Internships</h1>
           <p className="text-muted-foreground text-sm">
-            Let's have a quick chat to personalize your internship journey! Our
-            AI assistant will help you discover opportunities that match your
-            passions.
+            Let's have a quick chat to personalize your internship journey! Our AI assistant will help you discover
+            opportunities that match your passions.
           </p>
         </div>
 
@@ -1279,26 +1219,15 @@ const Chatbot = () => {
         >
           {" "}
           {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
+            <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
                 className={`flex items-start space-x-3 max-w-[80%] ${
-                  message.role === "user"
-                    ? "flex-row-reverse space-x-reverse"
-                    : ""
+                  message.role === "user" ? "flex-row-reverse space-x-reverse" : ""
                 }`}
               >
                 {message.role === "assistant" && (
                   <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                    <img
-                      src={chatbotAvatar}
-                      alt="AI Assistant"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={chatbotAvatar} alt="AI Assistant" className="w-full h-full object-cover" />
                   </div>
                 )}
                 <Card
@@ -1308,9 +1237,7 @@ const Chatbot = () => {
                       : "bg-transparent border-blue-500 text-blue-600"
                   }`}
                 >
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {message.content}
-                  </p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                 </Card>
               </div>
             </div>
@@ -1318,9 +1245,7 @@ const Chatbot = () => {
           {/* Quick Options */}
           {quickOptions && messages.length > 0 && !isTyping && !isLoading && (
             <div className="flex justify-start">
-              <div className="max-w-[80%]">
-                {renderQuickOptions(quickOptions)}
-              </div>
+              <div className="max-w-[80%]">{renderQuickOptions(quickOptions)}</div>
             </div>
           )}
           {/* Typing Indicator */}
@@ -1328,11 +1253,7 @@ const Chatbot = () => {
             <div className="flex justify-start">
               <div className="flex items-start space-x-3 max-w-[80%]">
                 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                  <img
-                    src={chatbotAvatar}
-                    alt="AI Assistant"
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={chatbotAvatar} alt="AI Assistant" className="w-full h-full object-cover" />
                 </div>
                 <div className="px-4 py-2 border border-blue-500 text-blue-600 rounded-full">
                   <div className="flex space-x-1">
@@ -1380,4 +1301,3 @@ const Chatbot = () => {
 };
 
 export default Chatbot;
-  

@@ -20,15 +20,18 @@ const SignIn = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    console.log('[SignIn] Submitting with keepLoggedIn:', keepLoggedIn);
+    const { error } = await signIn(email, password, keepLoggedIn);
 
     if (error) {
+      console.error('[SignIn] Sign in failed:', error);
       toast({
         title: "Sign in failed",
         description: error.message,
         variant: "destructive",
       });
     } else {
+      console.log('[SignIn] Sign in successful');
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
@@ -198,18 +201,23 @@ const SignIn = () => {
                 </div>
               </div>
 
-              {/* Keep me logged in */}
-              <div className="flex items-center gap-2">
-                <input
-                  id="keepLoggedIn"
-                  type="checkbox"
-                  checked={keepLoggedIn}
-                  onChange={(e) => setKeepLoggedIn(e.target.checked)}
-                  className="w-3 h-3 rounded border-[#D1D5DB] text-[#76A9FA] focus:ring-[#76A9FA] focus:ring-1"
-                />
-                <label htmlFor="keepLoggedIn" className="text-[12px] cursor-pointer" style={{ color: "#4B5563" }}>
-                  Keep me logged in
-                </label>
+              {/* Keep me logged in and Forgot Password */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <input
+                    id="keepLoggedIn"
+                    type="checkbox"
+                    checked={keepLoggedIn}
+                    onChange={(e) => setKeepLoggedIn(e.target.checked)}
+                    className="w-3 h-3 rounded border-[#D1D5DB] text-[#76A9FA] focus:ring-[#76A9FA] focus:ring-1"
+                  />
+                  <label htmlFor="keepLoggedIn" className="text-[12px] cursor-pointer" style={{ color: "#4B5563" }}>
+                    Keep me logged in
+                  </label>
+                </div>
+                <Link to="/forgot-password" className="text-[12px] hover:underline" style={{ color: "#3F83F8" }}>
+                  Forgot Password?
+                </Link>
               </div>
 
               {/* Button */}

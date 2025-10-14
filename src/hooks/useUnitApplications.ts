@@ -14,7 +14,9 @@ export interface ApplicationWithDetails extends Application {
 }
 
 export const useUnitApplications = () => {
-  const [applications, setApplications] = useState<ApplicationWithDetails[]>([]);
+  const [applications, setApplications] = useState<ApplicationWithDetails[]>(
+    []
+  );
   const [stats, setStats] = useState({
     total: 0,
     totalJobs: 0,
@@ -103,11 +105,24 @@ export const useUnitApplications = () => {
         // Fetch related data for each application
         const applicationsWithDetails = await Promise.all(
           (applicationsData || []).map(async (app) => {
-            const [internshipRes, profileRes, studentProfileRes] = await Promise.all([
-              supabase.from("internships").select("*").eq("id", app.internship_id).maybeSingle(),
-              supabase.from("profiles").select("*").eq("id", app.student_id).maybeSingle(),
-              supabase.from("student_profiles").select("*").eq("profile_id", app.student_id).maybeSingle(),
-            ]);
+            const [internshipRes, profileRes, studentProfileRes] =
+              await Promise.all([
+                supabase
+                  .from("internships")
+                  .select("*")
+                  .eq("id", app.internship_id)
+                  .maybeSingle(),
+                supabase
+                  .from("profiles")
+                  .select("*")
+                  .eq("id", app.student_id)
+                  .maybeSingle(),
+                supabase
+                  .from("student_profiles")
+                  .select("*")
+                  .eq("profile_id", app.student_id)
+                  .maybeSingle(),
+              ]);
 
             return {
               ...app,
@@ -139,7 +154,7 @@ export const useUnitApplications = () => {
                 cover_letter: null,
               },
             };
-          }),
+          })
         );
 
         console.log("Total applications:", applicationsWithDetails.length);
@@ -148,7 +163,9 @@ export const useUnitApplications = () => {
         // Calculate stats
         const total = applicationsWithDetails.length;
         const totalJobs = internshipIds.length;
-        const interviews = applicationsWithDetails.filter((a) => a.status === "interviewed").length;
+        const interviews = applicationsWithDetails.filter(
+          (a) => a.status === "interviewed"
+        ).length;
 
         // Get hired this month
         const currentMonth = new Date().getMonth();
@@ -156,7 +173,10 @@ export const useUnitApplications = () => {
         const hiredThisMonth = applicationsWithDetails.filter((a) => {
           if (a.status === "hired") {
             const appliedDate = new Date(a.applied_date);
-            return appliedDate.getMonth() === currentMonth && appliedDate.getFullYear() === currentYear;
+            return (
+              appliedDate.getMonth() === currentMonth &&
+              appliedDate.getFullYear() === currentYear
+            );
           }
           return false;
         }).length;

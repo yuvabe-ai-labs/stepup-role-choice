@@ -72,12 +72,12 @@ export const useInternships = () => {
 
         setProfile(profileData as DatabaseProfile);
 
-        // 2. Fetch internships created by this profile
+        // 2. Fetch internships created by this profile with status 'active' or 'closed'
         const { data, error: internshipsError } = await supabase
           .from("internships")
           .select("*")
           .eq("created_by", profileData.id)
-          .eq("status", "active")
+          .in("status", ["active", "closed"])
           .order("created_at", { ascending: false });
 
         if (internshipsError) throw internshipsError;
@@ -106,7 +106,7 @@ export const useInternships = () => {
         .from("internships")
         .select("*")
         .eq("created_by", profile.id)
-        .eq("status", "active")
+        .in("status", ["active", "closed"])
         .order("created_at", { ascending: false });
 
       if (internshipsError) throw internshipsError;

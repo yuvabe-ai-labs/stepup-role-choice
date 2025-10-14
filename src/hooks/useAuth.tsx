@@ -18,7 +18,7 @@ interface AuthContextType {
     fullName: string,
     role: string
   ) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   signInWithOAuth: (provider: "google" | "apple") => Promise<{ error: any }>;
@@ -209,42 +209,77 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, rememberMe: boolean = false) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      console.log('[useAuth] Signing in with rememberMe:', rememberMe);
+      
+      // Use secure-auth Edge Function for HttpOnly cookie auth
+      const { data, error } = await supabase.functions.invoke('secure-auth', {
+        body: {
+          action: 'signIn',
+          email,
+          password,
+          rememberMe,
+        },
       });
 
       if (error) {
-        console.error("Sign in error:", error);
+        console.error('[useAuth] Sign in error:', error);
+        return { error };
+      }
+
+      if (data.error) {
+        console.error('[useAuth] Sign in error:', data.error);
         // Handle specific error for unconfirmed email
-        if (error.message.includes("Email not confirmed")) {
+        if (data.error.includes("Email not confirmed")) {
           return {
             error: {
-              ...error,
-              message:
-                "Please check your email and click the confirmation link before signing in.",
+              message: "Please check your email and click the confirmation link before signing in.",
             },
           };
         }
+        return { error: { message: data.error } };
       }
 
-      return { error };
+      // Set session in Supabase client
+      if (data.session) {
+        await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        });
+      }
+
+      console.log('[useAuth] Sign in successful');
+      return { error: null };
     } catch (error: any) {
-      console.error("Sign in failed:", error);
+      console.error('[useAuth] Sign in failed:', error);
       return { error };
     }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Sign out failed",
-        description: error.message,
-        variant: "destructive",
+    try {
+      console.log('[useAuth] Signing out...');
+      
+      // Call secure-auth Edge Function to clear HttpOnly cookies
+      await supabase.functions.invoke('secure-auth', {
+        body: { action: 'signOut' },
       });
+
+      // Sign out from Supabase client
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('[useAuth] Sign out error:', error);
+        toast({
+          title: "Sign out failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        console.log('[useAuth] Sign out successful');
+      }
+    } catch (error: any) {
+      console.error('[useAuth] Sign out failed:', error);
     }
   };
 
