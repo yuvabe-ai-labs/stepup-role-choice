@@ -116,6 +116,12 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
         .filter(([_, checked]) => checked)
         .map(([section]) => section);
 
+      // Calculate match score
+      const { calculateMatchScore } = await import("@/utils/matchScore");
+      const studentSkills = profileData.studentProfile?.skills || [];
+      const internshipSkills = internship.skills_required || [];
+      const matchScore = calculateMatchScore(studentSkills, internshipSkills);
+
       // Create application record
       const applicationData = {
         student_id: profileData.profile.id, // Use profile.id, not auth user.id
@@ -123,6 +129,7 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
         status: "applied" as const,
         cover_letter: profileData.studentProfile?.cover_letter || "",
         included_sections: includedSections,
+        profile_match_score: matchScore,
       };
 
       const { error } = await supabase.from("applications").insert(applicationData);

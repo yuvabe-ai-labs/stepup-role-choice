@@ -91,8 +91,26 @@ const InternshipApplicants = () => {
               return null;
             }
 
+            // Calculate match score if not already set
+            let matchScore = app.profile_match_score;
+            if (matchScore === null || matchScore === undefined || matchScore === 0) {
+              const { calculateMatchScore } = await import("@/utils/matchScore");
+              const studentSkills = studentProfileRes.data?.skills || [];
+              const internshipSkills = internshipRes.data?.skills_required || [];
+              matchScore = calculateMatchScore(studentSkills, internshipSkills);
+
+              // Update the application with the calculated score
+              if (matchScore > 0) {
+                await supabase
+                  .from("applications")
+                  .update({ profile_match_score: matchScore })
+                  .eq("id", app.id);
+              }
+            }
+
             return {
               ...app,
+              profile_match_score: matchScore,
               internship: internshipRes.data,
               profile: profileRes.data,
               studentProfile: studentProfileRes.data || {
@@ -155,8 +173,7 @@ const InternshipApplicants = () => {
     }
 
     const filtered = applications.filter((app) => {
-      const matchScore =
-        app.profile_match_score || Math.floor(Math.random() * 40 + 60);
+      const matchScore = app.profile_match_score || 0;
 
       if (filters.exact && matchScore === 100) return true;
       if (filters.above90 && matchScore > 90 && matchScore < 100) return true;
@@ -397,9 +414,7 @@ const InternshipApplicants = () => {
                   const displaySkills = skills
                     .slice(0, 3)
                     .map((s: any) => (typeof s === "string" ? s : s.name || s));
-                  const matchScore =
-                    application.profile_match_score ||
-                    Math.floor(Math.random() * 40 + 60);
+                  const matchScore = application.profile_match_score || 0;
                   const daysAgo = getDaysAgo(application.applied_date);
 
                   return (
