@@ -94,10 +94,11 @@ const InternshipApplicants = () => {
             // Calculate match score if not already set
             let matchScore = app.profile_match_score;
             if (matchScore === null || matchScore === undefined || matchScore === 0) {
-              const { calculateMatchScore } = await import("@/utils/matchScore");
-              const studentSkills = studentProfileRes.data?.skills || [];
-              const internshipSkills = internshipRes.data?.skills_required || [];
-              matchScore = calculateMatchScore(studentSkills, internshipSkills);
+              const { calculateComprehensiveMatchScore } = await import("@/utils/matchScore");
+              matchScore = calculateComprehensiveMatchScore(
+                { studentProfile: studentProfileRes.data, profile: profileRes.data },
+                internshipRes.data
+              );
 
               // Update the application with the calculated score
               if (matchScore > 0) {

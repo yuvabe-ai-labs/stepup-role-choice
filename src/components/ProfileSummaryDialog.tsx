@@ -116,13 +116,18 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
         .filter(([_, checked]) => checked)
         .map(([section]) => section);
 
-      // Calculate match score
-      const { calculateMatchScore } = await import("@/utils/matchScore");
-      const studentSkills = profileData.studentProfile?.skills || [];
-      const internshipSkills = internship.skills_required || [];
-      console.log("Calculating match score:", { studentSkills, internshipSkills });
-      const matchScore = calculateMatchScore(studentSkills, internshipSkills);
-      console.log("Match score calculated:", matchScore);
+      // Calculate match score (comprehensive)
+      const { calculateComprehensiveMatchScore } = await import("@/utils/matchScore");
+      const matchScore = calculateComprehensiveMatchScore(
+        {
+          studentProfile: profileData.studentProfile,
+          education: profileData.education,
+          internships: profileData.internships,
+          profile: profileData.profile,
+        },
+        internship
+      );
+      console.log("Match score calculated (comprehensive):", matchScore);
 
       // Create application record
       const applicationData = {
