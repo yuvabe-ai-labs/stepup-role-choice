@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -131,7 +131,6 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
     { language: "", read: false, write: false, speak: false },
   ]);
 
-  // This is where conversationHistory is created and initialized as an empty array:
   const [conversationHistory, setConversationHistory] = useState<any[]>([]);
 
   const {
@@ -160,6 +159,40 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
   });
 
   const isPaid = watch("isPaid");
+
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+
+  const dates = Array.from({ length: 31 }, (_, i) => i + 1);
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
+
+  // Sync dropdown values with react-hook-form
+  useEffect(() => {
+    if (selectedDate && selectedMonth && selectedYear) {
+      const date = new Date(
+        parseInt(selectedYear),
+        parseInt(selectedMonth) - 1,
+        parseInt(selectedDate)
+      );
+      setValue("application_deadline", date, { shouldValidate: true });
+    }
+  }, [selectedDate, selectedMonth, selectedYear, setValue]);
 
   const handleAddLanguage = () => {
     const newLanguages = [
@@ -272,7 +305,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
   // AI Assistant function
   const handleAIAssist = async (fieldName: keyof FormData) => {
     console.log("AI Assist triggered for:", fieldName);
-    setAiLoading(fieldName as string); // Cast to string for state
+    setAiLoading(fieldName as string);
 
     try {
       const currentValue = watch(fieldName) as string;
@@ -313,7 +346,6 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
           prompt = `Help improve the following text for a ${jobTitle} internship: ${currentValue}`;
       }
 
-      // Add user message to history BEFORE sending
       const updatedHistory = [
         ...conversationHistory,
         { role: "user", content: prompt },
@@ -325,8 +357,8 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
         {
           body: {
             message: prompt,
-            conversationHistory: updatedHistory, // Pass the updated history state
-            userRole: "unit", // Assuming this dialog is always for a unit
+            conversationHistory: updatedHistory,
+            userRole: "unit",
           },
         }
       );
@@ -336,16 +368,14 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
       if (error) throw error;
 
       if (aiResponse?.response) {
-        // Clean up the response (remove markdown formatting if present)
         let cleanResponse = aiResponse.response
-          .replace(/\*\*/g, "") // Remove bold markdown
-          .replace(/\*/g, "") // Remove asterisk markdown
-          .replace(/^#+\s/gm, "") // Remove heading markdown
+          .replace(/\*\*/g, "")
+          .replace(/\*/g, "")
+          .replace(/^#+\s/gm, "")
           .trim();
 
         setValue(fieldName, cleanResponse, { shouldValidate: true });
 
-        // Add AI response to history AFTER receiving and processing
         setConversationHistory((prevHistory) => [
           ...prevHistory,
           { role: "ai", content: cleanResponse },
@@ -356,7 +386,6 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
           description: "The content has been generated successfully!",
         });
       } else {
-        // Handle cases where AI response is not in the expected format
         console.error("AI response in unexpected format:", aiResponse);
         toast({
           title: "AI Assist Failed",
@@ -364,7 +393,6 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
             "Received unexpected response from AI. Please try again.",
           variant: "destructive",
         });
-        // Optionally add an error message to history for debugging
         setConversationHistory((prevHistory) => [
           ...prevHistory,
           { role: "ai", content: `Error: Unexpected AI response format.` },
@@ -377,7 +405,6 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
         description: "Unable to generate AI suggestion. Please try again.",
         variant: "destructive",
       });
-      // Optionally add an error message to history
       setConversationHistory((prevHistory) => [
         ...prevHistory,
         { role: "ai", content: `Error generating response: ${error.message}` },
@@ -386,28 +413,6 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
       setAiLoading(null);
     }
   };
-
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
-
-  const dates = Array.from({ length: 31 }, (_, i) => i + 1);
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -448,6 +453,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                 </DialogDescription>
               </div>
             </div>
+
             {/* Job/Intern Role */}
             <div className="space-y-2">
               <Label htmlFor="title" className="text-sm font-medium">
@@ -815,8 +821,8 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
 
             {/* Last date to apply */}
             <div className="space-y-3">
-              <label className="block text-sm font-normal text-gray-700">
-                Last date to apply
+              <label className="block text-sm font-medium text-gray-700">
+                Last date to apply <span className="text-destructive">*</span>
               </label>
 
               <div className="flex gap-3">
@@ -880,6 +886,12 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
               {selectedDate && selectedMonth && selectedYear && (
                 <p className="text-sm text-gray-600 mt-2">
                   Selected: {selectedDate}/{selectedMonth}/{selectedYear}
+                </p>
+              )}
+
+              {errors.application_deadline && (
+                <p className="text-sm text-destructive">
+                  {errors.application_deadline.message}
                 </p>
               )}
             </div>
