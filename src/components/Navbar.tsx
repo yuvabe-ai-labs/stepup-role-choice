@@ -76,6 +76,15 @@ const Navbar = () => {
     navigate("/");
   };
 
+  // Handle profile navigation based on user role
+  const handleProfileClick = () => {
+    if (userRole === "unit") {
+      navigate("/unit-profile");
+    } else {
+      navigate("/profile");
+    }
+  };
+
   return (
     <nav className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
@@ -152,7 +161,7 @@ const Navbar = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40 rounded-lg">
               <DropdownMenuItem
-                onClick={() => navigate("/profile")}
+                onClick={handleProfileClick}
                 className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
               >
                 <User className="mr-2 h-4 w-4" />
