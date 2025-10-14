@@ -154,6 +154,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/courses"
               element={
