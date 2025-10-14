@@ -116,6 +116,14 @@ const App = () => (
             <Route path="/auth/:role/signin" element={<SignIn />} />
             <Route path="/auth/:role/signup" element={<SignUp />} />
             <Route
+              path="/internships/:id"
+              element={
+                <ProtectedRoute>
+                  <InternshipDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
