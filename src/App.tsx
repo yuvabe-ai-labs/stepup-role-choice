@@ -36,53 +36,54 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-
+  
   useEffect(() => {
     const checkProfileAndRedirect = async () => {
       if (user) {
         try {
           // Fetch profile with role and onboarding status
           const { data: profile, error } = await supabase
-            .from("profiles")
-            .select("onboarding_completed, role")
-            .eq("user_id", user.id)
+            .from('profiles')
+            .select('onboarding_completed, role')
+            .eq('user_id', user.id)
             .maybeSingle();
-
+          
           if (error) {
-            console.error("Error fetching profile:", error);
+            console.error('Error fetching profile:', error);
             setProfileLoading(false);
             return;
           }
-
+          
           const isOnboardingCompleted = profile?.onboarding_completed || false;
-          const role = profile?.role || "student";
-
+          const role = profile?.role || 'student';
+          
           setHasCompletedOnboarding(isOnboardingCompleted);
           setUserRole(role);
-
+          
           // If onboarding not completed, redirect to chatbot
-          if (!isOnboardingCompleted && location.pathname !== "/chatbot") {
-            navigate("/chatbot", { replace: true });
+          if (!isOnboardingCompleted && location.pathname !== '/chatbot') {
+            navigate('/chatbot', { replace: true });
             setProfileLoading(false);
             return;
           }
-
+          
           // Role-based routing after onboarding is complete
           if (isOnboardingCompleted) {
             // For students accessing unit dashboard or vice versa
-            if (role === "student" && location.pathname === "/unit-dashboard") {
-              navigate("/dashboard", { replace: true });
-            } else if (role === "unit" && location.pathname === "/dashboard") {
-              navigate("/unit-dashboard", { replace: true });
+            if (role === 'student' && location.pathname === '/unit-dashboard') {
+              navigate('/dashboard', { replace: true });
+            } else if (role === 'unit' && location.pathname === '/dashboard') {
+              navigate('/unit-dashboard', { replace: true });
             }
             // Redirect from chatbot to appropriate dashboard after onboarding
-            else if (location.pathname === "/chatbot") {
-              const targetDashboard = role === "unit" ? "/unit-dashboard" : "/dashboard";
+            else if (location.pathname === '/chatbot') {
+              const targetDashboard = role === 'unit' ? '/unit-dashboard' : '/dashboard';
               navigate(targetDashboard, { replace: true });
             }
           }
+          
         } catch (error) {
-          console.error("Error checking profile:", error);
+          console.error('Error checking profile:', error);
         }
       }
       setProfileLoading(false);
@@ -94,7 +95,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       setProfileLoading(false);
     }
   }, [user, loading, location.pathname, navigate]);
-
+  
   if (loading || profileLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-muted flex items-center justify-center">
@@ -102,7 +103,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }
-
+  
   return user ? <>{children}</> : <Navigate to="/" replace />;
 };
 
@@ -119,115 +120,71 @@ const App = () => (
             <Route path="/auth/:role/signup" element={<SignUp />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/check-email" element={<CheckEmail />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/unit-dashboard"
-              element={
-                <ProtectedRoute>
-                  <UnitDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/chatbot"
-              element={
-                <ProtectedRoute>
-                  <Chatbot />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/internships"
-              element={
-                <ProtectedRoute>
-                  <Internships />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/internships/:id"
-              element={
-                <ProtectedRoute>
-                  <InternshipDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/courses"
-              element={
-                <ProtectedRoute>
-                  <Courses />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/units"
-              element={
-                <ProtectedRoute>
-                  <Units />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/units/:id"
-              element={
-                <ProtectedRoute>
-                  <UnitView />
-                </ProtectedRoute>
-              }
-            />
-            {/* <Route path="/unit-profile/:id" element={
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/unit-dashboard" element={
+              <ProtectedRoute>
+                <UnitDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/chatbot" element={
+              <ProtectedRoute>
+                <Chatbot />
+              </ProtectedRoute>
+            } />
+            <Route path="/internships" element={
+              <ProtectedRoute>
+                <Internships />
+              </ProtectedRoute>
+            } />
+            <Route path="/internships/:id" element={
+              <ProtectedRoute>
+                <InternshipDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/courses" element={
+              <ProtectedRoute>
+                <Courses />
+              </ProtectedRoute>
+            } />
+            <Route path="/units" element={
+              <ProtectedRoute>
+                <Units />
+              </ProtectedRoute>
+            } />
+            <Route path="/units/:id" element={
+              <ProtectedRoute>
+                <UnitView />
+              </ProtectedRoute>
+            } />
+            <Route path="/unit-profile/:id" element={
               <ProtectedRoute>
                 <UnitProfileView />
               </ProtectedRoute>
-            } /> */}
-            <Route
-              path="/unit-profile"
-              element={
-                <ProtectedRoute>
-                  <UnitProfile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/candidate-profile/:id"
-              element={
-                <ProtectedRoute>
-                  <CandidateProfile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/all-applications"
-              element={
-                <ProtectedRoute>
-                  <AllApplications />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/internship-applicants/:internshipId"
-              element={
-                <ProtectedRoute>
-                  <InternshipApplicants />
-                </ProtectedRoute>
-              }
-            />
+            } />
+            <Route path="/candidate-profile/:id" element={
+              <ProtectedRoute>
+                <CandidateProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/all-applications" element={
+              <ProtectedRoute>
+                <AllApplications />
+              </ProtectedRoute>
+            } />
+            <Route path="/internship-applicants/:internshipId" element={
+              <ProtectedRoute>
+                <InternshipApplicants />
+              </ProtectedRoute>
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
