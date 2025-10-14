@@ -23,6 +23,8 @@ import { UnitProjectDialog } from "@/components/unit/UnitProjectDialog";
 import { UnitValuesDialog } from "@/components/unit/UnitValuesDialog";
 import { format } from "date-fns";
 import { useEffect } from "react";
+import { CircularProgress } from "@/components/CircularProgress";
+import { useUnitProfileCompletion } from "@/hooks/useUnitProfileCompletion";
 
 const UnitProfile = () => {
   const { user } = useAuth();
@@ -39,6 +41,8 @@ const UnitProfile = () => {
     parseJsonField,
   } = useUnitProfileData();
 
+  const profileCompletion = useUnitProfileCompletion({ profile, unitProfile });
+
   // Log user IDs when data is retrieved
   useEffect(() => {
     if (!loading && (profile || user)) {
@@ -50,9 +54,10 @@ const UnitProfile = () => {
       console.log("Profile Full Name:", profile?.full_name);
       console.log("Unit Profile ID:", unitProfile?.id);
       console.log("Unit Profile - Profile ID:", unitProfile?.profile_id);
+      console.log("Profile Completion:", profileCompletion + "%");
       console.log("==============================");
     }
-  }, [loading, profile, unitProfile, user]);
+  }, [loading, profile, unitProfile, user, profileCompletion]);
 
   if (loading) {
     return (
@@ -105,15 +110,21 @@ const UnitProfile = () => {
         <Card className="mb-8 bg-white rounded-3xl">
           <CardContent className="p-6">
             <div className="flex items-start space-x-6">
-              <Avatar className="h-24 w-24 ring-4 ring-white">
-                <AvatarImage src={unitProfile?.logo_url || ""} />
-                <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                  {unitProfile?.unit_name?.charAt(0) ||
-                    profile?.full_name?.charAt(0) ||
-                    user?.email?.charAt(0)?.toUpperCase() ||
-                    "U"}
-                </AvatarFallback>
-              </Avatar>
+              <CircularProgress
+                percentage={profileCompletion}
+                size={90}
+                strokeWidth={3}
+              >
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={unitProfile?.logo_url || ""} />
+                  <AvatarFallback className="text-lg bg-primary text-primary-foreground">
+                    {unitProfile?.unit_name?.charAt(0) ||
+                      profile?.full_name?.charAt(0) ||
+                      user?.email?.charAt(0)?.toUpperCase() ||
+                      "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </CircularProgress>
 
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
@@ -332,40 +343,6 @@ const UnitProfile = () => {
             </Card>
 
             {/* Values */}
-            {/* <Card className="rounded-3xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Values</h3>
-                  <UnitValuesDialog values={values} onSave={updateValues}>
-                    <Pencil className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
-                  </UnitValuesDialog>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {values.length > 0 ? (
-                    values.map((value: string, index: number) => (
-                      <Badge
-                        key={index}
-                        variant="secondary"
-                        className="px-3 py-1 flex items-center gap-1"
-                      >
-                        {value}
-                        <X
-                          className="w-3 h-3 cursor-pointer hover:text-destructive"
-                          onClick={() => removeValue(value)}
-                        />
-                      </Badge>
-                    ))
-                  ) : (
-                    <p className="text-muted-foreground">
-                      Add the core values that guide your organization's work
-                      and culture.
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card> */}
-
-            {/* Values */}
             <Card className="rounded-3xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -420,16 +397,8 @@ const UnitProfile = () => {
                               </p>
                             )}
 
-                            {/* Description */}
-                            {/* {project.description && (
-                              <p className="text-sm text-muted-foreground mt-2">
-                                {project.description}
-                              </p>
-                            )} */}
-
                             {/* Status + Completion Date */}
                             <p className="text-xs text-muted-foreground mt-2">
-                              {/* Status:{" "} */}
                               <span className="capitalize">
                                 {project.status}
                               </span>
