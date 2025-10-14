@@ -61,6 +61,7 @@ const SignUp = () => {
         title: "Account created successfully!",
         description: "Please check your email to verify your account then sign in to continue.",
       });
+      navigate(`/auth/${role}/signin`);
     }
 
     setLoading(false);
