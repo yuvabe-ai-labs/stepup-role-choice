@@ -29,6 +29,7 @@ import AllApplications from "./pages/AllApplications";
 import InternshipApplicants from "./pages/InternshipApplicants";
 import NotFound from "./pages/NotFound";
 import UnitProfile from "@/pages/UnitProfile";
+import InternshipDetail from "./pages/InternshipDetail";
 
 const queryClient = new QueryClient();
 
@@ -122,6 +123,14 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/auth/:role/signin" element={<SignIn />} />
             <Route path="/auth/:role/signup" element={<SignUp />} />
+            <Route
+              path="/internships/:id"
+              element={
+                <ProtectedRoute>
+                  <InternshipDetail />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/dashboard"
               element={

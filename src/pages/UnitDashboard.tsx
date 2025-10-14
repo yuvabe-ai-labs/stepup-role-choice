@@ -349,10 +349,7 @@ const UnitDashboard = () => {
                       .map((s: any) =>
                         typeof s === "string" ? s : s.name || s
                       );
-                    const matchScore =
-                      application.profile_match_score ||
-                      Math.floor(Math.random() * 40 + 60);
-
+                    const matchScore = application.profile_match_score;
                     return (
                       <Card
                         key={application.id}
@@ -392,10 +389,11 @@ const UnitDashboard = () => {
                             </Badge>
 
                             <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                              {typeof application.studentProfile?.bio === 'string'
+                              {typeof application.studentProfile?.bio ===
+                              "string"
                                 ? application.studentProfile.bio
                                 : Array.isArray(application.studentProfile?.bio)
-                                ? application.studentProfile.bio.join(' ')
+                                ? application.studentProfile.bio.join(" ")
                                 : "Passionate about creating user-centered digital experiences."}
                             </p>
 
