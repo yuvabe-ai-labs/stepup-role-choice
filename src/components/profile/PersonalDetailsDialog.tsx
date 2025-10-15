@@ -2,13 +2,29 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -30,7 +46,11 @@ interface PersonalDetailsDialogProps {
   children: React.ReactNode;
 }
 
-export const PersonalDetailsDialog = ({ profile, onUpdate, children }: PersonalDetailsDialogProps) => {
+export const PersonalDetailsDialog = ({
+  profile,
+  onUpdate,
+  children,
+}: PersonalDetailsDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -41,7 +61,9 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, children }: PersonalD
       email: profile.email || "",
       phone: profile.phone || "",
       gender: profile.gender || "",
-      date_of_birth: profile.date_of_birth ? new Date(profile.date_of_birth) : undefined,
+      date_of_birth: profile.date_of_birth
+        ? new Date(profile.date_of_birth)
+        : undefined,
     },
   });
 
@@ -53,7 +75,9 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, children }: PersonalD
         email: data.email || null,
         phone: data.phone || null,
         gender: data.gender || null,
-        date_of_birth: data.date_of_birth ? data.date_of_birth.toISOString().split("T")[0] : null,
+        date_of_birth: data.date_of_birth
+          ? data.date_of_birth.toISOString().split("T")[0]
+          : null,
       });
       setOpen(false);
     } catch (error) {
@@ -69,14 +93,18 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, children }: PersonalD
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Personal Details</DialogTitle>
-          <p className="text-xs">This information is important for employers to know you better</p>
+          <p className="text-xs">
+            This information is important for employers to know you better
+          </p>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <Label htmlFor="full_name">Full Name</Label>
             <Input id="full_name" {...form.register("full_name")} />
             {form.formState.errors.full_name && (
-              <p className="text-sm text-red-500">{form.formState.errors.full_name.message}</p>
+              <p className="text-sm text-red-500">
+                {form.formState.errors.full_name.message}
+              </p>
             )}
           </div>
 
@@ -84,7 +112,9 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, children }: PersonalD
             <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" {...form.register("email")} />
             {form.formState.errors.email && (
-              <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>
+              <p className="text-sm text-red-500">
+                {form.formState.errors.email.message}
+              </p>
             )}
           </div>
 
@@ -95,7 +125,10 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, children }: PersonalD
 
           <div>
             <Label htmlFor="gender">Gender</Label>
-            <Select value={form.watch("gender")} onValueChange={(value) => form.setValue("gender", value)}>
+            <Select
+              value={form.watch("gender")}
+              onValueChange={(value) => form.setValue("gender", value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
@@ -103,7 +136,9 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, children }: PersonalD
                 <SelectItem value="male">Male</SelectItem>
                 <SelectItem value="female">Female</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
-                <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
+                <SelectItem value="prefer_not_to_say">
+                  Prefer not to say
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -116,11 +151,15 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, children }: PersonalD
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
-                    !form.watch("date_of_birth") && "text-muted-foreground",
+                    !form.watch("date_of_birth") && "text-muted-foreground"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {form.watch("date_of_birth") ? format(form.watch("date_of_birth")!, "PPP") : <span>Pick a date</span>}
+                  {form.watch("date_of_birth") ? (
+                    format(form.watch("date_of_birth")!, "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -128,7 +167,9 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, children }: PersonalD
                   mode="single"
                   selected={form.watch("date_of_birth")}
                   onSelect={(date) => form.setValue("date_of_birth", date)}
-                  disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                  disabled={(date) =>
+                    date > new Date() || date < new Date("1900-01-01")
+                  }
                   initialFocus
                   className="p-3 pointer-events-auto"
                 />
@@ -137,7 +178,11 @@ export const PersonalDetailsDialog = ({ profile, onUpdate, children }: PersonalD
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>

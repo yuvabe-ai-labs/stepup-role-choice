@@ -1,5 +1,9 @@
 // <-- same imports as before -->
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -75,9 +79,15 @@ const Units = () => {
   // -------------------------------------------------------
 
   // Extract unique filter data
-  const uniqueUnits = [...new Set(units.map((u) => u.unit_name).filter(Boolean))];
-  const uniqueIndustries = [...new Set(units.map((u) => u.industry || u.unit_type).filter(Boolean))];
-  const uniqueDepartments = [...new Set(units.map((u) => u.unit_type).filter(Boolean))];
+  const uniqueUnits = [
+    ...new Set(units.map((u) => u.unit_name).filter(Boolean)),
+  ];
+  const uniqueIndustries = [
+    ...new Set(units.map((u) => u.industry || u.unit_type).filter(Boolean)),
+  ];
+  const uniqueDepartments = [
+    ...new Set(units.map((u) => u.unit_type).filter(Boolean)),
+  ];
 
   const interestAreas = [
     ...new Set(
@@ -85,19 +95,21 @@ const Units = () => {
         typeof u.focus_areas === "object" && u.focus_areas
           ? Object.values(u.focus_areas)
           : typeof u.focus_areas_backup === "object" && u.focus_areas_backup
-            ? Object.keys(u.focus_areas_backup)
-            : [],
-      ),
+          ? Object.keys(u.focus_areas_backup)
+          : []
+      )
     ),
   ];
 
   // Search filtering
-  const filteredUnitsList = uniqueUnits.filter((u) => u.toLowerCase().includes(searchUnits.toLowerCase()));
+  const filteredUnitsList = uniqueUnits.filter((u) =>
+    u.toLowerCase().includes(searchUnits.toLowerCase())
+  );
   const filteredIndustriesList = uniqueIndustries.filter((i) =>
-    i.toLowerCase().includes(searchIndustries.toLowerCase()),
+    i.toLowerCase().includes(searchIndustries.toLowerCase())
   );
   const filteredDepartmentsList = uniqueDepartments.filter((d) =>
-    d.toLowerCase().includes(searchDepartments.toLowerCase()),
+    d.toLowerCase().includes(searchDepartments.toLowerCase())
   );
 
   const toggleFilter = (category: keyof typeof filters, value: string) => {
@@ -105,7 +117,9 @@ const Units = () => {
     const list = filters[category] as string[];
     setFilters({
       ...filters,
-      [category]: list.includes(value) ? list.filter((v) => v !== value) : [...list, value],
+      [category]: list.includes(value)
+        ? list.filter((v) => v !== value)
+        : [...list, value],
     });
   };
 
@@ -144,18 +158,26 @@ const Units = () => {
 
   // ✅ Core filtering (uses parsePgTimestamp for created_at)
   const filteredUnits = units.filter((unit) => {
-    if (filters.units.length && !filters.units.includes(unit.unit_name)) return false;
+    if (filters.units.length && !filters.units.includes(unit.unit_name))
+      return false;
     if (filters.industries.length) {
       const ind = unit.industry || unit.unit_type;
       if (!ind || !filters.industries.includes(ind)) return false;
     }
-    if (filters.departments.length && !filters.departments.includes(unit.unit_type)) return false;
+    if (
+      filters.departments.length &&
+      !filters.departments.includes(unit.unit_type)
+    )
+      return false;
 
     if (filters.interestAreas.length) {
       const areas: string[] = [];
       if (typeof unit.focus_areas === "object" && unit.focus_areas)
         areas.push(...Object.values(unit.focus_areas).map(String));
-      if (typeof unit.focus_areas_backup === "object" && unit.focus_areas_backup)
+      if (
+        typeof unit.focus_areas_backup === "object" &&
+        unit.focus_areas_backup
+      )
         areas.push(...Object.keys(unit.focus_areas_backup).map(String));
 
       if (!filters.interestAreas.some((a) => areas.includes(a))) return false;
@@ -163,8 +185,12 @@ const Units = () => {
 
     if (filters.postingDate.from || filters.postingDate.to) {
       const unitDate = parsePgTimestamp(unit.created_at).getTime();
-      const from = filters.postingDate.from ? new Date(filters.postingDate.from).getTime() : -Infinity;
-      const to = filters.postingDate.to ? new Date(filters.postingDate.to).getTime() : Infinity;
+      const from = filters.postingDate.from
+        ? new Date(filters.postingDate.from).getTime()
+        : -Infinity;
+      const to = filters.postingDate.to
+        ? new Date(filters.postingDate.to).getTime()
+        : Infinity;
 
       // If unitDate is invalid, exclude it (could also decide to include)
       if (Number.isNaN(unitDate)) return false;
@@ -195,7 +221,11 @@ const Units = () => {
         <div className="w-80 bg-card pt-5 border rounded-3xl flex flex-col h-[90vh] sticky top-6">
           <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
             <h2 className="text-lg font-bold">Filters</h2>
-            <Button variant="ghost" className="text-primary text-sm font-medium" onClick={resetFilters}>
+            <Button
+              variant="ghost"
+              className="text-primary text-sm font-medium"
+              onClick={resetFilters}
+            >
               Reset all
             </Button>
           </div>
@@ -247,12 +277,18 @@ const Units = () => {
 
             {/* Interest Areas */}
             <div>
-              <Label className="text-sm font-semibold text-muted-foreground mb-3 block">Interest Areas</Label>
+              <Label className="text-sm font-semibold text-muted-foreground mb-3 block">
+                Interest Areas
+              </Label>
               <div className="flex flex-wrap gap-2">
                 {interestAreas.slice(0, 10).map((a) => (
                   <Button
                     key={String(a)}
-                    variant={filters.interestAreas.includes(String(a)) ? "default" : "outline"}
+                    variant={
+                      filters.interestAreas.includes(String(a))
+                        ? "default"
+                        : "outline"
+                    }
                     size="sm"
                     className="rounded-full"
                     onClick={() => toggleFilter("interestAreas", String(a))}
@@ -268,7 +304,9 @@ const Units = () => {
         {/* Main Content (Units Grid) */}
         <div className="flex-1">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold">Explore {filteredUnits.length} Units</h1>
+            <h1 className="text-3xl font-bold">
+              Explore {filteredUnits.length} Units
+            </h1>
           </div>
 
           {error ? (
@@ -287,7 +325,9 @@ const Units = () => {
             </div>
           ) : filteredUnits.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">No units found matching your filters.</p>
+              <p className="text-muted-foreground">
+                No units found matching your filters.
+              </p>
               <Button variant="outline" onClick={resetFilters} className="mt-4">
                 Clear Filters
               </Button>
@@ -305,8 +345,21 @@ const Units = () => {
                   >
                     {/* Card Header with Gradient */}
                     <div
-                      className={`${gradient} h-48 relative flex flex-col items-center justify-center p-6 text-white`}
+                      className={`${gradient} h-48 relative flex flex-col items-center justify-center text-white`}
                     >
+                      {unit.unit_image ? (
+                        <img
+                          src={unit.unit_image}
+                          alt={unit.unit_name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-white text-center">
+                          <h3 className="text-2xl font-bold">
+                            {unit.unit_name}
+                          </h3>
+                        </div>
+                      )}
                       <Badge className="absolute top-3 left-3 bg-white/90 text-foreground">
                         {formatDistanceToNow(new Date(unit.created_at), {
                           addSuffix: true,
@@ -314,10 +367,14 @@ const Units = () => {
                       </Badge>
 
                       {unit.is_aurovillian && (
-                        <Badge className="absolute top-3 right-3 bg-green-500 text-white">Auroville</Badge>
+                        <Badge className="absolute top-3 right-3 bg-green-500 text-white">
+                          Auroville
+                        </Badge>
                       )}
 
-                      <h3 className="text-xl font-bold text-center mb-2">{unit.unit_name.toUpperCase()}</h3>
+                      {/* <h3 className="text-xl font-bold text-center mb-2">
+                        {unit.unit_name.toUpperCase()}
+                      </h3> */}
                       <ChevronRight className="absolute right-4 bottom-4 w-6 h-6" />
                     </div>
 
@@ -333,11 +390,15 @@ const Units = () => {
                                 className="object-contain w-10 h-10"
                               />
                             ) : (
-                              <span className="text-xs text-muted-foreground">No Logo</span>
+                              <span className="text-xs text-muted-foreground">
+                                No Logo
+                              </span>
                             )}
                           </div>
                           <div>
-                            <p className="text-sm font-semibold line-clamp-1">{unit.unit_name}</p>
+                            <p className="text-sm font-semibold line-clamp-1">
+                              {unit.unit_name}
+                            </p>
                             <p className="text-xs text-muted-foreground line-clamp-1">
                               {unit.industry || unit.unit_type || "General"}
                             </p>
@@ -368,9 +429,20 @@ const Units = () => {
 };
 
 /* ------------------ Helper Subcomponents ------------------ */
-const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle, showAll, setShowAll }: any) => (
+const FilterSection = ({
+  label,
+  searchValue,
+  onSearch,
+  list,
+  selected,
+  onToggle,
+  showAll,
+  setShowAll,
+}: any) => (
   <div>
-    <Label className="text-sm font-semibold text-muted-foreground mb-3 block">{label}</Label>
+    <Label className="text-sm font-semibold text-muted-foreground mb-3 block">
+      {label}
+    </Label>
     <div className="relative mb-3">
       <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
       <Input
@@ -383,12 +455,19 @@ const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle,
     <div className="space-y-3">
       {(showAll ? list : list.slice(0, 4)).map((item: string) => (
         <div key={item} className="flex items-center space-x-2">
-          <Checkbox checked={selected.includes(item)} onCheckedChange={() => onToggle(item)} />
+          <Checkbox
+            checked={selected.includes(item)}
+            onCheckedChange={() => onToggle(item)}
+          />
           <span className="text-sm">{item}</span>
         </div>
       ))}
       {list.length > 4 && (
-        <Button variant="link" className="p-0 text-primary text-sm" onClick={() => setShowAll(!showAll)}>
+        <Button
+          variant="link"
+          className="p-0 text-primary text-sm"
+          onClick={() => setShowAll(!showAll)}
+        >
           {showAll ? "Show Less" : `+${list.length - 4} More`}
         </Button>
       )}
@@ -396,9 +475,16 @@ const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle,
   </div>
 );
 
-const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChange }: any) => (
+const PostingDateFilter = ({
+  filters,
+  activeDateRange,
+  onSelectDate,
+  onDateChange,
+}: any) => (
   <div>
-    <Label className="text-sm font-semibold text-muted-foreground mb-3 block">Posting Date</Label>
+    <Label className="text-sm font-semibold text-muted-foreground mb-3 block">
+      Posting Date
+    </Label>
     <div className="flex flex-col space-y-3">
       <div className="flex flex-wrap gap-2 justify-between">
         {["from", "to"].map((key) => (
@@ -412,14 +498,18 @@ const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChang
                 {filters.postingDate[key]
                   ? new Date(filters.postingDate[key]).toLocaleDateString()
                   : key === "from"
-                    ? "From"
-                    : "To"}
+                  ? "From"
+                  : "To"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="p-0" align="start">
               <Calendar
                 mode="single"
-                selected={filters.postingDate[key] ? new Date(filters.postingDate[key]) : undefined}
+                selected={
+                  filters.postingDate[key]
+                    ? new Date(filters.postingDate[key])
+                    : undefined
+                }
                 onSelect={(date) =>
                   onDateChange({
                     ...filters,
@@ -445,7 +535,11 @@ const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChang
             className="rounded-full flex-1"
             onClick={() => onSelectDate(range)}
           >
-            {range === "today" ? "Today" : range === "week" ? "This Week" : "This Month"}
+            {range === "today"
+              ? "Today"
+              : range === "week"
+              ? "This Week"
+              : "This Month"}
           </Button>
         ))}
       </div>
