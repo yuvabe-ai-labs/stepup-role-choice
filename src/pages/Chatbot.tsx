@@ -9,6 +9,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { Send, Sparkles } from "lucide-react";
 import chatbotAvatar from "@/assets/chatbot.png";
 import logo from "@/assets/logo-2.png";
+import { useIntern } from "@/hooks/useInternships";
+import { useInternshipRecommendations, useCourseRecommendations } from "@/hooks/useRecommendations";
+import { useCourses } from "@/hooks/useCourses";
 
 interface Message {
   id: string;
@@ -20,6 +23,11 @@ interface Message {
 const Chatbot = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const [userSkills, setUserSkills] = useState<string[]>([]);
+  const { internships, loading: internshipsLoading } = useIntern();
+  const { courses, loading: coursesLoading } = useCourses();
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -65,11 +73,46 @@ const Chatbot = () => {
           setProfileError("Profile not found. Please try signing in again.");
           setProfileLoading(false);
         }
+
+        if (data) {
+          const { data: studentProfile } = await supabase
+            .from("student_profiles")
+            .select("skills")
+            .eq("profile_id", data.id)
+            .maybeSingle();
+
+          if (studentProfile?.skills) {
+            let skills: any[] = [];
+
+            if (typeof studentProfile.skills === "string") {
+              try {
+                // Try to parse JSON
+                const parsed = JSON.parse(studentProfile.skills);
+                skills = Array.isArray(parsed) ? parsed : studentProfile.skills.split(",").map((s) => s.trim());
+              } catch {
+                // If invalid JSON, fallback to comma-separated
+                skills = studentProfile.skills.split(",").map((s) => s.trim());
+              }
+            } else if (Array.isArray(studentProfile.skills)) {
+              skills = studentProfile.skills;
+            }
+
+            setUserSkills(skills);
+          }
+        }
       }
     };
 
     fetchUserProfile();
   }, [user]);
+
+  // Use recommendation hooks
+  const recommendedInternships = useInternshipRecommendations(internships, userSkills);
+  const recommendedCourses = useCourseRecommendations(courses, userSkills);
+
+  // count total units matches with student's skill
+  const totalUnits = [];
+  recommendedInternships.map((internship) => totalUnits.push(internship.created_by));
 
   const continueToProfessional = () => {
     setShowProfessionalTransition(false);
@@ -1098,34 +1141,34 @@ const Chatbot = () => {
                 </>
               ) : (
                 <>
-                  <Card className="p-6 text-center space-y-3">
+                  <Card className="p-6 text-center space-y-3 rounded-3xl">
                     <div className="w-12 h-12 mx-auto bg-red-100 rounded-lg flex items-center justify-center">
                       <span className="text-2xl">📅</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">5</div>
+                      <div className="text-2xl font-bold text-foreground">{recommendedInternships.length}</div>
                       <div className="text-sm text-muted-foreground">Matching Internships</div>
                       <div className="text-xs text-muted-foreground">Found in business domain</div>
                     </div>
                   </Card>
 
-                  <Card className="p-6 text-center space-y-3">
+                  <Card className="p-6 text-center space-y-3 rounded-3xl">
                     <div className="w-12 h-12 mx-auto bg-teal-100 rounded-lg flex items-center justify-center">
                       <span className="text-2xl">🏢</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">12</div>
-                      <div className="text-sm text-muted-foreground">Auroville Units</div>
+                      <div className="text-2xl font-bold text-foreground">{new Set(totalUnits).size}</div>
+                      <div className="text-sm text-muted-foreground">Units</div>
                       <div className="text-xs text-muted-foreground">Relevant to your skills</div>
                     </div>
                   </Card>
 
-                  <Card className="p-6 text-center space-y-3">
+                  <Card className="p-6 text-center space-y-3 rounded-3xl">
                     <div className="w-12 h-12 mx-auto bg-purple-100 rounded-lg flex items-center justify-center">
                       <span className="text-2xl">🎯</span>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">3</div>
+                      <div className="text-2xl font-bold text-foreground">{recommendedCourses.length}</div>
                       <div className="text-sm text-muted-foreground">Skill Courses</div>
                       <div className="text-xs text-muted-foreground">To boost your profile</div>
                     </div>
