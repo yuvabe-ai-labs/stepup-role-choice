@@ -32,6 +32,10 @@ export interface StudentProfile {
   cover_letter: string | null;
   profile_type: string | null;
   preferred_language: string | null;
+  headline: string | null;
+  marital_status: string | null;
+  is_differently_abled: boolean | null;
+  has_career_break: boolean | null;
 }
 
 export interface EducationEntry {

@@ -109,7 +109,7 @@ const UnitProfileView = () => {
   const { unit, profile } = data;
   const focusAreas = safeParse(unit.focus_areas, []);
   const skillsOffered = safeParse(unit.skills_offered, []);
-  const recentProjects = safeParse(unit.recent_projects, []);
+  const recentProjects = safeParse(unit.projects, []);
   const values = safeParse(unit.values, []);
 
   return (

@@ -134,7 +134,12 @@ const Profile = () => {
                   <h1 className="text-2xl font-bold">{profile?.full_name || "Student Name"}</h1>
                   {profile && (
                     <>
-                      <PersonalDetailsDialog profile={profile} onUpdate={updateProfile}>
+                      <PersonalDetailsDialog 
+                        profile={profile} 
+                        studentProfile={studentProfile}
+                        onUpdate={updateProfile}
+                        onUpdateStudent={updateStudentProfile}
+                      >
                         <Edit className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
                       </PersonalDetailsDialog>
                     </>
@@ -244,7 +249,12 @@ const Profile = () => {
                   {/* Personal Details */}
                   <div className="flex items-center justify-between">
                     <span>Personal Details</span>
-                    <PersonalDetailsDialog profile={profile} onUpdate={updateProfile}>
+                    <PersonalDetailsDialog 
+                      profile={profile} 
+                      studentProfile={studentProfile}
+                      onUpdate={updateProfile}
+                      onUpdateStudent={updateStudentProfile}
+                    >
                       <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
                         Edit
                       </Button>
@@ -559,7 +569,12 @@ const Profile = () => {
                   <h3 className="font-semibold">Personal Details</h3>
                   {profile && (
                     <>
-                      <PersonalDetailsDialog profile={profile} onUpdate={updateProfile}>
+                      <PersonalDetailsDialog 
+                        profile={profile} 
+                        studentProfile={studentProfile}
+                        onUpdate={updateProfile}
+                        onUpdateStudent={updateStudentProfile}
+                      >
                         <>
                           <Edit className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
                         </>

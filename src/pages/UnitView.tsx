@@ -66,7 +66,7 @@ const UnitView = () => {
     );
   }
 
-  const recentProjects = safeParse(unit.recent_projects, []);
+  const recentProjects = safeParse(unit.projects, []);
   const values = safeParse(unit.values, []);
 
   return (
