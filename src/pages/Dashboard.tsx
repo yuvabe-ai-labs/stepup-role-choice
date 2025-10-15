@@ -213,7 +213,11 @@ const Dashboard = () => {
                                 <CardHeader className="pb-3">
                                   <div className="flex justify-between items-start mb-2">
                                     <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center text-background font-bold text-sm">
-                                      {<img src={internship.company_logo} className="w-12" /> || initial}
+                                      {internship.company_logo ? (
+                                        <img src={internship.company_logo} className="w-12" alt={internship.company_name} />
+                                      ) : (
+                                        initial
+                                      )}
                                     </div>
                                     <Badge variant="secondary" className="text-xs">
                                       {timeText}
