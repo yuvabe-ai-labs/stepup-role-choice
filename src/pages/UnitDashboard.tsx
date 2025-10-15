@@ -268,28 +268,28 @@ const UnitDashboard = () => {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-4 bg-muted/30 p-1 rounded-full">
+          <TabsList className="grid w-full grid-cols-4 bg-muted/30 p-1 rounded-full shadow-[inset_0_4px_10px_rgba(0,0,0,0.2)]">
             <TabsTrigger
               value="applications"
-              className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-m"
             >
               Applications
             </TabsTrigger>
             <TabsTrigger
               value="job-descriptions"
-              className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-m"
             >
               Job Descriptions
             </TabsTrigger>
             <TabsTrigger
               value="candidates"
-              className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-m"
             >
               Candidates Management
             </TabsTrigger>
             <TabsTrigger
               value="reports"
-              className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-m"
             >
               Reports
             </TabsTrigger>
@@ -353,114 +353,142 @@ const UnitDashboard = () => {
                     return (
                       <Card
                         key={application.id}
-                        className="border border-border/50 hover:shadow-md transition-shadow"
+                        className="border border-border/50 hover:shadow-md transition-shadow w-full max-w-[320px] rounded-3xl"
                       >
-                        <CardContent className="p-6">
-                          <div className="flex flex-col items-center text-center">
-                            <Avatar className="w-20 h-20 mb-4 ring-2 ring-primary/10">
-                              <AvatarImage
-                                src={
-                                  application.studentProfile?.avatar_url ||
-                                  undefined
-                                }
-                                alt={application.profile.full_name}
-                              />
-                              <AvatarFallback className="text-lg">
-                                {application.profile.full_name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
-                              </AvatarFallback>
-                            </Avatar>
-
-                            <h3 className="font-semibold text-lg mb-1">
-                              {application.profile.full_name}
-                            </h3>
-                            <p className="text-sm text-muted-foreground mb-3">
-                              {application.internship.title}
-                            </p>
-
-                            <Badge
-                              className={`${getStatusColor(
-                                application.status
-                              )} mb-4`}
-                            >
-                              {getStatusLabel(application.status)}
-                            </Badge>
-
-                            <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                              {typeof application.studentProfile?.bio ===
-                              "string"
-                                ? application.studentProfile.bio
-                                : Array.isArray(application.studentProfile?.bio)
-                                ? application.studentProfile.bio.join(" ")
-                                : "Passionate about creating user-centered digital experiences."}
-                            </p>
-
-                            <div className="flex flex-wrap gap-2 justify-center mb-4">
-                              {displaySkills.map(
-                                (skill: string, index: number) => (
-                                  <Badge
-                                    key={index}
-                                    variant="outline"
-                                    className="text-xs bg-muted/50"
-                                  >
-                                    {skill}
-                                  </Badge>
-                                )
-                              )}
-                              {skills.length > 3 && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs bg-muted/50"
-                                >
-                                  +{skills.length - 3}
-                                </Badge>
-                              )}
+                        <CardContent className="p-7">
+                          {/* Header Section - Avatar with Name */}
+                          <div className="flex items-start gap-2.5 mb-3">
+                            {/* Avatar with green ring */}
+                            <div className="relative flex-shrink-0">
+                              <Avatar className="w-16 h-16 ring-4 ring-green-500">
+                                <AvatarImage
+                                  src={
+                                    application.studentProfile?.avatar_url ||
+                                    undefined
+                                  }
+                                  alt={application.profile.full_name}
+                                />
+                                <AvatarFallback className="text-base">
+                                  {application.profile.full_name
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
+                                </AvatarFallback>
+                              </Avatar>
                             </div>
 
-                            <div className="w-full bg-muted/30 rounded-lg p-3 mb-4">
-                              <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center gap-2">
-                                  <Sparkles className="w-4 h-4 text-purple-500" />
-                                  <span className="text-xs font-medium">
-                                    AI Analysis for the profile
-                                  </span>
-                                </div>
-                                <div
-                                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${
-                                    matchScore >= 80
-                                      ? "border-green-500"
-                                      : matchScore >= 60
-                                      ? "border-orange-500"
-                                      : "border-red-500"
-                                  }`}
+                            {/* Name and Title */}
+                            <div className="flex-1 min-w-0 px-5">
+                              <h3 className="font-semibold text-base mb-0.5">
+                                {application.profile.full_name}
+                              </h3>
+                              <p className="text-xs text-muted-foreground mb-1.5">
+                                {application.internship.title}
+                              </p>
+                              <Badge
+                                className={`${getStatusColor(
+                                  application.status
+                                )} text-xs`}
+                              >
+                                {getStatusLabel(application.status)}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          {/* Bio */}
+                          <p className="text-sm text-gray-700 mb-3 leading-relaxed">
+                            {typeof application.studentProfile?.bio === "string"
+                              ? application.studentProfile.bio
+                              : Array.isArray(application.studentProfile?.bio)
+                              ? application.studentProfile.bio.join(" ")
+                              : "Passionate about creating user-centered digital experiences."}
+                          </p>
+
+                          {/* Skills */}
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {displaySkills.map(
+                              (skill: string, index: number) => (
+                                <Badge
+                                  key={index}
+                                  variant="outline"
+                                  className="text-[10px] text-gray-500 bg-muted/50 rounded-full px-2 py-1"
                                 >
+                                  {skill}
+                                </Badge>
+                              )
+                            )}
+                            {skills.length > 3 && (
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] text-gray-500 bg-muted/50 rounded-full px-2 py-1"
+                              >
+                                +{skills.length - 3}
+                              </Badge>
+                            )}
+                          </div>
+
+                          {/* Divider Line */}
+                          <div className="border-t border-border/50 my-4"></div>
+
+                          {/* AI Analysis Section */}
+                          <div className="bg-white rounded-xl  mb-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5">
+                                <Sparkles className="w-4 h-4 text-purple-600" />
+                                <span className="text-sm font-medium text-purple-600">
+                                  AI Analysis for the profile
+                                </span>
+                              </div>
+
+                              {/* Circular Progress */}
+                              <div className="relative w-10 h-10">
+                                <svg className="w-10 h-10 transform -rotate-90">
+                                  <circle
+                                    cx="20"
+                                    cy="20"
+                                    r="16"
+                                    stroke="#e5e7eb"
+                                    strokeWidth="3"
+                                    fill="none"
+                                  />
+                                  <circle
+                                    cx="20"
+                                    cy="20"
+                                    r="16"
+                                    stroke="#10b981"
+                                    strokeWidth="3"
+                                    fill="none"
+                                    strokeDasharray={`${2 * Math.PI * 16}`}
+                                    strokeDashoffset={`${
+                                      2 * Math.PI * 16 * (1 - matchScore / 100)
+                                    }`}
+                                    strokeLinecap="round"
+                                  />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center">
                                   <span className="text-xs font-bold">
                                     {matchScore}%
                                   </span>
                                 </div>
                               </div>
-                              <p
-                                className={`text-xs ${getMatchColor(
-                                  matchScore
-                                )}`}
-                              >
-                                {matchScore}% Skill matches for this role
-                              </p>
                             </div>
 
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full"
-                              onClick={() =>
-                                navigate(`/candidate/${application.id}`)
-                              }
-                            >
-                              View Profile
-                            </Button>
+                            <p className="text-xs text-muted-foreground">
+                              {matchScore}% Skill matches for this role
+                            </p>
                           </div>
+
+                          {/* View Profile Button */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full border-2 border-teal-500 text-teal-600 hover:bg-teal-50 text-xs py-2 rounded-full"
+                            onClick={() =>
+                              navigate(`/candidate/${application.id}`)
+                            }
+                          >
+                            View Profile
+                          </Button>
                         </CardContent>
                       </Card>
                     );
@@ -489,20 +517,20 @@ const UnitDashboard = () => {
               <h2 className="text-2xl font-semibold">Job Descriptions</h2>
               <div className="flex gap-4">
                 <Select value={jobFilter} onValueChange={setJobFilter}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[180px] rounded-full text-gray-400">
                     <SelectValue placeholder="Select Filter" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Jobs</SelectItem>
+                  <SelectContent className="rounded-2xl">
+                    <SelectItem value="all">Select Filter</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="closed">Closed</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button
-                  className="bg-teal-600 hover:bg-teal-700"
+                  className="bg-teal-600 hover:bg-teal-700 rounded-full"
                   onClick={() => setShowCreateDialog(true)}
                 >
-                  <Plus className="w-4 h-4 mr-2" />
+                  <Plus className="w-4 h-4" />
                   Create New JD
                 </Button>
               </div>
@@ -550,13 +578,16 @@ const UnitDashboard = () => {
                       ).length;
 
                       return (
-                        <Card key={internship.id} className="relative">
+                        <Card
+                          key={internship.id}
+                          className="relative rounded-3xl border border-black-50 max-w-lg"
+                        >
                           <CardContent className="p-6">
-                            <div className="flex items-start justify-between mb-4">
-                              <h3 className="font-semibold text-lg">
+                            <div className="flex items-start justify-between mb-6">
+                              <h3 className="font-semibold text-lg leading-tight">
                                 {internship.title}
                               </h3>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                                 <Badge
                                   className={
                                     internship.status === "active"
@@ -623,7 +654,7 @@ const UnitDashboard = () => {
                               </div>
                             </div>
 
-                            <div className="space-y-2 mb-4">
+                            <div className="space-y-3 mb-6">
                               <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">
                                   Applications:
@@ -658,7 +689,7 @@ const UnitDashboard = () => {
 
                             <Button
                               variant="outline"
-                              className="w-full"
+                              className="w-full rounded-full"
                               onClick={() =>
                                 navigate(
                                   `/internship-applicants/${internship.id}`
