@@ -1,0 +1,76 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+
+const AuthCallback = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const handleCallback = async () => {
+      try {
+        console.log("Auth callback triggered");
+
+        // Get the session from the URL hash
+        const { data, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error("Error getting session:", error);
+          toast({
+            title: "Authentication Error",
+            description: error.message,
+            variant: "destructive",
+          });
+          navigate("/auth/student/signin");
+          return;
+        }
+
+        if (data.session) {
+          console.log("User authenticated successfully:", data.session.user.id);
+          toast({
+            title: "Email Verified!",
+            description:
+              "Your account has been verified successfully. Let's set up your profile!",
+          });
+
+          // Wait a moment for the auth state to propagate
+          setTimeout(() => {
+            navigate("/chatbot", { replace: true });
+          }, 1000);
+        } else {
+          console.log("No session found, redirecting to signin");
+          toast({
+            title: "Verification Complete",
+            description: "Please sign in to continue.",
+          });
+          navigate("/auth/student/signin");
+        }
+      } catch (error: any) {
+        console.error("Callback error:", error);
+        toast({
+          title: "Error",
+          description: "Something went wrong. Please try signing in.",
+          variant: "destructive",
+        });
+        navigate("/auth/student/signin");
+      }
+    };
+
+    handleCallback();
+  }, [navigate, toast]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/20 to-muted">
+      <div className="text-center space-y-4">
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <div className="text-lg font-medium">Verifying your email...</div>
+        <div className="text-sm text-muted-foreground">
+          Please wait a moment
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AuthCallback;

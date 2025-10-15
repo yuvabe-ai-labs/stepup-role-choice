@@ -18,7 +18,11 @@ interface AuthContextType {
     fullName: string,
     role: string
   ) => Promise<{ error: any }>;
-  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<{ error: any }>;
+  signIn: (
+    email: string,
+    password: string,
+    rememberMe?: boolean
+  ) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   signInWithOAuth: (provider: "google" | "apple") => Promise<{ error: any }>;
@@ -120,7 +124,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
           } else {
             console.log("Profile created successfully:", newProfile);
-            
+
             // Initialize role-specific table
             if (userRole === "student") {
               const { error: studentError } = await supabase
@@ -128,27 +132,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 .insert({
                   profile_id: newProfile.id,
                 });
-              
+
               if (studentError) {
-                console.error("Student profile initialization failed:", studentError);
+                console.error(
+                  "Student profile initialization failed:",
+                  studentError
+                );
               } else {
                 console.log("Student profile initialized successfully");
               }
             } else if (userRole === "unit") {
-              const { error: unitError } = await supabase
-                .from("units")
-                .insert({
-                  profile_id: newProfile.id,
-                  unit_name: fullName, // Use signup name as initial unit name
-                });
-              
+              const { error: unitError } = await supabase.from("units").insert({
+                profile_id: newProfile.id,
+                unit_name: fullName, // Use signup name as initial unit name
+              });
+
               if (unitError) {
                 console.error("Unit profile initialization failed:", unitError);
               } else {
                 console.log("Unit profile initialized successfully");
               }
             }
-            
+
             toast({
               title: "Welcome!",
               description: "Your account has been set up successfully.",
@@ -177,8 +182,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     try {
       console.log("Starting signup process for:", email, "with role:", role);
-      // Redirect to role-specific signin page after email confirmation
-      const redirectUrl = `${window.location.origin}/auth/${role}/signin`;
+
+      // Redirect to auth callback handler, which will then route to chatbot
+      const redirectUrl = `${window.location.origin}/auth/callback`;
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -197,6 +203,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { error };
       }
 
+      // Store role for use after email confirmation
+      if (role) {
+        localStorage.setItem("pendingRole", role);
+      }
+
       // Don't create profile immediately - will be created on first sign in
       console.log(
         "User signup initiated, profile will be created on email confirmation"
@@ -209,14 +220,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signIn = async (email: string, password: string, rememberMe: boolean = false) => {
+  const signIn = async (
+    email: string,
+    password: string,
+    rememberMe: boolean = false
+  ) => {
     try {
-      console.log('[useAuth] Signing in with rememberMe:', rememberMe);
-      
+      console.log("[useAuth] Signing in with rememberMe:", rememberMe);
+
       // Use secure-auth Edge Function for HttpOnly cookie auth
-      const { data, error } = await supabase.functions.invoke('secure-auth', {
+      const { data, error } = await supabase.functions.invoke("secure-auth", {
         body: {
-          action: 'signIn',
+          action: "signIn",
           email,
           password,
           rememberMe,
@@ -224,17 +239,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) {
-        console.error('[useAuth] Sign in error:', error);
+        console.error("[useAuth] Sign in error:", error);
         return { error };
       }
 
       if (data.error) {
-        console.error('[useAuth] Sign in error:', data.error);
+        console.error("[useAuth] Sign in error:", data.error);
         // Handle specific error for unconfirmed email
         if (data.error.includes("Email not confirmed")) {
           return {
             error: {
-              message: "Please check your email and click the confirmation link before signing in.",
+              message:
+                "Please check your email and click the confirmation link before signing in.",
             },
           };
         }
@@ -249,37 +265,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
-      console.log('[useAuth] Sign in successful');
+      console.log("[useAuth] Sign in successful");
       return { error: null };
     } catch (error: any) {
-      console.error('[useAuth] Sign in failed:', error);
+      console.error("[useAuth] Sign in failed:", error);
       return { error };
     }
   };
 
   const signOut = async () => {
     try {
-      console.log('[useAuth] Signing out...');
-      
+      console.log("[useAuth] Signing out...");
+
       // Call secure-auth Edge Function to clear HttpOnly cookies
-      await supabase.functions.invoke('secure-auth', {
-        body: { action: 'signOut' },
+      await supabase.functions.invoke("secure-auth", {
+        body: { action: "signOut" },
       });
 
       // Sign out from Supabase client
       const { error } = await supabase.auth.signOut();
       if (error) {
-        console.error('[useAuth] Sign out error:', error);
+        console.error("[useAuth] Sign out error:", error);
         toast({
           title: "Sign out failed",
           description: error.message,
           variant: "destructive",
         });
       } else {
-        console.log('[useAuth] Sign out successful');
+        console.log("[useAuth] Sign out successful");
       }
     } catch (error: any) {
-      console.error('[useAuth] Sign out failed:', error);
+      console.error("[useAuth] Sign out failed:", error);
     }
   };
 
@@ -296,10 +312,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signInWithOAuth = async (provider: "google" | "apple") => {
     try {
+      // Store pending role for OAuth flow
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
       return { error };
