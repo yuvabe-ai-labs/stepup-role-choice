@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import UnitProfile from "@/pages/UnitProfile";
 import InternshipDetail from "./pages/InternshipDetail";
 import AuthCallback from "@/hooks/AuthCallback";
+import RecommendedInternships from "./pages/RecommendedInternships";
 
 const queryClient = new QueryClient();
 
@@ -133,6 +134,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <InternshipDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recommended-internships"
+              element={
+                <ProtectedRoute>
+                  <RecommendedInternships />
                 </ProtectedRoute>
               }
             />
