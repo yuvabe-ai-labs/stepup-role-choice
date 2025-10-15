@@ -74,12 +74,14 @@ const UnitView = () => {
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="h-48 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10"></div>
+        <div className="h-48 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10">
+          {unit.unit_image && <img src={unit.unit_image} alt={unit.unit_name} className="w-full h-full object-cover" />}
+        </div>
 
-        <div className="mt-[-20px] pt-0 p-20">
+        <div className="-mt-20 pt-0 p-20">
           {/* Hero Section with Unit Info */}
           <Card className="relative mb-8 overflow-hidden border-border bg-white rounded-3xl">
-            <CardContent className="p-8">
+            <CardContent className="p-6">
               <div className="flex flex-col md:flex-row items-start gap-6">
                 {/* Unit Logo */}
                 <div className="w-32 h-32 rounded-full bg-background border-4 border-background shadow-md flex items-center justify-center text-4xl font-bold text-foreground overflow-hidden">
