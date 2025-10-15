@@ -23,6 +23,7 @@ import InternshipApplicants from "./pages/InternshipApplicants";
 import NotFound from "./pages/NotFound";
 import UnitProfile from "@/pages/UnitProfile";
 import InternshipDetail from "./pages/InternshipDetail";
+import AuthCallback from "@/hooks/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -112,6 +113,18 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            <Route path="/auth/callback" element={<AuthCallback />} />
+
+            {/* Chatbot Route */}
+            <Route
+              path="/chatbot"
+              element={
+                <ProtectedRoute>
+                  <Chatbot />
+                </ProtectedRoute>
+              }
+            />
+
             <Route path="/" element={<Landing />} />
             <Route path="/auth/:role/signin" element={<SignIn />} />
             <Route path="/auth/:role/signup" element={<SignUp />} />
