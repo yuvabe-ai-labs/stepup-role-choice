@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Search, Bell, Menu, Sparkles } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronDown,
+  Search,
+  Bell,
+  Menu,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +18,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import type { ApplicationWithDetails } from "@/hooks/useUnitApplications";
+import Navbar from "@/components/Navbar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const InternshipApplicants = () => {
   const { internshipId } = useParams();
@@ -93,10 +107,19 @@ const InternshipApplicants = () => {
 
             // Calculate match score if not already set
             let matchScore = app.profile_match_score;
-            if (matchScore === null || matchScore === undefined || matchScore === 0) {
-              const { calculateComprehensiveMatchScore } = await import("@/utils/matchScore");
+            if (
+              matchScore === null ||
+              matchScore === undefined ||
+              matchScore === 0
+            ) {
+              const { calculateComprehensiveMatchScore } = await import(
+                "@/utils/matchScore"
+              );
               matchScore = calculateComprehensiveMatchScore(
-                { studentProfile: studentProfileRes.data, profile: profileRes.data },
+                {
+                  studentProfile: studentProfileRes.data,
+                  profile: profileRes.data,
+                },
                 internshipRes.data
               );
 
@@ -242,71 +265,49 @@ const InternshipApplicants = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full"></div>
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-teal-400 to-teal-600 rounded-full"></div>
-            </div>
-          </div>
-
-          <div className="flex-1 max-w-md mx-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Search"
-                className="pl-10 bg-muted/30 border-muted"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
-              <Bell className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <Menu className="w-4 h-4" />
-            </Button>
-            <div className="flex items-center space-x-2">
-              <div className="grid grid-cols-2 gap-1">
-                <div className="w-2 h-2 bg-orange-400 rounded-sm"></div>
-                <div className="w-2 h-2 bg-teal-400 rounded-sm"></div>
-                <div className="w-2 h-2 bg-blue-400 rounded-sm"></div>
-                <div className="w-2 h-2 bg-green-400 rounded-sm"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Main Content */}
       <main className="p-6 max-w-7xl mx-auto">
         {/* Back Button and Title */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/unit-dashboard")}
-              className="gap-2"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Back
-            </Button>
-            <h1 className="text-2xl font-semibold">
-              Applicants for {internshipTitle}
-            </h1>
-          </div>
+          {/* Left: Back Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/unit-dashboard")}
+            className="gap-2"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Back
+          </Button>
 
-          {/* Filter Dropdown */}
+          {/* Center: Title */}
+          <h1 className="text-2xl font-semibold text-center flex-1">
+            Applicants for {internshipTitle}
+          </h1>
+
+          {/* Right: Filter Dropdown */}
           <div className="relative">
-            <div className="border rounded-lg p-4 bg-card min-w-[250px]">
-              <Label className="text-sm font-medium mb-3 block">
-                Select Matches
-              </Label>
-              <div className="space-y-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-[250px] justify-between rounded-full text-gray-500"
+                >
+                  {Object.values(filters).some(Boolean)
+                    ? `${
+                        Object.values(filters).filter(Boolean).length
+                      } Selected`
+                    : "Select Matches"}
+                  <ChevronDown className="h-4 w-4 ml-2 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent
+                align="start"
+                className="w-[250px] rounded-2xl p-2 space-y-2"
+              >
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="exact"
@@ -317,11 +318,12 @@ const InternshipApplicants = () => {
                   />
                   <label
                     htmlFor="exact"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm font-medium leading-none cursor-pointer"
                   >
                     Exact Matches (100%)
                   </label>
                 </div>
+
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="above90"
@@ -332,11 +334,12 @@ const InternshipApplicants = () => {
                   />
                   <label
                     htmlFor="above90"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm font-medium leading-none cursor-pointer"
                   >
                     Above 90% Match
                   </label>
                 </div>
+
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="between80and90"
@@ -350,11 +353,12 @@ const InternshipApplicants = () => {
                   />
                   <label
                     htmlFor="between80and90"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm font-medium leading-none cursor-pointer"
                   >
                     80% – 90% Matches
                   </label>
                 </div>
+
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="between60and80"
@@ -368,110 +372,123 @@ const InternshipApplicants = () => {
                   />
                   <label
                     htmlFor="between60and80"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm font-medium leading-none cursor-pointer"
                   >
                     60% – 80% Matches
                   </label>
                 </div>
-              </div>
-            </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
-        {/* Applicants Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="border border-border/50">
-                <CardContent className="p-6">
-                  <Skeleton className="w-20 h-20 rounded-full mx-auto mb-4" />
-                  <Skeleton className="h-5 w-32 mx-auto mb-2" />
-                  <Skeleton className="h-4 w-24 mx-auto mb-3" />
-                  <Skeleton className="h-3 w-full mb-4" />
-                  <Skeleton className="h-8 w-full" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : filteredApplications.length === 0 ? (
-          <div className="text-center py-12">
-            <h3 className="text-lg font-medium mb-2">No Applicants Found</h3>
-            <p className="text-muted-foreground">
-              {applications.length === 0
-                ? "No one has applied to this internship yet."
-                : "No applicants match the selected filters."}
-            </p>
-          </div>
-        ) : (
-          <>
+        <div className="container mx-auto px-10 py-2">
+          {/* Applicants Grid */}
+          {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredApplications
-                .slice(0, displayCount)
-                .map((application) => {
-                  const skills = safeParse(
-                    application.studentProfile?.skills,
-                    []
-                  );
-                  const displaySkills = skills
-                    .slice(0, 3)
-                    .map((s: any) => (typeof s === "string" ? s : s.name || s));
-                  const matchScore = application.profile_match_score || 0;
-                  const daysAgo = getDaysAgo(application.applied_date);
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="border border-border/50">
+                  <CardContent className="p-6">
+                    <Skeleton className="w-20 h-20 rounded-full mx-auto mb-4" />
+                    <Skeleton className="h-5 w-32 mx-auto mb-2" />
+                    <Skeleton className="h-4 w-24 mx-auto mb-3" />
+                    <Skeleton className="h-3 w-full mb-4" />
+                    <Skeleton className="h-8 w-full" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredApplications.length === 0 ? (
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium mb-2">No Applicants Found</h3>
+              <p className="text-muted-foreground">
+                {applications.length === 0
+                  ? "No one has applied to this internship yet."
+                  : "No applicants match the selected filters."}
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredApplications
+                  .slice(0, displayCount)
+                  .map((application) => {
+                    const skills = safeParse(
+                      application.studentProfile?.skills,
+                      []
+                    );
+                    const displaySkills = skills
+                      .slice(0, 3)
+                      .map((s: any) =>
+                        typeof s === "string" ? s : s.name || s
+                      );
+                    const matchScore = application.profile_match_score || 0;
+                    const daysAgo = getDaysAgo(application.applied_date);
 
-                  return (
-                    <Card
-                      key={application.id}
-                      className="border border-border/50 hover:shadow-lg transition-shadow"
-                    >
-                      <CardContent className="p-6">
-                        <div className="flex flex-col items-center text-center">
-                          <Avatar
-                            className={`w-20 h-20 mb-3 ring-4 ${getMatchColor(
-                              matchScore
-                            )}`}
-                          >
-                            <AvatarImage
-                              src={
-                                application.studentProfile?.avatar_url ||
-                                undefined
-                              }
-                              alt={application.profile.full_name}
-                            />
-                            <AvatarFallback className="text-lg">
-                              {application.profile.full_name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
+                    return (
+                      <Card
+                        key={application.id}
+                        className="border border-border/50 hover:shadow-lg transition-shadow w-full max-w-s min-h-[460px] rounded-3xl"
+                      >
+                        <CardContent className="p-8 space-y-5">
+                          {/* Header Section */}
+                          <div className="flex items-center gap-5">
+                            {/* Avatar with green ring */}
+                            <div className="relative flex-shrink-0">
+                              <Avatar
+                                className={`w-20 h-20 ring-4 ${getMatchColor(
+                                  matchScore
+                                )}`}
+                              >
+                                <AvatarImage
+                                  src={
+                                    application.studentProfile?.avatar_url ||
+                                    undefined
+                                  }
+                                  alt={application.profile.full_name}
+                                />
+                                <AvatarFallback className="text-lg font-semibold">
+                                  {application.profile.full_name
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
+                                </AvatarFallback>
+                              </Avatar>
+                            </div>
 
-                          <h3 className="font-semibold text-lg mb-1">
-                            {application.profile.full_name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            {application.profile.role || "Professional"}
-                          </p>
+                            {/* Name, Role, and Status */}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-lg mb-1 text-gray-900">
+                                {application.profile.full_name}
+                              </h3>
+                              <p className="text-sm text-muted-foreground mb-2">
+                                {application.profile.role ||
+                                  application.internship.title}
+                              </p>
+                              <Badge className="bg-yellow-500 text-white hover:bg-yellow-500">
+                                Applied {daysAgo}{" "}
+                                {daysAgo === 1 ? "day" : "days"} ago
+                              </Badge>
+                            </div>
+                          </div>
 
-                          <Badge className="bg-yellow-500 text-white hover:bg-yellow-500 mb-4">
-                            Applied {daysAgo} {daysAgo === 1 ? "day" : "days"}{" "}
-                            ago
-                          </Badge>
-
-                          <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                            {typeof application.studentProfile?.bio === 'string'
+                          {/* Bio */}
+                          <p className="text-base text-gray-700 leading-relaxed">
+                            {typeof application.studentProfile?.bio === "string"
                               ? application.studentProfile.bio
                               : Array.isArray(application.studentProfile?.bio)
-                              ? application.studentProfile.bio.join(' ')
+                              ? application.studentProfile.bio.join(" ")
                               : "Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences."}
                           </p>
 
-                          <div className="flex flex-wrap gap-2 justify-center mb-4">
+                          {/* Skills */}
+                          <div className="flex flex-wrap gap-3">
                             {displaySkills.map(
                               (skill: string, index: number) => (
                                 <Badge
                                   key={index}
                                   variant="outline"
-                                  className="text-xs bg-muted/50"
+                                  className="text-[11px] text-gray-600 bg-muted/40 rounded-full px-3 py-1.5"
                                 >
                                   {skill}
                                 </Badge>
@@ -480,70 +497,95 @@ const InternshipApplicants = () => {
                             {skills.length > 3 && (
                               <Badge
                                 variant="outline"
-                                className="text-xs bg-muted/50"
+                                className="text-[11px] text-gray-600 bg-muted/40 rounded-full px-3 py-1.5"
                               >
                                 +{skills.length - 3}
                               </Badge>
                             )}
                           </div>
 
-                          <div className="w-full bg-muted/30 rounded-lg p-3 mb-4">
-                            <div className="flex items-center justify-between mb-1">
+                          {/* Divider */}
+                          <div className="border-t border-border/40"></div>
+
+                          {/* AI Analysis Section */}
+                          <div className="bg-white rounded-2xl p-3 shadow-sm">
+                            <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-purple-500" />
-                                <span className="text-xs font-medium">
+                                <Sparkles className="w-5 h-5 text-purple-600" />
+                                <span className="text-base font-medium text-purple-600">
                                   AI Analysis for the profile
                                 </span>
                               </div>
-                              <div
-                                className={`w-10 h-10 rounded-full border-4 flex items-center justify-center ${getMatchColor(
-                                  matchScore
-                                )}`}
-                              >
-                                <span className="text-xs font-bold">
-                                  {matchScore}%
-                                </span>
+
+                              {/* Circular Progress */}
+                              <div className="relative w-12 h-12">
+                                <svg className="w-12 h-12 transform -rotate-90">
+                                  <circle
+                                    cx="24"
+                                    cy="24"
+                                    r="18"
+                                    stroke="#e5e7eb"
+                                    strokeWidth="3"
+                                    fill="none"
+                                  />
+                                  <circle
+                                    cx="24"
+                                    cy="24"
+                                    r="18"
+                                    stroke="#10b981"
+                                    strokeWidth="3"
+                                    fill="none"
+                                    strokeDasharray={`${2 * Math.PI * 18}`}
+                                    strokeDashoffset={`${
+                                      2 * Math.PI * 18 * (1 - matchScore / 100)
+                                    }`}
+                                    strokeLinecap="round"
+                                  />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <span className="text-sm font-bold">
+                                    {matchScore}%
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                            <p
-                              className={`text-xs font-medium ${getMatchTextColor(
-                                matchScore
-                              )}`}
-                            >
+
+                            <p className="text-sm text-muted-foreground">
                               {matchScore}% Skill matches for this role
                             </p>
                           </div>
 
+                          {/* View Profile Button */}
                           <Button
                             variant="outline"
-                            size="sm"
-                            className="w-full border-primary text-primary hover:bg-primary/10"
+                            size="lg"
+                            className="w-full border-2 border-teal-500 text-teal-600 hover:bg-teal-50 text-sm py-3 rounded-full mt-4"
                             onClick={() =>
                               navigate(`/candidate/${application.id}`)
                             }
                           >
                             View Profile
                           </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-            </div>
-
-            {/* Infinite Scroll Target */}
-            {displayCount < filteredApplications.length && (
-              <div
-                ref={observerTarget}
-                className="flex justify-center mt-8 py-4"
-              >
-                <Button variant="link" className="text-primary font-medium">
-                  View More
-                </Button>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
               </div>
-            )}
-          </>
-        )}
+
+              {/* Infinite Scroll Target */}
+              {displayCount < filteredApplications.length && (
+                <div
+                  ref={observerTarget}
+                  className="flex justify-center mt-8 py-4"
+                >
+                  <Button variant="link" className="text-primary font-medium">
+                    View More
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </main>
     </div>
   );
