@@ -22,9 +22,11 @@ import { UnitDescriptionDialog } from "@/components/unit/UnitDescriptionDialog";
 import { UnitProjectDialog } from "@/components/unit/UnitProjectDialog";
 import { UnitValuesDialog } from "@/components/unit/UnitValuesDialog";
 import { format } from "date-fns";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CircularProgress } from "@/components/CircularProgress";
 import { useUnitProfileCompletion } from "@/hooks/useUnitProfileCompletion";
+import { ImageUploadDialog } from "@/components/ImageUploadDialog";
+import { Camera } from "lucide-react";
 
 const UnitProfile = () => {
   const { user } = useAuth();
@@ -39,7 +41,11 @@ const UnitProfile = () => {
     updateValues,
     removeValue,
     parseJsonField,
+    refetch,
   } = useUnitProfileData();
+
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
+  const [isBannerDialogOpen, setIsBannerDialogOpen] = useState(false);
 
   const profileCompletion = useUnitProfileCompletion({ profile, unitProfile });
 
@@ -89,20 +95,37 @@ const UnitProfile = () => {
   const values = parseJsonField(unitProfile?.values, []);
   const galleryImages = parseJsonField(unitProfile?.gallery_images, []);
 
+  const handleImageUploadSuccess = () => {
+    refetch();
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero Background */}
-      <div className="relative h-48 bg-gradient-to-r from-primary to-primary-foreground">
-        {unitProfile?.cover_image_url && (
+      {/* Hero Background - Banner */}
+      <div className="relative h-48 bg-gradient-to-r from-primary to-primary-foreground group">
+        {(unitProfile as any)?.banner_url ? (
+          <img
+            src={(unitProfile as any).banner_url}
+            alt="Banner"
+            className="w-full h-full object-cover"
+          />
+        ) : unitProfile?.cover_image_url ? (
           <img
             src={unitProfile.cover_image_url}
             alt="Cover"
             className="w-full h-full object-cover"
           />
+        ) : (
+          <div className="absolute inset-0 bg-black/20" />
         )}
-        <div className="absolute inset-0 bg-black/20" />
+        <button
+          onClick={() => setIsBannerDialogOpen(true)}
+          className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <Camera className="w-5 h-5" />
+        </button>
       </div>
 
       <div className="container mx-auto px-24 -mt-24 mb-6 relative z-10">
@@ -110,21 +133,29 @@ const UnitProfile = () => {
         <Card className="mb-8 bg-white rounded-3xl">
           <CardContent className="p-6">
             <div className="flex items-start space-x-6">
-              <CircularProgress
-                percentage={profileCompletion}
-                size={90}
-                strokeWidth={3}
-              >
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={unitProfile?.logo_url || ""} />
-                  <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-                    {unitProfile?.unit_name?.charAt(0) ||
-                      profile?.full_name?.charAt(0) ||
-                      user?.email?.charAt(0)?.toUpperCase() ||
-                      "U"}
-                  </AvatarFallback>
-                </Avatar>
-              </CircularProgress>
+              <div className="relative group">
+                <CircularProgress
+                  percentage={profileCompletion}
+                  size={90}
+                  strokeWidth={3}
+                >
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src={(unitProfile as any)?.avatar_url || unitProfile?.logo_url || ""} />
+                    <AvatarFallback className="text-lg bg-primary text-primary-foreground">
+                      {unitProfile?.unit_name?.charAt(0) ||
+                        profile?.full_name?.charAt(0) ||
+                        user?.email?.charAt(0)?.toUpperCase() ||
+                        "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                </CircularProgress>
+                <button
+                  onClick={() => setIsAvatarDialogOpen(true)}
+                  className="absolute bottom-0 right-0 bg-primary hover:bg-primary/90 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Camera className="w-3 h-3" />
+                </button>
+              </div>
 
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
@@ -480,6 +511,32 @@ const UnitProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* Image Upload Dialogs */}
+      {profile && unitProfile && (
+        <>
+          <ImageUploadDialog
+            isOpen={isAvatarDialogOpen}
+            onClose={() => setIsAvatarDialogOpen(false)}
+            currentImageUrl={(unitProfile as any)?.avatar_url || unitProfile.logo_url}
+            userId={profile.id}
+            userName={unitProfile.unit_name || profile.full_name}
+            imageType="avatar"
+            entityType="unit"
+            onSuccess={handleImageUploadSuccess}
+          />
+          <ImageUploadDialog
+            isOpen={isBannerDialogOpen}
+            onClose={() => setIsBannerDialogOpen(false)}
+            currentImageUrl={(unitProfile as any)?.banner_url}
+            userId={profile.id}
+            userName={unitProfile.unit_name || profile.full_name}
+            imageType="banner"
+            entityType="unit"
+            onSuccess={handleImageUploadSuccess}
+          />
+        </>
+      )}
     </div>
   );
 };

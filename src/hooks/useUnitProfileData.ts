@@ -244,5 +244,6 @@ export const useUnitProfileData = () => {
     removeSocialLink,
     updateGalleryImages,
     parseJsonField,
+    refetch: fetchProfileData,
   };
 };
