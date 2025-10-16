@@ -119,6 +119,8 @@ export const EducationDialog: React.FC<EducationDialogProps> = ({ children, educ
             <div>
               <Label htmlFor="start_year">Start Year *</Label>
               <Input
+                min={1900}
+                max={new Date().getFullYear()}
                 id="start_year"
                 type="number"
                 {...register("start_year", { valueAsNumber: true })}
@@ -130,6 +132,8 @@ export const EducationDialog: React.FC<EducationDialogProps> = ({ children, educ
             <div>
               <Label htmlFor="end_year">End Year</Label>
               <Input
+                min={1900}
+                max={new Date().getFullYear() + 10}
                 id="end_year"
                 type="number"
                 disabled={isCurrent}
