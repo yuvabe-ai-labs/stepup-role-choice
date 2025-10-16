@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Calendar, Clock, Video } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Calendar, Clock, Video, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,14 +32,64 @@ export default function ScheduleInterviewDialog({
 }: ScheduleInterviewDialogProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [senderEmail, setSenderEmail] = useState<string>("");
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    guests: candidateEmail || "",
     date: "",
     time: "",
     meetingType: "google",
   });
+
+  const [guestEmails, setGuestEmails] = useState<string[]>(
+    candidateEmail ? [candidateEmail] : []
+  );
+
+  // ✅ Fetch current user's email (view-only)
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user?.email) {
+        setSenderEmail(user.email);
+      }
+    };
+    fetchUserEmail();
+  }, []);
+
+  // ✅ Add guest email
+  const addEmail = (email: string) => {
+    const trimmed = email.trim();
+    if (
+      trimmed &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) &&
+      !guestEmails.includes(trimmed)
+    ) {
+      setGuestEmails((prev) => [...prev, trimmed]);
+    }
+  };
+
+  const handleAddGuest = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (["Enter", " ", ","].includes(e.key)) {
+      e.preventDefault();
+      addEmail(e.currentTarget.value);
+      e.currentTarget.value = "";
+    }
+  };
+
+  const handlePasteGuests = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text");
+    const emails = pasted.split(/[\s,;]+/).filter(Boolean);
+    emails.forEach(addEmail);
+  };
+
+  const handleRemoveGuest = (email: string) => {
+    if (email === candidateEmail) return;
+    setGuestEmails(guestEmails.filter((g) => g !== email));
+  };
 
   const handleSubmit = async () => {
     if (!formData.date || !formData.time) {
@@ -63,25 +113,34 @@ export default function ScheduleInterviewDialog({
     setIsLoading(true);
 
     try {
-      // Combine date and time into ISO string
       const scheduledDate = new Date(
         `${formData.date}T${formData.time}:00Z`
       ).toISOString();
 
-      const { data, error } = await supabase.functions.invoke(
-        "schedule-interview",
-        {
-          body: {
-            applicationId,
-            candidateName,
-            candidateEmail: formData.guests,
-            scheduledDate,
-            title: formData.title,
-            description: formData.description,
-            durationMinutes: 60,
-          },
-        }
-      );
+      // ✅ Log all submission details before sending
+      console.log("📩 Interview Submission Details:", {
+        applicationId,
+        candidateName,
+        guestEmails,
+        scheduledDate,
+        title: formData.title,
+        description: formData.description,
+        durationMinutes: 60,
+        senderEmail,
+      });
+
+      const { error } = await supabase.functions.invoke("schedule-interview", {
+        body: {
+          applicationId,
+          candidateName,
+          candidateEmail: guestEmails,
+          scheduledDate,
+          title: formData.title,
+          description: formData.description,
+          durationMinutes: 60,
+          senderEmail,
+        },
+      });
 
       if (error) throw error;
 
@@ -93,17 +152,17 @@ export default function ScheduleInterviewDialog({
       onOpenChange(false);
       onSuccess?.();
 
-      // Reset form
+      // Reset fields
       setFormData({
         title: "",
         description: "",
-        guests: candidateEmail || "",
         date: "",
         time: "",
         meetingType: "google",
       });
+      setGuestEmails(candidateEmail ? [candidateEmail] : []);
     } catch (error: any) {
-      console.error("Error scheduling interview:", error);
+      console.error("❌ Error scheduling interview:", error);
       toast({
         title: "Error",
         description:
@@ -123,14 +182,22 @@ export default function ScheduleInterviewDialog({
             <DialogTitle className="text-xl font-semibold">
               Schedule Interview
             </DialogTitle>
-            <button
-              onClick={() => onOpenChange(false)}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            ></button>
           </div>
         </DialogHeader>
 
         <div className="px-6 pb-6 space-y-5">
+          {/* ✅ Sender Email (view only) */}
+          {senderEmail && (
+            <div className="space-y-1">
+              <Label className="text-sm text-gray-700">Host Email</Label>
+              <Input
+                value={senderEmail}
+                disabled
+                className="h-11 bg-gray-100 text-gray-700 cursor-not-allowed"
+              />
+            </div>
+          )}
+
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title" className="text-sm text-gray-700">
@@ -168,15 +235,37 @@ export default function ScheduleInterviewDialog({
             <Label htmlFor="guests" className="text-sm text-gray-700">
               Add guests
             </Label>
-            <Input
-              id="guests"
-              placeholder="Example: email@gmail.com"
-              value={formData.guests}
-              onChange={(e) =>
-                setFormData({ ...formData, guests: e.target.value })
-              }
-              className="h-11"
-            />
+            <div className="flex flex-wrap items-center gap-2 border rounded-lg p-2 min-h-[44px] focus-within:ring-2 focus-within:ring-purple-500">
+              {guestEmails.map((email) => (
+                <span
+                  key={email}
+                  className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm ${
+                    email === candidateEmail
+                      ? "bg-gray-200 text-gray-700"
+                      : "bg-purple-100 text-purple-700"
+                  }`}
+                >
+                  {email}
+                  {email !== candidateEmail && (
+                    <button
+                      onClick={() => handleRemoveGuest(email)}
+                      className="hover:text-red-500"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </span>
+              ))}
+
+              <input
+                id="guests"
+                type="email"
+                placeholder="Add guest email..."
+                onKeyDown={handleAddGuest}
+                onPaste={handlePasteGuests}
+                className="flex-1 border-none outline-none bg-transparent text-sm p-1 min-w-[150px]"
+              />
+            </div>
           </div>
 
           {/* Date and Time */}
@@ -219,7 +308,7 @@ export default function ScheduleInterviewDialog({
             </div>
           </div>
 
-          {/* Meeting Link */}
+          {/* Meeting Type */}
           <div className="space-y-3">
             <Label className="text-sm text-gray-700">Meeting Link</Label>
             <div className="space-y-2">
