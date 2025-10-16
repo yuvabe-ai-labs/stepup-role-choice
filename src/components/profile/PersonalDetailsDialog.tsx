@@ -2,23 +2,11 @@ import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,7 +16,7 @@ import { DatabaseProfile, StudentProfile } from "@/types/profile";
 
 const personalDetailsSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
+  last_name: z.string().optional().or(z.literal("")), // optional,
   headline: z.string().optional(),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   phone: z.string().optional(),
@@ -48,7 +36,7 @@ const personalDetailsSchema = z.object({
         read: z.boolean(),
         write: z.boolean(),
         speak: z.boolean(),
-      })
+      }),
     )
     .optional(),
 });
@@ -64,13 +52,7 @@ interface PersonalDetailsDialogProps {
 }
 
 const LOCATIONS = ["Auroville", "Pondicherry", "Tamil Nadu", "Other"];
-const MARITAL_STATUS_OPTIONS = [
-  "Single",
-  "Married",
-  "Divorced",
-  "Widowed",
-  "Prefer not to say",
-];
+const MARITAL_STATUS_OPTIONS = ["Single/Unmarried", "Married", "Divorced", "Widowed", "Prefer not to say"];
 
 export const PersonalDetailsDialog = ({
   profile,
@@ -90,6 +72,7 @@ export const PersonalDetailsDialog = ({
       speak: boolean;
     }>
   >([]);
+  const [languageError, setLanguageError] = useState<string | null>(null);
 
   // Split full_name into first and last name
   const nameParts = profile.full_name.split(" ");
@@ -97,9 +80,7 @@ export const PersonalDetailsDialog = ({
   const lastName = nameParts.slice(1).join(" ") || "";
 
   // Parse date of birth
-  const dateOfBirth = profile.date_of_birth
-    ? new Date(profile.date_of_birth)
-    : null;
+  const dateOfBirth = profile.date_of_birth ? new Date(profile.date_of_birth) : null;
   const birthDate = dateOfBirth ? String(dateOfBirth.getDate()) : "";
   const birthMonth = dateOfBirth ? String(dateOfBirth.getMonth() + 1) : "";
   const birthYear = dateOfBirth ? String(dateOfBirth.getFullYear()) : "";
@@ -160,11 +141,7 @@ export const PersonalDetailsDialog = ({
   };
 
   const updateLanguage = (id: string, field: string, value: any) => {
-    setLanguages(
-      languages.map((lang) =>
-        lang.id === id ? { ...lang, [field]: value } : lang
-      )
-    );
+    setLanguages(languages.map((lang) => (lang.id === id ? { ...lang, [field]: value } : lang)));
   };
 
   const onSubmit = async (data: PersonalDetailsForm) => {
@@ -176,12 +153,18 @@ export const PersonalDetailsDialog = ({
       // Construct date of birth from separate fields
       let dateOfBirth: string | null = null;
       if (data.birth_date && data.birth_month && data.birth_year) {
-        const date = new Date(
-          parseInt(data.birth_year),
-          parseInt(data.birth_month) - 1,
-          parseInt(data.birth_date)
-        );
+        const date = new Date(parseInt(data.birth_year), parseInt(data.birth_month) - 1, parseInt(data.birth_date));
         dateOfBirth = date.toISOString().split("T")[0];
+      }
+
+      // Check for duplicate languages
+      const languageNames = languages.map((l) => l.name).filter(Boolean);
+      const duplicates = languageNames.filter((name, index) => languageNames.indexOf(name) !== index);
+
+      if (duplicates.length > 0) {
+        setLanguageError(`${duplicates[0]} language added more than once. Please remove or update it.`);
+        setLoading(false);
+        return;
       }
 
       // Update profile table
@@ -214,7 +197,7 @@ export const PersonalDetailsDialog = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-2xl">Personal Details</DialogTitle>
           <p className="text-sm text-muted-foreground">
@@ -222,34 +205,44 @@ export const PersonalDetailsDialog = ({
           </p>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+        <ScrollArea className="flex-1 overflow-y-auto pr-4 mt-2">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* First Name & Last Name */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="first_name">First Name</Label>
                 <Input
+                  className="rounded-full"
                   id="first_name"
                   placeholder="Enter Name"
                   {...form.register("first_name")}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Capitalize first character and keep rest as is
+                    const formatted = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+                    form.setValue("first_name", formatted);
+                  }}
                 />
                 {form.formState.errors.first_name && (
-                  <p className="text-sm text-red-500">
-                    {form.formState.errors.first_name.message}
-                  </p>
+                  <p className="text-sm text-red-500">{form.formState.errors.first_name.message}</p>
                 )}
               </div>
               <div>
                 <Label htmlFor="last_name">Last Name</Label>
                 <Input
                   id="last_name"
+                  className="rounded-full"
                   placeholder="Enter Name"
                   {...form.register("last_name")}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Capitalize first character and keep rest as is
+                    const formatted = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+                    form.setValue("last_name", formatted);
+                  }}
                 />
                 {form.formState.errors.last_name && (
-                  <p className="text-sm text-red-500">
-                    {form.formState.errors.last_name.message}
-                  </p>
+                  <p className="text-sm text-red-500">{form.formState.errors.last_name.message}</p>
                 )}
               </div>
             </div>
@@ -259,6 +252,7 @@ export const PersonalDetailsDialog = ({
               <Label htmlFor="headline">Headline</Label>
               <Input
                 id="headline"
+                className="rounded-full"
                 placeholder="Example: Digital Marketing Expert | Entrepreneur | Teacher"
                 {...form.register("headline")}
               />
@@ -270,20 +264,20 @@ export const PersonalDetailsDialog = ({
                 <Label htmlFor="email">Email address</Label>
                 <Input
                   id="email"
+                  className="rounded-full"
                   type="email"
                   placeholder="email@gmail.com"
                   {...form.register("email")}
                 />
                 {form.formState.errors.email && (
-                  <p className="text-sm text-red-500">
-                    {form.formState.errors.email.message}
-                  </p>
+                  <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>
                 )}
               </div>
               <div>
                 <Label htmlFor="phone">Contact details</Label>
                 <Input
                   id="phone"
+                  className="rounded-full"
                   placeholder="Example: +91 98765 43210"
                   {...form.register("phone")}
                 />
@@ -293,10 +287,7 @@ export const PersonalDetailsDialog = ({
             {/* Location */}
             <div>
               <Label htmlFor="location">Location</Label>
-              <Select
-                value={form.watch("location")}
-                onValueChange={(value) => form.setValue("location", value)}
-              >
+              <Select value={form.watch("location")} onValueChange={(value) => form.setValue("location", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Location" />
                 </SelectTrigger>
@@ -317,46 +308,30 @@ export const PersonalDetailsDialog = ({
                 name="gender"
                 control={form.control}
                 render={({ field }) => (
-                  <RadioGroup
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    className="flex gap-3 mt-2"
-                  >
+                  <RadioGroup value={field.value} onValueChange={field.onChange} className="flex gap-3 mt-2">
                     <div className="flex items-center">
-                      <RadioGroupItem
-                        value="male"
-                        id="male"
-                        className="peer sr-only"
-                      />
+                      <RadioGroupItem value="Male" id="male" className="peer sr-only" />
                       <Label
                         htmlFor="male"
-                        className="px-6 py-2 rounded-full border cursor-pointer peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
+                        className="px-4 py-2 rounded-full border cursor-pointer peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
                       >
                         Male
                       </Label>
                     </div>
                     <div className="flex items-center">
-                      <RadioGroupItem
-                        value="female"
-                        id="female"
-                        className="peer sr-only"
-                      />
+                      <RadioGroupItem value="Female" id="female" className="peer sr-only" />
                       <Label
                         htmlFor="female"
-                        className="px-6 py-2 rounded-full border cursor-pointer peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
+                        className="px-4 py-2 rounded-full border cursor-pointer peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
                       >
                         Female
                       </Label>
                     </div>
                     <div className="flex items-center">
-                      <RadioGroupItem
-                        value="other"
-                        id="other"
-                        className="peer sr-only"
-                      />
+                      <RadioGroupItem value="Other" id="other" className="peer sr-only" />
                       <Label
                         htmlFor="other"
-                        className="px-6 py-2 rounded-full border cursor-pointer peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
+                        className="px-4 py-2 rounded-full border cursor-pointer peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
                       >
                         Other
                       </Label>
@@ -370,8 +345,8 @@ export const PersonalDetailsDialog = ({
             <div className="pt-4">
               <h3 className="font-semibold mb-2">More Information</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Companies are focusing on equal opportunities and might be
-                looking for candidates from diverse backgrounds
+                Companies are focusing on equal opportunities and might be looking for candidates from diverse
+                backgrounds
               </p>
             </div>
 
@@ -382,18 +357,10 @@ export const PersonalDetailsDialog = ({
                 name="marital_status"
                 control={form.control}
                 render={({ field }) => (
-                  <RadioGroup
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    className="flex flex-wrap gap-3 mt-2"
-                  >
+                  <RadioGroup value={field.value} onValueChange={field.onChange} className="flex flex-wrap gap-3 mt-2">
                     {MARITAL_STATUS_OPTIONS.map((status) => (
                       <div key={status} className="flex items-center">
-                        <RadioGroupItem
-                          value={status.toLowerCase()}
-                          id={status}
-                          className="peer sr-only"
-                        />
+                        <RadioGroupItem value={status} id={status} className="peer sr-only" />
                         <Label
                           htmlFor={status}
                           className="px-4 py-2 rounded-full border cursor-pointer peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground text-sm"
@@ -411,10 +378,7 @@ export const PersonalDetailsDialog = ({
             <div>
               <Label>Date Of Birth</Label>
               <div className="grid grid-cols-3 gap-3 mt-2">
-                <Select
-                  value={form.watch("birth_date")}
-                  onValueChange={(value) => form.setValue("birth_date", value)}
-                >
+                <Select value={form.watch("birth_date")} onValueChange={(value) => form.setValue("birth_date", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Date" />
                   </SelectTrigger>
@@ -454,18 +418,12 @@ export const PersonalDetailsDialog = ({
                     ))}
                   </SelectContent>
                 </Select>
-                <Select
-                  value={form.watch("birth_year")}
-                  onValueChange={(value) => form.setValue("birth_year", value)}
-                >
+                <Select value={form.watch("birth_year")} onValueChange={(value) => form.setValue("birth_year", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Year" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from(
-                      { length: 100 },
-                      (_, i) => new Date().getFullYear() - i
-                    ).map((year) => (
+                    {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map((year) => (
                       <SelectItem key={year} value={String(year)}>
                         {year}
                       </SelectItem>
@@ -527,92 +485,92 @@ export const PersonalDetailsDialog = ({
 
             {/* Language Proficiency */}
             <div>
-              <Label className="mb-3 block">Language Proficiency</Label>
+              <Label className="mb-4 block">Language Proficiency</Label>
               {languages.map((language, index) => (
-                <div
-                  key={language.id}
-                  className="space-y-3 mb-4 p-4 border rounded-lg relative"
-                >
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2"
-                    onClick={() => removeLanguage(language.id)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                  <Select
-                    value={language.name}
-                    onValueChange={(value) =>
-                      updateLanguage(language.id, "name", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="English">English</SelectItem>
-                      <SelectItem value="Hindi">Hindi</SelectItem>
-                      <SelectItem value="Tamil">Tamil</SelectItem>
-                      <SelectItem value="French">French</SelectItem>
-                      <SelectItem value="Spanish">Spanish</SelectItem>
-                      <SelectItem value="German">German</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div className="flex gap-6">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`read-${language.id}`}
-                        checked={language.read}
-                        onCheckedChange={(checked) =>
-                          updateLanguage(language.id, "read", checked)
-                        }
-                      />
-                      <Label htmlFor={`read-${language.id}`}>Read</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`write-${language.id}`}
-                        checked={language.write}
-                        onCheckedChange={(checked) =>
-                          updateLanguage(language.id, "write", checked)
-                        }
-                      />
-                      <Label htmlFor={`write-${language.id}`}>Write</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`speak-${language.id}`}
-                        checked={language.speak}
-                        onCheckedChange={(checked) =>
-                          updateLanguage(language.id, "speak", checked)
-                        }
-                      />
-                      <Label htmlFor={`speak-${language.id}`}>Speak</Label>
+                <div key={language.id} className="flex items-center gap-12 justify-between mb-4 rounded-lg relative">
+                  <div className="w-full">
+                    {/* <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 pb-12 right-2"
+                      onClick={() => removeLanguage(language.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button> */}
+                    {/* <Select
+                      value={language.name}
+                      onValueChange={(value) =>
+                        updateLanguage(language.id, "name", value)
+                      }
+                    > */}
+                    <Select
+                      value={language.name}
+                      onValueChange={(value) => {
+                        updateLanguage(language.id, "name", value);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="English">English</SelectItem>
+                        <SelectItem value="Hindi">Hindi</SelectItem>
+                        <SelectItem value="Tamil">Tamil</SelectItem>
+                        <SelectItem value="French">French</SelectItem>
+                        <SelectItem value="Spanish">Spanish</SelectItem>
+                        <SelectItem value="German">German</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <div className="flex gap-6">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          disabled={!language.name}
+                          id={`read-${language.id}`}
+                          checked={language.read}
+                          onCheckedChange={(checked) => updateLanguage(language.id, "read", checked)}
+                          className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 data-[state=checked]:text-white"
+                        />
+                        <Label htmlFor={`read-${language.id}`}>Read</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          disabled={!language.name}
+                          id={`write-${language.id}`}
+                          checked={language.write}
+                          onCheckedChange={(checked) => updateLanguage(language.id, "write", checked)}
+                          className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 data-[state=checked]:text-white"
+                        />
+                        <Label htmlFor={`write-${language.id}`}>Write</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          disabled={!language.name}
+                          id={`speak-${language.id}`}
+                          checked={language.speak}
+                          onCheckedChange={(checked) => updateLanguage(language.id, "speak", checked)}
+                          className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 data-[state=checked]:text-white"
+                        />
+                        <Label htmlFor={`speak-${language.id}`}>Speak</Label>
+                      </div>
                     </div>
                   </div>
                 </div>
               ))}
-              <Button
-                type="button"
-                variant="link"
-                className="text-primary p-0"
-                onClick={addLanguage}
-              >
+              <Button type="button" variant="link" className="text-primary p-0" onClick={addLanguage}>
                 Add another language
               </Button>
+              {languageError && <p className="text-sm text-red-500 mt-2">{languageError}</p>}
             </div>
 
             <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-full">
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
+
+              <Button type="submit" disabled={loading} className="rounded-full">
                 {loading ? "Saving..." : "Save"}
               </Button>
             </div>
