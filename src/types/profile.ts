@@ -36,8 +36,6 @@ export interface StudentProfile {
   marital_status: string | null;
   is_differently_abled: boolean | null;
   has_career_break: boolean | null;
-  avatar_url: string | null;
-  banner_url: string | null;
 }
 
 export interface EducationEntry {
