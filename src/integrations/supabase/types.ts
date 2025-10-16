@@ -430,6 +430,7 @@ export type Database = {
         Row: {
           achievements: Json | null
           avatar_url: string | null
+          banner_url: string | null
           behance_url: string | null
           bio: string[] | null
           completed_courses: Json | null
@@ -461,6 +462,7 @@ export type Database = {
         Insert: {
           achievements?: Json | null
           avatar_url?: string | null
+          banner_url?: string | null
           behance_url?: string | null
           bio?: string[] | null
           completed_courses?: Json | null
@@ -492,6 +494,7 @@ export type Database = {
         Update: {
           achievements?: Json | null
           avatar_url?: string | null
+          banner_url?: string | null
           behance_url?: string | null
           bio?: string[] | null
           completed_courses?: Json | null
@@ -533,6 +536,7 @@ export type Database = {
       units: {
         Row: {
           address: string | null
+          banner_url: string | null
           contact_email: string | null
           contact_phone: string | null
           created_at: string
@@ -560,6 +564,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          banner_url?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
@@ -587,6 +592,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          banner_url?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string

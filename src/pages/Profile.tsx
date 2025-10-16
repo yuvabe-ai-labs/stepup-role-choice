@@ -32,6 +32,9 @@ import { InternshipDialog } from "@/components/profile/InternshipDialog";
 import { ProfileSummaryDialog } from "@/components/profile/ProfileSummaryDialog";
 import { format } from "date-fns";
 import { CircularProgress } from "@/components/CircularProgress";
+import { ImageUploadDialog } from "@/components/ImageUploadDialog";
+import { Camera } from "lucide-react";
+import { useState } from "react";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -56,7 +59,11 @@ const Profile = () => {
     removeInternshipEntry,
     removeInterest,
     removeSkill,
+    refetch,
   } = useProfileData();
+
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
+  const [isBannerDialogOpen, setIsBannerDialogOpen] = useState(false);
 
   const profileCompletion = useProfileCompletion({ profile, studentProfile });
 
@@ -111,13 +118,27 @@ const Profile = () => {
   const completedCourses = parseJsonField(studentProfile?.completed_courses, []);
   const internships = parseJsonField((studentProfile as any)?.internships, []);
 
+  const handleImageUploadSuccess = () => {
+    refetch();
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero Background */}
-      <div className="relative h-48 bg-gradient-to-r from-primary to-primary-foreground">
-        <div className="absolute inset-0 bg-black/20" />
+      {/* Hero Background - Banner */}
+      <div className="relative h-48 bg-gradient-to-r from-primary to-primary-foreground group">
+        {studentProfile?.banner_url ? (
+          <img src={studentProfile.banner_url} alt="Banner" className="w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 bg-black/20" />
+        )}
+        <button
+          onClick={() => setIsBannerDialogOpen(true)}
+          className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <Camera className="w-5 h-5" />
+        </button>
       </div>
 
       <div className="container mx-auto px-24 -mt-24 mb-6 relative z-10">
@@ -125,14 +146,22 @@ const Profile = () => {
         <Card className="mb-2 bg-white rounded-3xl">
           <CardContent className="p-6">
             <div className="flex items-start space-x-6">
-              <CircularProgress percentage={profileCompletion} size={90} strokeWidth={3}>
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={(studentProfile as any)?.avatar_url || ""} />
-                  <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-                    {profile?.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </CircularProgress>
+              <div className="relative group">
+                <CircularProgress percentage={profileCompletion} size={90} strokeWidth={3}>
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src={studentProfile?.avatar_url || ""} />
+                    <AvatarFallback className="text-lg bg-primary text-primary-foreground">
+                      {profile?.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </CircularProgress>
+                <button
+                  onClick={() => setIsAvatarDialogOpen(true)}
+                  className="absolute bottom-0 right-0 bg-primary hover:bg-primary/90 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Camera className="w-3 h-3" />
+                </button>
+              </div>
 
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
@@ -687,6 +716,32 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* Image Upload Dialogs */}
+      {profile && studentProfile && (
+        <>
+          <ImageUploadDialog
+            isOpen={isAvatarDialogOpen}
+            onClose={() => setIsAvatarDialogOpen(false)}
+            currentImageUrl={studentProfile.avatar_url}
+            userId={profile.id}
+            userName={profile.full_name}
+            imageType="avatar"
+            entityType="student"
+            onSuccess={handleImageUploadSuccess}
+          />
+          <ImageUploadDialog
+            isOpen={isBannerDialogOpen}
+            onClose={() => setIsBannerDialogOpen(false)}
+            currentImageUrl={studentProfile.banner_url}
+            userId={profile.id}
+            userName={profile.full_name}
+            imageType="banner"
+            entityType="student"
+            onSuccess={handleImageUploadSuccess}
+          />
+        </>
+      )}
     </div>
   );
 };
