@@ -42,9 +42,11 @@ import {
 import { useUnitApplications } from "@/hooks/useUnitApplications";
 import { useInternships } from "@/hooks/useInternships";
 import CreateInternshipDialog from "@/components/CreateInternshipDialog";
+import EditInternshipDial from "@/components/EditInternshipDialog";
 import { supabase } from "@/integrations/supabase/client";
 import InternshipDetailsView from "@/components/InternshipDetailsView";
 import Navbar from "@/components/Navbar";
+import EditInternshipDialog from "@/components/EditInternshipDialog";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -64,6 +66,7 @@ const UnitDashboard = () => {
   const [jobFilter, setJobFilter] = useState("all");
   const [updating, setUpdating] = useState<string | null>(null);
   const [selectedInternship, setSelectedInternship] = useState<any>(null);
+  const [editingInternship, setEditingInternship] = useState<any>(null);
 
   if (selectedInternship) {
     return (
@@ -87,8 +90,10 @@ const UnitDashboard = () => {
   };
 
   const handleAddComments = (internshipId: string) => {
-    // TODO: Implement edit functionality
-    console.log("Edit internship:", internshipId);
+    const internship = internships.find((i) => i.id === internshipId);
+    if (internship) {
+      setEditingInternship(internship);
+    }
   };
 
   const handleToggleStatus = async (id: string, currentStatus: string) => {
@@ -950,6 +955,17 @@ const UnitDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <EditInternshipDialog
+        isOpen={!!editingInternship}
+        onClose={() => setEditingInternship(null)}
+        onSuccess={() => {
+          setEditingInternship(null);
+          window.location.reload();
+        }}
+        internship={editingInternship}
+      />
+
       {/* Create Internship Dialog */}
       <CreateInternshipDialog
         isOpen={showCreateDialog}
