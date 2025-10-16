@@ -297,36 +297,6 @@ const SignUp = () => {
                     {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                 </div>
-
-                {/* Password Requirements */}
-                {password && (
-                  <div className="mt-3 space-y-1.5">
-                    {passwordRules.map((rule, index) => {
-                      const isValid = rule.test(password);
-                      return (
-                        <div key={index} className="flex items-center gap-2">
-                          <CheckCircle
-                            size={12}
-                            className={`${
-                              isValid ? "text-green-500" : "text-gray-300"
-                            } transition-colors`}
-                          />
-                          <span
-                            className={`text-[10px] ${
-                              isValid ? "text-green-600" : "text-gray-400"
-                            } transition-colors`}
-                            style={{
-                              fontFamily:
-                                "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
-                            }}
-                          >
-                            {rule.label}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
               </div>
 
               {/* Sign Up Button */}
