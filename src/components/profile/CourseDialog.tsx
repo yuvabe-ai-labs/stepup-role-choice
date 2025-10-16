@@ -1,19 +1,19 @@
-import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useToast } from '@/hooks/use-toast';
-import { CourseEntry } from '@/types/profile';
+import React from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useToast } from "@/hooks/use-toast";
+import { CourseEntry } from "@/types/profile";
 
 const courseSchema = z.object({
-  title: z.string().min(1, 'Course title is required'),
-  provider: z.string().min(1, 'Provider is required'),
-  completion_date: z.string().min(1, 'Completion date is required'),
-  certificate_url: z.string().url().optional().or(z.literal('')),
+  title: z.string().min(1, "Course title is required"),
+  provider: z.string().min(1, "Provider is required"),
+  completion_date: z.string().min(1, "Completion date is required"),
+  certificate_url: z.string().url().optional().or(z.literal("")),
 });
 
 type CourseFormData = z.infer<typeof courseSchema>;
@@ -21,24 +21,24 @@ type CourseFormData = z.infer<typeof courseSchema>;
 interface CourseDialogProps {
   children: React.ReactNode;
   course?: CourseEntry;
-  onSave: (course: Omit<CourseEntry, 'id'>) => Promise<void>;
+  onSave: (course: Omit<CourseEntry, "id">) => Promise<void>;
 }
 
-export const CourseDialog: React.FC<CourseDialogProps> = ({
-  children,
-  course,
-  onSave,
-}) => {
+export const CourseDialog: React.FC<CourseDialogProps> = ({ children, course, onSave }) => {
   const [open, setOpen] = React.useState(false);
   const { toast } = useToast();
-  
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<CourseFormData>({
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
     defaultValues: {
-      title: course?.title || '',
-      provider: course?.provider || '',
-      completion_date: course?.completion_date || '',
-      certificate_url: course?.certificate_url || '',
+      title: course?.title || "",
+      provider: course?.provider || "",
+      completion_date: course?.completion_date || "",
+      certificate_url: course?.certificate_url || "",
     },
   });
 
@@ -49,10 +49,10 @@ export const CourseDialog: React.FC<CourseDialogProps> = ({
         provider: data.provider!,
         completion_date: data.completion_date!,
         certificate_url: data.certificate_url || null,
-      } as Omit<CourseEntry, 'id'>);
+      } as Omit<CourseEntry, "id">);
       toast({
         title: "Success",
-        description: `Course ${course ? 'updated' : 'added'} successfully`,
+        description: `Course ${course ? "updated" : "added"} successfully`,
       });
       setOpen(false);
     } catch (error) {
@@ -66,45 +66,37 @@ export const CourseDialog: React.FC<CourseDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{course ? 'Edit Course' : 'Add Completed Course'}</DialogTitle>
+          <DialogTitle>{course ? "Edit Course" : "Add Completed Course"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <Label htmlFor="title">Course Title *</Label>
             <Input
               id="title"
-              {...register('title')}
+              {...register("title")}
               placeholder="e.g. React Development Course"
+              className="rounded-full"
             />
-            {errors.title && (
-              <p className="text-sm text-destructive mt-1">{errors.title.message}</p>
-            )}
+            {errors.title && <p className="text-sm text-destructive mt-1">{errors.title.message}</p>}
           </div>
 
           <div>
             <Label htmlFor="provider">Provider *</Label>
             <Input
               id="provider"
-              {...register('provider')}
+              {...register("provider")}
               placeholder="e.g. Coursera, Udemy, University"
+              className="rounded-full"
             />
-            {errors.provider && (
-              <p className="text-sm text-destructive mt-1">{errors.provider.message}</p>
-            )}
+            {errors.provider && <p className="text-sm text-destructive mt-1">{errors.provider.message}</p>}
           </div>
 
           <div>
             <Label htmlFor="completion_date">Completion Date *</Label>
-            <Input
-              id="completion_date"
-              type="date"
-              {...register('completion_date')}
-            />
+            <Input id="completion_date" type="date" {...register("completion_date")} className="rounded-full" />
             {errors.completion_date && (
               <p className="text-sm text-destructive mt-1">{errors.completion_date.message}</p>
             )}
@@ -115,8 +107,9 @@ export const CourseDialog: React.FC<CourseDialogProps> = ({
             <Input
               id="certificate_url"
               type="url"
-              {...register('certificate_url')}
+              {...register("certificate_url")}
               placeholder="https://certificate-url.com"
+              className="rounded-full"
             />
             {errors.certificate_url && (
               <p className="text-sm text-destructive mt-1">{errors.certificate_url.message}</p>
@@ -128,7 +121,7 @@ export const CourseDialog: React.FC<CourseDialogProps> = ({
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : course ? 'Update' : 'Add'}
+              {isSubmitting ? "Saving..." : course ? "Update" : "Add"}
             </Button>
           </div>
         </form>
