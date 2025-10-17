@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Mail, Phone, MapPin, Clock, GraduationCap } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, GraduationCap, Play, Pencil } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useUnitView } from "@/hooks/useUnitView";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
@@ -75,7 +75,7 @@ const UnitView = () => {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="h-48 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10">
-          {unit.unit_image && <img src={unit.unit_image} alt={unit.unit_name} className="w-full h-full object-cover" />}
+          {unit.banner_url && <img src={unit.banner_url} alt={unit.unit_name} className="w-full h-full object-cover" />}
         </div>
 
         <div className="-mt-20 pt-0 p-20">
@@ -85,8 +85,8 @@ const UnitView = () => {
               <div className="flex flex-col md:flex-row items-start gap-6">
                 {/* Unit Logo */}
                 <div className="w-32 h-32 rounded-full bg-background border-4 border-background shadow-md flex items-center justify-center text-4xl font-bold text-foreground overflow-hidden">
-                  {unit.image ? (
-                    <img src={unit.image} alt={unit.unit_name} className="w-full h-full object-cover" />
+                  {unit.avatar_url ? (
+                    <img src={unit.avatar_url} alt={unit.unit_name} className="w-full h-full object-cover" />
                   ) : (
                     unit.unit_name.charAt(0)
                   )}
@@ -289,21 +289,35 @@ const UnitView = () => {
                   </p>
                 </div>
                 {/* Our Values */}
-                {values.length > 0 && (
-                  <div className="border p-5 rounded-xl">
-                    <h3 className="text-lg font-semibold text-foreground mb-3">Our Values</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {values.map((value: string, idx: number) => (
-                        <Badge key={idx} variant="outline" className="px-4 py-2 text-sm">
-                          {value}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <div className="mb-6 border p-5 rounded-xl">
+                  <h3 className="text-lg font-semibold text-foreground mb-3">Our Values</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {unit.values ||
+                      "To create meaningful impact through innovative solutions and sustainable practices."}
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* Glimpse of the Unit */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-xl font-bold">Glimpse of the Unit</h3>
+                <Pencil className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
+              </div>
+              <div className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Button variant="outline" size="lg" className="gap-2">
+                    <Play className="w-5 h-5" />
+                    Play Video
+                  </Button>
+                </div>
+                {unit.image && <img src={unit.image} alt="Unit glimpse" className="w-full h-full object-cover" />}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
