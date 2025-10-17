@@ -112,7 +112,9 @@ const ProfileSidebar = () => {
               <p className="text-sm text-gray-600 mb-1">Applied</p>
               <div className="flex items-center space-x-2">
                 <span className="text-2xl font-bold text-gray-900">{appliedCount}</span>
-                <ChevronRight className="w-4 h-4 text-gray-400" />
+
+                {/* need to implement in future */}
+                {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}
               </div>
             </div>
 
@@ -120,13 +122,17 @@ const ProfileSidebar = () => {
               <p className="text-sm text-gray-600 mb-1">Saved</p>
               <div className="flex items-center space-x-2">
                 <span className="text-2xl font-bold text-gray-900">4</span>
-                <ChevronRight className="w-4 h-4 text-gray-400" />
+
+                {/* need to implement in future */}
+                {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}
               </div>
             </div>
           </div>
 
           {/* AI Resume Builder Prompt */}
-          <Card className="bg-gradient-to-br from-[#07636C] to-[#0694A2]  text-white p-4 rounded-xl border-0">
+
+          {/* need to implement in future */}
+          {/* <Card className="bg-gradient-to-br from-[#07636C] to-[#0694A2]  text-white p-4 rounded-xl border-0">
             <div className="flex items-center space-x-3">
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
@@ -149,12 +155,13 @@ const ProfileSidebar = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium leading-5">
-                  Get noticed by top Units with a resume built by AI Resume Builder
+                  Get noticed by top Units with a resume built by AI Resume
+                  Builder
                 </p>
               </div>
               <ChevronRight className="w-4 h-4 flex-shrink-0" />
             </div>
-          </Card>
+          </Card> */}
         </Card>
       </Card>
     </div>
