@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Mail, Phone, MapPin, Clock, GraduationCap, Play, Pencil, Plus } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, GraduationCap, Pencil, Plus } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useUnitView } from "@/hooks/useUnitView";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
@@ -85,10 +85,10 @@ const UnitView = () => {
               <div className="flex flex-col md:flex-row items-start gap-6">
                 {/* Unit Logo */}
                 <div className="w-32 h-32 rounded-full bg-background border-4 border-background shadow-md flex items-center justify-center text-4xl font-bold text-foreground overflow-hidden">
-                  {unit.avatar_url ? (
-                    <img src={unit.avatar_url} alt={unit.unit_name} className="w-full h-full object-cover" />
+                  {(unit as any).avatar_url ? (
+                    <img src={(unit as any).avatar_url} alt={unit.unit_name} className="w-full h-full object-cover" />
                   ) : (
-                    unit.unit_name.charAt(0)
+                    unit.unit_name?.charAt(0) || "U"
                   )}
                 </div>
 
@@ -301,41 +301,73 @@ const UnitView = () => {
           </div>
 
           {/* Glimpse of the Unit */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <h3 className="text-xl font-bold">Glimpse of the Unit</h3>
-              </div>
-              <div className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Button variant="outline" size="lg" className="gap-2">
-                    <Play className="w-5 h-5" />
-                    Play Video
-                  </Button>
-                </div>
-                {unit.image && <img src={unit.image} alt="Unit glimpse" className="w-full h-full object-cover" />}
-              </div>
-            </CardContent>
-          </Card>
+          {(() => {
+            const glimpseUrl = (unit as any).glimpse;
+            if (!glimpseUrl || typeof glimpseUrl !== 'string') return null;
+            
+            return (
+              <Card className="mt-8">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-xl font-bold text-foreground">Glimpse of the Unit</h3>
+                  </div>
+                  <div className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden">
+                    <video 
+                      controls 
+                      className="w-full h-full object-cover"
+                      preload="metadata"
+                    >
+                      <source src={glimpseUrl} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })()}
 
           {/* Gallery */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold">Gallery</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Placeholder gallery items */}
-                {[1, 2, 3].map((item) => (
-                  <div key={item} className="relative aspect-square bg-muted rounded-lg overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Plus className="w-8 h-8 text-muted-foreground" />
-                    </div>
+          {(() => {
+            const galleryImagesRaw = (unit as any).gallery_images;
+            let galleryImages: string[] = [];
+            
+            try {
+              if (typeof galleryImagesRaw === 'string') {
+                galleryImages = JSON.parse(galleryImagesRaw);
+              } else if (Array.isArray(galleryImagesRaw)) {
+                galleryImages = galleryImagesRaw;
+              }
+            } catch {
+              galleryImages = [];
+            }
+            
+            // Only display if there are images
+            if (!galleryImages || galleryImages.length === 0) return null;
+            
+            // Show up to 3 images
+            const displayImages = galleryImages.slice(0, 3);
+            
+            return (
+              <Card className="mt-8">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-foreground">Gallery</h3>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {displayImages.map((imageUrl, index) => (
+                      <div key={index} className="relative aspect-square bg-muted rounded-lg overflow-hidden">
+                        <img 
+                          src={imageUrl} 
+                          alt={`Gallery image ${index + 1}`} 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })()}
         </div>
       </div>
 
