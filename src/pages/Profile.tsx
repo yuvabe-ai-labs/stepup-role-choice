@@ -6,8 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import Navbar from "@/components/Navbar";
-import { Mail, Phone, MapPin, Trash2, X, Sparkle, Pencil, Pen, CircleCheckBig, CircleX } from "lucide-react";
+import { Mail, Phone, MapPin, Trash2, X, Sparkle, Pencil, Pen, CircleCheckBig, CircleX, Camera } from "lucide-react";
 import { useProfileData } from "@/hooks/useProfileData";
+import { AvatarUploadDialog } from "@/components/AvatarUploadDialog";
+import { useState } from "react";
 import { PersonalDetailsDialog } from "@/components/profile/PersonalDetailsDialog";
 import { SkillsDialog } from "@/components/profile/SkillsDialog";
 import { EducationDialog } from "@/components/profile/EducationDialog";
@@ -45,9 +47,15 @@ const Profile = () => {
     removeInternshipEntry,
     removeInterest,
     removeSkill,
+    refetch,
   } = useProfileData();
 
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
   const profileCompletion = useProfileCompletion({ profile, studentProfile });
+
+  const handleAvatarUploadSuccess = () => {
+    refetch?.();
+  };
 
   if (loading) {
     return (
@@ -119,14 +127,22 @@ const Profile = () => {
         <Card className="mb-2 bg-white rounded-3xl">
           <CardContent className="p-6">
             <div className="flex items-start space-x-6">
-              <CircularProgress percentage={profileCompletion} size={90} strokeWidth={3}>
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={(studentProfile as any)?.avatar_url || ""} />
-                  <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-                    {profile?.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </CircularProgress>
+              <div className="relative group">
+                <CircularProgress percentage={profileCompletion} size={90} strokeWidth={3}>
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src={(studentProfile as any)?.avatar_url || ""} />
+                    <AvatarFallback className="text-lg bg-primary text-primary-foreground">
+                      {profile?.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </CircularProgress>
+                <button
+                  onClick={() => setIsAvatarDialogOpen(true)}
+                  className="absolute bottom-0 right-0 bg-primary hover:bg-primary/90 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Camera className="w-3 h-3" />
+                </button>
+              </div>
 
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
@@ -713,6 +729,18 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* Avatar Upload Dialog */}
+      {profile && studentProfile && (
+        <AvatarUploadDialog
+          isOpen={isAvatarDialogOpen}
+          onClose={() => setIsAvatarDialogOpen(false)}
+          currentAvatarUrl={(studentProfile as any)?.avatar_url}
+          userId={profile.id}
+          userName={profile.full_name}
+          onSuccess={handleAvatarUploadSuccess}
+        />
+      )}
     </div>
   );
 };
