@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Mail, Phone, MapPin, Clock, ExternalLink } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, GraduationCap } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useUnitView } from "@/hooks/useUnitView";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
@@ -235,7 +235,7 @@ const UnitView = () => {
 
                         return (
                           <li key={idx} className="flex items-start gap-2 text-sm">
-                            <ExternalLink className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                            <GraduationCap className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                             <span className="text-foreground">{title}</span>
                           </li>
                         );
