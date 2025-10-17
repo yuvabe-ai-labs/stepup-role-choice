@@ -177,11 +177,10 @@ const UnitView = () => {
 
                                   {/* Apply Now Button */}
                                   <Button
-                                    className="bg-orange-500 hover:bg-orange-600 rounded-full text-white px-6"
-                                    disabled={hasApplied || isCheckingStatus}
-                                    onClick={() => setShowApplicationDialog(true)}
+                                    className="bg-orange-500 hover:bg-orange-600 rounded-full text-white"
+                                    onClick={() => handleApply(internship)}
                                   >
-                                    {hasApplied ? "Applied" : "Apply Now"}
+                                    Apply Now
                                   </Button>
                                 </div>
 
