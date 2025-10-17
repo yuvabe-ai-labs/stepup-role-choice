@@ -54,7 +54,7 @@ export const useGlimpse = (
       // Update glimpse in units table
       const { error: updateError } = await supabase
         .from("units")
-        .update({ glimpse: publicUrl })
+        .update({ glimpse: publicUrl } as any)
         .eq("profile_id", userId);
 
       if (updateError) throw updateError;
@@ -99,7 +99,7 @@ export const useGlimpse = (
       // Update database
       const { error } = await supabase
         .from("units")
-        .update({ glimpse: null })
+        .update({ glimpse: null } as any)
         .eq("profile_id", userId);
 
       if (error) throw error;

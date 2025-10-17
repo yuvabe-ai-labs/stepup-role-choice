@@ -7,8 +7,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
-import { Pencil, Sparkle } from "lucide-react";
-import { log } from "console";
+import { Pencil, Sparkle, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const summarySchema = z.object({
   cover_letter: z
@@ -27,6 +27,8 @@ interface ProfileSummaryDialogProps {
 
 export const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ children, summary, onSave }) => {
   const [open, setOpen] = React.useState(false);
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [generatedText, setGeneratedText] = React.useState("");
   const { toast } = useToast();
 
   const {
@@ -34,6 +36,7 @@ export const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ chil
     handleSubmit,
     formState: { errors, isSubmitting },
     watch,
+    setValue,
   } = useForm<SummaryFormData>({
     resolver: zodResolver(summarySchema),
     defaultValues: {
@@ -43,10 +46,47 @@ export const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ chil
 
   const coverLetter = watch("cover_letter");
   const characterCount = coverLetter?.length || 0;
+  const wordCount = coverLetter?.trim().split(/\s+/).filter(word => word.length > 0).length || 0;
+
+  const handleGenerate = async () => {
+    if (wordCount < 15) return;
+
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("gemini-chat", {
+        body: {
+          message: `Please enhance and polish this profile summary to make it more professional and compelling. Keep the core message but improve the language, structure, and impact: "${coverLetter}"`,
+          conversationHistory: [],
+          userRole: "student",
+        },
+      });
+
+      if (error) throw error;
+
+      const enhancedText = data?.response || data?.text || "";
+      setGeneratedText(enhancedText);
+      setValue("cover_letter", enhancedText);
+
+      toast({
+        title: "Success",
+        description: "Profile summary enhanced successfully",
+      });
+    } catch (error) {
+      console.error("Error generating summary:", error);
+      toast({
+        title: "Error",
+        description: "Failed to enhance profile summary",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const onSubmit = async (data: SummaryFormData) => {
     try {
-      await onSave(data.cover_letter);
+      const textToSave = generatedText || data.cover_letter;
+      await onSave(textToSave);
       toast({
         title: "Success",
         description: "Profile summary updated successfully",
@@ -73,37 +113,58 @@ export const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ chil
             {/*  AI Assistance Textarea */}
             <div className="border rounded-xl overflow-hidden">
               {/* Gradient Header  */}
-              <div className="bg-gradient-to-r from-[#DF10FF] to-[#005EFF] text-white px-[2px] py-[1px] text-sm">
-                <span className="p-4">AI Assistance - Type something which you want to enhance</span>
-                {/* Textarea  */}
-                <div className="relative">
-                  <Textarea
-                    id="cover_letter"
-                    {...register("cover_letter")}
-                    placeholder="Get AI assistance to write your Profile Summary"
-                    rows={6}
-                    className="mt-2 w-full p-4 resize-y border-0 outline-none text-gray-500 placeholder-gray-400 focus:outline-none focus:ring-0"
-                  />
+              <div className="bg-gradient-to-r from-[#DF10FF] to-[#005EFF] text-white px-4 py-2 text-sm flex items-center justify-between">
+                <span>AI Assistance - Type something which you want to enhance</span>
+                <span className="text-xs opacity-90">{wordCount} words (minimum 15)</span>
+              </div>
+              {/* Textarea  */}
+              <div className="relative bg-background">
+                <Textarea
+                  id="cover_letter"
+                  {...register("cover_letter")}
+                  placeholder="Get AI assistance to write your Profile Summary (minimum 15 words)"
+                  rows={6}
+                  className="w-full p-4 resize-y border-0 outline-none focus:outline-none focus:ring-0"
+                  disabled={isGenerating}
+                />
 
-                  {errors.cover_letter && <p className="text-sm">{errors.cover_letter.message}</p>}
+                {errors.cover_letter && (
+                  <p className="text-sm text-destructive px-4 pb-2">{errors.cover_letter.message}</p>
+                )}
 
-                  {/* Create Button  */}
-                  <button
-                    className="absolute bottom-2 right-2 bg-white text-gray-500 border rounded-full px-3 py-1 text-sm hover:bg-gray-100"
-                    // disabled={submi}
-                  >
-                    Create
-                  </button>
-                </div>
+                {/* Create Button  */}
+                <Button
+                  type="button"
+                  onClick={handleGenerate}
+                  disabled={wordCount < 15 || isGenerating}
+                  className="absolute bottom-3 right-3 rounded-full"
+                  size="sm"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkle className="w-4 h-4 mr-2" />
+                      Create
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
 
-            <div className="mt-4 text-right">
+            <div className="mt-4 flex justify-end gap-2">
               <Button
-                className="bg-white border text-gray-500 rounded-full px-6 py-2 text-sm hover:bg-gray-50"
-                type="submit"
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
                 disabled={isSubmitting}
               >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting || isGenerating}>
                 {isSubmitting ? "Saving..." : "Save"}
               </Button>
             </div>

@@ -85,8 +85,8 @@ const UnitView = () => {
               <div className="flex flex-col md:flex-row items-start gap-6">
                 {/* Unit Logo */}
                 <div className="w-32 h-32 rounded-full bg-background border-4 border-background shadow-md flex items-center justify-center text-4xl font-bold text-foreground overflow-hidden">
-                  {unit.avatar_url ? (
-                    <img src={unit.avatar_url} alt={unit.unit_name} className="w-full h-full object-cover" />
+                  {(unit as any).avatar_url ? (
+                    <img src={(unit as any).avatar_url} alt={unit.unit_name} className="w-full h-full object-cover" />
                   ) : (
                     unit.unit_name.charAt(0)
                   )}

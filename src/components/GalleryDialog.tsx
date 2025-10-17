@@ -131,7 +131,7 @@ export const GalleryDialog = ({
       const newGalleryImages = [...currentImages, ...uploadedUrls];
       const { error: updateError } = await supabase
         .from("units")
-        .update({ gallery_images: JSON.stringify(newGalleryImages) })
+        .update({ gallery_images: JSON.stringify(newGalleryImages) } as any)
         .eq("profile_id", userId);
 
       if (updateError) throw updateError;
@@ -177,7 +177,7 @@ export const GalleryDialog = ({
       const newGalleryImages = currentImages.filter((img) => img !== imageUrl);
       const { error } = await supabase
         .from("units")
-        .update({ gallery_images: JSON.stringify(newGalleryImages) })
+        .update({ gallery_images: JSON.stringify(newGalleryImages) } as any)
         .eq("profile_id", userId);
 
       if (error) throw error;

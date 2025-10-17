@@ -38,7 +38,7 @@ export const useGallery = (userId: string, currentImages: string[]) => {
       const newGalleryImages = [...currentImages, ...uploadedUrls];
       const { error: updateError } = await supabase
         .from("units")
-        .update({ gallery_images: JSON.stringify(newGalleryImages) })
+        .update({ gallery_images: JSON.stringify(newGalleryImages) } as any)
         .eq("profile_id", userId);
 
       if (updateError) throw updateError;
@@ -77,7 +77,7 @@ export const useGallery = (userId: string, currentImages: string[]) => {
       const newGalleryImages = currentImages.filter((img) => img !== imageUrl);
       const { error } = await supabase
         .from("units")
-        .update({ gallery_images: JSON.stringify(newGalleryImages) })
+        .update({ gallery_images: JSON.stringify(newGalleryImages) } as any)
         .eq("profile_id", userId);
 
       if (error) throw error;
@@ -118,7 +118,7 @@ export const useGallery = (userId: string, currentImages: string[]) => {
       // Update database
       const { error } = await supabase
         .from("units")
-        .update({ gallery_images: JSON.stringify([]) })
+        .update({ gallery_images: JSON.stringify([]) } as any)
         .eq("profile_id", userId);
 
       if (error) throw error;
