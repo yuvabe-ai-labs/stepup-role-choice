@@ -27,7 +27,7 @@ const InternshipDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [internship, setInternship] = useState<Tables<"internships"> | null>(null);
-  const [unitId, setUnitId] = useState<string | null>(null);
+  const [unit, setUnit] = useState<any | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -47,12 +47,12 @@ const InternshipDetail = () => {
         if (data.created_by) {
           const { data: unitData } = await supabase
             .from("units")
-            .select("id")
+            .select("*")
             .eq("profile_id", data.created_by)
             .maybeSingle();
 
           if (unitData) {
-            setUnitId(unitData.id);
+            setUnit(unitData);
           }
         }
       } catch (error) {
@@ -250,8 +250,8 @@ const InternshipDetail = () => {
           {skillsRequired.length > 0 && <hr />}
 
           {/* Ready to Apply */}
-          <Card className="border-0">
-            <CardContent className="p-8">
+          <Card className="border-0 shadow-none">
+            <CardContent className="p-0">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Ready to Apply</h2>
@@ -273,44 +273,35 @@ const InternshipDetail = () => {
           <hr />
 
           {/* Company Info */}
-          <Card className="border-0">
-            <CardContent className="p-8">
+          <Card className="border-0 shadow-none">
+            <CardContent className="p-0">
               <div className="flex gap-6 items-start">
                 <div className="w-[6.25rem] h-[6.25rem] rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0">
-                  <span className="text-3xl text-white font-bold">{internship.company_name.charAt(0)}</span>
+                  <span className="text-3xl text-white font-bold">{unit.unit_name.charAt(0)}</span>
                 </div>
 
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold mb-2">{internship.company_name}</h2>
-                  {internship.company_email && <p className="text-muted-foreground mb-3">{internship.company_email}</p>}
-                  {internship.location && (
+                  {unit.contact_email && (
+                    <div>
+                      <h2 className="text-2xl font-bold">{unit.unit_name}</h2>
+                      <p className="font-[500] text-gray-500">{unit.contact_email}</p>
+                    </div>
+                  )}
+
+                  {unit.address && (
                     <div className="flex items-center gap-1 text-sm text-muted-foreground mb-4">
                       <MapPin className="w-4 h-4" />
-                      <span>{internship.location}</span>
+                      <span>{unit.address}</span>
                     </div>
                   )}
                 </div>
-
-                <hr />
-
-                {/* About Company */}
-                {internship.company_description && (
-                  <section>
-                    <h2 className="text-2xl font-bold mb-4">About the company</h2>
-
-                    <p className="text-muted-foreground leading-relaxed">
-                      {internship.company_description ||
-                        `${internship.company_name} is a creative collective focused on sustainable design practices and conscious living solutions. We work with various Auroville units to create meaningful digital experiences that reflect the community's mission.`}
-                    </p>
-                  </section>
-                )}
 
                 <Button
                   variant="outline"
                   className="border-none bg-orange-500 hover:bg-orange-600 text-white rounded-full px-8"
                   onClick={() => {
-                    if (unitId) {
-                      navigate(`/units/${unitId}`);
+                    if (unit.id) {
+                      navigate(`/units/${unit.id}`);
                     } else {
                       toast({
                         title: "Not Available",
@@ -325,6 +316,18 @@ const InternshipDetail = () => {
               </div>
             </CardContent>
           </Card>
+
+          <hr />
+
+          {/* About Company */}
+          {unit.description && (
+            <section>
+              <h2 className="text-2xl font-bold my-4">About the company</h2>
+              <div className="flex flex-wrap gap-2">
+                <p className="text-muted-foreground leading-relaxed">{unit.description}</p>
+              </div>
+            </section>
+          )}
         </div>
       </div>
 
