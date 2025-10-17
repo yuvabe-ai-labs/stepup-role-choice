@@ -47,6 +47,7 @@ import { supabase } from "@/integrations/supabase/client";
 import InternshipDetailsView from "@/components/InternshipDetailsView";
 import Navbar from "@/components/Navbar";
 import EditInternshipDialog from "@/components/EditInternshipDialog";
+import { useUnitReports } from "@/hooks/useUnitReports";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -67,6 +68,13 @@ const UnitDashboard = () => {
   const [updating, setUpdating] = useState<string | null>(null);
   const [selectedInternship, setSelectedInternship] = useState<any>(null);
   const [editingInternship, setEditingInternship] = useState<any>(null);
+  const [filterStatus, setFilterStatus] = useState("all");
+  const {
+    weeklyData,
+    monthlyData,
+    stats: reportStats,
+    loading: reportsLoading,
+  } = useUnitReports();
 
   if (selectedInternship) {
     return (
@@ -76,6 +84,11 @@ const UnitDashboard = () => {
       />
     );
   }
+
+  const filteredApplications = applications.filter((application) => {
+    if (filterStatus === "all") return true;
+    return application.status === filterStatus;
+  });
 
   const handleInternshipCreated = () => {
     // Refresh the page to reload internships
@@ -300,13 +313,17 @@ const UnitDashboard = () => {
           </TabsList>
 
           {/* Applications Tab */}
+          {/* Applications Tab */}
           <TabsContent
             value="applications"
             className="container mx-auto px-10 py-2"
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold">All Applications</h2>
-              <Select defaultValue="all">
+              <Select
+                value={filterStatus}
+                onValueChange={(value) => setFilterStatus(value)}
+              >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select Filter" />
                 </SelectTrigger>
@@ -333,20 +350,27 @@ const UnitDashboard = () => {
                   </Card>
                 ))}
               </div>
-            ) : applications.length === 0 ? (
+            ) : filteredApplications.length === 0 ? (
               <div className="text-center py-12">
                 <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
                 <h3 className="text-lg font-medium mb-2">
-                  No Applications Yet
+                  {filterStatus === "all"
+                    ? "No Applications Yet"
+                    : `No ${
+                        filterStatus.charAt(0).toUpperCase() +
+                        filterStatus.slice(1)
+                      } Applications`}
                 </h3>
                 <p className="text-muted-foreground">
-                  Applications for your internships will appear here.
+                  {filterStatus === "all"
+                    ? "Applications for your internships will appear here."
+                    : `No ${filterStatus} applications found.`}
                 </p>
               </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {applications.slice(0, 9).map((application) => {
+                  {filteredApplications.slice(0, 9).map((application) => {
                     const skills = safeParse(
                       application.studentProfile?.skills,
                       []
@@ -503,7 +527,7 @@ const UnitDashboard = () => {
                 </div>
 
                 {/* View All button - always show if there are applications */}
-                {applications.length > 0 && (
+                {filteredApplications.length > 0 && (
                   <div className="flex justify-center mt-8">
                     <Button
                       variant="outline"
@@ -730,7 +754,7 @@ const UnitDashboard = () => {
           </TabsContent>
 
           {/* Candidates Management Tab */}
-          <TabsContent value="candidates" className="space-y-6">
+          {/* <TabsContent value="candidates" className="space-y-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold">Candidate Management</h2>
               <div className="relative">
@@ -865,22 +889,53 @@ const UnitDashboard = () => {
                 )}
               </>
             )}
+          </TabsContent> */}
+          <TabsContent value="candidates" className="space-y-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold">Candidate Management</h2>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Select by names"
+                  className="pl-10 w-[250px]"
+                  disabled
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-center items-center py-12">
+              <Card className="max-w-md w-full">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-8 h-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Coming Soon</h3>
+                  <p className="text-muted-foreground mb-6">
+                    Candidate management feature will be available soon.
+                  </p>
+                  <Button disabled variant="outline">
+                    Feature Coming Soon
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Reports Tab */}
           <TabsContent value="reports" className="container mx-auto px-10 py-2">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold">Reports for this Month</h2>
-              <Select defaultValue="current">
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select Month" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="current">Current Month</SelectItem>
-                  <SelectItem value="last">Last Month</SelectItem>
-                  <SelectItem value="custom">Custom Range</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* <Select defaultValue="current">
+      <SelectTrigger className="w-[180px]">
+        <SelectValue placeholder="Select Month" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="current">Current Month</SelectItem>
+        <SelectItem value="last">Last Month</SelectItem>
+        <SelectItem value="custom">Custom Range</SelectItem>
+      </SelectContent>
+    </Select> */}
             </div>
 
             <Card>
@@ -890,68 +945,288 @@ const UnitDashboard = () => {
                   <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-cyan-300"></div>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-gray-600">
                         Previous Week
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-teal-600"></div>
-                      <span className="text-sm text-muted-foreground">
-                        This Week
-                      </span>
+                      <span className="text-sm text-gray-600">This Week</span>
                     </div>
-                    <Select defaultValue="week">
-                      <SelectTrigger className="w-[130px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="week">This Week</SelectItem>
-                        <SelectItem value="month">This Month</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    {/* <Select defaultValue="week">
+            <SelectTrigger className="w-[130px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="week">This Week</SelectItem>
+              <SelectItem value="month">This Month</SelectItem>
+            </SelectContent>
+          </Select> */}
                   </div>
                 </div>
 
-                <div className="h-[400px] flex items-end justify-between gap-4 border-l border-b border-border p-4">
-                  {["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"].map(
-                    (day, index) => {
-                      const prevWeekHeight = Math.random() * 60 + 20;
-                      const thisWeekHeight = Math.random() * 60 + 20;
-
-                      return (
+                {reportsLoading ? (
+                  <div className="h-[400px] flex gap-4 p-4 relative">
+                    {/* Horizontal grid lines skeleton */}
+                    <div className="absolute left-12 right-0 top-0 bottom-8 pointer-events-none">
+                      {[0, 1, 2, 3, 4, 5].map((i) => (
                         <div
-                          key={day}
-                          className="flex-1 flex flex-col items-center gap-2"
-                        >
+                          key={i}
+                          className="absolute w-full border-t border-gray-200"
+                          style={{ top: `${(i / 5) * 100}%` }}
+                        ></div>
+                      ))}
+                    </div>
+
+                    {/* Y-axis labels skeleton */}
+                    <div className="absolute left-0 top-0 bottom-8 w-12 flex flex-col justify-between text-xs text-gray-600">
+                      {[0, 1, 2, 3, 4, 5].map((i) => (
+                        <div key={i} className="text-right pr-2">
+                          <Skeleton className="h-3 w-8 inline-block" />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Chart bars skeleton */}
+                    <div className="flex-1 flex items-end justify-around gap-8 ml-12">
+                      {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
+                        (day) => (
                           <div
-                            className="w-full flex gap-1 items-end"
-                            style={{ height: "300px" }}
+                            key={day}
+                            className="flex flex-col items-center gap-2"
                           >
                             <div
-                              className="flex-1 bg-cyan-300 rounded-t-lg transition-all hover:opacity-80"
-                              style={{ height: `${prevWeekHeight}%` }}
-                            ></div>
-                            <div
-                              className="flex-1 bg-teal-600 rounded-t-lg transition-all hover:opacity-80"
-                              style={{ height: `${thisWeekHeight}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-sm text-muted-foreground">
-                            {day}
-                          </span>
-                        </div>
-                      );
-                    }
-                  )}
-                </div>
+                              className="relative flex items-end justify-center"
+                              style={{ height: "300px", width: "48px" }}
+                            >
+                              {/* Larger bar skeleton (back layer) */}
+                              <Skeleton
+                                className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-2xl"
+                                style={{
+                                  height: `${Math.random() * 200 + 50}px`,
+                                  width: "36px",
+                                }}
+                              />
 
-                <div className="flex justify-center mt-8">
-                  <Button variant="link" className="text-primary font-medium">
-                    View Detailed Report
-                  </Button>
-                </div>
+                              {/* Smaller bar skeleton (front layer) */}
+                              <Skeleton
+                                className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-2xl z-10"
+                                style={{
+                                  height: `${Math.random() * 150 + 30}px`,
+                                  width: "28px",
+                                }}
+                              />
+                            </div>
+
+                            {/* Day label skeleton */}
+                            <Skeleton className="h-4 w-8" />
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-[400px] flex gap-4 p-4 relative">
+                    {/* Horizontal grid lines */}
+                    <div className="absolute left-12 right-0 top-0 bottom-8 pointer-events-none">
+                      {[0, 1, 2, 3, 4, 5].map((i) => (
+                        <div
+                          key={i}
+                          className="absolute w-full border-t border-gray-200"
+                          style={{ top: `${(i / 5) * 100}%` }}
+                        ></div>
+                      ))}
+                    </div>
+
+                    {/* Y-axis labels */}
+                    <div className="absolute left-0 top-0 bottom-8 w-12 flex flex-col justify-between text-xs text-gray-600">
+                      {(() => {
+                        const maxApplications = Math.max(
+                          ...weeklyData.flatMap((d) => [
+                            d.previousWeek,
+                            d.thisWeek,
+                          ]),
+                          1
+                        );
+
+                        let range, step;
+                        if (maxApplications <= 10) {
+                          range = 10;
+                          step = 2;
+                        } else if (maxApplications <= 50) {
+                          range = 50;
+                          step = 10;
+                        } else if (maxApplications <= 100) {
+                          range = 100;
+                          step = 20;
+                        } else if (maxApplications <= 500) {
+                          range = Math.ceil(maxApplications / 100) * 100;
+                          step = range / 5;
+                        } else {
+                          range = Math.ceil(maxApplications / 500) * 500;
+                          step = range / 5;
+                        }
+
+                        const labels = [];
+                        for (let i = 0; i <= 5; i++) {
+                          labels.push(
+                            <div key={i} className="text-right pr-2">
+                              {range - i * step}
+                            </div>
+                          );
+                        }
+                        return labels;
+                      })()}
+                    </div>
+
+                    {/* Chart bars */}
+                    <div className="flex-1 flex items-end justify-around gap-8 ml-12">
+                      {weeklyData.map((dayData) => {
+                        const maxApplications = Math.max(
+                          ...weeklyData.flatMap((d) => [
+                            d.previousWeek,
+                            d.thisWeek,
+                          ]),
+                          1
+                        );
+
+                        let range;
+                        if (maxApplications <= 10) range = 10;
+                        else if (maxApplications <= 50) range = 50;
+                        else if (maxApplications <= 100) range = 100;
+                        else if (maxApplications <= 500)
+                          range = Math.ceil(maxApplications / 100) * 100;
+                        else range = Math.ceil(maxApplications / 500) * 500;
+
+                        const scaleFactor = 280 / range;
+                        const prevWeekHeight =
+                          dayData.previousWeek * scaleFactor;
+                        const thisWeekHeight = dayData.thisWeek * scaleFactor;
+
+                        const isThisWeekLarger =
+                          dayData.thisWeek >= dayData.previousWeek;
+
+                        return (
+                          <div
+                            key={dayData.day}
+                            className="flex flex-col items-center gap-2"
+                          >
+                            <div
+                              className="relative flex items-end justify-center"
+                              style={{ height: "300px", width: "48px" }}
+                            >
+                              {/* Larger bar (back layer) */}
+                              <div
+                                className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-2xl transition-all hover:opacity-80 cursor-pointer ${
+                                  isThisWeekLarger
+                                    ? "bg-teal-600"
+                                    : "bg-cyan-300"
+                                }`}
+                                style={{
+                                  height: `${Math.max(
+                                    isThisWeekLarger
+                                      ? thisWeekHeight
+                                      : prevWeekHeight,
+                                    8
+                                  )}px`,
+                                  width: "36px",
+                                }}
+                              ></div>
+
+                              {/* Smaller bar (front layer) */}
+                              <div
+                                className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-2xl transition-all hover:opacity-80 cursor-pointer z-10 ${
+                                  isThisWeekLarger
+                                    ? "bg-cyan-300"
+                                    : "bg-teal-600"
+                                }`}
+                                style={{
+                                  height: `${Math.max(
+                                    isThisWeekLarger
+                                      ? prevWeekHeight
+                                      : thisWeekHeight,
+                                    8
+                                  )}px`,
+                                  width: "28px",
+                                }}
+                              ></div>
+                            </div>
+
+                            {/* Day label - moved lower with mt-4 */}
+                            <span className="text-sm text-gray-600 ">
+                              {dayData.day}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
+
+            {/* Quick Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">
+                        Total Applications
+                      </p>
+                      {reportsLoading ? (
+                        <Skeleton className="h-8 w-16 my-1" />
+                      ) : (
+                        <p className="text-2xl font-bold">
+                          {reportStats.totalApplications}
+                        </p>
+                      )}
+                    </div>
+                    <Users className="w-8 h-8 text-blue-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">
+                        Hired Candidates
+                      </p>
+                      {reportsLoading ? (
+                        <Skeleton className="h-8 w-16 my-1" />
+                      ) : (
+                        <p className="text-2xl font-bold">
+                          {reportStats.hiredCandidates}
+                        </p>
+                      )}
+                    </div>
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">
+                        Active Internships
+                      </p>
+                      {reportsLoading ? (
+                        <Skeleton className="h-8 w-16 my-1" />
+                      ) : (
+                        <p className="text-2xl font-bold">
+                          {reportStats.activeInternships}
+                        </p>
+                      )}
+                    </div>
+                    <Briefcase className="w-8 h-8 text-orange-500" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

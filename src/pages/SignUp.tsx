@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle } from "lucide-react";
 import signupIllustration from "@/assets/signup-illustration.png";
 import { Eye, EyeOff } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const SignUp = () => {
   const { role } = useParams<{ role: string }>();
@@ -29,6 +33,48 @@ const SignUp = () => {
     { test: (p: string) => p.length >= 8, label: "8 character minimum" },
   ];
 
+  // Check if user already exists
+  const checkUserExists = async (email: string) => {
+    try {
+      // Method 1: Check auth users (this might be limited by Supabase permissions)
+      const { data: authData, error: authError } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (authError) {
+        console.error("Error checking user existence:", authError);
+      }
+
+      if (authData) {
+        return true;
+      }
+
+      // Method 2: Try to sign in (will fail if user doesn't exist)
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: "dummy_password", // Wrong password to test existence
+      });
+
+      // If we get a "Invalid login credentials" error, the user might exist but password is wrong
+      // If we get "Email not confirmed" error, the user definitely exists
+      if (signInError) {
+        if (
+          signInError.message.includes("Invalid login credentials") ||
+          signInError.message.includes("Email not confirmed")
+        ) {
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      console.error("Error in checkUserExists:", error);
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -45,18 +91,68 @@ const SignUp = () => {
 
     setLoading(true);
 
-    const { error } = await signUp(email, password, fullName, role || "student");
+    try {
+      // First check if user already exists
+      const userExists = await checkUserExists(email);
 
-    if (error) {
+      if (userExists) {
+        toast({
+          title: "Email already registered",
+          description:
+            "An account with this email already exists. Please sign in or use a different email address.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // If user doesn't exist, proceed with signup
+      const { error } = await signUp(
+        email,
+        password,
+        fullName,
+        role || "student"
+      );
+
+      if (error) {
+        // Handle specific Supabase errors
+        if (
+          error.message?.includes("already registered") ||
+          error.message?.includes("user_exists") ||
+          error.message?.includes("email_taken")
+        ) {
+          toast({
+            title: "Email already registered",
+            description:
+              "An account with this email already exists. Please sign in instead.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Sign up failed",
+            description:
+              error.message || "Something went wrong. Please try again.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Account created successfully!",
+          description:
+            "Please check your email to verify your account. Click the link to get started!",
+        });
+
+        // Clear form
+        setFullName("");
+        setEmail("");
+        setPassword("");
+      }
+    } catch (error: any) {
+      console.error("Signup error:", error);
       toast({
         title: "Sign up failed",
-        description: error.message,
+        description: "Something went wrong. Please try again.",
         variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Account created successfully!",
-        description: "Please check your email to verify your account. Click the link to get started!",
       });
     }
 
@@ -64,6 +160,8 @@ const SignUp = () => {
   };
 
   const handleOAuthSignUp = async (provider: "google" | "apple") => {
+    setLoading(true);
+
     // Store the role for profile creation after OAuth
     if (role) {
       localStorage.setItem("pendingRole", role);
@@ -72,12 +170,30 @@ const SignUp = () => {
     const { error } = await signInWithOAuth(provider);
     if (error) {
       localStorage.removeItem("pendingRole"); // Clean up on error
-      toast({
-        title: "Sign up failed",
-        description: error.message,
-        variant: "destructive",
-      });
+
+      // Check for email already exists error in OAuth flow
+      if (
+        error.message?.includes("already registered") ||
+        error.message?.includes("already exists") ||
+        error.message?.includes("user_exists") ||
+        error.message?.includes("email_taken")
+      ) {
+        toast({
+          title: "Account already exists",
+          description:
+            "An account with this email already exists. Please sign in instead.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Sign up failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     }
+
+    setLoading(false);
     // Note: No navigation here - OAuth will handle redirect via auth callback
   };
 
@@ -86,7 +202,11 @@ const SignUp = () => {
       {/* Left Side - Illustration */}
       <div className="flex-1 hidden lg:flex items-center justify-center bg-gray-50">
         <div className="max-w-lg">
-          <img src={signupIllustration} alt="Signup Illustration" className="w-full h-auto" />
+          <img
+            src={signupIllustration}
+            alt="Signup Illustration"
+            className="w-full h-auto"
+          />
         </div>
       </div>
 
@@ -99,12 +219,13 @@ const SignUp = () => {
             style={{ boxShadow: "0px 2px 25px rgba(0, 0, 0, 0.15)" }}
           >
             {/* Header */}
-            <div className="text-center mb-4">
+            <div className="text-center mb-8">
               <h1
                 className="text-[20px] font-medium leading-[35px] mb-2"
                 style={{
                   color: "#1F2A37",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                  fontFamily:
+                    "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                 }}
               >
                 Create your account
@@ -113,19 +234,26 @@ const SignUp = () => {
                 className="text-[12px] leading-[15px]"
                 style={{
                   color: "#9CA3AF",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                  fontFamily:
+                    "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                 }}
               >
                 Please enter your details below
               </p>
             </div>
             {/* OAuth Buttons */}
-            <div className="flex gap-3 mb-4">
+            <div className="flex gap-3 mb-6">
               <button
                 onClick={() => handleOAuthSignUp("google")}
-                className="flex-1 h-8 bg-white border border-[#D1D5DB] rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+                disabled={loading}
+                className="flex-1 h-8 bg-white border border-[#D1D5DB] rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" className="rounded-sm">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  className="rounded-sm"
+                >
                   <path
                     fill="#4285F4"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -147,7 +275,8 @@ const SignUp = () => {
                   className="text-[10px] font-medium"
                   style={{
                     color: "#1F2A37",
-                    fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                    fontFamily:
+                      "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                   }}
                 >
                   Google
@@ -156,7 +285,8 @@ const SignUp = () => {
 
               <button
                 onClick={() => handleOAuthSignUp("apple")}
-                className="flex-1 h-8 bg-white border border-[#D1D5DB] rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+                disabled={loading}
+                className="flex-1 h-8 bg-white border border-[#D1D5DB] rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 <svg width="13" height="16" viewBox="0 0 24 24" fill="black">
                   <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
@@ -165,7 +295,8 @@ const SignUp = () => {
                   className="text-[10px] font-medium"
                   style={{
                     color: "#1F2A37",
-                    fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                    fontFamily:
+                      "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                   }}
                 >
                   Sign up with Apple
@@ -173,7 +304,7 @@ const SignUp = () => {
               </button>
             </div>
             {/* Divider */}
-            <div className="flex items-center mb-4">
+            <div className="flex items-center mb-6">
               <div className="flex-1 h-px bg-[#D1D5DB]"></div>
               <span
                 className="px-3 text-[10px] leading-3"
@@ -187,7 +318,7 @@ const SignUp = () => {
               <div className="flex-1 h-px bg-[#D1D5DB]"></div>
             </div>
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Full Name */}
               <div>
                 <label
@@ -195,12 +326,13 @@ const SignUp = () => {
                   className="block text-[12px] leading-[11px] mb-2"
                   style={{
                     color: "#4B5563",
-                    fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                    fontFamily:
+                      "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                   }}
                 >
                   Full Name *
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg px-4 py-2 flex items-center">
+                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center">
                   <input
                     id="fullName"
                     type="text"
@@ -209,9 +341,11 @@ const SignUp = () => {
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full text-[12px] leading-[11px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     style={{
-                      fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                      fontFamily:
+                        "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                     }}
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -220,77 +354,92 @@ const SignUp = () => {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-[12px] mb-2"
+                  className="block text-[12px] leading-[11px] mb-2"
                   style={{
                     color: "#4B5563",
-                    fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                    fontFamily:
+                      "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                   }}
                 >
                   Email Address *
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg px-4 py-2 flex items-center">
+                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center">
                   <input
                     id="email"
                     type="email"
                     placeholder="Enter email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full text-[12px] outline-none bg-transparent "
+                    className="w-full text-[12px] leading-[11px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     style={{
-                      fontFamily: "'Lato', system-ui, -apple-system, sans-serif",
+                      fontFamily:
+                        "'Lato', system-ui, -apple-system, sans-serif",
                     }}
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div>
-                <label htmlFor="password" className="block text-[12px] mb-2" style={{ color: "#4B5563" }}>
+                <label
+                  htmlFor="password"
+                  className="block text-[12px] mb-2"
+                  style={{ color: "#4B5563" }}
+                >
                   Password *
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg px-4 py-2 flex items-center gap-2">
+                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center gap-2">
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full text-[12px] outline-none bg-white placeholder-[#9CA3AF]"
+                    className="w-full text-[12px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     required
+                    disabled={loading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-[#9CA3AF] hover:text-[#4B5563] transition-colors"
+                    className="text-[#9CA3AF] hover:text-[#4B5563] transition-colors disabled:opacity-50"
+                    disabled={loading}
                   >
                     {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                 </div>
 
-                <div className="mt-4 space-y-2">
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                    {passwordRules.map((rule, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <CheckCircle
-                          className="w-3 h-3"
-                          style={{
-                            color: rule.test(password) ? "#10B981" : "#D9D9D9",
-                          }}
-                        />
-                        <span
-                          className="text-[10px] leading-[10px]"
-                          style={{
-                            color: "#9CA3AF",
-                            fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
-                          }}
-                        >
-                          {rule.label}
-                        </span>
-                      </div>
-                    ))}
+                {/* Password Requirements */}
+                {password && (
+                  <div className="mt-3 space-y-1.5">
+                    {passwordRules.map((rule, index) => {
+                      const isValid = rule.test(password);
+                      return (
+                        <div key={index} className="flex items-center gap-2">
+                          <CheckCircle
+                            size={12}
+                            className={`${
+                              isValid ? "text-green-500" : "text-gray-300"
+                            } transition-colors`}
+                          />
+                          <span
+                            className={`text-[10px] ${
+                              isValid ? "text-green-600" : "text-gray-400"
+                            } transition-colors`}
+                            style={{
+                              fontFamily:
+                                "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                            }}
+                          >
+                            {rule.label}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Sign Up Button */}
@@ -300,7 +449,8 @@ const SignUp = () => {
                 className="w-full h-[30px] rounded-lg flex items-center justify-center text-[12px] font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
                 style={{
                   backgroundColor: "#76A9FA",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                  fontFamily:
+                    "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                 }}
               >
                 {loading ? "Creating account..." : "Sign up"}
@@ -312,7 +462,8 @@ const SignUp = () => {
                 className="text-[12px] leading-4"
                 style={{
                   color: "#9CA3AF",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                  fontFamily:
+                    "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                 }}
               >
                 Already have an account?{" "}
@@ -321,7 +472,8 @@ const SignUp = () => {
                   className="text-[12px] leading-4 font-medium hover:underline"
                   style={{
                     color: "#3F83F8",
-                    fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                    fontFamily:
+                      "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                   }}
                 >
                   Sign In
