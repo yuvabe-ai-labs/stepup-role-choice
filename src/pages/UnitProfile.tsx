@@ -2,11 +2,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import Navbar from "@/components/Navbar";
 import {
-  Edit,
   Mail,
   Phone,
   MapPin,
@@ -15,18 +13,25 @@ import {
   X,
   Pencil,
   Building2,
+  ZoomIn,
+  Video,
+  ExternalLink,
+  Link,
+  Plus,
 } from "lucide-react";
 import { useUnitProfileData } from "@/hooks/useUnitProfileData";
 import { UnitDetailsDialog } from "@/components/unit/UnitDetailsDialog";
 import { UnitDescriptionDialog } from "@/components/unit/UnitDescriptionDialog";
 import { UnitProjectDialog } from "@/components/unit/UnitProjectDialog";
-import { UnitValuesDialog } from "@/components/unit/UnitValuesDialog";
-import { format } from "date-fns";
+import { UnitSocialLinksDialog } from "@/components/unit/UnitSocialLinksDialog";
+import { GalleryDialog } from "@/components/GalleryDialog";
+import { GlimpseDialog } from "@/components/GlimpseDialog";
 import { useEffect, useState } from "react";
 import { CircularProgress } from "@/components/CircularProgress";
 import { useUnitProfileCompletion } from "@/hooks/useUnitProfileCompletion";
 import { ImageUploadDialog } from "@/components/ImageUploadDialog";
 import { Camera } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const UnitProfile = () => {
   const { user } = useAuth();
@@ -38,28 +43,25 @@ const UnitProfile = () => {
     updateUnitProfile,
     addProjectEntry,
     removeProjectEntry,
-    updateValues,
-    removeValue,
+    updateSocialLinks,
+    removeSocialLink,
     parseJsonField,
     refetch,
   } = useUnitProfileData();
 
   const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
   const [isBannerDialogOpen, setIsBannerDialogOpen] = useState(false);
+  const [isGalleryDialogOpen, setIsGalleryDialogOpen] = useState(false);
+  const [isGlimpseDialogOpen, setIsGlimpseDialogOpen] = useState(false);
+  const [viewImage, setViewImage] = useState<string | null>(null);
 
   const profileCompletion = useUnitProfileCompletion({ profile, unitProfile });
 
-  // Log user IDs when data is retrieved
   useEffect(() => {
     if (!loading && (profile || user)) {
       console.log("=== Unit Profile Data Retrieved ===");
       console.log("Auth User ID:", user?.id);
-      console.log("Auth User Email:", user?.email);
       console.log("Profile ID:", profile?.id);
-      console.log("Profile User ID:", profile?.user_id);
-      console.log("Profile Full Name:", profile?.full_name);
-      console.log("Unit Profile ID:", unitProfile?.id);
-      console.log("Unit Profile - Profile ID:", unitProfile?.profile_id);
       console.log("Profile Completion:", profileCompletion + "%");
       console.log("==============================");
     }
@@ -90,13 +92,25 @@ const UnitProfile = () => {
     );
   }
 
-  // Safe data extraction
   const projects = parseJsonField(unitProfile?.projects, []);
-  const values = parseJsonField(unitProfile?.values, []);
   const galleryImages = parseJsonField(unitProfile?.gallery_images, []);
+  const socialLinks = parseJsonField(unitProfile?.social_links, []);
+  const glimpseUrl = (unitProfile as any)?.glimpse || null;
 
   const handleImageUploadSuccess = () => {
     refetch();
+  };
+
+  const handleGallerySuccess = () => {
+    refetch();
+  };
+
+  const handleGlimpseSuccess = () => {
+    refetch();
+  };
+
+  const handleSocialLinksSave = async (links: any[]) => {
+    await updateSocialLinks(links);
   };
 
   return (
@@ -140,7 +154,13 @@ const UnitProfile = () => {
                   strokeWidth={3}
                 >
                   <Avatar className="h-20 w-20">
-                    <AvatarImage src={(unitProfile as any)?.avatar_url || unitProfile?.logo_url || ""} />
+                    <AvatarImage
+                      src={
+                        (unitProfile as any)?.avatar_url ||
+                        unitProfile?.logo_url ||
+                        ""
+                      }
+                    />
                     <AvatarFallback className="text-lg bg-primary text-primary-foreground">
                       {unitProfile?.unit_name?.charAt(0) ||
                         profile?.full_name?.charAt(0) ||
@@ -180,7 +200,6 @@ const UnitProfile = () => {
                   {unitProfile?.industry || "Industry"}
                 </p>
 
-                {/* About Us description without title */}
                 <div className="mb-4 flex items-start gap-2">
                   <p className="text-sm text-muted-foreground flex-1">
                     {unitProfile?.description ||
@@ -243,7 +262,6 @@ const UnitProfile = () => {
               <CardContent className="p-6">
                 <h3 className="font-semibold mb-4">Quick Links</h3>
                 <div className="space-y-3 text-sm">
-                  {/* Unit Details */}
                   <div className="flex items-center justify-between">
                     <span>Unit Details</span>
                     <UnitDetailsDialog
@@ -262,7 +280,6 @@ const UnitProfile = () => {
                     </UnitDetailsDialog>
                   </div>
 
-                  {/* About Us */}
                   <div className="flex items-center justify-between">
                     <span>About Us</span>
                     <UnitDescriptionDialog
@@ -282,7 +299,18 @@ const UnitProfile = () => {
                     </UnitDescriptionDialog>
                   </div>
 
-                  {/* Mission */}
+                  <div className="flex items-center justify-between">
+                    <span>Glimpse</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-primary p-0 h-auto"
+                      onClick={() => setIsGlimpseDialogOpen(true)}
+                    >
+                      {glimpseUrl ? "Edit" : "Add"}
+                    </Button>
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <span>Mission</span>
                     <UnitDescriptionDialog
@@ -300,7 +328,6 @@ const UnitProfile = () => {
                     </UnitDescriptionDialog>
                   </div>
 
-                  {/* Values */}
                   <div className="flex items-center justify-between mt-4">
                     <span>Values</span>
                     <UnitDescriptionDialog
@@ -318,7 +345,6 @@ const UnitProfile = () => {
                     </UnitDescriptionDialog>
                   </div>
 
-                  {/* Projects */}
                   <div className="flex items-center justify-between">
                     <span>Projects</span>
                     <UnitProjectDialog onSave={addProjectEntry}>
@@ -332,16 +358,31 @@ const UnitProfile = () => {
                     </UnitProjectDialog>
                   </div>
 
-                  {/* Gallery */}
+                  <div className="flex items-center justify-between">
+                    <span>Social Links</span>
+                    <UnitSocialLinksDialog
+                      onSave={handleSocialLinksSave}
+                      currentLinks={socialLinks}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary p-0 h-auto"
+                      >
+                        Manage
+                      </Button>
+                    </UnitSocialLinksDialog>
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <span>Gallery</span>
                     <Button
                       variant="ghost"
                       size="sm"
                       className="text-primary p-0 h-auto"
-                      disabled
+                      onClick={() => setIsGalleryDialogOpen(true)}
                     >
-                      Add
+                      Manage
                     </Button>
                   </div>
                 </div>
@@ -351,6 +392,75 @@ const UnitProfile = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-8">
+            {/* Projects */}
+            <Card className="rounded-3xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold">Projects</h3>
+                  <UnitProjectDialog onSave={addProjectEntry}>
+                    <Button variant="ghost" size="sm" className="text-primary">
+                      Add Project
+                    </Button>
+                  </UnitProjectDialog>
+                </div>
+
+                {projects.length > 0 ? (
+                  <div className="space-y-4">
+                    {projects.map((project: any, index: number) => (
+                      <div
+                        key={index}
+                        className="p-4 border border-border rounded-xl"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-base text-foreground">
+                              {project.project_name || "Untitled Project"}
+                            </h4>
+
+                            {project.client_name && (
+                              <p className="text-sm text-muted-foreground mt-0.5">
+                                {project.client_name}
+                              </p>
+                            )}
+
+                            <p className="text-xs text-muted-foreground mt-2">
+                              <span className="capitalize">
+                                {project.status}
+                              </span>
+                              {project.status === "Completed" &&
+                                project.completion_date && (
+                                  <>
+                                    {" "}
+                                    • Completed on{" "}
+                                    {new Date(
+                                      project.completion_date
+                                    ).toLocaleDateString()}
+                                  </>
+                                )}
+                            </p>
+                          </div>
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeProjectEntry(project.id)}
+                            className="text-muted-foreground hover:text-destructive ml-2"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">
+                    Showcase the projects and initiatives your organization has
+                    worked on.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Mission */}
             <Card className="rounded-3xl">
               <CardContent className="p-6">
@@ -395,75 +505,144 @@ const UnitProfile = () => {
               </CardContent>
             </Card>
 
-            {/* Projects */}
+            {/* Social Links */}
             <Card className="rounded-3xl">
               <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Projects</h3>
-                  <UnitProjectDialog onSave={addProjectEntry}>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-semibold text-xl">Social Links</h3>
+                  <UnitSocialLinksDialog
+                    onSave={handleSocialLinksSave}
+                    currentLinks={socialLinks}
+                  >
                     <Button variant="ghost" size="sm" className="text-primary">
-                      Add Project
+                      {socialLinks.length > 0 ? "Manage Links" : "Add Links"}
                     </Button>
-                  </UnitProjectDialog>
+                  </UnitSocialLinksDialog>
                 </div>
 
-                {projects.length > 0 ? (
-                  <div className="space-y-4">
-                    {projects.map((project: any, index: number) => (
-                      <div
-                        key={index}
-                        className="p-4 border border-border rounded-xl"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            {/* Project Name */}
-                            <h4 className="font-semibold text-base text-foreground">
-                              {project.project_name || "Untitled Project"}
-                            </h4>
-
-                            {/* Client Name */}
-                            {project.client_name && (
-                              <p className="text-sm text-muted-foreground mt-0.5">
-                                {project.client_name}
-                              </p>
-                            )}
-
-                            {/* Status + Completion Date */}
-                            <p className="text-xs text-muted-foreground mt-2">
-                              <span className="capitalize">
-                                {project.status}
-                              </span>
-                              {project.status === "Completed" &&
-                                project.completion_date && (
-                                  <>
-                                    {" "}
-                                    • Completed on{" "}
-                                    {new Date(
-                                      project.completion_date
-                                    ).toLocaleDateString()}
-                                  </>
-                                )}
-                            </p>
+                {socialLinks.length > 0 ? (
+                  <div className="space-y-6">
+                    {socialLinks.map((link: any) => (
+                      <div key={link.id} className="space-y-2">
+                        <h4 className="font-semibold text-lg text-muted-foreground">
+                          {link.platform === "website" && "Website"}
+                          {link.platform === "linkedin" && "LinkedIn"}
+                          {link.platform === "instagram" && "Instagram"}
+                          {link.platform === "facebook" && "Facebook"}
+                          {link.platform === "x" && "X"}
+                          {link.platform === "threads" && "Threads"}
+                        </h4>
+                        <div className="flex items-center justify-between bg-muted/50 p-3 rounded-lg">
+                          <span className="text-sm text-muted-foreground font-mono">
+                            {link.url}
+                          </span>
+                          <div className="flex items-center space-x-2">
+                            <a
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1 hover:bg-accent rounded text-muted-foreground hover:text-primary"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeSocialLink(link.id)}
+                              className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
-
-                          {/* Delete Button */}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeProjectEntry(project.id)}
-                            className="text-muted-foreground hover:text-destructive ml-2"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
                         </div>
                       </div>
                     ))}
+
+                    {/* Add New Link Section */}
+                    <div className="border-t pt-6">
+                      <UnitSocialLinksDialog
+                        onSave={handleSocialLinksSave}
+                        currentLinks={socialLinks}
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-full border-dashed h-12 text-muted-foreground"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add New link
+                        </Button>
+                      </UnitSocialLinksDialog>
+                    </div>
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">
-                    Showcase the projects and initiatives your organization has
-                    worked on.
-                  </p>
+                  <div className="space-y-6">
+                    <div className="text-center py-12 border-2 border-dashed rounded-xl">
+                      <Link className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+                      <p className="text-muted-foreground text-lg mb-2">
+                        No social links added yet
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Add your organization's social media links and website
+                      </p>
+                    </div>
+
+                    {/* Add New Link Section */}
+                    <div className="border-t pt-6">
+                      <UnitSocialLinksDialog
+                        onSave={handleSocialLinksSave}
+                        currentLinks={socialLinks}
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-full border-dashed h-12 text-muted-foreground"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add New link
+                        </Button>
+                      </UnitSocialLinksDialog>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Glimpse of the Unit */}
+            <Card className="rounded-3xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Video className="w-5 h-5" />
+                    Glimpse of the Unit
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-primary"
+                    onClick={() => setIsGlimpseDialogOpen(true)}
+                  >
+                    {glimpseUrl ? "Edit Video" : "Add Video"}
+                  </Button>
+                </div>
+                {glimpseUrl ? (
+                  <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
+                    <video
+                      src={glimpseUrl}
+                      controls
+                      controlsList="nodownload"
+                      className="w-full h-full"
+                      poster=""
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                ) : (
+                  <div className="text-center py-12 border-2 border-dashed rounded-xl">
+                    <Video className="w-12 h-12 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground">
+                      Add a video to give visitors a glimpse of your
+                      organization
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -477,9 +656,9 @@ const UnitProfile = () => {
                     variant="ghost"
                     size="sm"
                     className="text-primary"
-                    disabled
+                    onClick={() => setIsGalleryDialogOpen(true)}
                   >
-                    Add Images
+                    {galleryImages.length > 0 ? "Manage Gallery" : "Add Images"}
                   </Button>
                 </div>
                 {galleryImages.length > 0 ? (
@@ -487,13 +666,17 @@ const UnitProfile = () => {
                     {galleryImages.map((image: string, index: number) => (
                       <div
                         key={index}
-                        className="relative aspect-square rounded-lg overflow-hidden border border-border"
+                        className="relative aspect-square rounded-lg overflow-hidden border border-border group cursor-pointer"
+                        onClick={() => setViewImage(image)}
                       >
                         <img
                           src={image}
                           alt={`Gallery image ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <ZoomIn className="w-8 h-8 text-white" />
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -512,19 +695,22 @@ const UnitProfile = () => {
         </div>
       </div>
 
-      {/* Image Upload Dialogs */}
+      {/* All Dialogs */}
       {profile && unitProfile && (
         <>
           <ImageUploadDialog
             isOpen={isAvatarDialogOpen}
             onClose={() => setIsAvatarDialogOpen(false)}
-            currentImageUrl={(unitProfile as any)?.avatar_url || unitProfile.logo_url}
+            currentImageUrl={
+              (unitProfile as any)?.avatar_url || unitProfile.logo_url
+            }
             userId={profile.id}
             userName={unitProfile.unit_name || profile.full_name}
             imageType="avatar"
             entityType="unit"
             onSuccess={handleImageUploadSuccess}
           />
+
           <ImageUploadDialog
             isOpen={isBannerDialogOpen}
             onClose={() => setIsBannerDialogOpen(false)}
@@ -535,8 +721,43 @@ const UnitProfile = () => {
             entityType="unit"
             onSuccess={handleImageUploadSuccess}
           />
+
+          <GalleryDialog
+            isOpen={isGalleryDialogOpen}
+            onClose={() => setIsGalleryDialogOpen(false)}
+            userId={profile.id}
+            currentImages={galleryImages}
+            onSuccess={handleGallerySuccess}
+          />
+
+          <GlimpseDialog
+            isOpen={isGlimpseDialogOpen}
+            onClose={() => setIsGlimpseDialogOpen(false)}
+            userId={profile.id}
+            currentGlimpseUrl={glimpseUrl}
+            onSuccess={handleGlimpseSuccess}
+          />
         </>
       )}
+
+      {/* Image Viewer Dialog */}
+      <Dialog open={!!viewImage} onOpenChange={() => setViewImage(null)}>
+        <DialogContent className="sm:max-w-4xl">
+          <div className="relative">
+            <img
+              src={viewImage || ""}
+              alt="Full size preview"
+              className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
+            />
+            <button
+              onClick={() => setViewImage(null)}
+              className="absolute top-2 right-2 p-2 bg-black/50 text-white rounded-full hover:bg-black/70"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
