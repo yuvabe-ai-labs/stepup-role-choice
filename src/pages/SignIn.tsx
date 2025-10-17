@@ -20,18 +20,18 @@ const SignIn = () => {
     e.preventDefault();
     setLoading(true);
 
-    console.log('[SignIn] Submitting with keepLoggedIn:', keepLoggedIn);
+    console.log("[SignIn] Submitting with keepLoggedIn:", keepLoggedIn);
     const { error } = await signIn(email, password, keepLoggedIn);
 
     if (error) {
-      console.error('[SignIn] Sign in failed:', error);
+      console.error("[SignIn] Sign in failed:", error);
       toast({
         title: "Sign in failed",
         description: error.message,
         variant: "destructive",
       });
     } else {
-      console.log('[SignIn] Sign in successful');
+      console.log("[SignIn] Sign in successful");
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
@@ -72,7 +72,7 @@ const SignIn = () => {
             style={{ boxShadow: "0px 2px 25px rgba(0, 0, 0, 0.15)" }}
           >
             {/* Header */}
-            <div className="text-center mb-8">
+            <div className="text-center mb-4">
               <h1
                 className="text-[20px] font-medium leading-[35px] mb-2"
                 style={{
@@ -94,7 +94,7 @@ const SignIn = () => {
             </div>
 
             {/* OAuth Buttons */}
-            <div className="flex gap-3 mb-6">
+            <div className="flex gap-3 mb-4">
               <button
                 onClick={() => handleOAuthSignIn("google")}
                 className="flex-1 h-8 bg-white border border-[#D1D5DB] rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
@@ -148,7 +148,7 @@ const SignIn = () => {
             </div>
 
             {/* Divider */}
-            <div className="flex items-center mb-6">
+            <div className="flex items-center mb-4">
               <div className="flex-1 h-px bg-[#D1D5DB]"></div>
               <span className="px-3 text-[10px] leading-3" style={{ color: "#9CA3AF" }}>
                 or
@@ -157,13 +157,13 @@ const SignIn = () => {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
               <div>
                 <label htmlFor="email" className="block text-[12px] mb-2" style={{ color: "#4B5563" }}>
                   Email Address *
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center">
+                <div className="border border-[#D1D5DB] rounded-lg px-3 py-2 flex items-center">
                   <input
                     id="email"
                     type="email"
@@ -181,7 +181,7 @@ const SignIn = () => {
                 <label htmlFor="password" className="block text-[12px] mb-2" style={{ color: "#4B5563" }}>
                   Password *
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center gap-2">
+                <div className="border border-[#D1D5DB] rounded-lg px-3 py-2 flex items-center gap-2">
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
