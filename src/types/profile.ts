@@ -20,6 +20,7 @@ export interface StudentProfile {
   created_at: string;
   updated_at: string;
   skills: any[] | null;
+  links: any[] | null;
   education: any[] | null;
   projects: any[] | null;
   languages: any[] | null;
@@ -36,8 +37,6 @@ export interface StudentProfile {
   marital_status: string | null;
   is_differently_abled: boolean | null;
   has_career_break: boolean | null;
-  avatar_url: string | null;
-  banner_url: string | null;
 }
 
 export interface EducationEntry {
@@ -86,4 +85,10 @@ export interface InternshipEntry {
   end_date: string | null;
   description: string | null;
   is_current: boolean;
+}
+
+export interface LinkEntry {
+  id: string;
+  platform: string;
+  url: string;
 }
