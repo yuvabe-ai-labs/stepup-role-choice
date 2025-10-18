@@ -27,6 +27,7 @@ import AuthCallback from "@/hooks/AuthCallback";
 import RecommendedInternships from "./pages/RecommendedInternships";
 import ForgotPassword from "./pages/ForgotPassword";
 import CheckEmail from "./pages/CheckEmail";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -133,6 +134,7 @@ const App = () => (
             <Route path="/auth/:role/signup" element={<SignUp />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/check-email" element={<CheckEmail />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               path="/internships/:id"
               element={
