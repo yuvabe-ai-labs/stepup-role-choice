@@ -12,7 +12,19 @@ const AuthCallback = () => {
       try {
         console.log("Auth callback triggered");
 
-        // Get the session from the URL hash
+        // Check the URL hash for the type parameter
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const type = hashParams.get("type");
+        const accessToken = hashParams.get("access_token");
+
+        // If this is a password recovery, redirect to reset password page with the token
+        if (type === "recovery" && accessToken) {
+          console.log("Password recovery detected, redirecting to reset password");
+          navigate("/reset-password" + window.location.hash, { replace: true });
+          return;
+        }
+
+        // Get the session from the URL hash (for email verification)
         const { data, error } = await supabase.auth.getSession();
 
         if (error) {
