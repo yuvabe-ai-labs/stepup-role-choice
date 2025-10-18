@@ -25,9 +25,31 @@ const SignIn = () => {
 
     if (error) {
       console.error("[SignIn] Sign in failed:", error);
+
+      // Parse the error message from Edge Function
+      let errorMessage = error.message || "Something went wrong. Please try again.";
+
+      // Check if it's the Edge Function error
+      if (errorMessage.includes("Edge Function returned a non-2xx status code")) {
+        errorMessage = "Incorrect email or password. Please check your credentials and try again.";
+      }
+      // Check for specific error patterns in the message
+      else if (
+        errorMessage.toLowerCase().includes("invalid") ||
+        errorMessage.toLowerCase().includes("incorrect") ||
+        errorMessage.toLowerCase().includes("credentials") ||
+        errorMessage.includes("Invalid login credentials")
+      ) {
+        errorMessage = "Incorrect email or password. Please check your credentials and try again.";
+      }
+      // Check for email not confirmed
+      else if (errorMessage.includes("Email not confirmed") || errorMessage.includes("email_not_confirmed")) {
+        errorMessage = "Please check your email and verify your account before signing in.";
+      }
+
       toast({
         title: "Sign in failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } else {
@@ -43,16 +65,29 @@ const SignIn = () => {
   };
 
   const handleOAuthSignIn = async (provider: "google" | "apple") => {
+    setLoading(true);
     if (role) localStorage.setItem("pendingRole", role);
+
     const { error } = await signInWithOAuth(provider);
+
     if (error) {
       localStorage.removeItem("pendingRole");
+
+      let errorMessage = error.message || "Authentication failed. Please try again.";
+
+      // Handle Edge Function errors for OAuth
+      if (errorMessage.includes("Edge Function returned a non-2xx status code")) {
+        errorMessage = "Authentication failed. Please try again or use a different sign-in method.";
+      }
+
       toast({
         title: "Sign in failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }
+
+    setLoading(false);
   };
 
   return (
@@ -72,7 +107,7 @@ const SignIn = () => {
             style={{ boxShadow: "0px 2px 25px rgba(0, 0, 0, 0.15)" }}
           >
             {/* Header */}
-            <div className="text-center mb-4">
+            <div className="text-center mb-8">
               <h1
                 className="text-[20px] font-medium leading-[35px] mb-2"
                 style={{
@@ -94,10 +129,11 @@ const SignIn = () => {
             </div>
 
             {/* OAuth Buttons */}
-            <div className="flex gap-3 mb-4">
+            <div className="flex gap-3 mb-6">
               <button
                 onClick={() => handleOAuthSignIn("google")}
-                className="flex-1 h-8 bg-white border border-[#D1D5DB] rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+                disabled={loading}
+                className="flex-1 h-8 bg-white border border-[#D1D5DB] rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" className="rounded-sm">
                   <path
@@ -130,7 +166,8 @@ const SignIn = () => {
 
               <button
                 onClick={() => handleOAuthSignIn("apple")}
-                className="flex-1 h-8 bg-white border border-[#D1D5DB] rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+                disabled={loading}
+                className="flex-1 h-8 bg-white border border-[#D1D5DB] rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 <svg width="13" height="16" viewBox="0 0 24 24" fill="black">
                   <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
@@ -148,7 +185,7 @@ const SignIn = () => {
             </div>
 
             {/* Divider */}
-            <div className="flex items-center mb-4">
+            <div className="flex items-center mb-6">
               <div className="flex-1 h-px bg-[#D1D5DB]"></div>
               <span className="px-3 text-[10px] leading-3" style={{ color: "#9CA3AF" }}>
                 or
@@ -157,13 +194,13 @@ const SignIn = () => {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email */}
               <div>
                 <label htmlFor="email" className="block text-[12px] mb-2" style={{ color: "#4B5563" }}>
                   Email Address *
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg px-3 py-2 flex items-center">
+                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center">
                   <input
                     id="email"
                     type="email"
@@ -172,6 +209,7 @@ const SignIn = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full text-[12px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -181,7 +219,7 @@ const SignIn = () => {
                 <label htmlFor="password" className="block text-[12px] mb-2" style={{ color: "#4B5563" }}>
                   Password *
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg px-3 py-2 flex items-center gap-2">
+                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center gap-2">
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -190,11 +228,13 @@ const SignIn = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full text-[12px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     required
+                    disabled={loading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-[#9CA3AF] hover:text-[#4B5563] transition-colors"
+                    className="text-[#9CA3AF] hover:text-[#4B5563] transition-colors disabled:opacity-50"
+                    disabled={loading}
                   >
                     {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
@@ -210,6 +250,7 @@ const SignIn = () => {
                     checked={keepLoggedIn}
                     onChange={(e) => setKeepLoggedIn(e.target.checked)}
                     className="w-3 h-3 rounded border-[#D1D5DB] text-[#76A9FA] focus:ring-[#76A9FA] focus:ring-1"
+                    disabled={loading}
                   />
                   <label htmlFor="keepLoggedIn" className="text-[12px] cursor-pointer" style={{ color: "#4B5563" }}>
                     Keep me logged in
@@ -234,7 +275,7 @@ const SignIn = () => {
             {/* Footer */}
             <div className="text-center mt-6">
               <span className="text-[12px]" style={{ color: "#9CA3AF" }}>
-                Don’t have an account?{" "}
+                Don't have an account?{" "}
                 <Link to={`/auth/${role}/signup`} className="font-medium hover:underline" style={{ color: "#3F83F8" }}>
                   Sign Up
                 </Link>
