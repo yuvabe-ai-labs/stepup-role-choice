@@ -5,6 +5,14 @@ import { useToast } from "@/hooks/use-toast";
 import signupIllustration from "@/assets/signup-illustration.png";
 import { Eye, EyeOff, Check, X } from "lucide-react";
 
+const passwordRules = [
+  { test: (p: string) => /[a-z]/.test(p), label: "one lowercase character" },
+  { test: (p: string) => /[A-Z]/.test(p), label: "one uppercase character" },
+  { test: (p: string) => /\d/.test(p), label: "one number" },
+  { test: (p: string) => /[!@#$%^&*(),.?":{}|<>]/.test(p), label: "one special character" },
+  { test: (p: string) => p.length >= 8, label: "8 character minimum" },
+];
+
 const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -14,8 +22,12 @@ const ResetPassword = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [hasToken, setHasToken] = useState(false);
+
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const validatePassword = (password: string) => passwordRules.every((rule) => rule.test(password));
+  const passwordsMatch = newPassword === confirmPassword && confirmPassword !== "";
 
   useEffect(() => {
     // Check if there's a recovery token in the URL hash
@@ -27,17 +39,9 @@ const ResetPassword = () => {
       setHasToken(true);
     } else {
       setError("Invalid or expired reset link. Please request a new one.");
-      setTimeout(() => {
-        navigate("/forgot-password");
-      }, 3000);
+      setTimeout(() => navigate("/forgot-password"), 3000);
     }
   }, [navigate]);
-
-  const validatePassword = (password: string) => {
-    return password.length >= 8;
-  };
-
-  const passwordsMatch = newPassword === confirmPassword && confirmPassword !== "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +49,7 @@ const ResetPassword = () => {
     setError("");
 
     if (!validatePassword(newPassword)) {
-      setError("Password must be at least 8 characters long");
+      setError("Password does not meet all requirements");
       setLoading(false);
       return;
     }
@@ -57,9 +61,7 @@ const ResetPassword = () => {
     }
 
     try {
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
 
       if (updateError) {
         if (updateError.message.includes("same")) {
@@ -77,9 +79,7 @@ const ResetPassword = () => {
         description: "Your password has been successfully updated.",
       });
 
-      setTimeout(() => {
-        navigate("/auth/student/signin");
-      }, 2000);
+      setTimeout(() => navigate("/auth/student/signin"), 2000);
     } catch (err) {
       console.error("Error:", err);
       toast({
@@ -92,9 +92,7 @@ const ResetPassword = () => {
     setLoading(false);
   };
 
-  if (!hasToken && !error) {
-    return null;
-  }
+  if (!hasToken && !error) return null;
 
   if (success) {
     return (
@@ -116,14 +114,14 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen bg-white flex">
-      {/* Left Side - Illustration */}
+      {/* Left Side Illustration */}
       <div className="flex-1 hidden lg:flex items-center justify-center bg-gray-50">
         <div className="max-w-lg">
           <img src={signupIllustration} alt="Reset Password Illustration" className="w-full h-auto" />
         </div>
       </div>
 
-      {/* Right Side - Form */}
+      {/* Right Side Form */}
       <div className="flex-1 flex items-center justify-center bg-white px-6">
         <div className="w-full max-w-[474px]">
           <div
@@ -132,22 +130,10 @@ const ResetPassword = () => {
           >
             {/* Header */}
             <div className="text-center mb-8">
-              <h1
-                className="text-[20px] font-medium leading-[35px] mb-2"
-                style={{
-                  color: "#1F2A37",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
-                }}
-              >
+              <h1 className="text-[20px] font-medium leading-[35px] mb-2" style={{ color: "#1F2A37" }}>
                 Reset Password
               </h1>
-              <p
-                className="text-[12px] leading-[15px]"
-                style={{
-                  color: "#9CA3AF",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
-                }}
-              >
+              <p className="text-[12px] leading-[15px]" style={{ color: "#9CA3AF" }}>
                 Enter your new password below
               </p>
             </div>
@@ -155,7 +141,10 @@ const ResetPassword = () => {
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
                 <X className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                <p className="text-[11px] text-red-600" style={{ fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, sans-serif" }}>
+                <p
+                  className="text-[11px] text-red-600"
+                  style={{ fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, sans-serif" }}
+                >
                   {error}
                 </p>
               </div>
@@ -221,16 +210,25 @@ const ResetPassword = () => {
 
               {/* Password Requirements */}
               <div className="space-y-1">
+                {passwordRules.map((rule, idx) => {
+                  const passed = rule.test(newPassword);
+                  return (
+                    <div key={idx} className="flex items-center gap-2">
+                      <div
+                        className={`w-3 h-3 rounded-full flex items-center justify-center ${passed ? "bg-green-500" : "bg-gray-300"}`}
+                      >
+                        {passed && <Check size={8} className="text-white" />}
+                      </div>
+                      <p className="text-[10px]" style={{ color: passed ? "#10B981" : "#9CA3AF" }}>
+                        {rule.label}
+                      </p>
+                    </div>
+                  );
+                })}
                 <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full flex items-center justify-center ${validatePassword(newPassword) ? 'bg-green-500' : 'bg-gray-300'}`}>
-                    {validatePassword(newPassword) && <Check size={8} className="text-white" />}
-                  </div>
-                  <p className="text-[10px]" style={{ color: validatePassword(newPassword) ? "#10B981" : "#9CA3AF" }}>
-                    At least 8 characters
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full flex items-center justify-center ${passwordsMatch ? 'bg-green-500' : 'bg-gray-300'}`}>
+                  <div
+                    className={`w-3 h-3 rounded-full flex items-center justify-center ${passwordsMatch ? "bg-green-500" : "bg-gray-300"}`}
+                  >
                     {passwordsMatch && <Check size={8} className="text-white" />}
                   </div>
                   <p className="text-[10px]" style={{ color: passwordsMatch ? "#10B981" : "#9CA3AF" }}>
