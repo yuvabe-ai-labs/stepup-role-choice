@@ -182,9 +182,9 @@ const RecommendedInternships = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="flex">
-        {/* Left Sidebar */}
-        <div className="w-80 bg-white border-r border-gray-200 min-h-screen">
+      <div className="flex h-[calc(100vh-4rem)]">
+        {/* Left Sidebar - Independently Scrollable */}
+        <div className="w-80 bg-white border-r border-gray-200 h-full overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
           {/* Top Picks Header */}
           <div className="bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 text-white p-5 m-4 rounded-lg shadow-sm">
             <h2 className="text-lg font-semibold mb-2">Top picks for you</h2>
@@ -266,8 +266,8 @@ const RecommendedInternships = () => {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 bg-white">
+        {/* Main Content - Independently Scrollable */}
+        <div className="flex-1 bg-white h-full overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
           {loading ? (
             <div className="p-8">
               <div className="flex justify-between items-start mb-8">
