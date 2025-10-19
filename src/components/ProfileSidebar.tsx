@@ -16,7 +16,11 @@ interface Profile {
   created_at: string;
 }
 
-const ProfileSidebar = () => {
+interface ProfileSidebarProps {
+  savedCount?: number;
+}
+
+const ProfileSidebar = ({ savedCount = 0 }: ProfileSidebarProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -121,7 +125,7 @@ const ProfileSidebar = () => {
             <div className="pl-6">
               <p className="text-sm text-gray-600 mb-1">Saved</p>
               <div className="flex items-center space-x-2">
-                <span className="text-2xl font-bold text-gray-900">4</span>
+                <span className="text-2xl font-bold text-gray-900">{savedCount}</span>
 
                 {/* need to implement in future */}
                 {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}

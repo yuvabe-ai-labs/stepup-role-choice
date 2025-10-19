@@ -4,12 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Clock, DollarSign, Download, Share2, CircleCheckBig } from "lucide-react";
+import { MapPin, Clock, DollarSign, Bookmark, Share2, CircleCheckBig } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
 import ApplicationSuccessDialog from "@/components/ApplicationSuccessDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useApplicationStatus } from "@/hooks/useApplicationStatus";
+import { useIsSaved } from "@/hooks/useSavedInternships";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -31,7 +32,81 @@ const InternshipDetail = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [savingInternship, setSavingInternship] = useState(false);
   const { hasApplied, isLoading: isCheckingStatus, markAsApplied } = useApplicationStatus(id || "");
+  const { isSaved, isLoading: isCheckingSaved, refetch: refetchSaved } = useIsSaved(id || "");
+
+  const handleSaveInternship = async () => {
+    if (!id) return;
+    
+    setSavingInternship(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to save internships.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!profile) {
+        toast({
+          title: "Error",
+          description: "Profile not found.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (isSaved) {
+        const { error } = await supabase
+          .from('saved_internships')
+          .delete()
+          .eq('student_id', profile.id)
+          .eq('internship_id', id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Removed",
+          description: "Internship removed from saved list.",
+        });
+      } else {
+        const { error } = await supabase
+          .from('saved_internships')
+          .insert({
+            student_id: profile.id,
+            internship_id: id
+          });
+
+        if (error) throw error;
+
+        toast({
+          title: "Saved",
+          description: "Internship saved successfully!",
+        });
+      }
+
+      refetchSaved();
+    } catch (error: any) {
+      console.error('Error saving internship:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save internship.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingInternship(false);
+    }
+  };
 
   useEffect(() => {
     const fetchInternship = async () => {
@@ -145,10 +220,13 @@ const InternshipDetail = () => {
               <div className="flex gap-2 items-start">
                 <Button
                   size="sm"
-                  className="flex items-center space-x-1.5 px-4 py-2 text-gray-700 bg-white hover:bg-gray-50"
+                  variant={isSaved ? "default" : "outline"}
+                  className={`flex items-center space-x-1.5 px-4 py-2 ${isSaved ? 'bg-primary text-primary-foreground' : 'text-gray-700 bg-white hover:bg-gray-50'}`}
+                  onClick={handleSaveInternship}
+                  disabled={savingInternship || isCheckingSaved}
                 >
-                  <Download className="w-4 h-4" />
-                  <span>Save</span>
+                  <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
+                  <span>{isSaved ? 'Saved' : 'Save'}</span>
                 </Button>
                 <Button
                   size="sm"

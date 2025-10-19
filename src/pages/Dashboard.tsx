@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Clock, MapPin, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, MapPin, Loader2, BookmarkCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
@@ -10,6 +10,8 @@ import ProfileSidebar from "@/components/ProfileSidebar";
 import { useIntern } from "@/hooks/useInternships";
 import { useCourses } from "@/hooks/useCourses";
 import { useInternshipRecommendations, useCourseRecommendations } from "@/hooks/useRecommendations";
+import { useSavedInternships } from "@/hooks/useSavedInternships";
+import { useAppliedInternships } from "@/hooks/useAppliedInternships";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 
@@ -19,10 +21,12 @@ const Dashboard = () => {
   const [currentInternshipIndex, setCurrentInternshipIndex] = useState(0);
   const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
   const [userSkills, setUserSkills] = useState<string[]>([]);
+  const [activityView, setActivityView] = useState<'saved' | 'applied'>('saved');
 
   const { internships, loading: internshipsLoading } = useIntern();
-
   const { courses, loading: coursesLoading } = useCourses();
+  const { savedInternships, loading: savedLoading } = useSavedInternships();
+  const { appliedInternships, loading: appliedLoading } = useAppliedInternships();
 
   // Fetch user skills for recommendations
   useEffect(() => {
@@ -126,14 +130,17 @@ const Dashboard = () => {
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-4 gap-2">
-          {/* Left Sidebar - Profile */}
+        <div className="grid lg:grid-cols-4 gap-6">
+          {/* Left Sidebar - Profile - Fixed */}
           <div className="lg:col-span-1">
-            <ProfileSidebar />
+            <div className="lg:sticky lg:top-8">
+              <ProfileSidebar savedCount={savedInternships.length} />
+            </div>
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3 space-y-2">
+          {/* Main Content - Scrollable */}
+          <div className="lg:col-span-3 space-y-6 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2"
+            style={{ scrollbarWidth: 'thin' }}>
             {/* Hero Section */}
             <div className="grid md:grid-cols-3 gap-4">
               {heroCards.map((card) => (
@@ -370,6 +377,102 @@ const Dashboard = () => {
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     </div>
+                  </div>
+                )}
+              </Card>
+            </section>
+
+            {/* Your Activity Section */}
+            <section>
+              <Card className="p-6 bg-white shadow-sm border border-gray-200 rounded-3xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold">Your Activity</h2>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={activityView === 'saved' ? 'default' : 'ghost'}
+                      onClick={() => setActivityView('saved')}
+                      className="rounded-full"
+                    >
+                      Saved
+                    </Button>
+                    <Button
+                      variant={activityView === 'applied' ? 'default' : 'ghost'}
+                      onClick={() => setActivityView('applied')}
+                      className="rounded-full"
+                    >
+                      Applied
+                    </Button>
+                  </div>
+                </div>
+
+                {(activityView === 'saved' ? savedLoading : appliedLoading) ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : (activityView === 'saved' ? savedInternships : appliedInternships).length === 0 ? (
+                  <div className="text-center py-12">
+                    <BookmarkCheck className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">
+                      No {activityView} internships yet
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {(activityView === 'saved' ? savedInternships : appliedInternships)
+                      .slice(0, 6)
+                      .map((internship) => {
+                        const dateToUse = activityView === 'saved' 
+                          ? (internship as any).saved_at 
+                          : (internship as any).applied_at;
+                        const timeAgo = formatDistanceToNow(new Date(dateToUse), { addSuffix: true });
+                        const initial = internship.company_name?.charAt(0) || 'C';
+
+                        return (
+                          <Card
+                            key={internship.id}
+                            className="p-6 hover:shadow-lg transition-all cursor-pointer rounded-2xl border-2"
+                            onClick={() => navigate(`/internships/${internship.id}`)}
+                          >
+                            <div className="space-y-4">
+                              {/* Header with Logo and Badge */}
+                              <div className="flex items-start justify-between">
+                                <div className="w-12 h-12 bg-foreground rounded-full flex items-center justify-center text-background font-bold">
+                                  {internship.company_logo ? (
+                                    <img
+                                      src={internship.company_logo}
+                                      alt={internship.company_name}
+                                      className="w-full h-full rounded-full object-cover"
+                                    />
+                                  ) : (
+                                    initial
+                                  )}
+                                </div>
+                                <Badge className="bg-primary text-primary-foreground">
+                                  {activityView === 'saved' ? 'Saved' : 'Applied'} {timeAgo.replace(' ago', '')}
+                                </Badge>
+                              </div>
+
+                              {/* Title */}
+                              <h3 className="text-lg font-bold line-clamp-2">
+                                {internship.title}
+                              </h3>
+
+                              {/* Description */}
+                              <p className="text-sm text-muted-foreground line-clamp-3">
+                                {internship.description || 'No description available'}
+                              </p>
+
+                              {/* Duration and Location */}
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="w-4 h-4" />
+                                  <span>{internship.duration || 'Not specified'}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        );
+                      })}
                   </div>
                 )}
               </Card>

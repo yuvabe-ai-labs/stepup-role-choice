@@ -305,8 +305,8 @@ const Units = () => {
                   >
                     {/* Card Header with Gradient */}
                     <div className={`${gradient} h-48 relative flex flex-col items-center justify-center text-white`}>
-                      {unit.unit_image ? (
-                        <img src={unit.unit_image} alt={unit.unit_name} className="w-full h-full object-cover" />
+                      {unit.image || unit.avatar_url ? (
+                        <img src={unit.image || unit.avatar_url} alt={unit.unit_name} className="w-full h-full object-cover" />
                       ) : (
                         <div className="text-white text-center">
                           <h3 className="text-2xl font-bold">{unit.unit_name}</h3>

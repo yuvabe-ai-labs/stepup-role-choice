@@ -344,6 +344,27 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_internships: {
+        Row: {
+          created_at: string
+          id: string
+          internship_id: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          internship_id: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          internship_id?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
       student_education: {
         Row: {
           created_at: string | null
@@ -443,9 +464,11 @@ export type Database = {
           headline: string | null
           id: string
           interests: Json | null
+          internships: Json | null
           is_differently_abled: boolean | null
           languages: Json | null
           linkedin_url: string | null
+          links: Json | null
           location: string | null
           looking_for: string[] | null
           marital_status: string | null
@@ -475,9 +498,11 @@ export type Database = {
           headline?: string | null
           id?: string
           interests?: Json | null
+          internships?: Json | null
           is_differently_abled?: boolean | null
           languages?: Json | null
           linkedin_url?: string | null
+          links?: Json | null
           location?: string | null
           looking_for?: string[] | null
           marital_status?: string | null
@@ -507,9 +532,11 @@ export type Database = {
           headline?: string | null
           id?: string
           interests?: Json | null
+          internships?: Json | null
           is_differently_abled?: boolean | null
           languages?: Json | null
           linkedin_url?: string | null
+          links?: Json | null
           location?: string | null
           looking_for?: string[] | null
           marital_status?: string | null
@@ -536,6 +563,7 @@ export type Database = {
       units: {
         Row: {
           address: string | null
+          avatar_url: string | null
           banner_url: string | null
           contact_email: string | null
           contact_phone: string | null
@@ -543,6 +571,9 @@ export type Database = {
           description: string | null
           focus_areas: Json | null
           focus_areas_backup: Json | null
+          gallery_images: Json | null
+          glimps: Json | null
+          glimpse: Json | null
           id: string
           image: string | null
           industry: string | null
@@ -555,7 +586,6 @@ export type Database = {
           skills_offered: Json | null
           skills_offered_backup: Json | null
           social_links: Json | null
-          unit_image: string | null
           unit_name: string | null
           unit_type: string | null
           updated_at: string
@@ -564,6 +594,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          avatar_url?: string | null
           banner_url?: string | null
           contact_email?: string | null
           contact_phone?: string | null
@@ -571,6 +602,9 @@ export type Database = {
           description?: string | null
           focus_areas?: Json | null
           focus_areas_backup?: Json | null
+          gallery_images?: Json | null
+          glimps?: Json | null
+          glimpse?: Json | null
           id?: string
           image?: string | null
           industry?: string | null
@@ -583,7 +617,6 @@ export type Database = {
           skills_offered?: Json | null
           skills_offered_backup?: Json | null
           social_links?: Json | null
-          unit_image?: string | null
           unit_name?: string | null
           unit_type?: string | null
           updated_at?: string
@@ -592,6 +625,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          avatar_url?: string | null
           banner_url?: string | null
           contact_email?: string | null
           contact_phone?: string | null
@@ -599,6 +633,9 @@ export type Database = {
           description?: string | null
           focus_areas?: Json | null
           focus_areas_backup?: Json | null
+          gallery_images?: Json | null
+          glimps?: Json | null
+          glimpse?: Json | null
           id?: string
           image?: string | null
           industry?: string | null
@@ -611,7 +648,6 @@ export type Database = {
           skills_offered?: Json | null
           skills_offered_backup?: Json | null
           social_links?: Json | null
-          unit_image?: string | null
           unit_name?: string | null
           unit_type?: string | null
           updated_at?: string
