@@ -4,7 +4,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -273,7 +273,7 @@ const Units = () => {
           {error ? (
             <p className="text-destructive">{error}</p>
           ) : loading ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
                 <Card key={i} className="overflow-hidden rounded-3xl">
                   <Skeleton className="h-48 w-full" />
@@ -294,7 +294,7 @@ const Units = () => {
               </Button>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
               {filteredUnits.map((unit, index) => {
                 const gradient = getUnitGradient(index);
 
@@ -305,20 +305,18 @@ const Units = () => {
                   >
                     {/* Card Header with Gradient */}
                     <div
-                      className={`${
-                        unit.banner_url ? "bg-transparent" : gradient
-                      } rounded-3xl h-48 relative flex flex-col items-center justify-center text-white`}
+                      className={`${gradient} rounded-3xl h-48 m-1 relative flex flex-col items-center justify-center text-white`}
                     >
                       {unit.avatar_url ? (
                         <img
                           src={unit.banner_url}
                           alt={unit.unit_name}
-                          className="w-full h-full object-cover rounded-3xl p-1"
+                          className="w-full h-full object-cover rounded-3xl"
                         />
                       ) : (
                         <div className="text-white text-center">
                           <h3 className="text-2xl font-bold">
-                            {unit.unit_name}
+                            {unit.unit_name.toUpperCase()}
                           </h3>
                         </div>
                       )}
@@ -339,7 +337,7 @@ const Units = () => {
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 rounded-full overflow-hidden border bg-white flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full overflow-hidden border flex items-center justify-center bg-black">
                             {unit.avatar_url ? (
                               <img
                                 src={unit.avatar_url}
@@ -347,8 +345,8 @@ const Units = () => {
                                 className="object-contain w-10 h-10"
                               />
                             ) : (
-                              <span className="text-xs text-muted-foreground">
-                                No Logo
+                              <span className="text-xs text-white font-bold">
+                                {unit.unit_name[0].toUpperCase()}
                               </span>
                             )}
                           </div>
@@ -392,54 +390,79 @@ const FilterSection = ({
   showAll,
   setShowAll,
 }: any) => {
-  const [open, setOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    onSearch(value);
+    setShowDropdown(value.trim().length > 0);
+  };
+
+  const filteredSearchResults = list.filter((item: string) =>
+    item.toLowerCase().includes(searchValue.toLowerCase())
+  );
 
   return (
-    <div>
+    <div className="relative">
       <Label className="text-sm font-semibold text-muted-foreground mb-3 block">
         {label}
       </Label>
 
-      {/* ✅ Search + Multi-select using Command */}
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full justify-between rounded-3xl"
-          >
-            {selected.length > 0
-              ? `${selected.length} selected`
-              : `Search & select ${label}`}
-            <ChevronRight className="h-4 w-4 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0" align="start">
-          <Command>
-            <CommandInput
-              placeholder={`Search ${label}...`}
-              value={searchValue}
-              onValueChange={onSearch}
-            />
-            <CommandList>
-              <CommandEmpty>No {label} found.</CommandEmpty>
-              {list
-                .filter((item: string) =>
-                  item.toLowerCase().includes(searchValue.toLowerCase())
-                )
-                .map((item: string) => (
-                  <CommandItem
-                    key={item}
-                    onSelect={() => onToggle(item)}
-                    className="flex items-center gap-2"
-                  >
-                    <Checkbox checked={selected.includes(item)} />
-                    <span>{item}</span>
-                  </CommandItem>
-                ))}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      {/* ✅ Single Search Input */}
+      <div className="relative mb-3">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder={`Search ${label}...`}
+          value={searchValue}
+          onChange={handleSearchChange}
+          className="pl-8 rounded-3xl"
+          onFocus={() => searchValue.trim().length > 0 && setShowDropdown(true)}
+        />
+      </div>
+
+      {/* ✅ Search Dropdown (filtered results) */}
+      {showDropdown && filteredSearchResults.length > 0 && (
+        <div
+          ref={dropdownRef}
+          className="absolute z-50 w-full bg-card border rounded-xl shadow-md max-h-56 overflow-auto"
+        >
+          {filteredSearchResults.map((item: string) => (
+            <div
+              key={item}
+              onClick={() => {
+                onToggle(item);
+                setShowDropdown(false);
+              }}
+              className={`flex items-center justify-between px-3 py-2 text-sm cursor-pointer hover:bg-muted transition ${
+                selected.includes(item) ? "bg-muted/50" : ""
+              }`}
+            >
+              <span>{item}</span>
+              <Checkbox checked={selected.includes(item)} />
+            </div>
+          ))}
+          {filteredSearchResults.length === 0 && (
+            <div className="px-3 py-2 text-sm text-muted-foreground">
+              No {label} found.
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ✅ Always visible checkbox list below */}
       <div className="space-y-3 mt-3">
