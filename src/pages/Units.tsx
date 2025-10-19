@@ -18,6 +18,15 @@ import Navbar from "@/components/Navbar";
 import { useUnits } from "@/hooks/useUnits";
 import { formatDistanceToNow } from "date-fns";
 
+// ✅ shadcn Command imports for improved searchable multi-select
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandItem,
+  CommandEmpty,
+} from "@/components/ui/command";
+
 const Units = () => {
   const navigate = useNavigate();
   const { units, loading, error } = useUnits();
@@ -49,35 +58,18 @@ const Units = () => {
     setActiveDateRange("");
   };
 
-  // ------------------ NEW: parse helper ------------------
   const parsePgTimestamp = (ts: any): Date => {
-    // If it's already a Date, return early
     if (ts instanceof Date) return ts;
-
     if (!ts) return new Date(NaN);
-
     let s = String(ts).trim();
-
-    // Replace space between date & time with 'T' for ISO compatibility
-    s = s.replace(" ", "T");
-
-    // Trim microseconds to milliseconds (convert .123456 -> .123)
-    s = s.replace(/\.(\d{3})\d+/, ".$1");
-
-    // If timezone is '+00' or '+00:00', convert to 'Z'
-    s = s.replace(/\+00:00?$|Z$/i, "Z");
-
-    // If there's no timezone offset (e.g., ends with seconds), append Z
-    if (!/[zZ]|[+\-]\d{2}:?\d{2}$/.test(s)) {
-      s = s + "Z";
-    }
-
-    const d = new Date(s);
-    return d;
+    s = s
+      .replace(" ", "T")
+      .replace(/\.(\d{3})\d+/, ".$1")
+      .replace(/\+00:00?$|Z$/i, "Z");
+    if (!/[zZ]|[+\-]\d{2}:?\d{2}$/.test(s)) s = s + "Z";
+    return new Date(s);
   };
-  // -------------------------------------------------------
 
-  // Extract unique filter data
   const uniqueUnits = [
     ...new Set(units.map((u) => u.unit_name).filter(Boolean)),
   ];
@@ -100,17 +92,6 @@ const Units = () => {
     ),
   ];
 
-  // Search filtering
-  const filteredUnitsList = uniqueUnits.filter((u) =>
-    u.toLowerCase().includes(searchUnits.toLowerCase())
-  );
-  const filteredIndustriesList = uniqueIndustries.filter((i) =>
-    i.toLowerCase().includes(searchIndustries.toLowerCase())
-  );
-  const filteredDepartmentsList = uniqueDepartments.filter((d) =>
-    d.toLowerCase().includes(searchDepartments.toLowerCase())
-  );
-
   const toggleFilter = (category: keyof typeof filters, value: string) => {
     if (category === "postingDate") return;
     const list = filters[category] as string[];
@@ -122,7 +103,6 @@ const Units = () => {
     });
   };
 
-  // ✅ Fixed & simplified date range logic
   const DateRange = (range: "today" | "week" | "month") => {
     if (activeDateRange === range) {
       setActiveDateRange("");
@@ -132,22 +112,18 @@ const Units = () => {
 
     const now = new Date();
     let from = new Date();
-
-    if (range === "today") {
-      from.setHours(0, 0, 0, 0);
-    } else if (range === "week") {
+    if (range === "today") from.setHours(0, 0, 0, 0);
+    else if (range === "week") {
       const firstDay = new Date(now);
-      firstDay.setDate(now.getDate() - now.getDay()); // week starts Sunday; adjust if you want Monday
+      firstDay.setDate(now.getDate() - now.getDay());
       firstDay.setHours(0, 0, 0, 0);
       from = firstDay;
     } else if (range === "month") {
       from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
     }
 
-    // End of current day in local time
     const to = new Date();
     to.setHours(23, 59, 59, 999);
-
     setActiveDateRange(range);
     setFilters({
       ...filters,
@@ -155,7 +131,6 @@ const Units = () => {
     });
   };
 
-  // ✅ Core filtering (uses parsePgTimestamp for created_at)
   const filteredUnits = units.filter((unit) => {
     if (filters.units.length && !filters.units.includes(unit.unit_name))
       return false;
@@ -178,7 +153,6 @@ const Units = () => {
         unit.focus_areas_backup
       )
         areas.push(...Object.keys(unit.focus_areas_backup).map(String));
-
       if (!filters.interestAreas.some((a) => areas.includes(a))) return false;
     }
 
@@ -190,10 +164,7 @@ const Units = () => {
       const to = filters.postingDate.to
         ? new Date(filters.postingDate.to).getTime()
         : Infinity;
-
-      // If unitDate is invalid, exclude it (could also decide to include)
       if (Number.isNaN(unitDate)) return false;
-
       if (unitDate < from || unitDate > to) return false;
     }
 
@@ -230,51 +201,42 @@ const Units = () => {
           </div>
 
           <div className="px-6 pb-6 overflow-y-auto flex-1 space-y-6">
-            {/* Units Filter */}
             <FilterSection
               label="Units"
               searchValue={searchUnits}
               onSearch={setSearchUnits}
-              list={filteredUnitsList}
+              list={uniqueUnits}
               selected={filters.units}
               onToggle={(v) => toggleFilter("units", v)}
               showAll={showAllUnits}
               setShowAll={setShowAllUnits}
             />
-
-            {/* Industry Filter */}
             <FilterSection
               label="Industry"
               searchValue={searchIndustries}
               onSearch={setSearchIndustries}
-              list={filteredIndustriesList}
+              list={uniqueIndustries}
               selected={filters.industries}
               onToggle={(v) => toggleFilter("industries", v)}
               showAll={showAllIndustries}
               setShowAll={setShowAllIndustries}
             />
-
-            {/* Department Filter */}
             <FilterSection
               label="Department"
               searchValue={searchDepartments}
               onSearch={setSearchDepartments}
-              list={filteredDepartmentsList}
+              list={uniqueDepartments}
               selected={filters.departments}
               onToggle={(v) => toggleFilter("departments", v)}
               showAll={showAllDepartments}
               setShowAll={setShowAllDepartments}
             />
-
-            {/* Posting Date */}
             <PostingDateFilter
               filters={filters}
               activeDateRange={activeDateRange}
               onSelectDate={(range) => DateRange(range)}
               onDateChange={setFilters}
             />
-
-            {/* Interest Areas */}
             <div>
               <Label className="text-sm font-semibold text-muted-foreground mb-3 block">
                 Interest Areas
@@ -300,7 +262,7 @@ const Units = () => {
           </div>
         </div>
 
-        {/* Main Content (Units Grid) */}
+        {/* Main content remains unchanged */}
         <div className="flex-1">
           <div className="mb-6">
             <h1 className="text-3xl font-bold">
@@ -396,7 +358,6 @@ const Units = () => {
                             </p>
                           </div>
                         </div>
-                        gradient
                         <Button
                           size="sm"
                           className="bg-gradient-to-br from-[#C94100] to-[#FFB592] hover:bg-orange-600 text-white rounded-3xl px-3"
@@ -420,7 +381,7 @@ const Units = () => {
   );
 };
 
-/* ------------------ Helper Subcomponents ------------------ */
+/* ------------------ UPDATED FilterSection ------------------ */
 const FilterSection = ({
   label,
   searchValue,
@@ -430,43 +391,82 @@ const FilterSection = ({
   onToggle,
   showAll,
   setShowAll,
-}: any) => (
-  <div>
-    <Label className="text-sm font-semibold text-muted-foreground mb-3 block">
-      {label}
-    </Label>
-    <div className="relative mb-3">
-      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-      <Input
-        placeholder={`Search ${label}...`}
-        value={searchValue}
-        onChange={(e) => onSearch(e.target.value)}
-        className="pl-8 rounded-3xl"
-      />
-    </div>
-    <div className="space-y-3">
-      {(showAll ? list : list.slice(0, 4)).map((item: string) => (
-        <div key={item} className="flex items-center space-x-2">
-          <Checkbox
-            checked={selected.includes(item)}
-            onCheckedChange={() => onToggle(item)}
-          />
-          <span className="text-sm">{item}</span>
-        </div>
-      ))}
-      {list.length > 4 && (
-        <Button
-          variant="link"
-          className="p-0 text-primary text-sm"
-          onClick={() => setShowAll(!showAll)}
-        >
-          {showAll ? "Show Less" : `+${list.length - 4} More`}
-        </Button>
-      )}
-    </div>
-  </div>
-);
+}: any) => {
+  const [open, setOpen] = useState(false);
 
+  return (
+    <div>
+      <Label className="text-sm font-semibold text-muted-foreground mb-3 block">
+        {label}
+      </Label>
+
+      {/* ✅ Search + Multi-select using Command */}
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className="w-full justify-between rounded-3xl"
+          >
+            {selected.length > 0
+              ? `${selected.length} selected`
+              : `Search & select ${label}`}
+            <ChevronRight className="h-4 w-4 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[300px] p-0" align="start">
+          <Command>
+            <CommandInput
+              placeholder={`Search ${label}...`}
+              value={searchValue}
+              onValueChange={onSearch}
+            />
+            <CommandList>
+              <CommandEmpty>No {label} found.</CommandEmpty>
+              {list
+                .filter((item: string) =>
+                  item.toLowerCase().includes(searchValue.toLowerCase())
+                )
+                .map((item: string) => (
+                  <CommandItem
+                    key={item}
+                    onSelect={() => onToggle(item)}
+                    className="flex items-center gap-2"
+                  >
+                    <Checkbox checked={selected.includes(item)} />
+                    <span>{item}</span>
+                  </CommandItem>
+                ))}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+
+      {/* ✅ Always visible checkbox list below */}
+      <div className="space-y-3 mt-3">
+        {(showAll ? list : list.slice(0, 4)).map((item: string) => (
+          <div key={item} className="flex items-center space-x-2">
+            <Checkbox
+              checked={selected.includes(item)}
+              onCheckedChange={() => onToggle(item)}
+            />
+            <span className="text-sm">{item}</span>
+          </div>
+        ))}
+        {list.length > 4 && (
+          <Button
+            variant="link"
+            className="p-0 text-primary text-sm"
+            onClick={() => setShowAll(!showAll)}
+          >
+            {showAll ? "Show Less" : `+${list.length - 4} More`}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ------------------ PostingDateFilter unchanged ------------------ */
 const PostingDateFilter = ({
   filters,
   activeDateRange,
@@ -517,7 +517,6 @@ const PostingDateFilter = ({
           </Popover>
         ))}
       </div>
-
       <div className="flex justify-between gap-2 flex-wrap mt-2">
         {["today", "week", "month"].map((range) => (
           <Button
