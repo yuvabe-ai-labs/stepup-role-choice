@@ -18,15 +18,6 @@ import Navbar from "@/components/Navbar";
 import { useUnits } from "@/hooks/useUnits";
 import { formatDistanceToNow } from "date-fns";
 
-// ✅ shadcn Command imports for improved searchable multi-select
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandItem,
-  CommandEmpty,
-} from "@/components/ui/command";
-
 const Units = () => {
   const navigate = useNavigate();
   const { units, loading, error } = useUnits();
@@ -74,10 +65,10 @@ const Units = () => {
     ...new Set(units.map((u) => u.unit_name).filter(Boolean)),
   ];
   const uniqueIndustries = [
-    ...new Set(units.map((u) => u.industry || u.unit_type).filter(Boolean)),
+    ...new Set(units.map((u) => u.industry).filter(Boolean)),
   ];
   const uniqueDepartments = [
-    ...new Set(units.map((u) => u.unit_type).filter(Boolean)),
+    ...new Set(units.flatMap((u) => u.skills_offered).filter(Boolean)),
   ];
 
   const interestAreas = [
@@ -135,12 +126,16 @@ const Units = () => {
     if (filters.units.length && !filters.units.includes(unit.unit_name))
       return false;
     if (filters.industries.length) {
-      const ind = unit.industry || unit.unit_type;
+      const ind = unit.industry;
       if (!ind || !filters.industries.includes(ind)) return false;
     }
     if (
       filters.departments.length &&
-      !filters.departments.includes(unit.unit_type)
+      !filters.departments.some((skill) =>
+        Array.isArray(unit.skills_offered)
+          ? unit.skills_offered.includes(skill)
+          : false
+      )
     )
       return false;
 
@@ -237,7 +232,7 @@ const Units = () => {
               onSelectDate={(range) => DateRange(range)}
               onDateChange={setFilters}
             />
-            <div>
+            {/* <div>
               <Label className="text-sm font-semibold text-muted-foreground mb-3 block">
                 Interest Areas
               </Label>
@@ -258,7 +253,7 @@ const Units = () => {
                   </Button>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 
