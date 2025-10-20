@@ -117,10 +117,10 @@ export const CourseDialog: React.FC<CourseDialogProps> = ({ children, course, on
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-full">
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="rounded-full">
               {isSubmitting ? "Saving..." : course ? "Update" : "Add"}
             </Button>
           </div>
