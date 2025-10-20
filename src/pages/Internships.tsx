@@ -16,7 +16,7 @@ import { useUnits } from "@/hooks/useUnits";
 import { formatDistanceToNow } from "date-fns";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 
-const Units = () => {
+const Internship = () => {
   const navigate = useNavigate();
   const { units } = useUnits();
   const { internships, loading, error } = useIntern();
@@ -64,7 +64,9 @@ const Units = () => {
 
   const uniqueUnits = [...new Set(internships.map((i) => i.company_name).filter(Boolean))];
   const uniqueTitles = [...new Set(internships.map((i) => i.title).filter(Boolean))];
-  const uniqueIndustries = [...new Set(units.flatMap((u) => u.industry).filter(Boolean))];
+  // const uniqueIndustries = [
+  //   ...new Set(units.flatMap((u) => u.industry).filter(Boolean)),
+  // ];
   // const uniqueDepartments = [
   //   ...new Set(internships.flatMap((i) => i.skills_offered).filter(Boolean)),
   // ];
@@ -118,13 +120,13 @@ const Units = () => {
     });
   };
 
-  const filteredUnits = units.filter((unit) => {
-    if (filters.industries.length) {
-      const ind = unit.industry;
-      if (!ind || !filters.industries.includes(ind)) return false;
-    }
-    return false;
-  });
+  // const filteredUnits = units.filter((unit) => {
+  //   if (filters.industries.length) {
+  //     const ind = unit.industry;
+  //     if (!ind || !filters.industries.includes(ind)) return false;
+  //   }
+  //   return false;
+  // });
 
   const filteredInternships = internships.filter((internship) => {
     if (filters.internships.length && !filters.internships.includes(internship.company_name)) return false;
@@ -132,13 +134,13 @@ const Units = () => {
       const ind = internship.title;
       if (!ind || !filters.titles.includes(ind)) return false;
     }
-    if (filters.industries.length) {
-      const unitId = internship.created_by;
-      const unit = units.filter((u) => u.profile_id === unitId);
+    // if (filters.industries.length) {
+    //   const unitId = internship.created_by;
+    //   const unit = units.filter((u) => u.profile_id === unitId);
 
-      const ind = internship.title;
-      if (!ind || !filters.titles.includes(ind)) return false;
-    }
+    //   const ind = internship.title;
+    //   if (!ind || !filters.titles.includes(ind)) return false;
+    // }
     // if (
     //   filters.departments.length &&
     //   !filters.departments.some((skill) =>
@@ -208,7 +210,7 @@ const Units = () => {
               showAll={showAllUnits}
               setShowAll={setShowAllUnits}
             />
-            <FilterSection
+            {/* <FilterSection
               label="Industry"
               searchValue={searchTitles}
               onSearch={setSearchTitles}
@@ -217,7 +219,7 @@ const Units = () => {
               onToggle={(v) => toggleFilter("industries", v)}
               showAll={showAllTitles}
               setShowAll={setShowAlltitles}
-            />
+            /> */}
             <FilterSection
               label="Internships Title"
               searchValue={searchTitles}
@@ -437,4 +439,4 @@ const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChang
   </div>
 );
 
-export default Units;
+export default Internship;
