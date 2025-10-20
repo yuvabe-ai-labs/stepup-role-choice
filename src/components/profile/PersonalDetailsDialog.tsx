@@ -161,11 +161,19 @@ export const PersonalDetailsDialog = ({
       const languageNames = languages.map((l) => l.name).filter(Boolean);
       const duplicates = languageNames.filter((name, index) => languageNames.indexOf(name) !== index);
 
+      // Validate empty selections
+      const emptyLanguages = languages.filter((lang) => !lang.name || lang.name.trim() === "");
+
       if (duplicates.length > 0) {
         setLanguageError(`${duplicates[0]} language added more than once. Please remove or update it.`);
         setLoading(false);
         return;
+      } else if (emptyLanguages.length > 0) {
+        setLanguageError("Please select a language before saving.");
+        setLoading(false);
+        return;
       }
+      setLanguageError("");
 
       // Update profile table
       await onUpdate({
