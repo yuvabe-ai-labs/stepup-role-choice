@@ -21,6 +21,7 @@ import { ProfileSummaryDialog } from "@/components/profile/ProfileSummaryDialog"
 import { format } from "date-fns";
 import { CircularProgress } from "@/components/CircularProgress";
 import { LinkDialog } from "@/components/profile/LinkDialog";
+import AIEditIcon from "@/components/ui/custom-icons";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -203,7 +204,6 @@ const Profile = () => {
                       </Button>
                     </ProfileSummaryDialog>
                   </div>
-
                   {/* Courses */}
                   <div className="flex items-center justify-between">
                     <span>Courses</span>
@@ -213,17 +213,15 @@ const Profile = () => {
                       </Button>
                     </CourseDialog>
                   </div>
-
                   {/* Key Skills */}
                   <div className="flex items-center justify-between">
                     <span>Key Skills</span>
                     <SkillsDialog studentProfile={studentProfile} onUpdate={updateStudentProfile}>
                       <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
-                        Edit
+                        Add
                       </Button>
                     </SkillsDialog>
                   </div>
-
                   {/* Education */}
                   <div className="flex items-center justify-between">
                     <span>Education</span>
@@ -233,7 +231,6 @@ const Profile = () => {
                       </Button>
                     </EducationDialog>
                   </div>
-
                   {/* Projects */}
                   <div className="flex items-center justify-between">
                     <span>Projects</span>
@@ -243,7 +240,6 @@ const Profile = () => {
                       </Button>
                     </ProjectDialog>
                   </div>
-
                   {/* Interests */}
                   <div className="flex items-center justify-between">
                     <span>Interests</span>
@@ -256,7 +252,6 @@ const Profile = () => {
                       </Button>
                     </InterestDialog>
                   </div>
-
                   {/* Internships */}
                   <div className="flex items-center justify-between">
                     <span>Internships</span>
@@ -266,7 +261,6 @@ const Profile = () => {
                       </Button>
                     </InternshipDialog>
                   </div>
-
                   {/* Personal Details */}
                   <div className="flex items-center justify-between">
                     <span>Personal Details</span>
@@ -277,9 +271,33 @@ const Profile = () => {
                       onUpdateStudent={updateStudentProfile}
                     >
                       <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
-                        Edit
+                        Add
                       </Button>
                     </PersonalDetailsDialog>
+                  </div>
+                  {/* Languages */}
+                  <div className="flex items-center justify-between">
+                    <span>Languages</span>
+                    <PersonalDetailsDialog
+                      profile={profile}
+                      studentProfile={studentProfile}
+                      onUpdate={updateProfile}
+                      onUpdateStudent={updateStudentProfile}
+                    >
+                      <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                        Add
+                      </Button>
+                    </PersonalDetailsDialog>
+                  </div>
+
+                  {/* Links */}
+                  <div className="flex items-center justify-between">
+                    <span>Links</span>
+                    <LinkDialog onSave={addInternshipEntry}>
+                      <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                        Add
+                      </Button>
+                    </LinkDialog>
                   </div>
                 </div>
               </CardContent>
@@ -300,11 +318,8 @@ const Profile = () => {
                 <div className="border rounded-2xl p-3 min-h-28">
                   <p className="text-muted-foreground">
                     {studentProfile?.cover_letter || (
-                      <p>
-                        <span className="pr-2">
-                          <Sparkle className="inline w-3 " />
-                          <Pencil className="inline w-4" />
-                        </span>
+                      <p className="flex pr-2 items-center gap-1">
+                        <AIEditIcon />
                         Get AI assistance to write your Profile Summary
                       </p>
                     )}
