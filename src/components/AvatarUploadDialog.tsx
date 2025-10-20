@@ -67,18 +67,22 @@ export const AvatarUploadDialog = ({
     try {
       setUploading(true);
 
+      // Get current auth user ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       // Delete old avatar if exists
       if (currentAvatarUrl) {
         const oldPath = currentAvatarUrl.split("/").pop();
         if (oldPath) {
-          await supabase.storage.from("avatars").remove([`${userId}/${oldPath}`]);
+          await supabase.storage.from("avatars").remove([`${user.id}/${oldPath}`]);
         }
       }
 
-      // Upload new avatar
+      // Upload new avatar using auth user ID for folder structure
       const fileExt = file.name.split(".").pop();
       const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${userId}/${fileName}`;
+      const filePath = `${user.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file);
 
@@ -122,10 +126,14 @@ export const AvatarUploadDialog = ({
     try {
       setUploading(true);
 
-      // Delete from storage
+      // Get current auth user ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      // Delete from storage using auth user ID
       const oldPath = currentAvatarUrl.split("/").pop();
       if (oldPath) {
-        await supabase.storage.from("avatars").remove([`${userId}/${oldPath}`]);
+        await supabase.storage.from("avatars").remove([`${user.id}/${oldPath}`]);
       }
 
       // Update student profile

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Mail, Phone, MapPin } from "lucide-react";
+import { Send, Mail, Phone, MapPin, AlertCircle } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface ProfileSummaryDialogProps {
@@ -20,7 +20,6 @@ interface CompleteProfileData {
   profile: any;
   studentProfile: any;
   education: any[];
-  internships: any[];
 }
 
 const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onClose, internship, onSuccess }) => {
@@ -76,20 +75,10 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
 
         if (educationError) throw educationError;
 
-        // Fetch internship history
-        const { data: internships, error: internshipsError } = await supabase
-          .from("student_internships")
-          .select("*")
-          .eq("profile_id", profile.id)
-          .order("end_date", { ascending: false });
-
-        if (internshipsError) throw internshipsError;
-
         setProfileData({
           profile,
           studentProfile: studentProfile || {},
           education: education || [],
-          internships: internships || [],
         });
       } catch (error) {
         console.error("Error fetching profile data:", error);
@@ -122,7 +111,7 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
         {
           studentProfile: profileData.studentProfile,
           education: profileData.education,
-          internships: profileData.internships,
+          internships: internships,
           profile: profileData.profile,
         },
         internship
@@ -187,6 +176,40 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
   const courses = parseJsonField(profileData?.studentProfile?.completed_courses, []);
   const interests = parseJsonField(profileData?.studentProfile?.interests, []);
   const projects = parseJsonField(profileData?.studentProfile?.projects, []);
+  const internships = parseJsonField(profileData?.studentProfile?.internships, []);
+
+  // Validation: Check if sections are complete
+  const sectionValidation = useMemo(() => {
+    if (!profileData) return {};
+
+    return {
+      personal_details: !!(
+        profileData.profile.full_name &&
+        profileData.profile.email &&
+        profileData.profile.phone &&
+        profileData.profile.date_of_birth
+      ),
+      profile_summary: !!(profileData.studentProfile?.cover_letter && profileData.studentProfile.cover_letter.length >= 10),
+      courses: courses.length > 0,
+      key_skills: skills.length > 0,
+      education: profileData.education.length > 0,
+      interests: interests.length > 0,
+      projects: projects.length > 0,
+      internship: internships.length > 0,
+    };
+  }, [profileData, skills, courses, interests, projects, internships]);
+
+  // Check if required sections are complete
+  const canSubmit = useMemo(() => {
+    return (
+      sectionValidation.personal_details &&
+      sectionValidation.profile_summary &&
+      sectionValidation.courses &&
+      sectionValidation.key_skills &&
+      sectionValidation.education &&
+      sectionValidation.interests
+    );
+  }, [sectionValidation]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -196,8 +219,9 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
           <h2 className="text-2xl font-bold text-gray-900">Send Your Profile to the Unit</h2>
           <Button
             onClick={handleSubmit}
-            disabled={isSubmitting || isLoading || !profileData}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full flex items-center gap-2"
+            disabled={isSubmitting || isLoading || !profileData || !canSubmit}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            title={!canSubmit ? "Please complete all required sections to submit" : ""}
           >
             <Send className="h-8" />
             {isSubmitting ? "Sending..." : "Send Profile"}
@@ -215,7 +239,14 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   disabled
                   className="data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400"
                 />
-                <span className="text-gray-700 font-medium">Personal Details</span>
+                <span className="text-gray-700 font-medium flex items-center gap-2">
+                  Personal Details
+                  {!sectionValidation.personal_details && (
+                    <span title="Incomplete section">
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    </span>
+                  )}
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Checkbox
@@ -223,7 +254,14 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   disabled
                   className="data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400"
                 />
-                <span className="text-gray-700 font-medium">Profile Summary</span>
+                <span className="text-gray-700 font-medium flex items-center gap-2">
+                  Profile Summary
+                  {!sectionValidation.profile_summary && (
+                    <span title="Incomplete section">
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    </span>
+                  )}
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Checkbox
@@ -231,7 +269,14 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   disabled
                   className="data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400"
                 />
-                <span className="text-gray-700 font-medium">Courses</span>
+                <span className="text-gray-700 font-medium flex items-center gap-2">
+                  Courses
+                  {!sectionValidation.courses && (
+                    <span title="Incomplete section">
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    </span>
+                  )}
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Checkbox
@@ -239,7 +284,14 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   disabled
                   className="data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400"
                 />
-                <span className="text-gray-700 font-medium">Key Skills</span>
+                <span className="text-gray-700 font-medium flex items-center gap-2">
+                  Key Skills
+                  {!sectionValidation.key_skills && (
+                    <span title="Incomplete section">
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    </span>
+                  )}
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Checkbox
@@ -247,7 +299,14 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   disabled
                   className="data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400"
                 />
-                <span className="text-gray-700 font-medium">Education</span>
+                <span className="text-gray-700 font-medium flex items-center gap-2">
+                  Education
+                  {!sectionValidation.education && (
+                    <span title="Incomplete section">
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    </span>
+                  )}
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Checkbox
@@ -255,7 +314,14 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   disabled
                   className="data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400"
                 />
-                <span className="text-gray-700 font-medium">Interests</span>
+                <span className="text-gray-700 font-medium flex items-center gap-2">
+                  Interests
+                  {!sectionValidation.interests && (
+                    <span title="Incomplete section">
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    </span>
+                  )}
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Checkbox
@@ -267,7 +333,14 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                     }))
                   }
                 />
-                <span className="text-gray-700 font-medium">Projects</span>
+                <span className="text-gray-700 font-medium flex items-center gap-2">
+                  Projects
+                  {!sectionValidation.projects && (
+                    <span title="Incomplete section">
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    </span>
+                  )}
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Checkbox
@@ -279,7 +352,14 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                     }))
                   }
                 />
-                <span className="text-gray-700 font-medium">Internship</span>
+                <span className="text-gray-700 font-medium flex items-center gap-2">
+                  Internship
+                  {!sectionValidation.internship && (
+                    <span title="Incomplete section">
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    </span>
+                  )}
+                </span>
               </div>
             </div>
           </div>
@@ -468,13 +548,13 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   )}
 
                   {/* Internship History */}
-                  {sections.internship && profileData.internships.length > 0 && (
+                  {sections.internship && internships.length > 0 && (
                     <div className="bg-white rounded-[20px] p-6 shadow-sm border border-gray-200">
                       <h3 className="text-xl font-bold text-gray-900 mb-4">Internship History</h3>
                       <div className="space-y-4">
-                        {profileData.internships.map((internship: any) => (
-                          <div key={internship.id} className="border-l-4 border-teal-500 pl-4">
-                            <h4 className="font-semibold text-gray-900">{internship.role}</h4>
+                        {internships.map((internship: any, index: number) => (
+                          <div key={internship.id || index} className="border-l-4 border-teal-500 pl-4">
+                            <h4 className="font-semibold text-gray-900">{internship.title || internship.role}</h4>
                             <p className="text-gray-700">{internship.company}</p>
                             <p className="text-sm text-gray-600">
                               {formatDate(internship.start_date)} -{" "}
