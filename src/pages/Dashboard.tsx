@@ -217,7 +217,7 @@ const Dashboard = () => {
                               <Card
                                 key={internship.id}
                                 className={`${colorClass} shadow-sm hover:shadow-md transition-shadow cursor-pointer rounded-xl`}
-                                onClick={() => navigate(`/internships/${internship.id}`)}
+                                onClick={() => navigate(`/recommended-internships?id=${internship.id}`)}
                               >
                                 <CardHeader className="pb-3">
                                   <div className="flex justify-between items-start mb-2">

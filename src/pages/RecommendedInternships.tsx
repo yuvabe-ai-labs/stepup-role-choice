@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -51,6 +52,7 @@ function parseNumberedObject(data: any): string[] {
 
 const RecommendedInternships = () => {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const { internships: rawInternships = [], loading, error } = useIntern();
   const [selectedInternship, setSelectedInternship] = useState<string>("");
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
@@ -111,12 +113,24 @@ const RecommendedInternships = () => {
   // Use the recommendation hook (same as Dashboard)
   const internships = useInternshipRecommendations(allInternships, userSkills);
 
-  // Set default selected internship when data loads
+  // Set default selected internship when data loads or from URL params
   useEffect(() => {
+    const idFromUrl = searchParams.get("id");
+    
+    if (idFromUrl && internships.length > 0) {
+      // Check if the internship from URL exists in the list
+      const exists = internships.some(int => int.id === idFromUrl);
+      if (exists) {
+        setSelectedInternship(idFromUrl);
+        return;
+      }
+    }
+    
+    // Default to first internship if no URL param or invalid ID
     if (internships.length > 0 && !selectedInternship) {
       setSelectedInternship(internships[0].id);
     }
-  }, [internships, selectedInternship]);
+  }, [internships, selectedInternship, searchParams]);
 
   const selectedInternshipData = internships.find((int) => int.id === selectedInternship) || internships[0];
 

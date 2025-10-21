@@ -137,19 +137,23 @@ const UnitView = () => {
                       const socialLinks = safeParse(unit.social_links, []);
                       if (socialLinks.length === 0) return null;
 
-                      const getSocialIcon = (platform: string) => {
-                        const lowerPlatform = platform.toLowerCase();
-                        if (lowerPlatform.includes("linkedin")) return Linkedin;
-                        if (lowerPlatform.includes("instagram")) return Instagram;
-                        if (lowerPlatform.includes("facebook")) return Facebook;
-                        if (lowerPlatform.includes("twitter") || lowerPlatform.includes("x")) return Twitter;
+                      const getSocialIcon = (link: any) => {
+                        // Detect platform from URL or platform field
+                        const url = (link.url || link).toLowerCase();
+                        const platform = (link.platform || "").toLowerCase();
+                        
+                        if (platform.includes("linkedin") || url.includes("linkedin.com")) return Linkedin;
+                        if (platform.includes("instagram") || url.includes("instagram.com")) return Instagram;
+                        if (platform.includes("facebook") || url.includes("facebook.com")) return Facebook;
+                        if (platform.includes("twitter") || platform.includes("x") || url.includes("twitter.com") || url.includes("x.com")) return Twitter;
                         return Globe;
                       };
 
                       return (
                         <div className="flex gap-2">
                           {socialLinks.map((link: any, idx: number) => {
-                            const Icon = getSocialIcon(link.platform);
+                            const Icon = getSocialIcon(link);
+                            const url = link.url || link;
                             return (
                               <Button
                                 key={idx}
@@ -158,7 +162,7 @@ const UnitView = () => {
                                 className="rounded-full"
                                 asChild
                               >
-                                <a href={link.url} target="_blank" rel="noopener noreferrer">
+                                <a href={url} target="_blank" rel="noopener noreferrer">
                                   <Icon className="w-4 h-4" />
                                 </a>
                               </Button>
