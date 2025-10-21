@@ -3,16 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  MapPin,
-  Clock,
-  DollarSign,
-  Bookmark,
-  Share,
-  Check,
-  Download,
-  Share2,
-} from "lucide-react";
+import { MapPin, Clock, DollarSign, Bookmark, Share, Check, Download, Share2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useIntern } from "@/hooks/useInternships";
 import { useApplicationStatus } from "@/hooks/useApplicationStatus";
@@ -21,6 +12,7 @@ import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
 import ApplicationSuccessDialog from "@/components/ApplicationSuccessDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
+import { formatDistanceToNow } from "date-fns";
 
 type Internship = Tables<"internships">;
 
@@ -48,7 +40,7 @@ function parseNumberedObject(data: any): string[] {
           value.length > 0 &&
           !value.toLowerCase().includes("responsibilities") &&
           !value.toLowerCase().includes("requirements") &&
-          !value.toLowerCase().includes("candidates")
+          !value.toLowerCase().includes("candidates"),
       );
   }
   return [];
@@ -61,18 +53,10 @@ const RecommendedInternships = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [userSkills, setUserSkills] = useState<string[]>([]);
 
-  const {
-    hasApplied,
-    isLoading: isCheckingStatus,
-    markAsApplied,
-  } = useApplicationStatus(selectedInternship);
+  const { hasApplied, isLoading: isCheckingStatus, markAsApplied } = useApplicationStatus(selectedInternship);
 
   // Ensure internships is always an array
-  const allInternships = Array.isArray(rawInternships)
-    ? rawInternships
-    : rawInternships
-    ? [rawInternships]
-    : [];
+  const allInternships = Array.isArray(rawInternships) ? rawInternships : rawInternships ? [rawInternships] : [];
 
   // Fetch user skills for recommendations
   useEffect(() => {
@@ -83,11 +67,7 @@ const RecommendedInternships = () => {
       if (!user) return;
 
       try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
+        const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle();
 
         if (profile) {
           const { data: studentProfile } = await supabase
@@ -102,9 +82,7 @@ const RecommendedInternships = () => {
             if (typeof studentProfile.skills === "string") {
               try {
                 const parsed = JSON.parse(studentProfile.skills);
-                skills = Array.isArray(parsed)
-                  ? parsed
-                  : studentProfile.skills.split(",").map((s) => s.trim());
+                skills = Array.isArray(parsed) ? parsed : studentProfile.skills.split(",").map((s) => s.trim());
               } catch {
                 skills = studentProfile.skills.split(",").map((s) => s.trim());
               }
@@ -133,8 +111,7 @@ const RecommendedInternships = () => {
     }
   }, [internships, selectedInternship]);
 
-  const selectedInternshipData =
-    internships.find((int) => int.id === selectedInternship) || internships[0];
+  const selectedInternshipData = internships.find((int) => int.id === selectedInternship) || internships[0];
 
   // Parse all data fields from database with error handling
   let responsibilities = [];
@@ -143,36 +120,28 @@ const RecommendedInternships = () => {
   let benefits = [];
 
   try {
-    responsibilities = parseNumberedObject(
-      safeParse(selectedInternshipData?.responsibilities, {})
-    );
+    responsibilities = parseNumberedObject(safeParse(selectedInternshipData?.responsibilities, {}));
   } catch (e) {
     console.error("Error parsing responsibilities:", e);
     responsibilities = [];
   }
 
   try {
-    requirements = parseNumberedObject(
-      safeParse(selectedInternshipData?.requirements, {})
-    );
+    requirements = parseNumberedObject(safeParse(selectedInternshipData?.requirements, {}));
   } catch (e) {
     console.error("Error parsing requirements:", e);
     requirements = [];
   }
 
   try {
-    skills = parseNumberedObject(
-      safeParse(selectedInternshipData?.skills_required, {})
-    );
+    skills = parseNumberedObject(safeParse(selectedInternshipData?.skills_required, {}));
   } catch (e) {
     console.error("Error parsing skills:", e);
     skills = [];
   }
 
   try {
-    benefits = parseNumberedObject(
-      safeParse(selectedInternshipData?.benefits, {})
-    );
+    benefits = parseNumberedObject(safeParse(selectedInternshipData?.benefits, {}));
   } catch (e) {
     console.error("Error parsing benefits:", e);
     benefits = [];
@@ -183,28 +152,22 @@ const RecommendedInternships = () => {
       <Navbar />
 
       <div className="flex h-[calc(100vh-4rem)]">
-        {/* Left Sidebar - Independently Scrollable */}
-        <div className="w-80 bg-white border-r border-gray-200 h-full overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
-          {/* Top Picks Header */}
-          <div className="bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 text-white p-5 m-4 rounded-lg shadow-sm">
+        {/* Left Sidebar - Fixed Header + Scrollable List */}
+        <div className="w-80 bg-white border-r border-gray-200 h-full flex flex-col">
+          {/* Fixed Top Picks Header */}
+          <div className="bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 text-white p-5 m-4 rounded-lg shadow-sm flex-shrink-0 sticky top-0 z-10">
             <h2 className="text-lg font-semibold mb-2">Top picks for you</h2>
             <p className="text-sm opacity-90 leading-relaxed">
-              Based on your profile, preferences, and activity like applies,
-              searches, and saves
+              Based on your profile, preferences, and activity like applies, searches, and saves
             </p>
-            <p className="text-xs mt-2 opacity-80">
-              {loading ? "..." : internships.length} results
-            </p>
+            <p className="text-xs mt-2 opacity-80">{loading ? "..." : internships.length} results</p>
           </div>
 
-          {/* Internship Cards List */}
-          <div className="px-4 pb-4 space-y-3">
+          {/* Scrollable Internship Cards List */}
+          <div className="px-4 py-4 space-y-1 overflow-y-auto flex-1" style={{ scrollbarWidth: "thin" }}>
             {loading ? (
               Array.from({ length: 3 }).map((_, index) => (
-                <Card
-                  key={index}
-                  className="cursor-pointer shadow-sm border border-gray-100"
-                >
+                <Card key={index} className="cursor-pointer shadow-sm border border-gray-100">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-3">
                       <Skeleton className="w-8 h-8 rounded-full" />
@@ -219,15 +182,11 @@ const RecommendedInternships = () => {
               ))
             ) : error ? (
               <div className="p-4 text-center">
-                <p className="text-gray-500 text-sm">
-                  Error loading internships: {error}
-                </p>
+                <p className="text-gray-500 text-sm">Error loading internships: {error}</p>
               </div>
             ) : internships.length === 0 ? (
               <div className="p-4 text-center">
-                <p className="text-gray-500 text-sm">
-                  No recommended internships available.
-                </p>
+                <p className="text-gray-500 text-sm">No recommended internships available.</p>
               </div>
             ) : (
               internships.map((internship) => (
@@ -235,7 +194,7 @@ const RecommendedInternships = () => {
                   key={internship.id}
                   className={`cursor-pointer transition-all duration-150 shadow-sm border border-gray-100 hover:shadow-md ${
                     selectedInternship === internship.id
-                      ? "ring-2 ring-blue-500 shadow-md border-blue-200"
+                      ? "ring-1 ring-blue-500 shadow-md border-blue-200"
                       : "hover:border-gray-300"
                   }`}
                   onClick={() => setSelectedInternship(internship.id)}
@@ -246,15 +205,16 @@ const RecommendedInternships = () => {
                         {internship.company_name?.charAt(0) || "C"}
                       </div>
                       <Badge className="bg-blue-500 hover:bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
-                        Saved 5d ago
+                        Saved{" "}
+                        {internship.posted_date
+                          ? formatDistanceToNow(new Date(internship.posted_date), {
+                              addSuffix: true,
+                            })
+                          : "recently"}
                       </Badge>
                     </div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-2 leading-tight">
-                      {internship.title}
-                    </h3>
-                    <p className="text-xs text-gray-600 mb-3 leading-relaxed line-clamp-2">
-                      {internship.description}
-                    </p>
+                    <h3 className="font-semibold text-gray-900 text-sm mb-2 leading-tight">{internship.title}</h3>
+                    <p className="text-xs text-gray-600 mb-3 leading-relaxed line-clamp-2">{internship.description}</p>
                     <div className="flex items-center text-xs text-gray-500">
                       <Clock className="w-3 h-3 mr-1" />
                       {internship.duration}
@@ -267,7 +227,7 @@ const RecommendedInternships = () => {
         </div>
 
         {/* Main Content - Independently Scrollable */}
-        <div className="flex-1 bg-white h-full overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+        <div className="flex-1 bg-white h-full overflow-y-auto" style={{ scrollbarWidth: "thin" }}>
           {loading ? (
             <div className="p-8">
               <div className="flex justify-between items-start mb-8">
@@ -288,15 +248,11 @@ const RecommendedInternships = () => {
             </div>
           ) : error ? (
             <div className="p-8 text-center py-16">
-              <p className="text-gray-500">
-                Error loading internship details: {error}
-              </p>
+              <p className="text-gray-500">Error loading internship details: {error}</p>
             </div>
           ) : !selectedInternshipData ? (
             <div className="p-8 text-center py-16">
-              <p className="text-gray-500">
-                Select an internship to view details
-              </p>
+              <p className="text-gray-500">Select an internship to view details</p>
             </div>
           ) : (
             <div className="p-8">
@@ -304,18 +260,12 @@ const RecommendedInternships = () => {
               <div className="flex justify-between items-start mb-8">
                 <div className="flex items-start space-x-5">
                   <div className="w-16 h-16 bg-teal-600 text-white rounded-2xl flex items-center justify-center shadow-sm">
-                    <svg
-                      className="w-8 h-8"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
                     </svg>
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                      {selectedInternshipData.title}
-                    </h1>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-1">{selectedInternshipData.title}</h1>
                     <p className="text-lg text-gray-700 mb-3 font-medium">
                       {selectedInternshipData.company_name?.replace(/\n/g, "")}
                     </p>
@@ -362,9 +312,7 @@ const RecommendedInternships = () => {
 
               {/* About the Internship */}
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  About the Internship
-                </h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">About the Internship</h2>
                 <div className="text-gray-700 leading-relaxed">
                   <p>{selectedInternshipData.description}</p>
                 </div>
@@ -373,18 +321,14 @@ const RecommendedInternships = () => {
               {/* Key Responsibilities */}
               {responsibilities.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                    Key Responsibilities
-                  </h2>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Key Responsibilities</h2>
                   <div className="space-y-3">
                     {responsibilities.map((responsibility, index) => (
                       <div key={index} className="flex items-start space-x-3">
                         <div className="w-5 h-5 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <Check className="w-3 h-3" />
                         </div>
-                        <p className="text-gray-700 leading-relaxed">
-                          {responsibility}
-                        </p>
+                        <p className="text-gray-700 leading-relaxed">{responsibility}</p>
                       </div>
                     ))}
                   </div>
@@ -394,18 +338,14 @@ const RecommendedInternships = () => {
               {/* Requirements */}
               {requirements.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                    Requirements from the Candidates
-                  </h2>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Requirements from the Candidates</h2>
                   <div className="space-y-3">
                     {requirements.map((requirement, index) => (
                       <div key={index} className="flex items-start space-x-3">
                         <div className="w-5 h-5 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <Check className="w-3 h-3" />
                         </div>
-                        <p className="text-gray-700 leading-relaxed">
-                          {requirement}
-                        </p>
+                        <p className="text-gray-700 leading-relaxed">{requirement}</p>
                       </div>
                     ))}
                   </div>
@@ -415,16 +355,10 @@ const RecommendedInternships = () => {
               {/* Skills Required */}
               {skills.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                    Skills Required
-                  </h2>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Skills Required</h2>
                   <div className="flex flex-wrap gap-2">
                     {skills.map((skill, index) => (
-                      <Badge
-                        key={index}
-                        variant="secondary"
-                        className="bg-gray-100 text-gray-700 px-3 py-1"
-                      >
+                      <Badge key={index} variant="secondary" className="bg-gray-100 text-gray-700 px-3 py-1">
                         {skill}
                       </Badge>
                     ))}
@@ -435,18 +369,14 @@ const RecommendedInternships = () => {
               {/* Benefits */}
               {benefits.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                    Benefits
-                  </h2>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Benefits</h2>
                   <div className="space-y-3">
                     {benefits.map((benefit, index) => (
                       <div key={index} className="flex items-start space-x-3">
                         <div className="w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <Check className="w-3 h-3" />
                         </div>
-                        <p className="text-gray-700 leading-relaxed">
-                          {benefit}
-                        </p>
+                        <p className="text-gray-700 leading-relaxed">{benefit}</p>
                       </div>
                     ))}
                   </div>
@@ -457,25 +387,17 @@ const RecommendedInternships = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {selectedInternshipData.application_deadline && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Application Deadline
-                    </h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Application Deadline</h3>
                     <p className="text-gray-700">
-                      {new Date(
-                        selectedInternshipData.application_deadline
-                      ).toLocaleDateString()}
+                      {new Date(selectedInternshipData.application_deadline).toLocaleDateString()}
                     </p>
                   </div>
                 )}
 
                 {selectedInternshipData.company_email && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Contact
-                    </h3>
-                    <p className="text-gray-700">
-                      {selectedInternshipData.company_email}
-                    </p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Contact</h3>
+                    <p className="text-gray-700">{selectedInternshipData.company_email}</p>
                   </div>
                 )}
               </div>
@@ -498,10 +420,7 @@ const RecommendedInternships = () => {
       )}
 
       {/* Success Dialog */}
-      <ApplicationSuccessDialog
-        isOpen={showSuccessDialog}
-        onClose={() => setShowSuccessDialog(false)}
-      />
+      <ApplicationSuccessDialog isOpen={showSuccessDialog} onClose={() => setShowSuccessDialog(false)} />
     </div>
   );
 };
