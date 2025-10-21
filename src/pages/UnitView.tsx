@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Mail, Phone, MapPin, Clock, GraduationCap, Pencil, Plus } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, Globe, Linkedin, Instagram, Facebook, Twitter } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useUnitView } from "@/hooks/useUnitView";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
@@ -121,23 +121,53 @@ const UnitView = () => {
                     )}
                   </div>
 
-                  {/* Visit Website Button */}
-                  {unit.website_url && (
-                    <Button variant="outline" className="gap-2 rounded-full" asChild>
-                      <a href={unit.website_url} target="_blank" rel="noopener noreferrer">
-                        Visit Website
-                      </a>
-                    </Button>
-                  )}
+                  {/* Visit Website and Social Links */}
+                  <div className="flex gap-3 items-center">
+                    {unit.website_url && (
+                      <Button variant="outline" className="gap-2 rounded-full" asChild>
+                        <a href={unit.website_url} target="_blank" rel="noopener noreferrer">
+                          <Globe className="w-4 h-4" />
+                          Visit Website
+                        </a>
+                      </Button>
+                    )}
 
-                  {/* Social Links */}
-                  {Array(unit.social_links).length > 0 && (
-                    <Button variant="outline" className="gap-2 rounded-full" asChild>
-                      <a href={unit.website_url} target="_blank" rel="noopener noreferrer">
-                        Visit Website
-                      </a>
-                    </Button>
-                  )}
+                    {/* Social Links */}
+                    {(() => {
+                      const socialLinks = safeParse(unit.social_links, []);
+                      if (socialLinks.length === 0) return null;
+
+                      const getSocialIcon = (platform: string) => {
+                        const lowerPlatform = platform.toLowerCase();
+                        if (lowerPlatform.includes("linkedin")) return Linkedin;
+                        if (lowerPlatform.includes("instagram")) return Instagram;
+                        if (lowerPlatform.includes("facebook")) return Facebook;
+                        if (lowerPlatform.includes("twitter") || lowerPlatform.includes("x")) return Twitter;
+                        return Globe;
+                      };
+
+                      return (
+                        <div className="flex gap-2">
+                          {socialLinks.map((link: any, idx: number) => {
+                            const Icon = getSocialIcon(link.platform);
+                            return (
+                              <Button
+                                key={idx}
+                                variant="outline"
+                                size="icon"
+                                className="rounded-full"
+                                asChild
+                              >
+                                <a href={link.url} target="_blank" rel="noopener noreferrer">
+                                  <Icon className="w-4 h-4" />
+                                </a>
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -184,12 +214,12 @@ const UnitView = () => {
                                     )}
                                   </div>
 
-                                  {/* Apply Now Button */}
+                                  {/* View Button */}
                                   <Button
                                     className="bg-orange-500 hover:bg-orange-600 rounded-full text-white"
-                                    onClick={() => handleApply(internship)}
+                                    onClick={() => navigate(`/internships/${internship.id}`)}
                                   >
-                                    Apply Now
+                                    View
                                   </Button>
                                 </div>
 

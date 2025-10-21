@@ -23,6 +23,7 @@ export const useProfileCompletion = ({ profile, studentProfile }: ProfileComplet
       Array.isArray(studentProfile.interests) && studentProfile.interests.length > 0,
       Array.isArray(studentProfile.languages) && studentProfile.languages.length > 0,
       Array.isArray(studentProfile.completed_courses) && studentProfile.completed_courses.length > 0,
+      Array.isArray(studentProfile.links) && studentProfile.links.length > 0,
     ];
 
     const filledFields = fields.filter(Boolean).length;

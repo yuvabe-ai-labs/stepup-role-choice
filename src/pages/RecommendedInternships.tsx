@@ -3,16 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Clock, DollarSign, Bookmark, Share, Check, Download, Share2 } from "lucide-react";
+import { MapPin, Clock, DollarSign, Bookmark, Check, Share2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useIntern } from "@/hooks/useInternships";
 import { useApplicationStatus } from "@/hooks/useApplicationStatus";
 import { useInternshipRecommendations } from "@/hooks/useRecommendations";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
 import ApplicationSuccessDialog from "@/components/ApplicationSuccessDialog";
+import { ShareDialog } from "@/components/ShareDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
+import { useIsSaved } from "@/hooks/useSavedInternships";
+import { useToast } from "@/hooks/use-toast";
 
 type Internship = Tables<"internships">;
 
@@ -47,13 +50,17 @@ function parseNumberedObject(data: any): string[] {
 }
 
 const RecommendedInternships = () => {
+  const { toast } = useToast();
   const { internships: rawInternships = [], loading, error } = useIntern();
   const [selectedInternship, setSelectedInternship] = useState<string>("");
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const [userSkills, setUserSkills] = useState<string[]>([]);
+  const [savingInternship, setSavingInternship] = useState(false);
 
   const { hasApplied, isLoading: isCheckingStatus, markAsApplied } = useApplicationStatus(selectedInternship);
+  const { isSaved, isLoading: isCheckingSaved, refetch: refetchSaved } = useIsSaved(selectedInternship);
 
   // Ensure internships is always an array
   const allInternships = Array.isArray(rawInternships) ? rawInternships : rawInternships ? [rawInternships] : [];
@@ -112,6 +119,74 @@ const RecommendedInternships = () => {
   }, [internships, selectedInternship]);
 
   const selectedInternshipData = internships.find((int) => int.id === selectedInternship) || internships[0];
+
+  const handleSaveInternship = async () => {
+    if (!selectedInternship) return;
+
+    setSavingInternship(true);
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to save internships.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).single();
+
+      if (!profile) {
+        toast({
+          title: "Error",
+          description: "Profile not found.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (isSaved) {
+        const { error } = await supabase
+          .from("saved_internships")
+          .delete()
+          .eq("student_id", profile.id)
+          .eq("internship_id", selectedInternship);
+
+        if (error) throw error;
+
+        toast({
+          title: "Removed",
+          description: "Internship removed from saved list.",
+        });
+      } else {
+        const { error } = await supabase.from("saved_internships").insert({
+          student_id: profile.id,
+          internship_id: selectedInternship,
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Saved",
+          description: "Internship saved successfully!",
+        });
+      }
+
+      refetchSaved();
+    } catch (error: any) {
+      console.error("Error saving internship:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save internship.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingInternship(false);
+    }
+  };
 
   // Parse all data fields from database with error handling
   let responsibilities = [];
@@ -288,14 +363,19 @@ const RecommendedInternships = () => {
                 <div className="flex space-x-3">
                   <Button
                     size="sm"
-                    className="flex items-center space-x-1.5 px-4 py-2 text-gray-700 bg-white hover:bg-gray-50"
+                    className={`flex items-center space-x-1.5 px-4 py-2 ${
+                      isSaved ? "text-gray-400 bg-white" : "text-gray-600 bg-white"
+                    }`}
+                    onClick={handleSaveInternship}
+                    disabled={savingInternship || isCheckingSaved}
                   >
-                    <Download className="w-4 h-4" />
-                    <span>Save</span>
+                    <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
+                    <span>{isSaved ? "Saved" : "Save"}</span>
                   </Button>
                   <Button
                     size="sm"
                     className="flex items-center space-x-1.5 px-4 py-2 text-gray-700 bg-white hover:bg-gray-50"
+                    onClick={() => setShowShareDialog(true)}
                   >
                     <Share2 className="w-4 h-4" />
                     <span>Share</span>
@@ -421,6 +501,16 @@ const RecommendedInternships = () => {
 
       {/* Success Dialog */}
       <ApplicationSuccessDialog isOpen={showSuccessDialog} onClose={() => setShowSuccessDialog(false)} />
+
+      {/* Share Dialog */}
+      {selectedInternshipData && (
+        <ShareDialog
+          isOpen={showShareDialog}
+          onClose={() => setShowShareDialog(false)}
+          title={selectedInternshipData.title}
+          url={`${window.location.origin}/internships/${selectedInternshipData.id}`}
+        />
+      )}
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, Clock, DollarSign, Bookmark, Share2, CircleCheckBig } from "lucide-react";
+import { ShareDialog } from "@/components/ShareDialog";
 import Navbar from "@/components/Navbar";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
 import ApplicationSuccessDialog from "@/components/ApplicationSuccessDialog";
@@ -31,6 +32,7 @@ const InternshipDetail = () => {
   const [unit, setUnit] = useState<any | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [savingInternship, setSavingInternship] = useState(false);
   const { hasApplied, isLoading: isCheckingStatus, markAsApplied } = useApplicationStatus(id || "");
@@ -225,7 +227,11 @@ const InternshipDetail = () => {
                   <Bookmark className={`w-4 h-4 ${isSaved ? "fill" : ""}`} />
                   <span>{isSaved ? "Saved" : "Save"}</span>
                 </Button>
-                <Button size="sm" className="flex items-center px-4 py-2 text-gray-700 bg-white">
+                <Button 
+                  size="sm" 
+                  className="flex items-center px-4 py-2 text-gray-700 bg-white"
+                  onClick={() => setShowShareDialog(true)}
+                >
                   <Share2 className="w-4 h-4" />
                   <span>Share</span>
                 </Button>
@@ -418,6 +424,16 @@ const InternshipDetail = () => {
 
       {/* Success Dialog */}
       <ApplicationSuccessDialog isOpen={showSuccessDialog} onClose={() => setShowSuccessDialog(false)} />
+
+      {/* Share Dialog */}
+      {internship && (
+        <ShareDialog
+          isOpen={showShareDialog}
+          onClose={() => setShowShareDialog(false)}
+          title={internship.title}
+          url={window.location.href}
+        />
+      )}
     </div>
   );
 };
