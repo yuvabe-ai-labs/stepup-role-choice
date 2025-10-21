@@ -38,10 +38,12 @@ const InternshipDetail = () => {
 
   const handleSaveInternship = async () => {
     if (!id) return;
-    
+
     setSavingInternship(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         toast({
           title: "Authentication Required",
@@ -51,11 +53,7 @@ const InternshipDetail = () => {
         return;
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
+      const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).single();
 
       if (!profile) {
         toast({
@@ -68,10 +66,10 @@ const InternshipDetail = () => {
 
       if (isSaved) {
         const { error } = await supabase
-          .from('saved_internships')
+          .from("saved_internships")
           .delete()
-          .eq('student_id', profile.id)
-          .eq('internship_id', id);
+          .eq("student_id", profile.id)
+          .eq("internship_id", id);
 
         if (error) throw error;
 
@@ -80,12 +78,10 @@ const InternshipDetail = () => {
           description: "Internship removed from saved list.",
         });
       } else {
-        const { error } = await supabase
-          .from('saved_internships')
-          .insert({
-            student_id: profile.id,
-            internship_id: id
-          });
+        const { error } = await supabase.from("saved_internships").insert({
+          student_id: profile.id,
+          internship_id: id,
+        });
 
         if (error) throw error;
 
@@ -97,7 +93,7 @@ const InternshipDetail = () => {
 
       refetchSaved();
     } catch (error: any) {
-      console.error('Error saving internship:', error);
+      console.error("Error saving internship:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to save internship.",
@@ -220,18 +216,16 @@ const InternshipDetail = () => {
               <div className="flex gap-2 items-start">
                 <Button
                   size="sm"
-                  variant={isSaved ? "default" : "outline"}
-                  className={`flex items-center space-x-1.5 px-4 py-2 ${isSaved ? 'bg-primary text-primary-foreground' : 'text-gray-700 bg-white hover:bg-gray-50'}`}
+                  className={`flex items-center  px-4 py-2 ${
+                    isSaved ? "text-gray-400 bg-white" : "text-gray-600 bg-white"
+                  }`}
                   onClick={handleSaveInternship}
                   disabled={savingInternship || isCheckingSaved}
                 >
-                  <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
-                  <span>{isSaved ? 'Saved' : 'Save'}</span>
+                  <Bookmark className={`w-4 h-4 ${isSaved ? "fill" : ""}`} />
+                  <span>{isSaved ? "Saved" : "Save"}</span>
                 </Button>
-                <Button
-                  size="sm"
-                  className="flex items-center space-x-1.5 px-4 py-2 text-gray-700 bg-white hover:bg-gray-50"
-                >
+                <Button size="sm" className="flex items-center px-4 py-2 text-gray-700 bg-white">
                   <Share2 className="w-4 h-4" />
                   <span>Share</span>
                 </Button>
