@@ -218,8 +218,8 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="p-0 pl-[30px] max-w-6xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="bg-white px-8 py-6  border-gray-200 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">Send Your Profile to the Unit</h2>
+        <div className="bg-white pl-0 px-8 py-6  border-gray-200 flex items-center justify-between">
+          <h2 className="text-2xl font-semibold text-gray-900">Send Your Profile to the Unit</h2>
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || isLoading || !profileData || !canSubmit}
@@ -369,7 +369,7 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
 
           {/* Right Content - Profile Preview */}
           <ScrollArea className="flex-1">
-            <div className="p-8 space-y-6">
+            <div className="p-8 pt-0 pl-2.5 space-y-2.5">
               {isLoading ? (
                 <div className="space-y-4">
                   <div className="animate-pulse bg-gray-200 h-8 rounded w-3/4"></div>
