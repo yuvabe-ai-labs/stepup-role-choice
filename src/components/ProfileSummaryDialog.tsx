@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Mail, Phone, MapPin, AlertCircle } from "lucide-react";
+import { Send, Mail, Phone, MapPin, TriangleAlert } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface ProfileSummaryDialogProps {
@@ -19,7 +19,7 @@ interface ProfileSummaryDialogProps {
 interface CompleteProfileData {
   profile: any;
   studentProfile: any;
-  education: any[];
+  // education: any[];
 }
 
 const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onClose, internship, onSuccess }) => {
@@ -67,18 +67,18 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
         if (studentError && studentError.code !== "PGRST116") throw studentError;
 
         // Fetch education records
-        const { data: education, error: educationError } = await supabase
-          .from("student_education")
-          .select("*")
-          .eq("profile_id", profile.id)
-          .order("end_year", { ascending: false });
+        // const { data: education, error: educationError } = await supabase
+        //   .from("student_education")
+        //   .select("*")
+        //   .eq("profile_id", profile.id)
+        //   .order("end_year", { ascending: false });
 
-        if (educationError) throw educationError;
+        // if (educationError) throw educationError;
 
         setProfileData({
           profile,
           studentProfile: studentProfile || {},
-          education: education || [],
+          // education: education || [],
         });
       } catch (error) {
         console.error("Error fetching profile data:", error);
@@ -110,11 +110,11 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
       const matchScore = calculateComprehensiveMatchScore(
         {
           studentProfile: profileData.studentProfile,
-          education: profileData.education,
+          // education: profileData.education,
           internships: internships,
           profile: profileData.profile,
         },
-        internship
+        internship,
       );
       console.log("Match score calculated (comprehensive):", matchScore);
 
@@ -173,6 +173,7 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
   };
 
   const skills = parseJsonField(profileData?.studentProfile?.skills, []);
+  const education = parseJsonField(profileData?.studentProfile?.education, []);
   const courses = parseJsonField(profileData?.studentProfile?.completed_courses, []);
   const interests = parseJsonField(profileData?.studentProfile?.interests, []);
   const projects = parseJsonField(profileData?.studentProfile?.projects, []);
@@ -189,15 +190,17 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
         profileData.profile.phone &&
         profileData.profile.date_of_birth
       ),
-      profile_summary: !!(profileData.studentProfile?.cover_letter && profileData.studentProfile.cover_letter.length >= 10),
+      profile_summary: !!(
+        profileData.studentProfile?.cover_letter && profileData.studentProfile.cover_letter.length >= 10
+      ),
       courses: courses.length > 0,
       key_skills: skills.length > 0,
-      education: profileData.education.length > 0,
+      education: education.length > 0,
       interests: interests.length > 0,
       projects: projects.length > 0,
       internship: internships.length > 0,
     };
-  }, [profileData, skills, courses, interests, projects, internships]);
+  }, [profileData, skills, courses, interests, projects, internships, education]);
 
   // Check if required sections are complete
   const canSubmit = useMemo(() => {
@@ -239,11 +242,11 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   disabled
                   className="data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400"
                 />
-                <span className="text-gray-700 font-medium flex items-center gap-2">
+                <span className="text-gray-700 font-medium flex w-full justify-between items-center gap-2">
                   Personal Details
                   {!sectionValidation.personal_details && (
-                    <span title="Incomplete section">
-                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span title="Please update Personal Details before sending">
+                      <TriangleAlert className="h-4 w-4 text-red-500" />
                     </span>
                   )}
                 </span>
@@ -254,11 +257,11 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   disabled
                   className="data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400"
                 />
-                <span className="text-gray-700 font-medium flex items-center gap-2">
+                <span className="text-gray-700 font-medium flex w-full justify-between items-center gap-2">
                   Profile Summary
                   {!sectionValidation.profile_summary && (
-                    <span title="Incomplete section">
-                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span title="Please update Profile Summary before sending">
+                      <TriangleAlert className="h-4 w-4 text-red-500" />
                     </span>
                   )}
                 </span>
@@ -269,11 +272,11 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   disabled
                   className="data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400"
                 />
-                <span className="text-gray-700 font-medium flex items-center gap-2">
+                <span className="text-gray-700 font-medium flex w-full justify-between items-center gap-2">
                   Courses
                   {!sectionValidation.courses && (
-                    <span title="Incomplete section">
-                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span title="Please update Courses before sending">
+                      <TriangleAlert className="h-4 w-4 text-red-500" />
                     </span>
                   )}
                 </span>
@@ -284,11 +287,11 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   disabled
                   className="data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400"
                 />
-                <span className="text-gray-700 font-medium flex items-center gap-2">
+                <span className="text-gray-700 font-medium flex w-full justify-between items-center gap-2">
                   Key Skills
                   {!sectionValidation.key_skills && (
-                    <span title="Incomplete section">
-                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span title="Please update Key Skills before sending">
+                      <TriangleAlert className="h-4 w-4 text-red-500" />
                     </span>
                   )}
                 </span>
@@ -299,11 +302,11 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   disabled
                   className="data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400"
                 />
-                <span className="text-gray-700 font-medium flex items-center gap-2">
+                <span className="text-gray-700 font-medium flex w-full justify-between items-center gap-2">
                   Education
                   {!sectionValidation.education && (
-                    <span title="Incomplete section">
-                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span title="Please update Education before sending">
+                      <TriangleAlert className="h-4 w-4 text-red-500" />
                     </span>
                   )}
                 </span>
@@ -314,11 +317,11 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   disabled
                   className="data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400"
                 />
-                <span className="text-gray-700 font-medium flex items-center gap-2">
+                <span className="text-gray-700 font-medium flex w-full justify-between items-center gap-2">
                   Interests
                   {!sectionValidation.interests && (
-                    <span title="Incomplete section">
-                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span title="Please update Interests before sending">
+                      <TriangleAlert className="h-4 w-4 text-red-500" />
                     </span>
                   )}
                 </span>
@@ -333,11 +336,11 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                     }))
                   }
                 />
-                <span className="text-gray-700 font-medium flex items-center gap-2">
+                <span className="text-gray-700 font-medium flex w-full justify-between items-center gap-2">
                   Projects
                   {!sectionValidation.projects && (
-                    <span title="Incomplete section">
-                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span title="Please update Projects before sending">
+                      <TriangleAlert className="h-4 w-4 text-red-500" />
                     </span>
                   )}
                 </span>
@@ -352,11 +355,11 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                     }))
                   }
                 />
-                <span className="text-gray-700 font-medium flex items-center gap-2">
+                <span className="text-gray-700 font-medium flex w-full justify-between items-center gap-2">
                   Internship
                   {!sectionValidation.internship && (
-                    <span title="Incomplete section">
-                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span title="Please update Internship before sending">
+                      <TriangleAlert className="h-4 w-4 text-red-500" />
                     </span>
                   )}
                 </span>
@@ -423,7 +426,7 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                         <div>
                           <p className="text-sm text-gray-500 mb-1">Graduated</p>
                           <p className="text-gray-900">
-                            {profileData.education?.some((edu: any) => !edu.end_year) ? "No" : "Yes"}
+                            {profileData.studentProfile.education?.some((edu: any) => !edu.end_year) ? "No" : "Yes"}
                           </p>
                         </div>
                         <div>
@@ -488,11 +491,11 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   )}
 
                   {/* Education */}
-                  {sections.education && profileData.education.length > 0 && (
+                  {sections.education && education.length > 0 && (
                     <div className="bg-white rounded-[20px] p-6 shadow-sm border border-gray-200">
                       <h3 className="text-xl font-bold text-gray-900 mb-4">Education</h3>
                       <div className="space-y-4">
-                        {profileData.education.map((edu: any) => (
+                        {education.map((edu: any) => (
                           <div key={edu.id} className="border-l-4 border-green-500 pl-4">
                             <h4 className="font-semibold text-gray-900">{edu.degree}</h4>
                             <p className="text-gray-700">{edu.institution}</p>
