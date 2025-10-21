@@ -73,7 +73,7 @@ const UnitView = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="container p-0 mx-auto">
         <div className="h-48 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10">
           {unit.banner_url && <img src={unit.banner_url} alt={unit.unit_name} className="w-full h-full object-cover" />}
         </div>
@@ -129,15 +129,24 @@ const UnitView = () => {
                       </a>
                     </Button>
                   )}
+
+                  {/* Social Links */}
+                  {Array(unit.social_links).length > 0 && (
+                    <Button variant="outline" className="gap-2 rounded-full" asChild>
+                      <a href={unit.website_url} target="_blank" rel="noopener noreferrer">
+                        Visit Website
+                      </a>
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="">
             {/* Left Column - Open Internship Positions */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="space-y-6">
               <div className="border p-8 rounded-3xl">
                 <h2 className="text-2xl font-bold text-foreground mb-6">Open Internship Positions</h2>
 
@@ -212,13 +221,17 @@ const UnitView = () => {
             </div>
 
             {/* Right Column - Sidebar */}
-            <div className="space-y-6">
-              {/* Recent Projects */}
-              <Card className="border-border rounded-3xl">
+            {/* <div className="space-y-6"> */}
+            {/* Recent Projects */}
+            {/* <Card className="border-border rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-bold text-foreground mb-4">Recent Projects</h3>
+                  <h3 className="text-lg font-bold text-foreground mb-4">
+                    Recent Projects
+                  </h3>
                   {recentProjects.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No recent projects listed.</p>
+                    <p className="text-sm text-muted-foreground">
+                      No recent projects listed.
+                    </p>
                   ) : (
                     <ul className="space-y-3">
                       {recentProjects.map((project: any, idx: number) => {
@@ -234,7 +247,10 @@ const UnitView = () => {
                               JSON.stringify(project);
 
                         return (
-                          <li key={idx} className="flex items-start gap-2 text-sm">
+                          <li
+                            key={idx}
+                            className="flex items-start gap-2 text-sm"
+                          >
                             <GraduationCap className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                             <span className="text-foreground">{title}</span>
                           </li>
@@ -243,35 +259,43 @@ const UnitView = () => {
                     </ul>
                   )}
                 </CardContent>
-              </Card>
+              </Card> */}
 
-              {/* Contact Info */}
-              <Card className="border-border rounded-3xl">
+            {/* Contact Info */}
+            {/* <Card className="border-border rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-bold text-foreground mb-4">Contact Info</h3>
+                  <h3 className="text-lg font-bold text-foreground mb-4">
+                    Contact Info
+                  </h3>
                   <div className="space-y-3">
                     {unit.contact_email && (
                       <div className="flex items-center gap-3">
                         <Mail className="w-5 h-5 text-muted-foreground" />
-                        <span className="text-sm text-foreground">{unit.contact_email}</span>
+                        <span className="text-sm text-foreground">
+                          {unit.contact_email}
+                        </span>
                       </div>
                     )}
                     {unit.contact_phone && (
                       <div className="flex items-center gap-3">
                         <Phone className="w-5 h-5 text-muted-foreground" />
-                        <span className="text-sm text-foreground">{unit.contact_phone}</span>
+                        <span className="text-sm text-foreground">
+                          {unit.contact_phone}
+                        </span>
                       </div>
                     )}
                     {unit.address && (
                       <div className="flex items-center gap-3">
                         <MapPin className="w-5 h-5 text-muted-foreground" />
-                        <span className="text-sm text-foreground">{unit.address}</span>
+                        <span className="text-sm text-foreground">
+                          {unit.address}
+                        </span>
                       </div>
                     )}
                   </div>
                 </CardContent>
-              </Card>
-            </div>
+              </Card> */}
+            {/* </div> */}
           </div>
 
           {/* Mission & Values Section */}
@@ -303,8 +327,8 @@ const UnitView = () => {
           {/* Glimpse of the Unit */}
           {(() => {
             const glimpseUrl = (unit as any).glimpse;
-            if (!glimpseUrl || typeof glimpseUrl !== 'string') return null;
-            
+            if (!glimpseUrl || typeof glimpseUrl !== "string") return null;
+
             return (
               <Card className="mt-8">
                 <CardContent className="p-6">
@@ -312,11 +336,7 @@ const UnitView = () => {
                     <h3 className="text-xl font-bold text-foreground">Glimpse of the Unit</h3>
                   </div>
                   <div className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden">
-                    <video 
-                      controls 
-                      className="w-full h-full object-cover"
-                      preload="metadata"
-                    >
+                    <video controls className="w-full h-full object-cover" preload="metadata">
                       <source src={glimpseUrl} type="video/mp4" />
                       Your browser does not support the video tag.
                     </video>
@@ -330,9 +350,9 @@ const UnitView = () => {
           {(() => {
             const galleryImagesRaw = (unit as any).gallery_images;
             let galleryImages: string[] = [];
-            
+
             try {
-              if (typeof galleryImagesRaw === 'string') {
+              if (typeof galleryImagesRaw === "string") {
                 galleryImages = JSON.parse(galleryImagesRaw);
               } else if (Array.isArray(galleryImagesRaw)) {
                 galleryImages = galleryImagesRaw;
@@ -340,13 +360,13 @@ const UnitView = () => {
             } catch {
               galleryImages = [];
             }
-            
+
             // Only display if there are images
             if (!galleryImages || galleryImages.length === 0) return null;
-            
+
             // Show up to 3 images
             const displayImages = galleryImages.slice(0, 3);
-            
+
             return (
               <Card className="mt-8">
                 <CardContent className="p-6">
@@ -356,11 +376,7 @@ const UnitView = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {displayImages.map((imageUrl, index) => (
                       <div key={index} className="relative aspect-square bg-muted rounded-lg overflow-hidden">
-                        <img 
-                          src={imageUrl} 
-                          alt={`Gallery image ${index + 1}`} 
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={imageUrl} alt={`Gallery image ${index + 1}`} className="w-full h-full object-cover" />
                       </div>
                     ))}
                   </div>
