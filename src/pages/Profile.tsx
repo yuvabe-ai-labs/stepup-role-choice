@@ -441,11 +441,8 @@ const Profile = () => {
                 <div className="space-y-4">
                   {completedCourses.length > 0 ? (
                     completedCourses.map((course: any, index: number) => (
-                      <div>
-                        <div
-                          key={index}
-                          className="flex items-center justify-between  rounded-lg"
-                        >
+                      <div key={index}>
+                        <div className="flex items-center justify-between  rounded-lg">
                           <div>
                             <h4 className="font-medium">
                               {course.title || "Course Title"}
@@ -474,8 +471,8 @@ const Profile = () => {
                             </Button>
                           </div>
                         </div>
-                        {completedCourses[-1] === course ? (
-                          <hr className="border border-gray-200 mt-2.5" />
+                        {course.title !== completedCourses.at(-1).title ? (
+                          <hr className="border-0.5 border-gray-200  mt-2.5" />
                         ) : undefined}
                       </div>
                     ))
@@ -506,7 +503,7 @@ const Profile = () => {
                       <Badge
                         key={index}
                         variant="outline"
-                        className="px-4 py-2 border-gray-600 flex items-center gap-1 bg-transparent"
+                        className="px-4 py-2 border-gray-400 flex items-center gap-1 bg-transparent"
                       >
                         {skill}
                         {/* <X
@@ -677,7 +674,7 @@ const Profile = () => {
                       <Badge
                         key={index}
                         variant="outline"
-                        className="px-3 py-1 flex items-center gap-1"
+                        className="px-4 py-2 flex items-center gap-1 border-gray-400"
                       >
                         {interest}
                         {/* <X
@@ -898,7 +895,7 @@ const Profile = () => {
               <Card className="rounded-3xl border-gray-200">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg text-lg font-semibold">Links</h2>
+                    <h2 className="text-lg font-semibold">Links</h2>
                     <LinkDialog
                       existingLinks={studentProfile.links || []}
                       onSave={addLinkEntry}

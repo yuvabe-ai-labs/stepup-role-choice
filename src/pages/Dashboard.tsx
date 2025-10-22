@@ -159,8 +159,8 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-4 gap-6">
+      <div className="container mx-auto px-28 py-10">
+        <div className="grid lg:grid-cols-4 gap-2.5">
           {/* Left Sidebar - Profile - Fixed */}
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-8">
@@ -170,11 +170,11 @@ const Dashboard = () => {
 
           {/* Main Content - Scrollable */}
           <div
-            className="lg:col-span-3 space-y-6 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2"
+            className="lg:col-span-3 space-y-2.5 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2"
             style={{ scrollbarWidth: "thin" }}
           >
             {/* Hero Section */}
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-3 gap-2.5">
               {heroCards.map((card) => (
                 <Card
                   key={card.id}
@@ -241,7 +241,7 @@ const Dashboard = () => {
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
 
-                      <div className="flex-1 grid md:grid-cols-3 gap-4">
+                      <div className="flex-1 grid md:grid-cols-3 gap-2.5">
                         {recommendedInternships
                           .slice(
                             currentInternshipIndex,
@@ -280,7 +280,7 @@ const Dashboard = () => {
                                   )
                                 }
                               >
-                                <CardHeader className="pb-3">
+                                <CardHeader className="pb-2.5">
                                   <div className="flex justify-between items-start mb-2">
                                     <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center text-background font-bold text-sm">
                                       {internship.company_logo ? (
@@ -297,8 +297,9 @@ const Dashboard = () => {
                                       {timeText}
                                     </Badge>
                                   </div>
-                                  <CardTitle className="text-base font-semibold">
+                                  <CardTitle className=" m-0 text-gray-800 text-base font-normal flex justify-between items-center">
                                     {internship.title}
+                                    <ChevronRight className="w-5 h-5" />
                                   </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
@@ -308,12 +309,12 @@ const Dashboard = () => {
                                       {internship.duration || "Not specified"}
                                     </span>
                                   </div>
-                                  <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                                  {/* <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                                     <MapPin className="w-3 h-3" />
                                     <span>
                                       {internship.location || "Remote"}
                                     </span>
-                                  </div>
+                                  </div> */}
                                 </CardContent>
                               </Card>
                             );
@@ -379,7 +380,7 @@ const Dashboard = () => {
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
-                      <div className="flex-1 grid md:grid-cols-3 gap-4">
+                      <div className="flex-1 grid md:grid-cols-3 gap-2.5">
                         {recommendedCourses
                           .slice(currentCourseIndex, currentCourseIndex + 3)
                           .map((course, idx) => {
@@ -400,7 +401,7 @@ const Dashboard = () => {
                                 onClick={() => navigate("/courses")}
                               >
                                 <div
-                                  className={`h-32 relative ${gradientClass} flex items-center justify-center`}
+                                  className={`h-32 relative ${gradientClass} max-h-28 flex items-center justify-center`}
                                 >
                                   {course.image_url ? (
                                     <img
@@ -424,21 +425,21 @@ const Dashboard = () => {
                                   </Badge>
                                 </div>
 
-                                <CardContent className="p-4 space-y-3">
+                                <CardContent className="px-5 py-2.5 space-y-2">
                                   {/* Title */}
-                                  <h3 className="font-bold text-lg line-clamp-2">
+                                  <h3 className="font-medium text-base line-clamp-2">
                                     {course.title}
                                   </h3>
 
                                   {/* Duration and Level */}
                                   <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                    <div className="flex m-0 items-center gap-1 text-sm text-muted-foreground">
                                       <Clock className="w-4 h-4" />
                                       <span>
                                         {course.duration || "8 weeks"}
                                       </span>
                                     </div>
-                                    {course.difficulty_level && (
+                                    {/* {course.difficulty_level && (
                                       <Badge
                                         className={`${getDifficultyColor(
                                           course.difficulty_level
@@ -446,7 +447,7 @@ const Dashboard = () => {
                                       >
                                         {course.difficulty_level}
                                       </Badge>
-                                    )}
+                                    )} */}
                                   </div>
 
                                   {/* <p className="text-xs text-muted-foreground">
@@ -460,13 +461,10 @@ const Dashboard = () => {
                                   </p> */}
 
                                   {/* Know More Button */}
-                                  <Button
-                                    className="border-none text-sm text-primary hover:bg-transparent hover:text-primary"
-                                    variant="outline"
-                                  >
+                                  <button className="border-none flex gap-1 items-center p-0 m-0 text-sm text-primary hover:bg-transparent hover:text-primary">
                                     Know more
-                                    <ChevronRight className="w-3" />
-                                  </Button>
+                                    <ChevronRight className="w-4 h-4" />
+                                  </button>
                                 </CardContent>
                               </Card>
                             );
@@ -534,7 +532,7 @@ const Dashboard = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="grid md:grid-cols-3 gap-6">
+                  <div className="grid md:grid-cols-3 gap-2.5">
                     {(activityView === "saved"
                       ? savedInternships
                       : appliedInternships
@@ -555,7 +553,7 @@ const Dashboard = () => {
                         return (
                           <Card
                             key={internship.id}
-                            className="p-6 hover:shadow-lg transition-all cursor-pointer rounded-xl border"
+                            className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300"
                             onClick={() =>
                               navigate(`/internships/${internship.id}`)
                             }
@@ -583,18 +581,18 @@ const Dashboard = () => {
                               </div>
 
                               {/* Title */}
-                              <h3 className="text-lg font-bold line-clamp-2">
+                              <h3 className="text-4 font-semibold text-gray-900 line-clamp-2">
                                 {internship.title}
                               </h3>
 
                               {/* Description */}
-                              <p className="text-sm text-muted-foreground line-clamp-3">
+                              <p className="text-sm text-gray-500 line-clamp-3">
                                 {internship.description ||
                                   "No description available"}
                               </p>
 
                               {/* Duration and Location */}
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-4 text-sm text-gray-600">
                                 <div className="flex items-center gap-1">
                                   <Clock className="w-4 h-4" />
                                   <span>
