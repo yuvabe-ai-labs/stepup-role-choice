@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +18,11 @@ interface SkillsDialogProps {
   children: React.ReactNode;
 }
 
-export const SkillsDialog = ({ studentProfile, onUpdate, children }: SkillsDialogProps) => {
+export const SkillsDialog = ({
+  studentProfile,
+  onUpdate,
+  children,
+}: SkillsDialogProps) => {
   const [open, setOpen] = useState(false);
   const [skills, setSkills] = useState<string[]>(studentProfile?.skills || []);
   const [newSkill, setNewSkill] = useState("");
@@ -62,29 +72,45 @@ export const SkillsDialog = ({ studentProfile, onUpdate, children }: SkillsDialo
               value={newSkill}
               onChange={(e) => setNewSkill(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="rounded-full"
+              className="rounded-full "
             />
 
-            <Button type="button" onClick={addSkill} size="sm" className="rounded-full">
+            <Button type="button" onClick={addSkill} className="rounded-full ">
               Add
             </Button>
           </div>
 
-          <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+          <div className="flex flex-wrap gap-2 max-h-40 items-center overflow-y-auto">
             {skills.map((skill, index) => (
-              <Badge key={index} variant="secondary" className="px-3 py-1">
+              <Badge
+                key={index}
+                variant="secondary"
+                className="px-3 py-1 bg-blue-50 text-blue-500"
+              >
                 {skill}
 
-                <X className="w-3 h-3 cursor-pointer" onClick={() => removeSkill(skill)} />
+                <X
+                  className="w-3 h-3 ml-1 cursor-pointer"
+                  onClick={() => removeSkill(skill)}
+                />
               </Badge>
             ))}
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-full">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className="rounded-full"
+            >
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={loading} className="rounded-full">
+            <Button
+              onClick={handleSave}
+              disabled={loading}
+              className="rounded-full"
+            >
               {loading ? "Saving..." : "Save Changes"}
             </Button>
           </div>
