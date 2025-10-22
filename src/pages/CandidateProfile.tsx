@@ -12,6 +12,14 @@ import {
   User,
   CopyCheck,
   Ban,
+  Linkedin,
+  Instagram,
+  Facebook,
+  Twitter,
+  Globe,
+  Youtube,
+  Palette,
+  Dribbble,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -160,6 +168,7 @@ const CandidateProfile = () => {
   const internships = safeParse(data.studentProfile.internships, []);
   const courses = safeParse(data.studentProfile.completed_courses, []);
   const education = safeParse(data.studentProfile.education, []);
+  const links = safeParse(data.studentProfile.links, []);
 
   const matchScore = data.application.profile_match_score || 0;
 
@@ -220,7 +229,7 @@ const CandidateProfile = () => {
 
         {/* Profile Header Card */}
         <div className="container mx-auto px-10 py-2">
-          <Card className="mb-4 rounded-3xl shadow">
+          <Card className="mb-4 rounded-3xl">
             <CardContent className="p-8">
               <div className="flex items-start gap-6">
                 <Avatar className="w-24 h-24">
@@ -329,13 +338,15 @@ const CandidateProfile = () => {
           </Card>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-[35%_62%] gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-[30%_69%] gap-4">
             {/* Left Column */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Skills & Expertise */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-6">Skills & Expertise</h3>
+                  <h3 className="text-2xl font-bold mb-6">
+                    Skills & Expertise
+                  </h3>
                   <div className="space-y-4">
                     {skills.length > 0 ? (
                       skills.map((skill: any, idx: number) => {
@@ -400,16 +411,16 @@ const CandidateProfile = () => {
               {/* Internships */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4">Internships</h3>
+                  <h3 className="text-2xl font-bold mb-4">Internships</h3>
                   {internships.length > 0 ? (
-                    <ul className="space-y-3">
+                    <ul className="space-y-4">
                       {internships.map((internship: any) => (
-                        <li key={internship.id} className="text-sm">
+                        <li key={internship.id} className="text-base">
                           <div className="flex items-center justify-between">
-                            <span className="font-semibold">
+                            <span className="font-semibold text-lg">
                               {internship.title}
                             </span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-sm text-muted-foreground">
                               {internship.is_current
                                 ? "Ongoing"
                                 : `${new Date(
@@ -424,15 +435,15 @@ const CandidateProfile = () => {
                             </span>
                           </div>
 
-                          <p className="text-muted-foreground">
+                          <p className="text-muted-foreground text-base mt-1">
                             Company:{" "}
-                            <span className="font-medium">
+                            <span className="font-medium text-foreground">
                               {internship.company || "—"}
                             </span>
                           </p>
 
                           {internship.description ? (
-                            <p className="text-muted-foreground">
+                            <p className="text-muted-foreground text-[15px] leading-relaxed mt-1">
                               {internship.description}
                             </p>
                           ) : (
@@ -444,7 +455,7 @@ const CandidateProfile = () => {
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-base text-muted-foreground">
                       No internships listed
                     </p>
                   )}
@@ -453,11 +464,11 @@ const CandidateProfile = () => {
             </div>
 
             {/* Right Column */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Interests */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4">Interests</h3>
+                  <h3 className="text-2xl font-bold mb-4">Interests</h3>
                   <div className="flex flex-wrap gap-2">
                     {interests.length > 0 ? (
                       interests.map((interest: string, idx: number) => (
@@ -502,16 +513,16 @@ const CandidateProfile = () => {
               {/* Completed Courses */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4">Completed Courses</h3>
+                  <h3 className="text-2xl font-bold mb-4">Completed Courses</h3>
                   {courses.length > 0 ? (
-                    <ul className="space-y-3">
+                    <ul className="space-y-4">
                       {courses.map((course: any) => (
-                        <li key={course.id} className="text-sm">
+                        <li key={course.id} className="text-base">
                           <div className="flex items-center justify-between">
-                            <span className="font-semibold">
+                            <span className="font-semibold text-lg">
                               {course.title}
                             </span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-sm text-muted-foreground">
                               {course.completion_date
                                 ? new Date(
                                     course.completion_date
@@ -519,7 +530,7 @@ const CandidateProfile = () => {
                                 : ""}
                             </span>
                           </div>
-                          <p className="text-muted-foreground">
+                          <p className="text-muted-foreground text-base mt-1">
                             Provider:{" "}
                             <span className="font-medium">
                               {course.provider}
@@ -530,7 +541,7 @@ const CandidateProfile = () => {
                               href={course.certificate_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline text-sm"
+                              className="text-blue-600 hover:underline text-base"
                             >
                               View Certificate
                             </a>
@@ -543,7 +554,7 @@ const CandidateProfile = () => {
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-base text-muted-foreground">
                       No completed courses listed
                     </p>
                   )}
@@ -553,16 +564,16 @@ const CandidateProfile = () => {
               {/* Projects */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4">Projects</h3>
+                  <h3 className="text-2xl font-bold mb-4">Projects</h3>
                   {projects.length > 0 ? (
-                    <ul className="space-y-3">
+                    <ul className="space-y-4">
                       {projects.map((project: any) => (
-                        <li key={project.id} className="text-sm">
+                        <li key={project.id} className="text-base">
                           <div className="flex items-center justify-between">
-                            <span className="font-semibold">
+                            <span className="font-semibold text-lg">
                               {project.title}
                             </span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-sm text-muted-foreground">
                               {project.is_current
                                 ? "Ongoing"
                                 : `${new Date(
@@ -574,13 +585,13 @@ const CandidateProfile = () => {
                           </div>
 
                           {project.description && (
-                            <p className="text-muted-foreground">
+                            <p className="text-muted-foreground text-[15px] leading-relaxed mt-1">
                               {project.description}
                             </p>
                           )}
 
                           {project.technologies?.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-1">
+                            <div className="flex flex-wrap gap-2 mt-2">
                               {project.technologies.map(
                                 (tech: string, idx: number) => (
                                   <span
@@ -599,12 +610,12 @@ const CandidateProfile = () => {
                               href={project.project_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline text-sm"
+                              className="text-blue-600 hover:underline text-base mt-1 block"
                             >
                               View Project
                             </a>
                           ) : (
-                            <span className="italic text-muted-foreground text-sm">
+                            <span className="italic text-muted-foreground text-sm mt-1 block">
                               No project link available
                             </span>
                           )}
@@ -612,7 +623,7 @@ const CandidateProfile = () => {
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-base text-muted-foreground">
                       No projects listed
                     </p>
                   )}
@@ -622,50 +633,52 @@ const CandidateProfile = () => {
               {/* Education */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-6">Education</h3>
+                  <h3 className="text-2xl font-bold mb-6">Education</h3>
                   {education.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                       {education.map((edu: any, idx: number) => (
                         <div
                           key={idx}
                           className="flex items-start justify-between pb-4 border-b last:border-0"
                         >
                           <div>
-                            <h4 className="font-semibold">
+                            <h4 className="font-semibold text-lg">
                               {edu.degree || edu.name || "Education"}
                             </h4>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-base text-muted-foreground">
                               {edu.institution ||
                                 edu.school ||
                                 edu.college ||
                                 "Educational Institution"}
                             </p>
                             {edu.field_of_study && (
-                              <p className="text-sm text-muted-foreground mt-1">
+                              <p className="text-base text-muted-foreground mt-1">
                                 {edu.field_of_study}
                               </p>
                             )}
                             {edu.description && (
-                              <p className="text-sm mt-2">{edu.description}</p>
+                              <p className="text-base mt-2 leading-relaxed">
+                                {edu.description}
+                              </p>
                             )}
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-medium">
+                            <p className="text-base font-medium">
                               {edu.start_year || edu.start_date} -{" "}
                               {edu.end_year || edu.end_date || "Present"}
                             </p>
                             {edu.score && (
-                              <p className="text-sm text-primary font-semibold">
+                              <p className="text-base text-primary font-semibold">
                                 {edu.score}
                               </p>
                             )}
                             {edu.grade && (
-                              <p className="text-sm text-primary font-semibold">
+                              <p className="text-base text-primary font-semibold">
                                 {edu.grade}
                               </p>
                             )}
                             {edu.gpa && (
-                              <p className="text-sm text-primary font-semibold">
+                              <p className="text-base text-primary font-semibold">
                                 GPA: {edu.gpa}
                               </p>
                             )}
@@ -674,7 +687,7 @@ const CandidateProfile = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-base text-muted-foreground">
                       No education records
                     </p>
                   )}
@@ -684,84 +697,87 @@ const CandidateProfile = () => {
               {/* Links */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4">Links</h3>
-                  <div className="flex flex-wrap gap-3">
-                    {data.studentProfile.linkedin_url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2"
-                        asChild
-                      >
-                        <a
-                          href={data.studentProfile.linkedin_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          LinkedIn
-                        </a>
-                      </Button>
-                    )}
-                    {data.studentProfile.behance_url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2"
-                        asChild
-                      >
-                        <a
-                          href={data.studentProfile.behance_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Behance
-                        </a>
-                      </Button>
-                    )}
-                    {data.studentProfile.dribbble_url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2"
-                        asChild
-                      >
-                        <a
-                          href={data.studentProfile.dribbble_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Dribbble
-                        </a>
-                      </Button>
-                    )}
-                    {data.studentProfile.website_url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2"
-                        asChild
-                      >
-                        <a
-                          href={data.studentProfile.website_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Website
-                        </a>
-                      </Button>
-                    )}
-                    {!data.studentProfile.linkedin_url &&
-                      !data.studentProfile.behance_url &&
-                      !data.studentProfile.dribbble_url &&
-                      !data.studentProfile.website_url && (
-                        <p className="text-sm text-muted-foreground">
-                          No links provided
-                        </p>
-                      )}
+                  <h3 className="text-2xl font-bold mb-4">Links</h3>
+
+                  <div className="flex flex-wrap gap-3 items-center">
+                    {(() => {
+                      const getSocialIcon = (link: any) => {
+                        const url = (link.url || "").toLowerCase();
+                        const platform = (link.platform || "").toLowerCase();
+
+                        if (
+                          platform.includes("linkedin") ||
+                          url.includes("linkedin.com")
+                        )
+                          return Linkedin;
+                        if (
+                          platform.includes("instagram") ||
+                          url.includes("instagram.com")
+                        )
+                          return Instagram;
+                        if (
+                          platform.includes("facebook") ||
+                          url.includes("facebook.com")
+                        )
+                          return Facebook;
+                        if (
+                          platform.includes("twitter") ||
+                          platform.includes("x") ||
+                          url.includes("twitter.com") ||
+                          url.includes("x.com")
+                        )
+                          return Twitter;
+                        if (
+                          platform.includes("youtube") ||
+                          url.includes("youtube.com")
+                        )
+                          return Youtube;
+                        if (
+                          platform.includes("behance") ||
+                          url.includes("behance.net")
+                        )
+                          return Palette;
+                        if (
+                          platform.includes("dribbble") ||
+                          url.includes("dribbble.com")
+                        )
+                          return Dribbble;
+                        return Globe;
+                      };
+
+                      if (!links || links.length === 0) {
+                        return (
+                          <p className="text-sm text-muted-foreground">
+                            No links provided
+                          </p>
+                        );
+                      }
+
+                      return (
+                        <div className="flex flex-wrap gap-3">
+                          {links.map((link: any, idx: number) => {
+                            const Icon = getSocialIcon(link);
+                            return (
+                              <Button
+                                key={idx}
+                                variant="outline"
+                                size="icon"
+                                className="rounded-full"
+                                asChild
+                              >
+                                <a
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <Icon className="w-4 h-4" />
+                                </a>
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </CardContent>
               </Card>

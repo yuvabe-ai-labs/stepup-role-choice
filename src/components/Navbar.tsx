@@ -108,7 +108,7 @@ const Navbar = () => {
                 variant="ghost"
                 className={`text-sm font-medium ${
                   isActive(item.path)
-                    ? "text-primary border-b-2 border-primary rounded-none"
+                    ? "text-primary rounded-none"
                     : "text-black"
                 }`}
                 onClick={() => navigate(item.path)}
@@ -134,7 +134,7 @@ const Navbar = () => {
           {/* Notifications */}
           <div className="relative">
             <Bell className="h-5 w-5 text-black fill-black" />
-            <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+            {/* <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full"></span> */}
           </div>
 
           {/* Mobile Menu */}
@@ -145,16 +145,24 @@ const Navbar = () => {
           {/* User Avatar with Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center space-x-2 bg-gray-200 p-1 rounded-full px-3 gap-2 hover:bg-gray-300 transition-colors">
-                <div className="flex flex-col space-y-1 gap-0.5">
-                  <div className="w-4 h-[3px] bg-black rounded-full -translate-x-1"></div>
-                  <div className="w-4 h-[3px] bg-black rounded-full translate-x-1"></div>
-                  <div className="w-4 h-[3px] bg-black rounded-full -translate-x-1"></div>
+              <button className="flex items-center justify-between bg-[var(--indigo-50,#F0F5FF)] rounded-full pl-3 pr-1 gap-2 py-1.5 shadow-sm w-fit">
+                {/* Three Bars */}
+                <div className="flex flex-col justify-center space-y-[3px] m-1.5">
+                  {/* Line 1 - Left aligned, half width */}
+                  <div className="h-[3px] w-3 bg-gray-500 rounded-full self-start"></div>
+
+                  {/* Line 2 - Wider middle line */}
+                  <div className="h-[3px] w-[26px] bg-gray-500 rounded-full mx-auto"></div>
+
+                  {/* Line 3 - Right aligned, half width */}
+                  <div className="h-[3px] w-3 bg-gray-500 rounded-full self-end"></div>
                 </div>
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="" />
-                  <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                    {user?.email?.charAt(0).toUpperCase()}
+
+                {/* Avatar */}
+                <Avatar className="h-10 w-10 border-2 border-white shadow-md">
+                  <AvatarImage src="/path-to-profile.png" alt="User" />
+                  <AvatarFallback className="text-sm bg-[#F8F6F2] text-gray-800">
+                    {user?.email?.charAt(0).toUpperCase() ?? "U"}
                   </AvatarFallback>
                 </Avatar>
               </button>
