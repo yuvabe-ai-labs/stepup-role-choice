@@ -18,6 +18,8 @@ import {
   ExternalLink,
   Link,
   Plus,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useUnitProfileData } from "@/hooks/useUnitProfileData";
 import { UnitDetailsDialog } from "@/components/unit/UnitDetailsDialog";
@@ -26,7 +28,7 @@ import { UnitProjectDialog } from "@/components/unit/UnitProjectDialog";
 import { UnitSocialLinksDialog } from "@/components/unit/UnitSocialLinksDialog";
 import { GalleryDialog } from "@/components/GalleryDialog";
 import { GlimpseDialog } from "@/components/GlimpseDialog";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { CircularProgress } from "@/components/CircularProgress";
 import { useUnitProfileCompletion } from "@/hooks/useUnitProfileCompletion";
 import { ImageUploadDialog } from "@/components/ImageUploadDialog";
@@ -56,6 +58,7 @@ const UnitProfile = () => {
   const [viewImage, setViewImage] = useState<string | null>(null);
 
   const profileCompletion = useUnitProfileCompletion({ profile, unitProfile });
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!loading && (profile || user)) {
@@ -144,7 +147,7 @@ const UnitProfile = () => {
 
       <div className="container mx-auto px-24 -mt-24 mb-6 relative z-10">
         {/* Profile Header */}
-        <Card className="mb-8 bg-white rounded-3xl">
+        <Card className="mb-4 bg-white rounded-3xl">
           <CardContent className="p-6">
             <div className="flex items-start space-x-6">
               <div className="relative group">
@@ -255,7 +258,7 @@ const UnitProfile = () => {
           </CardContent>
         </Card>
 
-        <div className="grid lg:grid-cols-4 gap-8">
+        <div className="grid lg:grid-cols-4 gap-4">
           {/* Left Sidebar - Quick Links */}
           <div className="lg:col-span-1">
             <Card className="rounded-3xl">
@@ -391,12 +394,12 @@ const UnitProfile = () => {
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-3 space-y-8">
+          <div className="lg:col-span-3 space-y-4">
             {/* Projects */}
             <Card className="rounded-3xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Projects</h3>
+                  <h3 className="text-xl font-semibold">Projects</h3>
                   <UnitProjectDialog onSave={addProjectEntry}>
                     <Button variant="ghost" size="sm" className="text-primary">
                       Add Project
@@ -405,12 +408,9 @@ const UnitProfile = () => {
                 </div>
 
                 {projects.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="divide-y divide-border">
                     {projects.map((project: any, index: number) => (
-                      <div
-                        key={index}
-                        className="p-4 border border-border rounded-xl"
-                      >
+                      <div key={index} className="py-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h4 className="font-semibold text-base text-foreground">
@@ -424,19 +424,19 @@ const UnitProfile = () => {
                             )}
 
                             <p className="text-xs text-muted-foreground mt-2">
-                              <span className="capitalize">
-                                {project.status}
-                              </span>
                               {project.status === "Completed" &&
-                                project.completion_date && (
-                                  <>
-                                    {" "}
-                                    • Completed on{" "}
-                                    {new Date(
-                                      project.completion_date
-                                    ).toLocaleDateString()}
-                                  </>
-                                )}
+                              project.completion_date ? (
+                                <>
+                                  Completed on{" "}
+                                  {new Date(
+                                    project.completion_date
+                                  ).toLocaleDateString()}
+                                </>
+                              ) : (
+                                <span className="capitalize">
+                                  {project.status}
+                                </span>
+                              )}
                             </p>
                           </div>
 
@@ -460,21 +460,22 @@ const UnitProfile = () => {
                 )}
               </CardContent>
             </Card>
-
             {/* Mission */}
             <Card className="rounded-3xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Mission</h3>
-                  <UnitDescriptionDialog
-                    description={unitProfile?.mission || ""}
-                    onSave={(mission) => updateUnitProfile({ mission })}
-                    title="Edit Mission"
-                  >
-                    <Pencil className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
-                  </UnitDescriptionDialog>
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    Mission
+                    <UnitDescriptionDialog
+                      description={unitProfile?.mission || ""}
+                      onSave={(mission) => updateUnitProfile({ mission })}
+                      title="Edit Mission"
+                    >
+                      <Pencil className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
+                    </UnitDescriptionDialog>
+                  </h3>
                 </div>
-                <div className="border rounded-xl p-4 min-h-[100px]">
+                <div className="rounded-xl min-h-[100px]">
                   <p className="text-muted-foreground whitespace-pre-wrap">
                     {unitProfile?.mission ||
                       "Define your organization's mission statement - the purpose and primary objectives that drive your work."}
@@ -482,21 +483,23 @@ const UnitProfile = () => {
                 </div>
               </CardContent>
             </Card>
-
             {/* Values */}
             <Card className="rounded-3xl">
               <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Values</h3>
-                  <UnitDescriptionDialog
-                    description={unitProfile?.values || ""}
-                    onSave={(values) => updateUnitProfile({ values })}
-                    title="Edit Values"
-                  >
-                    <Pencil className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
-                  </UnitDescriptionDialog>
+                <div className="flex items-center mb-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    Values
+                    <UnitDescriptionDialog
+                      description={unitProfile?.values || ""}
+                      onSave={(values) => updateUnitProfile({ values })}
+                      title="Edit Values"
+                    >
+                      <Pencil className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
+                    </UnitDescriptionDialog>
+                  </h3>
                 </div>
-                <div className="border rounded-xl p-4 min-h-[100px]">
+
+                <div className="rounded-xl min-h-[100px]">
                   <p className="text-muted-foreground whitespace-pre-wrap">
                     {unitProfile?.values ||
                       "Describe the principles and ethics that define your organization's culture and decisions."}
@@ -504,104 +507,54 @@ const UnitProfile = () => {
                 </div>
               </CardContent>
             </Card>
-
             {/* Social Links */}
             <Card className="rounded-3xl">
               <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-semibold text-xl">Social Links</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold">Social Links</h2>
                   <UnitSocialLinksDialog
                     onSave={handleSocialLinksSave}
                     currentLinks={socialLinks}
                   >
                     <Button variant="ghost" size="sm" className="text-primary">
-                      {socialLinks.length > 0 ? "Manage Links" : "Add Links"}
+                      Add Links
                     </Button>
                   </UnitSocialLinksDialog>
                 </div>
 
                 {socialLinks.length > 0 ? (
-                  <div className="space-y-6">
-                    {socialLinks.map((link: any) => (
-                      <div key={link.id} className="space-y-2">
-                        <h4 className="font-semibold text-lg text-muted-foreground">
-                          {link.platform === "website" && "Website"}
-                          {link.platform === "linkedin" && "LinkedIn"}
-                          {link.platform === "instagram" && "Instagram"}
-                          {link.platform === "facebook" && "Facebook"}
-                          {link.platform === "x" && "X"}
-                          {link.platform === "threads" && "Threads"}
-                        </h4>
-                        <div className="flex items-center justify-between bg-muted/50 p-3 rounded-lg">
-                          <span className="text-sm text-muted-foreground font-mono">
-                            {link.url}
-                          </span>
-                          <div className="flex items-center space-x-2">
-                            <a
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-1 hover:bg-accent rounded text-muted-foreground hover:text-primary"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                            </a>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeSocialLink(link.id)}
-                              className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
+                  <div>
+                    {socialLinks.map((link: any, index: number) => (
+                      <div
+                        key={index}
+                        className="grid grid-cols-5 items-center mt-4"
+                      >
+                        <p className="font-medium capitalize">
+                          {link.platform}
+                        </p>
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:underline break-all grid col-span-3 border rounded-xl px-3 py-2"
+                        >
+                          {link.url}
+                        </a>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeSocialLink(link.id)}
+                          className="text-muted-foreground hover:text-destructive justify-self-end"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     ))}
-
-                    {/* Add New Link Section */}
-                    <div className="border-t pt-6">
-                      <UnitSocialLinksDialog
-                        onSave={handleSocialLinksSave}
-                        currentLinks={socialLinks}
-                      >
-                        <Button
-                          variant="outline"
-                          className="w-full border-dashed h-12 text-muted-foreground"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add New link
-                        </Button>
-                      </UnitSocialLinksDialog>
-                    </div>
                   </div>
                 ) : (
-                  <div className="space-y-6">
-                    <div className="text-center py-12 border-2 border-dashed rounded-xl">
-                      <Link className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-                      <p className="text-muted-foreground text-lg mb-2">
-                        No social links added yet
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Add your organization's social media links and website
-                      </p>
-                    </div>
-
-                    {/* Add New Link Section */}
-                    <div className="border-t pt-6">
-                      <UnitSocialLinksDialog
-                        onSave={handleSocialLinksSave}
-                        currentLinks={socialLinks}
-                      >
-                        <Button
-                          variant="outline"
-                          className="w-full border-dashed h-12 text-muted-foreground"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add New link
-                        </Button>
-                      </UnitSocialLinksDialog>
-                    </div>
-                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    No social links added yet.
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -610,7 +563,7 @@ const UnitProfile = () => {
             <Card className="rounded-3xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold flex items-center gap-2">
+                  <h3 className=" text-xl font-semibold flex items-center gap-2">
                     <Video className="w-5 h-5" />
                     Glimpse of the Unit
                   </h3>
@@ -651,7 +604,7 @@ const UnitProfile = () => {
             <Card className="rounded-3xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Gallery</h3>
+                  <h3 className="text-xl font-semibold">Gallery</h3>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -661,24 +614,61 @@ const UnitProfile = () => {
                     {galleryImages.length > 0 ? "Manage Gallery" : "Add Images"}
                   </Button>
                 </div>
+
                 {galleryImages.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {galleryImages.map((image: string, index: number) => (
-                      <div
-                        key={index}
-                        className="relative aspect-square rounded-lg overflow-hidden border border-border group cursor-pointer"
-                        onClick={() => setViewImage(image)}
-                      >
-                        <img
-                          src={image}
-                          alt={`Gallery image ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <ZoomIn className="w-8 h-8 text-white" />
+                  <div className="flex items-center space-x-4">
+                    {/* Left Chevron outside */}
+                    <button
+                      onClick={() =>
+                        scrollRef.current?.scrollBy({
+                          left: -300,
+                          behavior: "smooth",
+                        })
+                      }
+                      className="bg-white border border-border rounded-full shadow-md p-2 hover:bg-accent"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+
+                    {/* Scrollable Image Container */}
+                    <div
+                      ref={scrollRef}
+                      className="flex overflow-x-auto space-x-4 scroll-smooth no-scrollbar"
+                      style={{
+                        scrollbarWidth: "none",
+                        msOverflowStyle: "none",
+                      }}
+                    >
+                      {galleryImages.map((image: string, index: number) => (
+                        <div
+                          key={index}
+                          className="relative flex-shrink-0 w-64 h-64 rounded-lg overflow-hidden border border-border group cursor-pointer"
+                          onClick={() => setViewImage(image)}
+                        >
+                          <img
+                            src={image}
+                            alt={`Gallery image ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <ZoomIn className="w-8 h-8 text-white" />
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+
+                    {/* Right Chevron outside */}
+                    <button
+                      onClick={() =>
+                        scrollRef.current?.scrollBy({
+                          left: 300,
+                          behavior: "smooth",
+                        })
+                      }
+                      className="bg-white border border-border rounded-full shadow-md p-2 hover:bg-accent"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
                   </div>
                 ) : (
                   <div className="text-center py-8">
