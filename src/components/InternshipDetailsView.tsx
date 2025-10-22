@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import Navbar from "@/components/Navbar";
 
 interface InternshipDetailsViewProps {
   internship: any;
@@ -52,44 +53,7 @@ const InternshipDetailsView = ({
   return (
     <div className="min-h-screen bg-background">
       {/* Header - Same as InternshipApplicants */}
-      <header className="border-b bg-card px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full"></div>
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-teal-400 to-teal-600 rounded-full"></div>
-            </div>
-          </div>
-
-          <div className="flex-1 max-w-md mx-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Search"
-                className="pl-10 bg-muted/30 border-muted"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
-              <Bell className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <Menu className="w-4 h-4" />
-            </Button>
-            <div className="flex items-center space-x-2">
-              <div className="grid grid-cols-2 gap-1">
-                <div className="w-2 h-2 bg-orange-400 rounded-sm"></div>
-                <div className="w-2 h-2 bg-teal-400 rounded-sm"></div>
-                <div className="w-2 h-2 bg-blue-400 rounded-sm"></div>
-                <div className="w-2 h-2 bg-green-400 rounded-sm"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Main Content */}
       <main className="p-6 max-w-7xl mx-auto">

@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Trash2, Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface SocialLink {
   platform: string;
@@ -42,6 +43,7 @@ export const UnitSocialLinksDialog: React.FC<UnitSocialLinksDialogProps> = ({
     url: "",
     id: "",
   });
+  const { toast } = useToast();
 
   const platformOptions = [
     { value: "website", label: "Website" },
@@ -54,12 +56,39 @@ export const UnitSocialLinksDialog: React.FC<UnitSocialLinksDialogProps> = ({
 
   const addNewLink = () => {
     if (newLink.platform && newLink.url) {
-      const linkToAdd = {
-        ...newLink,
-        id: Date.now().toString(),
-      };
+      const platformExists = links.some(
+        (l) => l.platform.toLowerCase() === newLink.platform.toLowerCase()
+      );
+      const urlExists = links.some(
+        (l) => l.url.toLowerCase() === newLink.url.toLowerCase()
+      );
+
+      if (platformExists) {
+        toast({
+          title: "Duplicate Platform",
+          description: "This platform already exists.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (urlExists) {
+        toast({
+          title: "Duplicate URL",
+          description: "This URL already exists.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const linkToAdd = { ...newLink, id: Date.now().toString() };
       setLinks([...links, linkToAdd]);
       setNewLink({ platform: "", url: "", id: "" });
+
+      toast({
+        title: "Success",
+        description: "Link added successfully",
+      });
     }
   };
 
@@ -69,112 +98,137 @@ export const UnitSocialLinksDialog: React.FC<UnitSocialLinksDialogProps> = ({
 
   const handleSave = () => {
     onSave(links);
+    toast({
+      title: "Success",
+      description: "Links saved successfully",
+    });
     setOpen(false);
   };
 
-  const getPlatformDisplayName = (platform: string) => {
-    const platformMap: { [key: string]: string } = {
-      website: "Website",
-      linkedin: "LinkedIn",
-      instagram: "Instagram",
-      facebook: "Facebook",
-      x: "X",
-      threads: "Threads",
-    };
-    return platformMap[platform] || platform;
-  };
+  const getPlatformLabel = (value: string) =>
+    platformOptions.find((opt) => opt.value === value)?.label || value;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+
+      <DialogContent className="max-w-[480px] rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Social Links</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">
+            Manage Social Links
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 mt-4">
+        <div className="space-y-6 mt-2">
           {/* Existing Links */}
-          {links.map((link) => (
-            <div key={link.id} className="space-y-2">
-              <h3 className="font-semibold text-lg text-muted-foreground">
-                {getPlatformDisplayName(link.platform)}
-              </h3>
-              <div className="flex items-center justify-between bg-muted/50 p-3 rounded-lg">
-                <span className="text-sm text-muted-foreground font-mono">
-                  {link.url}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeLink(link.id)}
-                  className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
+          {links.length > 0 && (
+            <div className="space-y-3">
+              {links.map((link) => (
+                <div
+                  key={link.id}
+                  className="grid grid-cols-5 items-center gap-2 border rounded-2xl px-3 py-2"
                 >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
+                  <p className="font-medium col-span-1">
+                    {getPlatformLabel(link.platform)}
+                  </p>
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:underline break-all col-span-3"
+                  >
+                    {link.url}
+                  </a>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeLink(link.id)}
+                    className="text-muted-foreground hover:text-destructive justify-self-end"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
 
-          {/* Divider */}
-          {links.length > 0 && <hr className="border-t border-border" />}
-
-          {/* Add New Link Section */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Add New link</h4>
-
-            <div className="space-y-3 p-4 border rounded-lg">
-              <div>
-                <Label htmlFor="new-platform">Platform</Label>
-                <Select
-                  value={newLink.platform}
-                  onValueChange={(value) =>
-                    setNewLink({ ...newLink, platform: value })
-                  }
-                >
-                  <SelectTrigger id="new-platform" className="mt-1">
-                    <SelectValue placeholder="Select platform" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {platformOptions.map((platform) => (
-                      <SelectItem key={platform.value} value={platform.value}>
-                        {platform.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="new-url">URL</Label>
-                <Input
-                  id="new-url"
-                  type="url"
-                  placeholder="https://www.url.com/"
-                  value={newLink.url}
-                  onChange={(e) =>
-                    setNewLink({ ...newLink, url: e.target.value })
-                  }
-                  className="mt-1"
-                />
-              </div>
-
-              <Button
-                onClick={addNewLink}
-                disabled={!newLink.platform || !newLink.url}
-                className="w-full"
+          {/* Add New Link */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              addNewLink();
+            }}
+            className="space-y-4 border-t pt-4"
+          >
+            <div>
+              <Label htmlFor="platform">Platform *</Label>
+              <Select
+                value={newLink.platform}
+                onValueChange={(value) =>
+                  setNewLink({ ...newLink, platform: value })
+                }
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Link
+                <SelectTrigger
+                  id="platform"
+                  className="rounded-full mt-1 focus:ring-2 focus:ring-primary"
+                >
+                  <SelectValue placeholder="Select a platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  {platformOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="url">URL *</Label>
+              <Input
+                id="url"
+                type="url"
+                value={newLink.url}
+                onChange={(e) =>
+                  setNewLink({ ...newLink, url: e.target.value })
+                }
+                placeholder="https://example.com"
+                className="rounded-full mt-1"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setNewLink({ platform: "", url: "", id: "" })}
+                className="rounded-full"
+              >
+                Clear
+              </Button>
+              <Button
+                type="submit"
+                disabled={!newLink.platform || !newLink.url}
+                className="rounded-full"
+              >
+                Add
               </Button>
             </div>
-          </div>
+          </form>
         </div>
 
-        <div className="flex justify-end gap-2 mt-6">
-          <Button variant="outline" onClick={() => setOpen(false)}>
+        <div className="flex justify-end space-x-2 mt-6">
+          <Button
+            variant="outline"
+            onClick={() => setOpen(false)}
+            className="rounded-full"
+          >
             Cancel
           </Button>
-          <Button onClick={handleSave}>Save Links</Button>
+          <Button onClick={handleSave} className="rounded-full">
+            Save Links
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

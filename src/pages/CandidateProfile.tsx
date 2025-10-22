@@ -60,6 +60,22 @@ const CandidateProfile = () => {
     return statusMap[status] || status;
   };
 
+  const getStatusBg = (status: string) => {
+    switch (status) {
+      case "shortlisted":
+        return "bg-green-500 text-white";
+      case "interviewed":
+        return "bg-gradient-to-r from-[#07636C] to-[#0694A2] text-white";
+      case "applied":
+      case "rejected":
+        return "bg-red-500 text-white";
+      case "hired":
+        return "bg-blue-500 text-white";
+      default:
+        return "bg-gray-200 text-gray-700";
+    }
+  };
+
   const handleStatusChange = async (
     newStatus: "applied" | "shortlisted" | "rejected" | "interviewed" | "hired"
   ) => {
@@ -140,6 +156,9 @@ const CandidateProfile = () => {
   const skills = safeParse(data.studentProfile.skills, []);
   const interests = safeParse(data.studentProfile.interests, []);
   const achievements = safeParse(data.studentProfile.achievements, []);
+  const projects = safeParse(data.studentProfile.projects, []);
+  const internships = safeParse(data.studentProfile.internships, []);
+  const courses = safeParse(data.studentProfile.completed_courses, []);
   const education = safeParse(data.studentProfile.education, []);
 
   const matchScore = data.application.profile_match_score || 0;
@@ -201,7 +220,7 @@ const CandidateProfile = () => {
 
         {/* Profile Header Card */}
         <div className="container mx-auto px-10 py-2">
-          <Card className="mb-8 rounded-3xl shadow">
+          <Card className="mb-4 rounded-3xl shadow">
             <CardContent className="p-8">
               <div className="flex items-start gap-6">
                 <Avatar className="w-24 h-24">
@@ -251,64 +270,58 @@ const CandidateProfile = () => {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <Button className="gap-2 rounded-full">
-                      <Download className="w-4 h-4" />
-                      Download Profile
-                    </Button>
-                    <Select
-                      value={data.application.status}
-                      onValueChange={handleStatusChange}
-                      disabled={isUpdatingStatus}
-                    >
-                      {/* Rounded trigger */}
-                      <SelectTrigger className="w-48 rounded-full text-gray-700">
-                        <SelectValue placeholder="Select Status" />
-                      </SelectTrigger>
+                    <div className="flex items-center gap-3">
+                      {/* <Button className="gap-2 rounded-full px-6">
+                        <Download className="w-4 h-4" />
+                        Download Profile
+                      </Button> */}
 
-                      {/* Rounded dropdown content */}
-                      <SelectContent className="rounded-2xl">
-                        {/* Each item styled without the checkmark */}
-                        <SelectItem
-                          value="shortlisted"
-                          className="focus:bg-accent/50 focus:text-accent-foreground data-[state=checked]:bg-transparent data-[state=checked]:text-foreground"
+                      <Select
+                        value={data.application.status}
+                        onValueChange={handleStatusChange}
+                        disabled={isUpdatingStatus}
+                      >
+                        {/* Trigger with dynamic background */}
+                        <SelectTrigger
+                          className={`w-48 rounded-full px-6 ${getStatusBg(
+                            data.application.status
+                          )}`}
                         >
-                          <div className="flex items-center gap-2">
-                            <Heart className="w-4 h-4" />
-                            Shortlisted
-                          </div>
-                        </SelectItem>
+                          <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
 
-                        <SelectItem
-                          value="applied"
-                          className="focus:bg-accent/50 focus:text-accent-foreground data-[state=checked]:bg-transparent data-[state=checked]:text-foreground"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Ban className="w-4 h-4" />
-                            Not Shortlisted
-                          </div>
-                        </SelectItem>
+                        {/* Dropdown content */}
+                        <SelectContent className="rounded-2xl">
+                          <SelectItem value="shortlisted">
+                            <div className="flex items-center gap-2 px-4">
+                              <Heart className="w-4 h-4" />
+                              Shortlisted
+                            </div>
+                          </SelectItem>
 
-                        <SelectItem
-                          value="hired"
-                          className="focus:bg-accent/50 focus:text-accent-foreground data-[state=checked]:bg-transparent data-[state=checked]:text-foreground"
-                        >
-                          <div className="flex items-center gap-2">
-                            <CopyCheck className="w-4 h-4" />
-                            Select Candidate
-                          </div>
-                        </SelectItem>
+                          <SelectItem value="applied">
+                            <div className="flex items-center gap-2 px-4">
+                              <Ban className="w-4 h-4" />
+                              Not Shortlisted
+                            </div>
+                          </SelectItem>
 
-                        <SelectItem
-                          value="interviewed"
-                          className="focus:bg-accent/50 focus:text-accent-foreground data-[state=checked]:bg-transparent data-[state=checked]:text-foreground"
-                        >
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4" />
-                            Schedule Interview
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                          <SelectItem value="hired">
+                            <div className="flex items-center gap-2 px-4">
+                              <CopyCheck className="w-4 h-4" />
+                              Select Candidate
+                            </div>
+                          </SelectItem>
+
+                          <SelectItem value="interviewed">
+                            <div className="flex items-center gap-2 px-4">
+                              <User className="w-4 h-4" />
+                              Schedule Interview
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -316,9 +329,9 @@ const CandidateProfile = () => {
           </Card>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-[35%_62%] gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[35%_62%] gap-4">
             {/* Left Column */}
-            <div className="space-y-8">
+            <div className="space-y-4">
               {/* Skills & Expertise */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
@@ -354,7 +367,7 @@ const CandidateProfile = () => {
               </Card>
 
               {/* Internship History */}
-              <Card className="rounded-3xl">
+              {/* <Card className="rounded-3xl">
                 <CardContent className="p-6">
                   <h3 className="text-xl font-bold mb-6">Internship History</h3>
                   {data.internships.length > 0 ? (
@@ -382,11 +395,65 @@ const CandidateProfile = () => {
                     </p>
                   )}
                 </CardContent>
+              </Card> */}
+
+              {/* Internships */}
+              <Card className="rounded-3xl">
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold mb-4">Internships</h3>
+                  {internships.length > 0 ? (
+                    <ul className="space-y-3">
+                      {internships.map((internship: any) => (
+                        <li key={internship.id} className="text-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold">
+                              {internship.title}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {internship.is_current
+                                ? "Ongoing"
+                                : `${new Date(
+                                    internship.start_date
+                                  ).toLocaleDateString()} - ${
+                                    internship.end_date
+                                      ? new Date(
+                                          internship.end_date
+                                        ).toLocaleDateString()
+                                      : "N/A"
+                                  }`}
+                            </span>
+                          </div>
+
+                          <p className="text-muted-foreground">
+                            Company:{" "}
+                            <span className="font-medium">
+                              {internship.company || "—"}
+                            </span>
+                          </p>
+
+                          {internship.description ? (
+                            <p className="text-muted-foreground">
+                              {internship.description}
+                            </p>
+                          ) : (
+                            <span className="italic text-muted-foreground text-sm">
+                              No description available
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No internships listed
+                    </p>
+                  )}
+                </CardContent>
               </Card>
             </div>
 
             {/* Right Column */}
-            <div className="space-y-8">
+            <div className="space-y-4">
               {/* Interests */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
@@ -412,7 +479,7 @@ const CandidateProfile = () => {
               </Card>
 
               {/* Achievements */}
-              <Card className="rounded-3xl">
+              {/* <Card className="rounded-3xl">
                 <CardContent className="p-6">
                   <h3 className="text-xl font-bold mb-4">Achievements</h3>
                   {achievements.length > 0 ? (
@@ -427,6 +494,126 @@ const CandidateProfile = () => {
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       No achievements listed
+                    </p>
+                  )}
+                </CardContent>
+              </Card> */}
+
+              {/* Completed Courses */}
+              <Card className="rounded-3xl">
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold mb-4">Completed Courses</h3>
+                  {courses.length > 0 ? (
+                    <ul className="space-y-3">
+                      {courses.map((course: any) => (
+                        <li key={course.id} className="text-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold">
+                              {course.title}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {course.completion_date
+                                ? new Date(
+                                    course.completion_date
+                                  ).toLocaleDateString()
+                                : ""}
+                            </span>
+                          </div>
+                          <p className="text-muted-foreground">
+                            Provider:{" "}
+                            <span className="font-medium">
+                              {course.provider}
+                            </span>
+                          </p>
+                          {course.certificate_url ? (
+                            <a
+                              href={course.certificate_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline text-sm"
+                            >
+                              View Certificate
+                            </a>
+                          ) : (
+                            <span className="italic text-muted-foreground text-sm">
+                              No certificate available
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No completed courses listed
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Projects */}
+              <Card className="rounded-3xl">
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold mb-4">Projects</h3>
+                  {projects.length > 0 ? (
+                    <ul className="space-y-3">
+                      {projects.map((project: any) => (
+                        <li key={project.id} className="text-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold">
+                              {project.title}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {project.is_current
+                                ? "Ongoing"
+                                : `${new Date(
+                                    project.start_date
+                                  ).toLocaleDateString()} - ${new Date(
+                                    project.end_date
+                                  ).toLocaleDateString()}`}
+                            </span>
+                          </div>
+
+                          {project.description && (
+                            <p className="text-muted-foreground">
+                              {project.description}
+                            </p>
+                          )}
+
+                          {project.technologies?.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {project.technologies.map(
+                                (tech: string, idx: number) => (
+                                  <span
+                                    key={idx}
+                                    className="text-xs bg-muted px-2 py-1 rounded-full"
+                                  >
+                                    {tech}
+                                  </span>
+                                )
+                              )}
+                            </div>
+                          )}
+
+                          {project.project_url ? (
+                            <a
+                              href={project.project_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline text-sm"
+                            >
+                              View Project
+                            </a>
+                          ) : (
+                            <span className="italic text-muted-foreground text-sm">
+                              No project link available
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No projects listed
                     </p>
                   )}
                 </CardContent>
