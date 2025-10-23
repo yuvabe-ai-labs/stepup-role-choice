@@ -48,7 +48,12 @@ const SignUp = () => {
 
     setLoading(true);
 
-    const { error } = await signUp(email, password, fullName, role || "student");
+    const { error } = await signUp(
+      email,
+      password,
+      fullName,
+      role || "student"
+    );
 
     if (error) {
       toast({
@@ -59,7 +64,8 @@ const SignUp = () => {
     } else {
       toast({
         title: "Account created successfully!",
-        description: "Please check your email to verify your account then sign in to continue.",
+        description:
+          "Please check your email to verify your account then sign in to continue.",
       });
     }
 
@@ -88,7 +94,11 @@ const SignUp = () => {
       {/* Left Side - Illustration */}
       <div className="flex-1 hidden lg:flex items-center justify-center bg-gray-50">
         <div className="max-w-lg">
-          <img src={signupIllustration} alt="Signup Illustration" className="w-full h-auto" />
+          <img
+            src={signupIllustration}
+            alt="Signup Illustration"
+            className="w-full h-auto"
+          />
         </div>
       </div>
 
@@ -106,7 +116,8 @@ const SignUp = () => {
                 className="text-[20px] font-medium leading-[35px] mb-2"
                 style={{
                   color: "#1F2A37",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                  fontFamily:
+                    "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                 }}
               >
                 Create your account
@@ -115,7 +126,8 @@ const SignUp = () => {
                 className="text-[12px] leading-[15px]"
                 style={{
                   color: "#9CA3AF",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                  fontFamily:
+                    "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                 }}
               >
                 Please enter your details below
@@ -123,7 +135,7 @@ const SignUp = () => {
             </div>
 
             {/* OAuth Buttons */}
-            <div className="flex gap-3 mb-6">
+            {/* <div className="flex gap-3 mb-6">
               <button
                 onClick={() => handleOAuthSignUp("google")}
                 className="flex-1 h-8 bg-white border border-[#D1D5DB] rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
@@ -174,10 +186,10 @@ const SignUp = () => {
                   Sign up with Apple
                 </span>
               </button>
-            </div>
+            </div> */}
 
             {/* Divider */}
-            <div className="flex items-center mb-6">
+            {/* <div className="flex items-center mb-6">
               <div className="flex-1 h-px bg-[#D1D5DB]"></div>
               <span
                 className="px-3 text-[10px] leading-3"
@@ -189,7 +201,7 @@ const SignUp = () => {
                 or
               </span>
               <div className="flex-1 h-px bg-[#D1D5DB]"></div>
-            </div>
+            </div> */}
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -200,7 +212,8 @@ const SignUp = () => {
                   className="block text-[12px] leading-[11px] mb-2"
                   style={{
                     color: "#4B5563",
-                    fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                    fontFamily:
+                      "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                   }}
                 >
                   Full Name *
@@ -214,7 +227,8 @@ const SignUp = () => {
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full text-[12px] leading-[11px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     style={{
-                      fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                      fontFamily:
+                        "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                     }}
                     required
                   />
@@ -228,7 +242,8 @@ const SignUp = () => {
                   className="block text-[12px] leading-[11px] mb-2"
                   style={{
                     color: "#4B5563",
-                    fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                    fontFamily:
+                      "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                   }}
                 >
                   Email Address *
@@ -242,7 +257,8 @@ const SignUp = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full text-[12px] leading-[11px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     style={{
-                      fontFamily: "'Lato', system-ui, -apple-system, sans-serif",
+                      fontFamily:
+                        "'Lato', system-ui, -apple-system, sans-serif",
                     }}
                     required
                   />
@@ -251,7 +267,11 @@ const SignUp = () => {
 
               {/* Password */}
               <div>
-                <label htmlFor="password" className="block text-[12px] mb-2" style={{ color: "#4B5563" }}>
+                <label
+                  htmlFor="password"
+                  className="block text-[12px] mb-2"
+                  style={{ color: "#4B5563" }}
+                >
                   Password *
                 </label>
                 <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center gap-2">
@@ -281,7 +301,9 @@ const SignUp = () => {
                       return (
                         <li
                           key={index}
-                          className={`flex items-center gap-1 ${passed ? "text-green-600" : "text-gray-400"}`}
+                          className={`flex items-center gap-1 ${
+                            passed ? "text-green-600" : "text-gray-400"
+                          }`}
                         >
                           {passed ? (
                             <CheckCircle size={12} className="text-green-600" />
@@ -303,7 +325,8 @@ const SignUp = () => {
                 className="w-full h-[30px] rounded-lg flex items-center justify-center text-[12px] font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
                 style={{
                   backgroundColor: "#76A9FA",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                  fontFamily:
+                    "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                 }}
               >
                 {loading ? "Creating account..." : "Sign up"}
@@ -316,7 +339,8 @@ const SignUp = () => {
                 className="text-[12px] leading-4"
                 style={{
                   color: "#9CA3AF",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                  fontFamily:
+                    "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                 }}
               >
                 Already have an account?{" "}
@@ -325,7 +349,8 @@ const SignUp = () => {
                   className="text-[12px] leading-4 font-medium hover:underline"
                   style={{
                     color: "#3F83F8",
-                    fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
+                    fontFamily:
+                      "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
                   }}
                 >
                   Sign In
