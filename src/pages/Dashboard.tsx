@@ -144,13 +144,13 @@ const Dashboard = () => {
 
   const nextInternship = () => {
     setCurrentInternshipIndex((prev) =>
-      prev === recommendedInternships.length - 1 ? 0 : prev + 1
+      prev + 3 >= recommendedInternships.length ? 0 : prev + 3
     );
   };
 
   const prevInternship = () => {
     setCurrentInternshipIndex((prev) =>
-      prev === 0 ? recommendedInternships.length - 1 : prev - 1
+      prev === 0 ? Math.max(recommendedInternships.length - 3, 0) : prev - 3
     );
   };
 
