@@ -2,14 +2,24 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Clock, MapPin, Loader2, BookmarkCheck } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  MapPin,
+  Loader2,
+  BookmarkCheck,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import { useIntern } from "@/hooks/useInternships";
 import { useCourses } from "@/hooks/useCourses";
-import { useInternshipRecommendations, useCourseRecommendations } from "@/hooks/useRecommendations";
+import {
+  useInternshipRecommendations,
+  useCourseRecommendations,
+} from "@/hooks/useRecommendations";
 import { useSavedInternships } from "@/hooks/useSavedInternships";
 import { useAppliedInternships } from "@/hooks/useAppliedInternships";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,12 +31,15 @@ const Dashboard = () => {
   const [currentInternshipIndex, setCurrentInternshipIndex] = useState(0);
   const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
   const [userSkills, setUserSkills] = useState<string[]>([]);
-  const [activityView, setActivityView] = useState<"saved" | "applied">("saved");
+  const [activityView, setActivityView] = useState<"saved" | "applied">(
+    "saved"
+  );
 
   const { internships, loading: internshipsLoading } = useIntern();
   const { courses, loading: coursesLoading } = useCourses();
   const { savedInternships, loading: savedLoading } = useSavedInternships();
-  const { appliedInternships, loading: appliedLoading } = useAppliedInternships();
+  const { appliedInternships, loading: appliedLoading } =
+    useAppliedInternships();
 
   // Fetch user skills for recommendations
   useEffect(() => {
@@ -34,7 +47,11 @@ const Dashboard = () => {
       if (!user) return;
 
       try {
-        const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle();
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
         if (profile) {
           const { data: studentProfile } = await supabase
@@ -50,7 +67,9 @@ const Dashboard = () => {
               try {
                 // Try to parse JSON
                 const parsed = JSON.parse(studentProfile.skills);
-                skills = Array.isArray(parsed) ? parsed : studentProfile.skills.split(",").map((s) => s.trim());
+                skills = Array.isArray(parsed)
+                  ? parsed
+                  : studentProfile.skills.split(",").map((s) => s.trim());
               } catch {
                 // If invalid JSON, fallback to comma-separated
                 skills = studentProfile.skills.split(",").map((s) => s.trim());
@@ -71,7 +90,10 @@ const Dashboard = () => {
   }, [user]);
 
   // Use recommendation hooks
-  const recommendedInternships = useInternshipRecommendations(internships, userSkills);
+  const recommendedInternships = useInternshipRecommendations(
+    internships,
+    userSkills
+  );
 
   const recommendedCourses = useCourseRecommendations(courses, userSkills);
 
@@ -99,19 +121,27 @@ const Dashboard = () => {
   ];
 
   const nextInternship = () => {
-    setCurrentInternshipIndex((prev) => (prev === recommendedInternships.length - 1 ? 0 : prev + 1));
+    setCurrentInternshipIndex((prev) =>
+      prev === recommendedInternships.length - 1 ? 0 : prev + 1
+    );
   };
 
   const prevInternship = () => {
-    setCurrentInternshipIndex((prev) => (prev === 0 ? recommendedInternships.length - 1 : prev - 1));
+    setCurrentInternshipIndex((prev) =>
+      prev === 0 ? recommendedInternships.length - 1 : prev - 1
+    );
   };
 
   const nextCourse = () => {
-    setCurrentCourseIndex((prev) => (prev === recommendedCourses.length - 1 ? 0 : prev + 1));
+    setCurrentCourseIndex((prev) =>
+      prev === recommendedCourses.length - 1 ? 0 : prev + 1
+    );
   };
 
   const prevCourse = () => {
-    setCurrentCourseIndex((prev) => (prev === 0 ? recommendedCourses.length - 1 : prev - 1));
+    setCurrentCourseIndex((prev) =>
+      prev === 0 ? recommendedCourses.length - 1 : prev - 1
+    );
   };
   const getDifficultyColor = (level: string) => {
     switch (level?.toLowerCase()) {
@@ -129,8 +159,8 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-4 gap-6">
+      <div className="container mx-auto px-28 py-10">
+        <div className="grid lg:grid-cols-4 gap-2.5">
           {/* Left Sidebar - Profile - Fixed */}
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-8">
@@ -140,20 +170,34 @@ const Dashboard = () => {
 
           {/* Main Content - Scrollable */}
           <div
-            className="lg:col-span-3 space-y-6 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2"
+            className="lg:col-span-3 space-y-2.5 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2"
             style={{ scrollbarWidth: "thin" }}
           >
             {/* Hero Section */}
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-3 gap-2.5">
               {heroCards.map((card) => (
-                <Card key={card.id} className={`${card.color} border-0 shadow-sm rounded-3xl`}>
+                <Card
+                  key={card.id}
+                  className={`${card.color} border-0 shadow-sm rounded-3xl`}
+                >
                   <CardContent className="p-6">
                     <div className="min-h-[120px] flex flex-col justify-center">
                       <h3 className="font-bold text-sm mb-2">{card.title}</h3>
-                      {card.subtitle && <p className="text-xs text-muted-foreground mb-1">{card.subtitle}</p>}
-                      {card.speaker && <p className="text-xs text-muted-foreground">{card.speaker}</p>}
+                      {card.subtitle && (
+                        <p className="text-xs text-muted-foreground mb-1">
+                          {card.subtitle}
+                        </p>
+                      )}
+                      {card.speaker && (
+                        <p className="text-xs text-muted-foreground">
+                          {card.speaker}
+                        </p>
+                      )}
                       {card.type && (
-                        <Badge variant="secondary" className="w-fit text-xs mt-2">
+                        <Badge
+                          variant="secondary"
+                          className="w-fit text-xs mt-2"
+                        >
                           {card.type}
                         </Badge>
                       )}
@@ -182,7 +226,9 @@ const Dashboard = () => {
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
                 ) : recommendedInternships.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No internships available</p>
+                  <p className="text-center text-muted-foreground py-8">
+                    No internships available
+                  </p>
                 ) : (
                   <div className="relative">
                     <div className="flex items-center space-x-4">
@@ -195,9 +241,12 @@ const Dashboard = () => {
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
 
-                      <div className="flex-1 grid md:grid-cols-3 gap-4">
+                      <div className="flex-1 grid md:grid-cols-3 gap-2.5">
                         {recommendedInternships
-                          .slice(currentInternshipIndex, currentInternshipIndex + 3)
+                          .slice(
+                            currentInternshipIndex,
+                            currentInternshipIndex + 3
+                          )
                           .map((internship, idx) => {
                             if (!internship) return null;
 
@@ -207,19 +256,31 @@ const Dashboard = () => {
                               "bg-purple-100 border-purple-200",
                             ];
                             const colorClass = colors[idx % colors.length];
-                            const initial = internship.company_name?.charAt(0) || "C";
+                            const initial =
+                              internship.company_name?.charAt(0) || "C";
                             const daysAgo = Math.floor(
-                              (Date.now() - new Date(internship.created_at).getTime()) / (1000 * 60 * 60 * 24),
+                              (Date.now() -
+                                new Date(internship.created_at).getTime()) /
+                                (1000 * 60 * 60 * 24)
                             );
-                            const timeText = daysAgo === 0 ? "Today" : daysAgo === 1 ? "1d ago" : `${daysAgo}d ago`;
+                            const timeText =
+                              daysAgo === 0
+                                ? "Today"
+                                : daysAgo === 1
+                                ? "1d ago"
+                                : `${daysAgo}d ago`;
 
                             return (
                               <Card
                                 key={internship.id}
                                 className={`${colorClass} shadow-sm hover:shadow-md transition-shadow cursor-pointer rounded-xl`}
-                                onClick={() => navigate(`/recommended-internships?id=${internship.id}`)}
+                                onClick={() =>
+                                  navigate(
+                                    `/recommended-internships?id=${internship.id}`
+                                  )
+                                }
                               >
-                                <CardHeader className="pb-3">
+                                <CardHeader className="pb-2.5">
                                   <div className="flex justify-between items-start mb-2">
                                     <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center text-background font-bold text-sm">
                                       {internship.company_logo ? (
@@ -232,21 +293,28 @@ const Dashboard = () => {
                                         initial
                                       )}
                                     </div>
-                                    <Badge variant="secondary" className="text-xs">
+                                    <Badge className="text-xs bg-transparent text-gray-600">
                                       {timeText}
                                     </Badge>
                                   </div>
-                                  <CardTitle className="text-base font-semibold">{internship.title}</CardTitle>
+                                  <CardTitle className=" m-0 text-gray-800 text-base font-normal flex justify-between items-center">
+                                    {internship.title}
+                                    <ChevronRight className="w-5 h-5" />
+                                  </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
                                   <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                                     <Clock className="w-3 h-3" />
-                                    <span>{internship.duration || "Not specified"}</span>
+                                    <span>
+                                      {internship.duration || "Not specified"}
+                                    </span>
                                   </div>
-                                  <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                                  {/* <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                                     <MapPin className="w-3 h-3" />
-                                    <span>{internship.location || "Remote"}</span>
-                                  </div>
+                                    <span>
+                                      {internship.location || "Remote"}
+                                    </span>
+                                  </div> */}
                                 </CardContent>
                               </Card>
                             );
@@ -281,8 +349,14 @@ const Dashboard = () => {
             <section>
               <Card className="p-6 bg-white shadow-sm border border-gray-200 rounded-3xl">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold">Certified Courses for you</h2>
-                  <Button variant="link" className="text-primary p-0 h-auto" onClick={() => navigate("/courses")}>
+                  <h2 className="text-xl font-semibold">
+                    Certified Courses for you
+                  </h2>
+                  <Button
+                    variant="link"
+                    className="text-primary p-0 h-auto"
+                    onClick={() => navigate("/courses")}
+                  >
                     View all
                   </Button>
                 </div>
@@ -292,90 +366,117 @@ const Dashboard = () => {
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
                 ) : recommendedCourses.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No courses available</p>
+                  <p className="text-center text-muted-foreground py-8">
+                    No courses available
+                  </p>
                 ) : (
                   <div className="relative">
                     <div className="flex items-center space-x-4">
-                      <Button variant="outline" size="icon" onClick={prevCourse} className="flex-shrink-0 rounded-full">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={prevCourse}
+                        className="flex-shrink-0 rounded-full"
+                      >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
-                      <div className="flex-1 grid md:grid-cols-3 gap-4">
-                        {recommendedCourses.slice(currentCourseIndex, currentCourseIndex + 3).map((course, idx) => {
-                          if (!course) return null;
+                      <div className="flex-1 grid md:grid-cols-3 gap-2.5">
+                        {recommendedCourses
+                          .slice(currentCourseIndex, currentCourseIndex + 3)
+                          .map((course, idx) => {
+                            if (!course) return null;
 
-                          const gradients = [
-                            "bg-gradient-to-br from-blue-900 to-purple-900",
-                            "bg-gradient-to-br from-purple-800 to-orange-600",
-                            "bg-gradient-to-br from-cyan-500 to-blue-600",
-                          ];
-                          const gradientClass = gradients[idx % gradients.length];
+                            const gradients = [
+                              "bg-gradient-to-br from-blue-900 to-purple-900",
+                              "bg-gradient-to-br from-purple-800 to-orange-600",
+                              "bg-gradient-to-br from-cyan-500 to-blue-600",
+                            ];
+                            const gradientClass =
+                              gradients[idx % gradients.length];
 
-                          return (
-                            <Card
-                              key={course.id}
-                              className="overflow-hidden rounded-3xl hover:shadow-lg transition-all"
-                              onClick={() => navigate("/courses")}
-                            >
-                              <div className={`h-32 relative ${gradientClass} flex items-center justify-center`}>
-                                {course.image_url ? (
-                                  <img
-                                    src={course.image_url}
-                                    alt={course.title}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="text-white text-center">
-                                    <h3 className="text-2xl font-bold">{course.category || "Course"}</h3>
-                                  </div>
-                                )}
-                                {/* Time ago badge */}
-                                <Badge className="absolute top-3 right-3 bg-white/90 text-foreground hover:bg-white">
-                                  {formatDistanceToNow(new Date(course.created_at), { addSuffix: true })}
-                                </Badge>
-                              </div>
-
-                              <CardContent className="p-4 space-y-3">
-                                {/* Title */}
-                                <h3 className="font-bold text-lg line-clamp-2">{course.title}</h3>
-
-                                {/* Duration and Level */}
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                    <Clock className="w-4 h-4" />
-                                    <span>{course.duration || "8 weeks"}</span>
-                                  </div>
-                                  {course.difficulty_level && (
-                                    <Badge className={`${getDifficultyColor(course.difficulty_level)} text-white`}>
-                                      {course.difficulty_level}
-                                    </Badge>
+                            return (
+                              <Card
+                                key={course.id}
+                                className="overflow-hidden rounded-3xl hover:shadow-lg transition-all"
+                                onClick={() => navigate("/courses")}
+                              >
+                                <div
+                                  className={`h-32 relative ${gradientClass} max-h-28 flex items-center justify-center`}
+                                >
+                                  {course.image_url ? (
+                                    <img
+                                      src={course.image_url}
+                                      alt={course.title}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="text-white text-center">
+                                      <h3 className="text-2xl font-bold">
+                                        {course.category || "Course"}
+                                      </h3>
+                                    </div>
                                   )}
+                                  {/* Time ago badge */}
+                                  <Badge className="absolute top-3 right-3 bg-white/90 text-foreground hover:bg-white">
+                                    {formatDistanceToNow(
+                                      new Date(course.created_at),
+                                      { addSuffix: true }
+                                    )}
+                                  </Badge>
                                 </div>
 
-                                {/* <p className="text-xs text-muted-foreground">
+                                <CardContent className="px-5 py-2.5 space-y-2">
+                                  {/* Title */}
+                                  <h3 className="font-medium text-base line-clamp-2">
+                                    {course.title}
+                                  </h3>
+
+                                  {/* Duration and Level */}
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex m-0 items-center gap-1 text-sm text-muted-foreground">
+                                      <Clock className="w-4 h-4" />
+                                      <span>
+                                        {course.duration || "8 weeks"}
+                                      </span>
+                                    </div>
+                                    {/* {course.difficulty_level && (
+                                      <Badge
+                                        className={`${getDifficultyColor(
+                                          course.difficulty_level
+                                        )} text-white`}
+                                      >
+                                        {course.difficulty_level}
+                                      </Badge>
+                                    )} */}
+                                  </div>
+
+                                  {/* <p className="text-xs text-muted-foreground">
                                     {course.provider || "Online Course"}
                                   </p> */}
 
-                                {/* Description */}
-                                {/* <p className="text-sm text-muted-foreground line-clamp-3">
+                                  {/* Description */}
+                                  {/* <p className="text-sm text-muted-foreground line-clamp-3">
                                     {course.description ||
                                       "Build your skills with this comprehensive course..."}
                                   </p> */}
 
-                                {/* Know More Button */}
-                                <Button
-                                  className="border-none text-sm text-primary hover:bg-transparent hover:text-primary"
-                                  variant="outline"
-                                >
-                                  Know more
-                                  <ChevronRight className="w-3" />
-                                </Button>
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
+                                  {/* Know More Button */}
+                                  <button className="border-none flex gap-1 items-center p-0 m-0 text-sm text-primary hover:bg-transparent hover:text-primary">
+                                    Know more
+                                    <ChevronRight className="w-4 h-4" />
+                                  </button>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
                       </div>
 
-                      <Button variant="outline" size="icon" onClick={nextCourse} className="flex-shrink-0 rounded-full">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={nextCourse}
+                        className="flex-shrink-0 rounded-full"
+                      >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     </div>
@@ -393,7 +494,9 @@ const Dashboard = () => {
                     <Button
                       onClick={() => setActivityView("saved")}
                       className={`rounded-full bg-transparent ${
-                        activityView === "saved" ? "text-gray-600 underline underline-offset-8" : "text-gray-400"
+                        activityView === "saved"
+                          ? "text-gray-600 underline underline-offset-8"
+                          : "text-gray-400"
                       }`}
                     >
                       Saved
@@ -404,7 +507,9 @@ const Dashboard = () => {
                       // }
                       onClick={() => setActivityView("applied")}
                       className={`rounded-full bg-transparent ${
-                        activityView === "applied" ? "text-gray-600 underline underline-offset-8" : "text-gray-400"
+                        activityView === "applied"
+                          ? "text-gray-600 underline underline-offset-8"
+                          : "text-gray-400"
                       }`}
                     >
                       Applied
@@ -416,26 +521,42 @@ const Dashboard = () => {
                   <div className="flex justify-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
-                ) : (activityView === "saved" ? savedInternships : appliedInternships).length === 0 ? (
+                ) : (activityView === "saved"
+                    ? savedInternships
+                    : appliedInternships
+                  ).length === 0 ? (
                   <div className="text-center py-12">
                     <BookmarkCheck className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No {activityView} internships yet</p>
+                    <p className="text-muted-foreground">
+                      No {activityView} internships yet
+                    </p>
                   </div>
                 ) : (
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {(activityView === "saved" ? savedInternships : appliedInternships)
+                  <div className="grid md:grid-cols-3 gap-2.5">
+                    {(activityView === "saved"
+                      ? savedInternships
+                      : appliedInternships
+                    )
                       .slice(0, 6)
                       .map((internship) => {
                         const dateToUse =
-                          activityView === "saved" ? (internship as any).saved_at : (internship as any).applied_at;
-                        const timeAgo = formatDistanceToNow(new Date(dateToUse), { addSuffix: true });
-                        const initial = internship.company_name?.charAt(0) || "C";
+                          activityView === "saved"
+                            ? (internship as any).saved_at
+                            : (internship as any).applied_at;
+                        const timeAgo = formatDistanceToNow(
+                          new Date(dateToUse),
+                          { addSuffix: true }
+                        );
+                        const initial =
+                          internship.company_name?.charAt(0) || "C";
 
                         return (
                           <Card
                             key={internship.id}
-                            className="p-6 hover:shadow-lg transition-all cursor-pointer rounded-xl border"
-                            onClick={() => navigate(`/internships/${internship.id}`)}
+                            className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300"
+                            onClick={() =>
+                              navigate(`/internships/${internship.id}`)
+                            }
                           >
                             <div className="space-y-2">
                               {/* Header with Logo and Badge */}
@@ -452,23 +573,31 @@ const Dashboard = () => {
                                   )}
                                 </div>
                                 <Badge className="bg-primary text-primary-foreground">
-                                  {activityView === "saved" ? "Saved" : "Applied"} {timeAgo.replace(" ago", "")}
+                                  {activityView === "saved"
+                                    ? "Saved"
+                                    : "Applied"}{" "}
+                                  {timeAgo.replace(" ago", "")}
                                 </Badge>
                               </div>
 
                               {/* Title */}
-                              <h3 className="text-lg font-bold line-clamp-2">{internship.title}</h3>
+                              <h3 className="text-4 font-semibold text-gray-900 line-clamp-2">
+                                {internship.title}
+                              </h3>
 
                               {/* Description */}
-                              <p className="text-sm text-muted-foreground line-clamp-3">
-                                {internship.description || "No description available"}
+                              <p className="text-sm text-gray-500 line-clamp-3">
+                                {internship.description ||
+                                  "No description available"}
                               </p>
 
                               {/* Duration and Location */}
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-4 text-sm text-gray-600">
                                 <div className="flex items-center gap-1">
                                   <Clock className="w-4 h-4" />
-                                  <span>{internship.duration || "Not specified"}</span>
+                                  <span>
+                                    {internship.duration || "Not specified"}
+                                  </span>
                                 </div>
                               </div>
                             </div>
