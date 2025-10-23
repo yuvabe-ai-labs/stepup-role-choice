@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -60,6 +60,7 @@ const RecommendedInternships = () => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [userSkills, setUserSkills] = useState<string[]>([]);
   const [savingInternship, setSavingInternship] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const { hasApplied, isLoading: isCheckingStatus, markAsApplied } = useApplicationStatus(selectedInternship);
   const { isSaved, isLoading: isCheckingSaved, refetch: refetchSaved } = useIsSaved(selectedInternship);
@@ -130,7 +131,14 @@ const RecommendedInternships = () => {
     if (internships.length > 0 && !selectedInternship) {
       setSelectedInternship(internships[0].id);
     }
-  }, [internships, selectedInternship, searchParams]);
+  }, [internships, searchParams]);
+
+  // Scroll to top when internship selection changes
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [selectedInternship]);
 
   const selectedInternshipData = internships.find((int) => int.id === selectedInternship) || internships[0];
 
@@ -316,7 +324,7 @@ const RecommendedInternships = () => {
         </div>
 
         {/* Main Content - Independently Scrollable */}
-        <div className="flex-1 bg-white h-full overflow-y-auto" style={{ scrollbarWidth: "thin" }}>
+        <div ref={contentRef} className="flex-1 bg-white h-full overflow-y-auto" style={{ scrollbarWidth: "thin" }}>
           {loading ? (
             <div className="p-8">
               <div className="flex justify-between items-start mb-8">
