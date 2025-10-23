@@ -37,6 +37,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import ScheduleInterviewDialog from "@/components/ScheduleInterviewDialog";
 
@@ -56,6 +66,10 @@ const CandidateProfile = () => {
   const { data, loading, error, refetch } = useCandidateProfile(id || "");
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<
+    "applied" | "shortlisted" | "rejected" | "interviewed" | "hired" | null
+  >(null);
 
   const getStatusLabel = (status: string) => {
     const statusMap: Record<string, string> = {
@@ -84,6 +98,35 @@ const CandidateProfile = () => {
     }
   };
 
+  const getDialogContent = (status: string) => {
+    switch (status) {
+      case "shortlisted":
+        return {
+          title: "Shortlist Candidate?",
+          description: `Are you sure you want to shortlist ${data?.profile.full_name}? This will move them to the next stage of the hiring process.`,
+          icon: <Heart className="w-6 h-6 text-green-500" />,
+        };
+      case "applied":
+        return {
+          title: "Not Shortlist Candidate?",
+          description: `Are you sure you want to mark ${data?.profile.full_name} as not shortlisted? You can change this status later if needed.`,
+          icon: <Ban className="w-6 h-6 text-red-500" />,
+        };
+      case "hired":
+        return {
+          title: "Select Candidate?",
+          description: `Are you sure you want to select ${data?.profile.full_name} for this position? This will mark them as hired.`,
+          icon: <CopyCheck className="w-6 h-6 text-blue-500" />,
+        };
+      default:
+        return {
+          title: "Update Status?",
+          description: `Are you sure you want to update the status for ${data?.profile.full_name}?`,
+          icon: <User className="w-6 h-6" />,
+        };
+    }
+  };
+
   const handleStatusChange = async (
     newStatus: "applied" | "shortlisted" | "rejected" | "interviewed" | "hired"
   ) => {
@@ -95,11 +138,21 @@ const CandidateProfile = () => {
       return;
     }
 
+    // Store pending status and show confirmation dialog
+    setPendingStatus(newStatus);
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmStatusChange = async () => {
+    if (!data?.application.id || !pendingStatus) return;
+
     setIsUpdatingStatus(true);
+    setShowConfirmDialog(false);
+
     try {
       const { error: updateError } = await supabase
         .from("applications")
-        .update({ status: newStatus })
+        .update({ status: pendingStatus })
         .eq("id", data.application.id);
 
       if (updateError) throw updateError;
@@ -111,7 +164,7 @@ const CandidateProfile = () => {
       toast({
         title: "Status Updated",
         description: `Application status changed to ${getStatusLabel(
-          newStatus
+          pendingStatus
         )}`,
         duration: 3000,
       });
@@ -125,7 +178,13 @@ const CandidateProfile = () => {
       });
     } finally {
       setIsUpdatingStatus(false);
+      setPendingStatus(null);
     }
+  };
+
+  const handleCancelStatusChange = () => {
+    setShowConfirmDialog(false);
+    setPendingStatus(null);
   };
 
   if (loading) {
@@ -171,6 +230,8 @@ const CandidateProfile = () => {
   const links = safeParse(data.studentProfile.links, []);
 
   const matchScore = data.application.profile_match_score || 0;
+
+  const dialogContent = pendingStatus ? getDialogContent(pendingStatus) : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -280,11 +341,6 @@ const CandidateProfile = () => {
 
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-3">
-                      {/* <Button className="gap-2 rounded-full px-6">
-                        <Download className="w-4 h-4" />
-                        Download Profile
-                      </Button> */}
-
                       <Select
                         value={data.application.status}
                         onValueChange={handleStatusChange}
@@ -292,7 +348,7 @@ const CandidateProfile = () => {
                       >
                         {/* Trigger with dynamic background */}
                         <SelectTrigger
-                          className={`w-48 rounded-full px-6 ${getStatusBg(
+                          className={`w-64 rounded-full px-6 ${getStatusBg(
                             data.application.status
                           )}`}
                         >
@@ -377,37 +433,6 @@ const CandidateProfile = () => {
                 </CardContent>
               </Card>
 
-              {/* Internship History */}
-              {/* <Card className="rounded-3xl">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-6">Internship History</h3>
-                  {data.internships.length > 0 ? (
-                    <div className="space-y-4">
-                      {data.internships.map((internship) => (
-                        <div
-                          key={internship.id}
-                          className="flex items-start justify-between pb-4 border-b last:border-0"
-                        >
-                          <div>
-                            <h4 className="font-semibold">{internship.role}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              {internship.company}
-                            </p>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            View
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No internship history
-                    </p>
-                  )}
-                </CardContent>
-              </Card> */}
-
               {/* Internships */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
@@ -488,27 +513,6 @@ const CandidateProfile = () => {
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Achievements */}
-              {/* <Card className="rounded-3xl">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4">Achievements</h3>
-                  {achievements.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {achievements.map((achievement: string, idx: number) => (
-                        <div key={idx} className="flex items-start gap-2">
-                          <Star className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-sm">{achievement}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No achievements listed
-                    </p>
-                  )}
-                </CardContent>
-              </Card> */}
 
               {/* Completed Courses */}
               <Card className="rounded-3xl">
@@ -785,6 +789,45 @@ const CandidateProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* Status Confirmation Dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent className="rounded-3xl">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              {dialogContent?.icon}
+              <AlertDialogTitle className="text-xl">
+                {dialogContent?.title}
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base">
+              {dialogContent?.description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={handleCancelStatusChange}
+              className="rounded-full"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmStatusChange}
+              className={`rounded-full ${
+                pendingStatus === "shortlisted"
+                  ? "bg-green-500 hover:bg-green-600"
+                  : pendingStatus === "applied"
+                  ? "bg-red-500 hover:bg-red-600"
+                  : pendingStatus === "hired"
+                  ? "bg-blue-500 hover:bg-blue-600"
+                  : ""
+              }`}
+            >
+              {isUpdatingStatus ? "Updating..." : "Confirm"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Schedule Interview Dialog */}
       <ScheduleInterviewDialog

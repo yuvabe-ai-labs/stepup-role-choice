@@ -422,10 +422,10 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
         <ScrollArea className="max-h-[calc(90vh-140px)]">
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="px-6 py-4 space-y-6"
+            className="px-6 space-y-6 pb-6"
           >
             {/* File Upload Section */}
-            <div className="border-2 border-dashed border-primary/30 rounded-2xl p-8 bg-primary/5">
+            {/* <div className="border-2 border-dashed border-primary/30 rounded-2xl p-8 bg-primary/5">
               <div className="flex flex-col items-center justify-center text-center space-y-3">
                 <Upload className="w-12 h-12 text-primary" />
                 <div>
@@ -440,7 +440,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                   Drag and Drop your files here
                 </p>
               </div>
-            </div>
+            </div> */}
 
             <div className="flex items-center justify-between">
               <div>

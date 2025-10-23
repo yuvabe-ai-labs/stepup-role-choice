@@ -212,32 +212,33 @@ const Internship = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="flex gap-5 px-28 pt-10">
-        {/* Sidebar Filters */}
-        <div className="w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col h-[90vh] sticky top-6">
-          <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
-            <h2 className="text-lg font-bold">Filters</h2>
-            <Button
-              variant="ghost"
-              className="text-primary text-sm font-medium"
-              onClick={resetFilters}
-            >
-              Reset all
-            </Button>
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex gap-5 pt-10">
+          {/* Sidebar Filters */}
+          <div className="w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col h-[90vh] sticky top-6">
+            <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
+              <h2 className="text-lg font-bold">Filters</h2>
+              <Button
+                variant="ghost"
+                className="text-primary text-sm font-medium"
+                onClick={resetFilters}
+              >
+                Reset all
+              </Button>
+            </div>
 
-          <div className="px-6 pb-6 overflow-y-auto flex-1 space-y-6">
-            <FilterSection
-              label="Units"
-              searchValue={searchUnits}
-              onSearch={setSearchUnits}
-              list={uniqueUnits}
-              selected={filters.internships}
-              onToggle={(v) => toggleFilter("internships", v)}
-              showAll={showAllUnits}
-              setShowAll={setShowAllUnits}
-            />
-            {/* <FilterSection
+            <div className="px-6 pb-6 overflow-y-auto flex-1 space-y-6">
+              <FilterSection
+                label="Units"
+                searchValue={searchUnits}
+                onSearch={setSearchUnits}
+                list={uniqueUnits}
+                selected={filters.internships}
+                onToggle={(v) => toggleFilter("internships", v)}
+                showAll={showAllUnits}
+                setShowAll={setShowAllUnits}
+              />
+              {/* <FilterSection
               label="Industry"
               searchValue={searchTitles}
               onSearch={setSearchTitles}
@@ -247,33 +248,33 @@ const Internship = () => {
               showAll={showAllTitles}
               setShowAll={setShowAlltitles}
             /> */}
-            <FilterSection
-              label="Internships Title"
-              searchValue={searchTitles}
-              onSearch={setSearchTitles}
-              list={uniqueTitles}
-              selected={filters.titles}
-              onToggle={(v) => toggleFilter("titles", v)}
-              showAll={showAllTitles}
-              setShowAll={setShowAlltitles}
-            />
-            <PostingDateFilter
-              filters={filters}
-              activeDateRange={activeDateRange}
-              onSelectDate={(range) => DateRange(range)}
-              onDateChange={setFilters}
-            />
+              <FilterSection
+                label="Internships Title"
+                searchValue={searchTitles}
+                onSearch={setSearchTitles}
+                list={uniqueTitles}
+                selected={filters.titles}
+                onToggle={(v) => toggleFilter("titles", v)}
+                showAll={showAllTitles}
+                setShowAll={setShowAlltitles}
+              />
+              <PostingDateFilter
+                filters={filters}
+                activeDateRange={activeDateRange}
+                onSelectDate={(range) => DateRange(range)}
+                onDateChange={setFilters}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Main content remains unchanged */}
-        <div className="flex-1">
-          <div className="mb-6">
-            <h1 className="text-2xl text-gray-600 font-medium">
-              Explore {filteredInternships.length} Internship
-              {internships.length !== 1 ? "s" : ""}
-            </h1>
-          </div>
+          {/* Main content remains unchanged */}
+          <div className="flex-1">
+            <div className="mb-6">
+              <h1 className="text-2xl text-gray-600 font-medium">
+                Explore {filteredInternships.length} Internship
+                {internships.length !== 1 ? "s" : ""}
+              </h1>
+            </div>
 
           {error ? (
             <p className="text-destructive">{error}</p>

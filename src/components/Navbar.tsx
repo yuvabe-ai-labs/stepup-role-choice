@@ -30,34 +30,73 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [profileId, setProfileId] = useState<string | null>(null);
 
-  // Fetch user role from profile
+  // Fetch user role and profile data
   useEffect(() => {
-    const fetchUserRole = async () => {
+    const fetchUserData = async () => {
       if (!user) {
         setUserRole(null);
+        setAvatarUrl(null);
+        setProfileId(null);
         return;
       }
 
       try {
-        const { data, error } = await supabase
+        // First, get the user's profile and role
+        const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("role")
+          .select("id, role")
           .eq("user_id", user.id)
           .maybeSingle();
 
-        if (error) {
-          console.error("Error fetching user role:", error);
+        if (profileError) {
+          console.error("Error fetching user profile:", profileError);
           return;
         }
 
-        setUserRole(data?.role || null);
+        if (!profileData) {
+          return;
+        }
+
+        setUserRole(profileData.role);
+        setProfileId(profileData.id);
+
+        // Then, fetch the avatar based on role
+        if (profileData.role === "student") {
+          const { data: studentData, error: studentError } = await supabase
+            .from("student_profiles")
+            .select("avatar_url")
+            .eq("profile_id", profileData.id)
+            .maybeSingle();
+
+          if (studentError) {
+            console.error("Error fetching student avatar:", studentError);
+            return;
+          }
+
+          setAvatarUrl(studentData?.avatar_url || null);
+        } else if (profileData.role === "unit") {
+          const { data: unitData, error: unitError } = await supabase
+            .from("units")
+            .select("avatar_url")
+            .eq("profile_id", profileData.id)
+            .maybeSingle();
+
+          if (unitError) {
+            console.error("Error fetching unit avatar:", unitError);
+            return;
+          }
+
+          setAvatarUrl(unitData?.avatar_url || null);
+        }
       } catch (error) {
-        console.error("Failed to fetch user role:", error);
+        console.error("Failed to fetch user data:", error);
       }
     };
 
-    fetchUserRole();
+    fetchUserData();
   }, [user]);
 
   const allNavItems = [
@@ -159,8 +198,11 @@ const Navbar = () => {
                 </div>
 
                 {/* Avatar */}
-                <Avatar className="h-10 w-10 border-2 border-white shadow-md">
-                  <AvatarImage src="/path-to-profile.png" alt="User" />
+                <Avatar className="h-10 w-10 border-1 border-white shadow-md">
+                  <AvatarImage
+                    src={avatarUrl || undefined}
+                    alt={user?.email || "User"}
+                  />
                   <AvatarFallback className="text-sm bg-[#F8F6F2] text-gray-800">
                     {user?.email?.charAt(0).toUpperCase() ?? "U"}
                   </AvatarFallback>
@@ -181,7 +223,7 @@ const Navbar = () => {
                 className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
               >
                 <FileText className="mr-2 h-4 w-4" />
-                <span>Applications</span>
+                <span>My Tasks</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => navigate("")}
