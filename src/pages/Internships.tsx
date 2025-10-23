@@ -207,32 +207,33 @@ const Internship = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="flex gap-5 px-28 pt-10">
-        {/* Sidebar Filters */}
-        <div className="w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col h-[90vh] sticky top-6">
-          <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
-            <h2 className="text-lg font-bold">Filters</h2>
-            <Button
-              variant="ghost"
-              className="text-primary text-sm font-medium"
-              onClick={resetFilters}
-            >
-              Reset all
-            </Button>
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex gap-5 pt-10">
+          {/* Sidebar Filters */}
+          <div className="w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col h-[90vh] sticky top-6">
+            <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
+              <h2 className="text-lg font-bold">Filters</h2>
+              <Button
+                variant="ghost"
+                className="text-primary text-sm font-medium"
+                onClick={resetFilters}
+              >
+                Reset all
+              </Button>
+            </div>
 
-          <div className="px-6 pb-6 overflow-y-auto flex-1 space-y-6">
-            <FilterSection
-              label="Units"
-              searchValue={searchUnits}
-              onSearch={setSearchUnits}
-              list={uniqueUnits}
-              selected={filters.internships}
-              onToggle={(v) => toggleFilter("internships", v)}
-              showAll={showAllUnits}
-              setShowAll={setShowAllUnits}
-            />
-            {/* <FilterSection
+            <div className="px-6 pb-6 overflow-y-auto flex-1 space-y-6">
+              <FilterSection
+                label="Units"
+                searchValue={searchUnits}
+                onSearch={setSearchUnits}
+                list={uniqueUnits}
+                selected={filters.internships}
+                onToggle={(v) => toggleFilter("internships", v)}
+                showAll={showAllUnits}
+                setShowAll={setShowAllUnits}
+              />
+              {/* <FilterSection
               label="Industry"
               searchValue={searchTitles}
               onSearch={setSearchTitles}
@@ -242,86 +243,89 @@ const Internship = () => {
               showAll={showAllTitles}
               setShowAll={setShowAlltitles}
             /> */}
-            <FilterSection
-              label="Internships Title"
-              searchValue={searchTitles}
-              onSearch={setSearchTitles}
-              list={uniqueTitles}
-              selected={filters.titles}
-              onToggle={(v) => toggleFilter("titles", v)}
-              showAll={showAllTitles}
-              setShowAll={setShowAlltitles}
-            />
-            <PostingDateFilter
-              filters={filters}
-              activeDateRange={activeDateRange}
-              onSelectDate={(range) => DateRange(range)}
-              onDateChange={setFilters}
-            />
-          </div>
-        </div>
-
-        {/* Main content remains unchanged */}
-        <div className="flex-1">
-          <div className="mb-6">
-            <h1 className="text-2xl text-gray-600 font-medium">
-              Explore {filteredInternships.length} Internship
-              {internships.length !== 1 ? "s" : ""}
-            </h1>
+              <FilterSection
+                label="Internships Title"
+                searchValue={searchTitles}
+                onSearch={setSearchTitles}
+                list={uniqueTitles}
+                selected={filters.titles}
+                onToggle={(v) => toggleFilter("titles", v)}
+                showAll={showAllTitles}
+                setShowAll={setShowAlltitles}
+              />
+              <PostingDateFilter
+                filters={filters}
+                activeDateRange={activeDateRange}
+                onSelectDate={(range) => DateRange(range)}
+                onDateChange={setFilters}
+              />
+            </div>
           </div>
 
-          {error ? (
-            <p className="text-destructive">{error}</p>
-          ) : (
-            <>
-              <div className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-3">
-                {filteredInternships.map((internship, index) => {
-                  const gradient = getInternshipGradient(index);
-                  return (
-                    <Card
-                      key={internship.id}
-                      className="overflow-hidden rounded-3xl hover:shadow-lg transition-all cursor-pointer border-2 border-muted"
-                      onClick={() => navigate(`/internships/${internship.id}`)}
-                    >
-                      <div
-                        className={`${gradient} h-48 relative flex items-center justify-center p-6`}
+          {/* Main content remains unchanged */}
+          <div className="flex-1">
+            <div className="mb-6">
+              <h1 className="text-2xl text-gray-600 font-medium">
+                Explore {filteredInternships.length} Internship
+                {internships.length !== 1 ? "s" : ""}
+              </h1>
+            </div>
+
+            {error ? (
+              <p className="text-destructive">{error}</p>
+            ) : (
+              <>
+                <div className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredInternships.map((internship, index) => {
+                    const gradient = getInternshipGradient(index);
+                    return (
+                      <Card
+                        key={internship.id}
+                        className="overflow-hidden rounded-3xl hover:shadow-lg transition-all cursor-pointer border-2 border-muted"
+                        onClick={() =>
+                          navigate(`/internships/${internship.id}`)
+                        }
                       >
-                        <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground">
-                          Saved{" "}
-                          {internship.posted_date
-                            ? formatDistanceToNow(
-                                new Date(internship.posted_date),
-                                {
-                                  addSuffix: true,
-                                }
-                              )
-                            : "recently"}
-                        </Badge>
-                        <div className="w-16 h-16 bg-card rounded-2xl flex items-center justify-center shadow-lg">
-                          <div className="text-2xl font-bold text-primary">
-                            {internship.company_name?.charAt(0) || "I"}
+                        <div
+                          className={`${gradient} h-48 relative flex items-center justify-center p-6`}
+                        >
+                          <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground">
+                            Saved{" "}
+                            {internship.posted_date
+                              ? formatDistanceToNow(
+                                  new Date(internship.posted_date),
+                                  {
+                                    addSuffix: true,
+                                  }
+                                )
+                              : "recently"}
+                          </Badge>
+                          <div className="w-16 h-16 bg-card rounded-2xl flex items-center justify-center shadow-lg">
+                            <div className="text-2xl font-bold text-primary">
+                              {internship.company_name?.charAt(0) || "I"}
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <CardContent className="p-5">
-                        <h3 className="font-bold text-lg mb-2 line-clamp-1">
-                          {internship.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                          {internship.description}
-                        </p>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Clock className="w-4 h-4 mr-1.5" />
-                          {internship.duration || "Duration not specified"}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </>
-          )}
+                        <CardContent className="p-5">
+                          <h3 className="font-bold text-lg mb-2 line-clamp-1">
+                            {internship.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                            {internship.description}
+                          </p>
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <Clock className="w-4 h-4 mr-1.5" />
+                            {internship.duration || "Duration not specified"}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
