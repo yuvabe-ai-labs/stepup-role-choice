@@ -16,6 +16,7 @@ import {
   Pencil,
   Ban,
   CheckCircle,
+  Trash2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,6 +40,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useUnitApplications } from "@/hooks/useUnitApplications";
 import { useInternships } from "@/hooks/useInternships";
 import CreateInternshipDialog from "@/components/CreateInternshipDialog";
@@ -69,6 +80,8 @@ const UnitDashboard = () => {
   const [selectedInternship, setSelectedInternship] = useState<any>(null);
   const [editingInternship, setEditingInternship] = useState<any>(null);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [deletingInternship, setDeletingInternship] = useState<any>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const {
     weeklyData,
     monthlyData,
@@ -106,6 +119,36 @@ const UnitDashboard = () => {
     const internship = internships.find((i) => i.id === internshipId);
     if (internship) {
       setEditingInternship(internship);
+    }
+  };
+
+  const handleDeleteClick = (internship: any) => {
+    setDeletingInternship(internship);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingInternship) return;
+
+    try {
+      setUpdating(deletingInternship.id);
+
+      // Delete the internship from database
+      const { error: deleteError } = await supabase
+        .from("internships")
+        .delete()
+        .eq("id", deletingInternship.id);
+
+      if (deleteError) throw deleteError;
+
+      setShowDeleteDialog(false);
+      setDeletingInternship(null);
+      window.location.reload(); // Refresh the list after deletion
+    } catch (err: any) {
+      console.error("Error deleting job:", err);
+      alert("Failed to delete job description");
+    } finally {
+      setUpdating(null);
     }
   };
 
@@ -312,7 +355,6 @@ const UnitDashboard = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Applications Tab */}
           {/* Applications Tab */}
           <TabsContent
             value="applications"
@@ -640,6 +682,15 @@ const UnitDashboard = () => {
                                         Activate JD
                                       </span>
                                     )}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleDeleteClick(internship)
+                                    }
+                                    className="text-red-600 focus:text-red-600"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Delete JD
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
@@ -1184,6 +1235,36 @@ const UnitDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the job description "
+              {deletingInternship?.title}". This action cannot be undone and
+              will remove all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setDeletingInternship(null);
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {updating === deletingInternship?.id ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <EditInternshipDialog
         isOpen={!!editingInternship}
