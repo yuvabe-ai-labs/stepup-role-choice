@@ -146,7 +146,7 @@ export default function ScheduleInterviewDialog({
 
       toast({
         title: "Interview Scheduled",
-        description: `Google Meet link has been sent to ${candidateName}`,
+        description: `Zoom Meet link has been sent to ${candidateName}`,
       });
 
       onOpenChange(false);
