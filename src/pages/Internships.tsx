@@ -190,28 +190,28 @@ const Internship = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
-      <div className="flex gap-5 ">
-        {/* Sidebar Filters */}
-        <div className="w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col h-[90vh] sticky top-6">
-          <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
-            <h2 className="text-lg font-bold">Filters</h2>
-            <Button variant="ghost" className="text-primary text-sm font-medium" onClick={resetFilters}>
-              Reset all
-            </Button>
-          </div>
+        <div className="flex gap-5 px-6 pt-10">
+          {/* Sidebar Filters */}
+          <div className="w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col h-[90vh] sticky top-6">
+            <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
+              <h2 className="text-lg font-bold">Filters</h2>
+              <Button variant="ghost" className="text-primary text-sm font-medium" onClick={resetFilters}>
+                Reset all
+              </Button>
+            </div>
 
-          <div className="px-6 pb-6 overflow-y-auto flex-1 space-y-6">
-            <FilterSection
-              label="Units"
-              searchValue={searchUnits}
-              onSearch={setSearchUnits}
-              list={uniqueUnits}
-              selected={filters.internships}
-              onToggle={(v) => toggleFilter("internships", v)}
-              showAll={showAllUnits}
-              setShowAll={setShowAllUnits}
-            />
-            {/* <FilterSection
+            <div className="px-6 pb-6 overflow-y-auto flex-1 space-y-6">
+              <FilterSection
+                label="Units"
+                searchValue={searchUnits}
+                onSearch={setSearchUnits}
+                list={uniqueUnits}
+                selected={filters.internships}
+                onToggle={(v) => toggleFilter("internships", v)}
+                showAll={showAllUnits}
+                setShowAll={setShowAllUnits}
+              />
+              {/* <FilterSection
               label="Industry"
               searchValue={searchTitles}
               onSearch={setSearchTitles}
@@ -221,109 +221,110 @@ const Internship = () => {
               showAll={showAllTitles}
               setShowAll={setShowAlltitles}
             /> */}
-            <FilterSection
-              label="Internships Title"
-              searchValue={searchTitles}
-              onSearch={setSearchTitles}
-              list={uniqueTitles}
-              selected={filters.titles}
-              onToggle={(v) => toggleFilter("titles", v)}
-              showAll={showAllTitles}
-              setShowAll={setShowAlltitles}
-            />
-            <PostingDateFilter
-              filters={filters}
-              activeDateRange={activeDateRange}
-              onSelectDate={(range) => DateRange(range)}
-              onDateChange={setFilters}
-            />
-          </div>
-        </div>
-
-        {/* Main content remains unchanged */}
-        <div className="flex-1">
-          <div className="mb-6">
-            <h1 className="text-2xl text-gray-600 font-medium">
-              Explore {filteredInternships.length} Internship
-              {internships.length !== 1 ? "s" : ""}
-            </h1>
+              <FilterSection
+                label="Internships Title"
+                searchValue={searchTitles}
+                onSearch={setSearchTitles}
+                list={uniqueTitles}
+                selected={filters.titles}
+                onToggle={(v) => toggleFilter("titles", v)}
+                showAll={showAllTitles}
+                setShowAll={setShowAlltitles}
+              />
+              <PostingDateFilter
+                filters={filters}
+                activeDateRange={activeDateRange}
+                onSelectDate={(range) => DateRange(range)}
+                onDateChange={setFilters}
+              />
+            </div>
           </div>
 
-          {error ? (
-            <p className="text-destructive">{error}</p>
-          ) : (
-            <>
-              <div className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-3">
-                {filteredInternships.map((internship, index) => {
-                  const gradient = getInternshipGradient(index);
-                  const dateToUse = internship.created_at;
+          {/* Main content remains unchanged */}
+          <div className="flex-1">
+            <div className="mb-6">
+              <h1 className="text-2xl text-gray-600 font-medium">
+                Explore {filteredInternships.length} Internship
+                {internships.length !== 1 ? "s" : ""}
+              </h1>
+            </div>
 
-                  const getShortTimeAgo = (date: string | Date) => {
-                    const now = new Date();
-                    const past = new Date(date);
+            {error ? (
+              <p className="text-destructive">{error}</p>
+            ) : (
+              <>
+                <div className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredInternships.map((internship, index) => {
+                    const gradient = getInternshipGradient(index);
+                    const dateToUse = internship.created_at;
 
-                    const days = differenceInDays(now, past);
-                    if (days > 0) return `${days}d`;
+                    const getShortTimeAgo = (date: string | Date) => {
+                      const now = new Date();
+                      const past = new Date(date);
 
-                    const hours = differenceInHours(now, past);
-                    if (hours > 0) return `${hours}h`;
+                      const days = differenceInDays(now, past);
+                      if (days > 0) return `${days}d`;
 
-                    const minutes = differenceInMinutes(now, past);
-                    if (minutes > 0) return `${minutes}m`;
+                      const hours = differenceInHours(now, past);
+                      if (hours > 0) return `${hours}h`;
 
-                    return "just now";
-                  };
+                      const minutes = differenceInMinutes(now, past);
+                      if (minutes > 0) return `${minutes}m`;
 
-                  const timeAgo = getShortTimeAgo(dateToUse);
+                      return "just now";
+                    };
 
-                  const matchingUnit = units.find((unit) => unit.profile_id === internship.created_by);
+                    const timeAgo = getShortTimeAgo(dateToUse);
 
-                  return (
-                    <Card
-                      key={internship.id}
-                      className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300"
-                      onClick={() => navigate(`/internships/${internship.id}`)}
-                    >
-                      <div className="space-y-2">
-                        <div className="flex items-start justify-between">
-                          <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center text-background font-bold">
-                            {matchingUnit?.avatar_url ? (
-                              <img
-                                src={matchingUnit.avatar_url}
-                                alt={matchingUnit.unit_name}
-                                className="w-full h-full rounded-full object-cover"
-                              />
-                            ) : (
-                              internship.company_name?.charAt(0) || "C"
-                            )}
+                    const matchingUnit = units.find((unit) => unit.profile_id === internship.created_by);
+
+                    return (
+                      <Card
+                        key={internship.id}
+                        className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300"
+                        onClick={() => navigate(`/internships/${internship.id}`)}
+                      >
+                        <div className="space-y-2">
+                          <div className="flex items-start justify-between">
+                            <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center text-background font-bold">
+                              {matchingUnit?.avatar_url ? (
+                                <img
+                                  src={matchingUnit.avatar_url}
+                                  alt={matchingUnit.unit_name}
+                                  className="w-full h-full rounded-full object-cover"
+                                />
+                              ) : (
+                                internship.company_name?.charAt(0) || "C"
+                              )}
+                            </div>
+                            <Badge className="bg-primary text-primary-foreground">{`Posted ${timeAgo} ago`}</Badge>
                           </div>
-                          <Badge className="bg-primary text-primary-foreground">{`Posted ${timeAgo} ago`}</Badge>
-                        </div>
 
-                        {internship.title ? (
-                          <h3 className="text-4 font-semibold text-gray-900 line-clamp-2">
-                            {internship.title.length > 20 ? `${internship.title.slice(0, 21)}...` : internship.title}
-                          </h3>
-                        ) : (
-                          "Title"
-                        )}
+                          {internship.title ? (
+                            <h3 className="text-4 font-semibold text-gray-900 line-clamp-2">
+                              {internship.title.length > 20 ? `${internship.title.slice(0, 21)}...` : internship.title}
+                            </h3>
+                          ) : (
+                            "Title"
+                          )}
 
-                        <p className="text-sm text-gray-500 line-clamp-3">
-                          {internship.description || "No description available"}
-                        </p>
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            <span>{internship.duration || "Not specified"}</span>
+                          <p className="text-sm text-gray-500 line-clamp-3">
+                            {internship.description || "No description available"}
+                          </p>
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              <span>{internship.duration || "Not specified"}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-            </>
-          )}
+                      </Card>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -469,7 +470,6 @@ const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChang
         ))}
       </div>
     </div>
-   </div> 
   </div>
 );
 
