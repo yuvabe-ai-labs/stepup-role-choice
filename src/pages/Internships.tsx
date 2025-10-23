@@ -17,7 +17,12 @@ import { ChevronRight, CalendarIcon, Search, Clock } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useIntern } from "@/hooks/useInternships";
 import { useUnits } from "@/hooks/useUnits";
-import { formatDistanceToNow } from "date-fns";
+import {
+  differenceInDays,
+  differenceInHours,
+  differenceInMinutes,
+  formatDistanceToNow,
+} from "date-fns";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 
 const Internship = () => {
@@ -271,61 +276,89 @@ const Internship = () => {
               </h1>
             </div>
 
-            {error ? (
-              <p className="text-destructive">{error}</p>
-            ) : (
-              <>
-                <div className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredInternships.map((internship, index) => {
-                    const gradient = getInternshipGradient(index);
-                    return (
-                      <Card
-                        key={internship.id}
-                        className="overflow-hidden rounded-3xl hover:shadow-lg transition-all cursor-pointer border-2 border-muted"
-                        onClick={() =>
-                          navigate(`/internships/${internship.id}`)
-                        }
-                      >
-                        <div
-                          className={`${gradient} h-48 relative flex items-center justify-center p-6`}
-                        >
-                          <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground">
-                            Saved{" "}
-                            {internship.posted_date
-                              ? formatDistanceToNow(
-                                  new Date(internship.posted_date),
-                                  {
-                                    addSuffix: true,
-                                  }
-                                )
-                              : "recently"}
-                          </Badge>
-                          <div className="w-16 h-16 bg-card rounded-2xl flex items-center justify-center shadow-lg">
-                            <div className="text-2xl font-bold text-primary">
-                              {internship.company_name?.charAt(0) || "I"}
-                            </div>
+          {error ? (
+            <p className="text-destructive">{error}</p>
+          ) : (
+            <>
+              <div className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-3">
+                {filteredInternships.map((internship, index) => {
+                  const gradient = getInternshipGradient(index);
+                  const dateToUse = internship.created_at;
+
+                  const getShortTimeAgo = (date: string | Date) => {
+                    const now = new Date();
+                    const past = new Date(date);
+
+                    const days = differenceInDays(now, past);
+                    if (days > 0) return `${days}d`;
+
+                    const hours = differenceInHours(now, past);
+                    if (hours > 0) return `${hours}h`;
+
+                    const minutes = differenceInMinutes(now, past);
+                    if (minutes > 0) return `${minutes}m`;
+
+                    return "just now";
+                  };
+
+                  const timeAgo = getShortTimeAgo(dateToUse);
+
+                  const matchingUnit = units.find(
+                    (unit) => unit.profile_id === internship.created_by
+                  );
+
+                  return (
+                    <Card
+                      key={internship.id}
+                      className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300"
+                      onClick={() => navigate(`/internships/${internship.id}`)}
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-start justify-between">
+                          <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center text-background font-bold">
+                            {matchingUnit?.avatar_url ? (
+                              <img
+                                src={matchingUnit.avatar_url}
+                                alt={matchingUnit.unit_name}
+                                className="w-full h-full rounded-full object-cover"
+                              />
+                            ) : (
+                              internship.company_name?.charAt(0) || "C"
+                            )}
                           </div>
+                          <Badge className="bg-primary text-primary-foreground">
+                            {`Posted ${timeAgo} ago`}
+                          </Badge>
                         </div>
 
-                        <CardContent className="p-5">
-                          <h3 className="font-bold text-lg mb-2 line-clamp-1">
-                            {internship.title}
+                        {internship.title ? (
+                          <h3 className="text-4 font-semibold text-gray-900 line-clamp-2">
+                            {internship.title.length > 20
+                              ? `${internship.title.slice(0, 21)}...`
+                              : internship.title}
                           </h3>
-                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                            {internship.description}
-                          </p>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Clock className="w-4 h-4 mr-1.5" />
-                            {internship.duration || "Duration not specified"}
+                        ) : (
+                          "Title"
+                        )}
+
+                        <p className="text-sm text-gray-500 line-clamp-3">
+                          {internship.description || "No description available"}
+                        </p>
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            <span>
+                              {internship.duration || "Not specified"}
+                            </span>
                           </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

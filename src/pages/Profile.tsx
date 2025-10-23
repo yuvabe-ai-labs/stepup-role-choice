@@ -215,8 +215,8 @@ const Profile = () => {
                     <MapPin className="w-4 h-4" />
                     <span>
                       {studentProfile?.location
-                        ? studentProfile.location[0].toLocaleUpperCase() +
-                          studentProfile.location.slice(1)
+                        ? studentProfile?.location[0]?.toLocaleUpperCase() +
+                          studentProfile?.location?.slice(1)
                         : "Location not provided"}
                     </span>
                   </div>
