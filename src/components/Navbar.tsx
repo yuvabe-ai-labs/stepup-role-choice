@@ -223,7 +223,7 @@ const Navbar = () => {
                 className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
               >
                 <FileText className="mr-2 h-4 w-4" />
-                <span>Applications</span>
+                <span>My Tasks</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => navigate("")}
