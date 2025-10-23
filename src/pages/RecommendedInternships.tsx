@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { MapPin, Clock, DollarSign, Bookmark, Check, Share2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { useIntern } from "@/hooks/useInternships";
 import { useApplicationStatus } from "@/hooks/useApplicationStatus";
 import { useInternshipRecommendations } from "@/hooks/useRecommendations";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
@@ -15,10 +15,16 @@ import { ShareDialog } from "@/components/ShareDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
-import { useIsSaved } from "@/hooks/useSavedInternships";
 import { useToast } from "@/hooks/use-toast";
 
 type Internship = Tables<"internships">;
+
+interface InternshipWithUnit extends Internship {
+  unit_avatar?: string | null;
+  unit_name?: string | null;
+  matchScore?: number;
+  matchPercentage?: number;
+}
 
 // Helper to safely parse JSON
 function safeParse<T>(data: any, fallback: T): T {
@@ -53,62 +59,106 @@ function parseNumberedObject(data: any): string[] {
 const RecommendedInternships = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const { internships: rawInternships = [], loading, error } = useIntern();
+  const [allInternships, setAllInternships] = useState<InternshipWithUnit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedInternship, setSelectedInternship] = useState<string>("");
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [userSkills, setUserSkills] = useState<string[]>([]);
-  const [savingInternship, setSavingInternship] = useState(false);
+  const [savedInternshipsSet, setSavedInternshipsSet] = useState<Set<string>>(new Set());
   const contentRef = useRef<HTMLDivElement>(null);
 
   const { hasApplied, isLoading: isCheckingStatus, markAsApplied } = useApplicationStatus(selectedInternship);
-  const { isSaved, isLoading: isCheckingSaved, refetch: refetchSaved } = useIsSaved(selectedInternship);
 
-  // Ensure internships is always an array
-  const allInternships = Array.isArray(rawInternships) ? rawInternships : rawInternships ? [rawInternships] : [];
-
-  // Fetch user skills for recommendations
+  // Fetch internships with unit data and user skills
   useEffect(() => {
-    const fetchUserSkills = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
+    const fetchData = async () => {
       try {
-        const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle();
+        setLoading(true);
+        setError(null);
 
-        if (profile) {
-          const { data: studentProfile } = await supabase
-            .from("student_profiles")
-            .select("skills")
-            .eq("profile_id", profile.id)
-            .maybeSingle();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-          if (studentProfile?.skills) {
-            let skills: any[] = [];
+        // Fetch internships with unit data
+        const { data: internshipsData, error: internshipsError } = await supabase
+          .from("internships")
+          .select(`
+            *,
+            profiles!internships_created_by_fkey (
+              id,
+              units (
+                avatar_url,
+                unit_name
+              )
+            )
+          `)
+          .eq("status", "active")
+          .order("created_at", { ascending: false });
 
-            if (typeof studentProfile.skills === "string") {
-              try {
-                const parsed = JSON.parse(studentProfile.skills);
-                skills = Array.isArray(parsed) ? parsed : studentProfile.skills.split(",").map((s) => s.trim());
-              } catch {
-                skills = studentProfile.skills.split(",").map((s) => s.trim());
+        if (internshipsError) throw internshipsError;
+
+        // Transform data to include unit info
+        const transformedInternships: InternshipWithUnit[] = (internshipsData || []).map((internship: any) => ({
+          ...internship,
+          unit_avatar: internship.profiles?.units?.[0]?.avatar_url || null,
+          unit_name: internship.profiles?.units?.[0]?.unit_name || null,
+        }));
+
+        setAllInternships(transformedInternships);
+
+        // Fetch user skills and saved internships if logged in
+        if (user) {
+          const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle();
+
+          if (profile) {
+            // Fetch skills
+            const { data: studentProfile } = await supabase
+              .from("student_profiles")
+              .select("skills")
+              .eq("profile_id", profile.id)
+              .maybeSingle();
+
+            if (studentProfile?.skills) {
+              let skills: any[] = [];
+
+              if (typeof studentProfile.skills === "string") {
+                try {
+                  const parsed = JSON.parse(studentProfile.skills);
+                  skills = Array.isArray(parsed) ? parsed : studentProfile.skills.split(",").map((s) => s.trim());
+                } catch {
+                  skills = studentProfile.skills.split(",").map((s) => s.trim());
+                }
+              } else if (Array.isArray(studentProfile.skills)) {
+                skills = studentProfile.skills;
               }
-            } else if (Array.isArray(studentProfile.skills)) {
-              skills = studentProfile.skills;
+
+              setUserSkills(skills);
             }
 
-            setUserSkills(skills);
+            // Fetch saved internships
+            const { data: savedData } = await supabase
+              .from("saved_internships")
+              .select("internship_id")
+              .eq("student_id", profile.id);
+
+            if (savedData) {
+              setSavedInternshipsSet(new Set(savedData.map((item) => item.internship_id)));
+            }
           }
         }
-      } catch (error) {
-        console.error("Error fetching user skills:", error);
+      } catch (error: any) {
+        console.error("Error fetching data:", error);
+        setError(error.message || "Failed to fetch internships");
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUserSkills();
+    fetchData();
   }, []);
 
   // Use the recommendation hook (same as Dashboard)
@@ -145,7 +195,6 @@ const RecommendedInternships = () => {
   const handleSaveInternship = async () => {
     if (!selectedInternship) return;
 
-    setSavingInternship(true);
     try {
       const {
         data: { user },
@@ -170,6 +219,18 @@ const RecommendedInternships = () => {
         return;
       }
 
+      const isSaved = savedInternshipsSet.has(selectedInternship);
+
+      // Optimistic update
+      const newSavedSet = new Set(savedInternshipsSet);
+      if (isSaved) {
+        newSavedSet.delete(selectedInternship);
+      } else {
+        newSavedSet.add(selectedInternship);
+      }
+      setSavedInternshipsSet(newSavedSet);
+
+      // Perform API call
       if (isSaved) {
         const { error } = await supabase
           .from("saved_internships")
@@ -177,7 +238,11 @@ const RecommendedInternships = () => {
           .eq("student_id", profile.id)
           .eq("internship_id", selectedInternship);
 
-        if (error) throw error;
+        if (error) {
+          // Revert on error
+          setSavedInternshipsSet(savedInternshipsSet);
+          throw error;
+        }
 
         toast({
           title: "Removed",
@@ -189,15 +254,17 @@ const RecommendedInternships = () => {
           internship_id: selectedInternship,
         });
 
-        if (error) throw error;
+        if (error) {
+          // Revert on error
+          setSavedInternshipsSet(savedInternshipsSet);
+          throw error;
+        }
 
         toast({
           title: "Saved",
           description: "Internship saved successfully!",
         });
       }
-
-      refetchSaved();
     } catch (error: any) {
       console.error("Error saving internship:", error);
       toast({
@@ -205,8 +272,6 @@ const RecommendedInternships = () => {
         description: error.message || "Failed to save internship.",
         variant: "destructive",
       });
-    } finally {
-      setSavingInternship(false);
     }
   };
 
@@ -298,9 +363,12 @@ const RecommendedInternships = () => {
                 >
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-3">
-                      <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-xs font-bold">
-                        {internship.company_name?.charAt(0) || "C"}
-                      </div>
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={internship.unit_avatar || undefined} alt={internship.unit_name || "Unit"} />
+                        <AvatarFallback className="bg-black text-white text-xs font-bold">
+                          {(internship.unit_name || internship.company_name)?.charAt(0) || "C"}
+                        </AvatarFallback>
+                      </Avatar>
                       <Badge className="bg-blue-500 hover:bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
                         Saved{" "}
                         {internship.posted_date
@@ -356,11 +424,15 @@ const RecommendedInternships = () => {
               {/* Header */}
               <div className="flex justify-between items-start mb-8">
                 <div className="flex items-start space-x-5">
-                  <div className="w-16 h-16 bg-teal-600 text-white rounded-2xl flex items-center justify-center shadow-sm">
-                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
-                    </svg>
-                  </div>
+                  <Avatar className="w-16 h-16 shadow-sm">
+                    <AvatarImage
+                      src={selectedInternshipData.unit_avatar || undefined}
+                      alt={selectedInternshipData.unit_name || "Unit"}
+                    />
+                    <AvatarFallback className="bg-teal-600 text-white text-2xl font-bold">
+                      {(selectedInternshipData.unit_name || selectedInternshipData.company_name)?.charAt(0) || "C"}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
                     <h1 className="text-2xl font-bold text-gray-900 mb-1">{selectedInternshipData.title}</h1>
                     <p className="text-lg text-gray-700 mb-3 font-medium">
@@ -386,13 +458,14 @@ const RecommendedInternships = () => {
                   <Button
                     size="sm"
                     className={`flex items-center space-x-1.5 px-4 py-2 ${
-                      isSaved ? "text-gray-400 bg-white" : "text-gray-600 bg-white"
+                      savedInternshipsSet.has(selectedInternship) ? "text-gray-400 bg-white" : "text-gray-600 bg-white"
                     }`}
                     onClick={handleSaveInternship}
-                    disabled={savingInternship || isCheckingSaved}
                   >
-                    <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
-                    <span>{isSaved ? "Saved" : "Save"}</span>
+                    <Bookmark
+                      className={`w-4 h-4 ${savedInternshipsSet.has(selectedInternship) ? "fill-current" : ""}`}
+                    />
+                    <span>{savedInternshipsSet.has(selectedInternship) ? "Saved" : "Save"}</span>
                   </Button>
                   <Button
                     size="sm"

@@ -7,6 +7,8 @@ type Course = Tables<"courses">;
 interface InternshipWithScore extends Internship {
   matchScore: number;
   matchPercentage: number;
+  unit_avatar?: string | null;
+  unit_name?: string | null;
 }
 
 interface CourseWithScore extends Course {
@@ -14,7 +16,7 @@ interface CourseWithScore extends Course {
 }
 
 export const useInternshipRecommendations = (
-  internships: Internship[],
+  internships: any[],
   userSkills: string[],
 ): InternshipWithScore[] => {
   return useMemo(() => {
@@ -25,8 +27,6 @@ export const useInternshipRecommendations = (
         matchPercentage: 0,
       }));
     }
-
-    // const normalizedUserSkills = userSkills.map((s) => s.toLowerCase().trim());
 
     // Remove duplicates and normalize user skills
     const normalizedUserSkills = Array.from(new Set(userSkills.map((s) => s.toLowerCase().trim())));
@@ -47,13 +47,6 @@ export const useInternshipRecommendations = (
       const normalizedRequired = skillsRequired
         .filter((s): s is string => typeof s === "string")
         .map((s) => s.toLowerCase().trim());
-
-      // const matchCount = normalizedUserSkills.filter((userSkill) =>
-      //   normalizedRequired.some(
-      //     (reqSkill) =>
-      //       reqSkill.includes(userSkill) || userSkill.includes(reqSkill)
-      //   )
-      // ).length;
 
       // Count exact matches only
       const matchCount = normalizedUserSkills.filter((userSkill) => normalizedRequired.includes(userSkill)).length;
