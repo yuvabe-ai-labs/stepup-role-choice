@@ -214,7 +214,17 @@ const InternshipDetail = () => {
                 <div className="flex gap-7 flex-1">
                   <div className="w-[6.25rem] h-[6.25rem] rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0">
                     <span className="text-3xl text-white font-bold">
-                      {internship.company_name.charAt(0)}
+                      {unit?.avatar_url ? (
+                        <img
+                          src={unit.avatar_url}
+                          alt={unit.unit_name || internship.company_name}
+                          className="w-full h-full rounded-2xl object-cover"
+                        />
+                      ) : (
+                        <span className="text-3xl text-white font-bold">
+                          {internship.company_name.charAt(0)}
+                        </span>
+                      )}
                     </span>
                   </div>
 
@@ -364,7 +374,7 @@ const InternshipDetail = () => {
             <CardContent className="p-0">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl text-gray-600 font-bold mb-5">
+                  <h2 className="text-2xl text-gray-900 font-bold mb-5">
                     Ready to Apply
                   </h2>
                   <p className="text-muted-foreground">
@@ -391,9 +401,17 @@ const InternshipDetail = () => {
             <CardContent className="p-0">
               <div className="flex gap-6 items-start">
                 <div className="w-[6.25rem] h-[6.25rem] rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0">
-                  <span className="text-3xl text-white font-bold">
-                    {unit.unit_name.charAt(0)}
-                  </span>
+                  {unit?.avatar_url ? (
+                    <img
+                      src={unit.avatar_url}
+                      alt={unit.unit_name}
+                      className="w-full h-full rounded-2xl object-cover"
+                    />
+                  ) : (
+                    <span className="text-3xl text-white font-bold">
+                      {unit.unit_name?.charAt(0)}
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex-1">
@@ -440,7 +458,7 @@ const InternshipDetail = () => {
             <section>
               <h2 className="text-xl font-medium my-4">About the company</h2>
               <div className="flex flex-wrap gap-2">
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-muted-foreground text-justify leading-relaxed">
                   {unit.description}
                 </p>
               </div>

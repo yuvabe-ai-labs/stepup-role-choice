@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import { useIntern } from "@/hooks/useInternships";
+import { useUnits } from "@/hooks/useUnits";
 import { useCourses } from "@/hooks/useCourses";
 import {
   useInternshipRecommendations,
@@ -23,19 +24,40 @@ import {
 import { useSavedInternships } from "@/hooks/useSavedInternships";
 import { useAppliedInternships } from "@/hooks/useAppliedInternships";
 import { supabase } from "@/integrations/supabase/client";
-import { formatDistanceToNow } from "date-fns";
+import {
+  differenceInDays,
+  differenceInHours,
+  differenceInMinutes,
+  formatDistanceToNow,
+} from "date-fns";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentInternshipIndex, setCurrentInternshipIndex] = useState(0);
   const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
+
   const [userSkills, setUserSkills] = useState<string[]>([]);
   const [activityView, setActivityView] = useState<"saved" | "applied">(
     "saved"
   );
 
+  const [currentActivityIndex, setCurrentActivityIndex] = useState(0);
+
+  const nextActivity = (activities: any[]) => {
+    setCurrentActivityIndex((prev) =>
+      prev + 3 >= activities.length ? 0 : prev + 3
+    );
+  };
+
+  const prevActivity = (activities: any[]) => {
+    setCurrentActivityIndex((prev) =>
+      prev === 0 ? Math.max(activities.length - 3, 0) : prev - 3
+    );
+  };
+
   const { internships, loading: internshipsLoading } = useIntern();
+  const { units } = useUnits();
   const { courses, loading: coursesLoading } = useCourses();
   const { savedInternships, loading: savedLoading } = useSavedInternships();
   const { appliedInternships, loading: appliedLoading } =
@@ -251,9 +273,9 @@ const Dashboard = () => {
                             if (!internship) return null;
 
                             const colors = [
-                              "bg-green-100 border-green-200",
-                              "bg-blue-100 border-blue-200",
-                              "bg-purple-100 border-purple-200",
+                              "bg-[#F4FFD5] border-[#AAD23C]",
+                              "bg-[#E8EFFF] border-[#5A80D8]",
+                              "bg-[#DAC8FF] border-[#7752C5]",
                             ];
                             const colorClass = colors[idx % colors.length];
                             const initial =
@@ -270,6 +292,11 @@ const Dashboard = () => {
                                 ? "1d ago"
                                 : `${daysAgo}d ago`;
 
+                            const matchingUnit = units.find(
+                              (unit) =>
+                                unit.profile_id === internship.created_by
+                            );
+
                             return (
                               <Card
                                 key={internship.id}
@@ -283,11 +310,11 @@ const Dashboard = () => {
                                 <CardHeader className="pb-2.5">
                                   <div className="flex justify-between items-start mb-2">
                                     <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center text-background font-bold text-sm">
-                                      {internship.company_logo ? (
+                                      {matchingUnit?.avatar_url ? (
                                         <img
-                                          src={internship.company_logo}
-                                          className="w-12"
-                                          alt={internship.company_name}
+                                          src={matchingUnit.avatar_url}
+                                          alt={matchingUnit.unit_name}
+                                          className="w-full h-full rounded-full object-cover"
                                         />
                                       ) : (
                                         initial
@@ -417,19 +444,30 @@ const Dashboard = () => {
                                     </div>
                                   )}
                                   {/* Time ago badge */}
-                                  <Badge className="absolute top-3 right-3 bg-white/90 text-foreground hover:bg-white">
-                                    {formatDistanceToNow(
-                                      new Date(course.created_at),
-                                      { addSuffix: true }
-                                    )}
-                                  </Badge>
+                                  {course.created_at ? (
+                                    <Badge className="absolute top-3 right-3 bg-white/90 text-foreground hover:bg-white">
+                                      {formatDistanceToNow(
+                                        new Date(course.created_at),
+                                        { addSuffix: true }
+                                      )}
+                                    </Badge>
+                                  ) : (
+                                    "Time"
+                                  )}
                                 </div>
 
                                 <CardContent className="px-5 py-2.5 space-y-2">
                                   {/* Title */}
-                                  <h3 className="font-medium text-base line-clamp-2">
-                                    {course.title}
-                                  </h3>
+
+                                  {course.title ? (
+                                    <h3 className="font-medium text-base line-clamp-2">
+                                      {course.title.length > 20
+                                        ? `${course.title.slice(0, 21)}...`
+                                        : course.title}
+                                    </h3>
+                                  ) : (
+                                    "Title"
+                                  )}
 
                                   {/* Duration and Level */}
                                   <div className="flex items-center justify-between">
@@ -502,9 +540,6 @@ const Dashboard = () => {
                       Saved
                     </Button>
                     <Button
-                      // variant={
-                      //   activityView === "applied" ? "default" : "outline"
-                      // }
                       onClick={() => setActivityView("applied")}
                       className={`rounded-full bg-transparent ${
                         activityView === "applied"
@@ -532,78 +567,134 @@ const Dashboard = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="grid md:grid-cols-3 gap-2.5">
-                    {(activityView === "saved"
-                      ? savedInternships
-                      : appliedInternships
-                    )
-                      .slice(0, 6)
-                      .map((internship) => {
-                        const dateToUse =
-                          activityView === "saved"
-                            ? (internship as any).saved_at
-                            : (internship as any).applied_at;
-                        const timeAgo = formatDistanceToNow(
-                          new Date(dateToUse),
-                          { addSuffix: true }
-                        );
-                        const initial =
-                          internship.company_name?.charAt(0) || "C";
+                  <div className="relative">
+                    <div className="flex items-center space-x-4">
+                      {/* Left Button */}
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() =>
+                          prevActivity(
+                            activityView === "saved"
+                              ? savedInternships
+                              : appliedInternships
+                          )
+                        }
+                        className="flex-shrink-0 rounded-full"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
 
-                        return (
-                          <Card
-                            key={internship.id}
-                            className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300"
-                            onClick={() =>
-                              navigate(`/internships/${internship.id}`)
-                            }
-                          >
-                            <div className="space-y-2">
-                              {/* Header with Logo and Badge */}
-                              <div className="flex items-start justify-between">
-                                <div className="w-12 h-12 bg-foreground rounded-full flex items-center justify-center text-background font-bold">
-                                  {internship.company_logo ? (
-                                    <img
-                                      src={internship.company_logo}
-                                      alt={internship.company_name}
-                                      className="w-full h-full rounded-full object-cover"
-                                    />
+                      {/* Activity Cards */}
+                      <div className="flex-1 grid md:grid-cols-3 gap-2.5">
+                        {(activityView === "saved"
+                          ? savedInternships
+                          : appliedInternships
+                        )
+                          .slice(currentActivityIndex, currentActivityIndex + 3)
+                          .map((internship) => {
+                            const dateToUse =
+                              activityView === "saved"
+                                ? (internship as any).saved_at
+                                : (internship as any).applied_at;
+
+                            const getShortTimeAgo = (date: string | Date) => {
+                              const now = new Date();
+                              const past = new Date(date);
+
+                              const days = differenceInDays(now, past);
+                              if (days > 0) return `${days}d`;
+
+                              const hours = differenceInHours(now, past);
+                              if (hours > 0) return `${hours}h`;
+
+                              const minutes = differenceInMinutes(now, past);
+                              if (minutes > 0) return `${minutes}m`;
+
+                              return "just now";
+                            };
+
+                            const timeAgo = getShortTimeAgo(dateToUse);
+
+                            const matchingUnit = units.find(
+                              (unit) =>
+                                unit.profile_id === internship.created_by
+                            );
+
+                            return (
+                              <Card
+                                key={internship.id}
+                                className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300"
+                                onClick={() =>
+                                  navigate(`/internships/${internship.id}`)
+                                }
+                              >
+                                <div className="space-y-2">
+                                  <div className="flex items-start justify-between">
+                                    <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center text-background font-bold">
+                                      {matchingUnit?.avatar_url ? (
+                                        <img
+                                          src={matchingUnit.avatar_url}
+                                          alt={matchingUnit.unit_name}
+                                          className="w-full h-full rounded-full object-cover"
+                                        />
+                                      ) : (
+                                        internship.company_name?.charAt(0) ||
+                                        "C"
+                                      )}
+                                    </div>
+                                    <Badge className="bg-primary text-primary-foreground">
+                                      {activityView === "saved"
+                                        ? "Saved"
+                                        : "Applied"}{" "}
+                                      {`${timeAgo} ago`}
+                                    </Badge>
+                                  </div>
+
+                                  {internship.title ? (
+                                    <h3 className="text-4 font-semibold text-gray-900 line-clamp-2">
+                                      {internship.title.length > 20
+                                        ? `${internship.title.slice(0, 21)}...`
+                                        : internship.title}
+                                    </h3>
                                   ) : (
-                                    initial
+                                    "Title"
                                   )}
+
+                                  <p className="text-sm text-gray-500 line-clamp-3">
+                                    {internship.description ||
+                                      "No description available"}
+                                  </p>
+                                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="w-4 h-4" />
+                                      <span>
+                                        {internship.duration || "Not specified"}
+                                      </span>
+                                    </div>
+                                  </div>
                                 </div>
-                                <Badge className="bg-primary text-primary-foreground">
-                                  {activityView === "saved"
-                                    ? "Saved"
-                                    : "Applied"}{" "}
-                                  {timeAgo.replace(" ago", "")}
-                                </Badge>
-                              </div>
+                              </Card>
+                            );
+                          })}
+                      </div>
 
-                              {/* Title */}
-                              <h3 className="text-4 font-semibold text-gray-900 line-clamp-2">
-                                {internship.title}
-                              </h3>
-
-                              {/* Description */}
-                              <p className="text-sm text-gray-500 line-clamp-3">
-                                {internship.description ||
-                                  "No description available"}
-                              </p>
-
-                              {/* Duration and Location */}
-                              <div className="flex items-center gap-4 text-sm text-gray-600">
-                                <div className="flex items-center gap-1">
-                                  <Clock className="w-4 h-4" />
-                                  <span>
-                                    {internship.duration || "Not specified"}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </Card>
-                        );
-                      })}
+                      {/* Right Button */}
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() =>
+                          nextActivity(
+                            activityView === "saved"
+                              ? savedInternships
+                              : appliedInternships
+                          )
+                        }
+                        className="flex-shrink-0 rounded-full"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 )}
               </Card>
