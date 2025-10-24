@@ -17,8 +17,7 @@ const Courses = () => {
     postedDate: "",
   });
 
-  const { courses, loading, error, hasMore, loadMore } =
-    useInfiniteCourses(filters);
+  const { courses, loading, error, hasMore, loadMore } = useInfiniteCourses(filters);
   const { observerTarget } = useInfiniteScroll({
     loading,
     hasMore,
@@ -70,8 +69,8 @@ const Courses = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex gap-6 py-6">
+      <div className="container lg:px-[7.5rem] lg:py-10">
+        <div className="flex gap-6">
           {/* Left Sidebar - Filters */}
           <div className="w-80 bg-card border rounded-3xl p-6 h-fit sticky top-6">
             <div className="flex items-center justify-between mb-6">
@@ -87,9 +86,7 @@ const Courses = () => {
 
             {/* Course Level Filter */}
             <div className="mb-6">
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">
-                Course Level
-              </h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Course Level</h3>
               <div className="space-y-3">
                 {difficultyLevels.map((level) => (
                   <div key={level} className="flex items-center space-x-2">
@@ -98,10 +95,7 @@ const Courses = () => {
                       checked={filters.difficulty.includes(level)}
                       onCheckedChange={() => toggleFilter("difficulty", level)}
                     />
-                    <label
-                      htmlFor={`difficulty-${level}`}
-                      className="text-sm font-medium cursor-pointer"
-                    >
+                    <label htmlFor={`difficulty-${level}`} className="text-sm font-medium cursor-pointer">
                       {level}
                     </label>
                   </div>
@@ -111,9 +105,7 @@ const Courses = () => {
 
             {/* Posted Date Filter */}
             <div className="mb-6">
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">
-                Posted Date
-              </h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Posted Date</h3>
               <div className="space-y-3">
                 {postedDates.map((date) => (
                   <div key={date.value} className="flex items-center space-x-2">
@@ -122,10 +114,7 @@ const Courses = () => {
                       checked={filters.postedDate === date.value}
                       onCheckedChange={() => setPostedDateFilter(date.value)}
                     />
-                    <label
-                      htmlFor={`posted-${date.value}`}
-                      className="text-sm font-medium cursor-pointer"
-                    >
+                    <label htmlFor={`posted-${date.value}`} className="text-sm font-medium cursor-pointer">
                       {date.label}
                     </label>
                   </div>
@@ -135,9 +124,7 @@ const Courses = () => {
 
             {/* Duration Filter */}
             <div className="mb-6">
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">
-                Duration
-              </h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Duration</h3>
               <div className="space-y-3">
                 {durations.map((duration) => (
                   <div key={duration} className="flex items-center space-x-2">
@@ -146,10 +133,7 @@ const Courses = () => {
                       checked={filters.duration.includes(duration)}
                       onCheckedChange={() => toggleFilter("duration", duration)}
                     />
-                    <label
-                      htmlFor={`duration-${duration}`}
-                      className="text-sm font-medium cursor-pointer"
-                    >
+                    <label htmlFor={`duration-${duration}`} className="text-sm font-medium cursor-pointer">
                       {duration}
                     </label>
                   </div>
@@ -169,9 +153,7 @@ const Courses = () => {
           {/* Main Content */}
           <div className="flex-1">
             <div className="mb-6">
-              <h1 className="text-3xl font-bold">
-                Explore {courses.length} Courses
-              </h1>
+              <h1 className="text-3xl font-bold">Explore {courses.length} Courses</h1>
             </div>
 
             {error && (
@@ -191,29 +173,17 @@ const Courses = () => {
                   "bg-gradient-to-br from-teal-500 to-blue-600",
                   "bg-gradient-to-br from-yellow-500 to-orange-600",
                 ];
-                const gradient =
-                  gradients[Math.floor(Math.random() * gradients.length)];
+                const gradient = gradients[Math.floor(Math.random() * gradients.length)];
 
                 return (
-                  <Card
-                    key={course.id}
-                    className="overflow-hidden rounded-3xl hover:shadow-lg transition-all"
-                  >
+                  <Card key={course.id} className="overflow-hidden rounded-3xl hover:shadow-lg transition-all">
                     {/* Course Image/Gradient Header */}
-                    <div
-                      className={`h-40 ${gradient} relative flex items-center justify-center`}
-                    >
+                    <div className={`h-40 ${gradient} relative flex items-center justify-center`}>
                       {course.image_url ? (
-                        <img
-                          src={course.image_url}
-                          alt={course.title}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={course.image_url} alt={course.title} className="w-full h-full object-cover" />
                       ) : (
                         <div className="text-white text-center">
-                          <h3 className="text-2xl font-bold">
-                            {course.category || "Course"}
-                          </h3>
+                          <h3 className="text-2xl font-bold">{course.category || "Course"}</h3>
                         </div>
                       )}
                       {/* Time ago badge */}
@@ -232,25 +202,18 @@ const Courses = () => {
                           <span>{course.duration || "8 weeks"}</span>
                         </div>
                         {course.difficulty_level && (
-                          <Badge
-                            className={`${getDifficultyColor(
-                              course.difficulty_level
-                            )} text-white`}
-                          >
+                          <Badge className={`${getDifficultyColor(course.difficulty_level)} text-white`}>
                             {course.difficulty_level}
                           </Badge>
                         )}
                       </div>
 
                       {/* Title */}
-                      <h3 className="font-bold text-lg line-clamp-2">
-                        {course.title}
-                      </h3>
+                      <h3 className="font-bold text-lg line-clamp-2">{course.title}</h3>
 
                       {/* Description */}
                       <p className="text-sm text-muted-foreground line-clamp-3">
-                        {course.description ||
-                          "Build your skills with this comprehensive course..."}
+                        {course.description || "Build your skills with this comprehensive course..."}
                       </p>
 
                       {/* Know More Button */}
@@ -268,10 +231,7 @@ const Courses = () => {
               {/* Loading Skeletons */}
               {loading &&
                 Array.from({ length: 6 }).map((_, i) => (
-                  <Card
-                    key={`skeleton-${i}`}
-                    className="overflow-hidden rounded-3xl"
-                  >
+                  <Card key={`skeleton-${i}`} className="overflow-hidden rounded-3xl">
                     <Skeleton className="h-40 w-full" />
                     <CardContent className="p-4 space-y-3">
                       <Skeleton className="h-4 w-full" />
@@ -287,21 +247,13 @@ const Courses = () => {
             <div ref={observerTarget} className="h-10 mt-8" />
 
             {!loading && !hasMore && courses.length > 0 && (
-              <p className="text-center text-muted-foreground mt-8">
-                No more courses to load
-              </p>
+              <p className="text-center text-muted-foreground mt-8">No more courses to load</p>
             )}
 
             {!loading && courses.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  No courses found matching your filters.
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={resetFilters}
-                  className="mt-4"
-                >
+                <p className="text-muted-foreground">No courses found matching your filters.</p>
+                <Button variant="outline" onClick={resetFilters} className="mt-4">
                   Clear Filters
                 </Button>
               </div>
