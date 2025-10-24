@@ -1,14 +1,4 @@
-import {
-  Search,
-  Bell,
-  Menu,
-  User,
-  FileText,
-  MessageSquare,
-  HelpCircle,
-  Settings,
-  LogOut,
-} from "lucide-react";
+import { Search, Bell, Menu, User, FileText, MessageSquare, HelpCircle, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -126,15 +116,11 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70 shadow-sm">
-      <div className="container flex h-16 items-center justify-between px-4">
+      <div className="container flex h-16 items-center justify-between px-20">
         {/* Logo */}
         <div className="flex justify-center">
           <a href="/dashboard">
-            <img
-              src={logo}
-              alt="Company Logo"
-              className="h-5 w-auto cursor-pointer"
-            />
+            <img src={logo} alt="Company Logo" className="h-5 w-auto cursor-pointer" />
           </a>
         </div>
 
@@ -145,11 +131,7 @@ const Navbar = () => {
               <Button
                 key={item.name}
                 variant="ghost"
-                className={`text-sm font-medium ${
-                  isActive(item.path)
-                    ? "text-primary rounded-none"
-                    : "text-black"
-                }`}
+                className={`text-sm font-medium ${isActive(item.path) ? "text-primary rounded-none" : "text-black"}`}
                 onClick={() => navigate(item.path)}
               >
                 {item.name}
@@ -199,10 +181,7 @@ const Navbar = () => {
 
                 {/* Avatar */}
                 <Avatar className="h-10 w-10 border-1 border-white shadow-md">
-                  <AvatarImage
-                    src={avatarUrl || undefined}
-                    alt={user?.email || "User"}
-                  />
+                  <AvatarImage src={avatarUrl || undefined} alt={user?.email || "User"} />
                   <AvatarFallback className="text-sm bg-[#F8F6F2] text-gray-800">
                     {user?.email?.charAt(0).toUpperCase() ?? "U"}
                   </AvatarFallback>
