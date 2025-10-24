@@ -189,10 +189,10 @@ const Internship = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container lg:px-[7.5rem] lg:py-10">
-        <div className="flex gap-5">
+      <div className="container px-4 sm:px-6 lg:px-[7.5rem] py-4 lg:py-10">
+        <div className="flex flex-col lg:flex-row gap-5">
           {/* Sidebar Filters */}
-          <div className="w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col h-[90vh] sticky top-6">
+          <div className="w-full lg:w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col lg:h-[90vh] lg:sticky lg:top-6 mb-4 lg:mb-0">
             <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
               <h2 className="text-lg font-bold">Filters</h2>
               <Button variant="ghost" className="text-primary text-sm font-medium" onClick={resetFilters}>
@@ -241,9 +241,9 @@ const Internship = () => {
           </div>
 
           {/* Main content remains unchanged */}
-          <div className="flex-1">
-            <div className="mb-6">
-              <h1 className="text-2xl text-gray-600 font-medium">
+          <div className="flex-1 w-full">
+            <div className="mb-4 sm:mb-6">
+              <h1 className="text-xl sm:text-2xl text-gray-600 font-medium">
                 Explore {filteredInternships.length} Internship
                 {internships.length !== 1 ? "s" : ""}
               </h1>
@@ -253,7 +253,7 @@ const Internship = () => {
               <p className="text-destructive">{error}</p>
             ) : (
               <>
-                <div className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {filteredInternships.map((internship, index) => {
                     const gradient = getInternshipGradient(index);
                     const dateToUse = internship.created_at;

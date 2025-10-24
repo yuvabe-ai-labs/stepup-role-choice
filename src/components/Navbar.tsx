@@ -116,7 +116,7 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70 shadow-sm">
-      <div className="container flex h-16 items-center justify-between px-20">
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-6 md:px-10 lg:px-20">
         {/* Logo */}
         <div className="flex justify-center">
           <a href="/dashboard">
@@ -126,7 +126,7 @@ const Navbar = () => {
 
         {/* Navigation Links - Only show if user is not a unit */}
         {navItems.length > 0 && (
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-4 xl:space-x-8">
             {navItems.map((item) => (
               <Button
                 key={item.name}
@@ -143,12 +143,12 @@ const Navbar = () => {
         {/* Search and User Actions */}
         <div className="flex items-center space-x-4">
           {/* Search Bar */}
-          <div className="relative hidden md:block">
+          <div className="relative hidden lg:block">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search"
-              className="pl-10 w-64 bg-white border border-gray-300 rounded-full"
+              className="pl-10 w-48 xl:w-64 bg-white border border-gray-300 rounded-full"
             />
           </div>
 
@@ -159,14 +159,14 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu */}
-          <Button variant="ghost" size="icon" className="md:hidden">
+          <Button variant="ghost" size="icon" className="lg:hidden">
             <Menu className="h-5 w-5" />
           </Button>
 
           {/* User Avatar with Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center justify-between bg-[var(--indigo-50,#F0F5FF)] rounded-full pl-3 pr-1 gap-2 py-1.5 shadow-sm w-fit">
+              <button className="flex items-center justify-between bg-[var(--indigo-50,#F0F5FF)] rounded-full pl-2 sm:pl-3 pr-1 gap-1 sm:gap-2 py-1.5 shadow-sm w-fit">
                 {/* Three Bars */}
                 <div className="flex flex-col justify-center space-y-[3px] m-1.5">
                   {/* Line 1 - Left aligned, half width */}

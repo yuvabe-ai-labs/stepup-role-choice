@@ -124,11 +124,11 @@ const Profile = () => {
         {/* <div className="  bg-black/20" /> */}
       </div>
 
-      <div className="-mt-[8.25rem] pt-0 container lg:px-[7.5rem] lg:py-10">
+      <div className="-mt-[8.25rem] pt-0 container px-4 sm:px-6 lg:px-[7.5rem] py-4 lg:py-10">
         {/* Profile Header */}
-        <Card className="relative mb-2 h-[185px] border-gray-200 bg-white rounded-3xl">
-          <CardContent className="p-6">
-            <div className="flex items-start space-x-6">
+        <Card className="relative mb-2 min-h-[185px] h-auto border-gray-200 bg-white rounded-3xl">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
               <div className="relative group">
                 <CircularProgress percentage={profileCompletion} size={90} strokeWidth={3}>
                   <Avatar className="h-20 w-20">
@@ -166,7 +166,7 @@ const Profile = () => {
                   {profile?.role === "student" ? studentProfile.headline : profile?.role || "User"}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
                   <div className="flex items-center space-x-1">
                     <Mail className="w-4 h-4" />
                     <span>{profile?.email || user?.email || "No email provided"}</span>
@@ -199,9 +199,9 @@ const Profile = () => {
             </div>
           </CardContent>
         </Card>
-        <div className="grid lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
           {/* Left Sidebar - Quick Links */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 mb-4 lg:mb-0">
             <Card className="rounded-3xl border-gray-200">
               <CardContent className="p-6">
                 <h3 className="font-semibold text-lg mb-4">Quick Links</h3>

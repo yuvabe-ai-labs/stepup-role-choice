@@ -77,9 +77,9 @@ const ProfileSidebar = ({ savedCount = 0 }: ProfileSidebarProps) => {
   }, [user]);
 
   return (
-    <div className="w-full max-w-sm">
+    <div className="w-full">
       {/* Profile Card */}
-      <Card className="p-6 bg-white shadow-sm border border-gray-200 rounded-3xl">
+      <Card className="p-4 sm:p-6 bg-white shadow-sm border border-gray-200 rounded-3xl">
         {/* Profile Info Section */}
         <div className="text-center mb-6">
           <div className="flex flex-col items-center space-y-4">
@@ -118,7 +118,7 @@ const ProfileSidebar = ({ savedCount = 0 }: ProfileSidebarProps) => {
         </div>
 
         {/* Profile Performance Section */}
-        <Card className="p-6 bg-white shadow-sm border border-gray-200 rounded-3xl">
+        <Card className="p-4 sm:p-6 bg-white shadow-sm border border-gray-200 rounded-3xl">
           <div className="flex items-center justify-between mb-4">
             <h4 className="font-semibold text-gray-800">Profile Performance</h4>
             <Info className="w-4 h-4 text-gray-800" />

@@ -130,10 +130,10 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="container lg:px-[7.5rem] lg:py-10">
-        <div className="grid lg:grid-cols-4 gap-2.5">
+      <div className="container px-4 sm:px-6 lg:px-[7.5rem] py-4 lg:py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2.5">
           {/* Left Sidebar - Profile - Fixed */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 mb-4 lg:mb-0">
             <div className="lg:sticky lg:top-8">
               <ProfileSidebar savedCount={savedInternships.length} />
             </div>
@@ -145,7 +145,7 @@ const Dashboard = () => {
             style={{ scrollbarWidth: "thin" }}
           >
             {/* Hero Section */}
-            <div className="grid md:grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
               {heroCards.map((card) => (
                 <Card key={card.id} className={`${card.color} border-0 shadow-sm rounded-3xl`}>
                   <CardContent className="p-6">
@@ -186,17 +186,17 @@ const Dashboard = () => {
                   <p className="text-center text-muted-foreground py-8">No internships available</p>
                 ) : (
                   <div className="relative">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2 sm:space-x-4">
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={prevInternship}
-                        className="flex-shrink-0 rounded-full"
+                        className="flex-shrink-0 rounded-full hidden sm:flex"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
 
-                      <div className="flex-1 grid md:grid-cols-3 gap-2.5">
+                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
                         {recommendedInternships
                           .slice(currentInternshipIndex, currentInternshipIndex + 3)
                           .map((internship, idx) => {
@@ -263,7 +263,7 @@ const Dashboard = () => {
                         variant="outline"
                         size="icon"
                         onClick={nextInternship}
-                        className="flex-shrink-0 rounded-full"
+                        className="flex-shrink-0 rounded-full hidden sm:flex"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
@@ -301,11 +301,11 @@ const Dashboard = () => {
                   <p className="text-center text-muted-foreground py-8">No courses available</p>
                 ) : (
                   <div className="relative">
-                    <div className="flex items-center space-x-4">
-                      <Button variant="outline" size="icon" onClick={prevCourse} className="flex-shrink-0 rounded-full">
+                    <div className="flex items-center space-x-2 sm:space-x-4">
+                      <Button variant="outline" size="icon" onClick={prevCourse} className="flex-shrink-0 rounded-full hidden sm:flex">
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
-                      <div className="flex-1 grid md:grid-cols-3 gap-2.5">
+                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
                         {recommendedCourses.slice(currentCourseIndex, currentCourseIndex + 3).map((course, idx) => {
                           if (!course) return null;
 

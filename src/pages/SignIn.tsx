@@ -117,10 +117,10 @@ const SignIn = () => {
       </div>
 
       {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center bg-white px-6">
+      <div className="flex-1 flex items-center justify-center bg-white px-4 sm:px-6">
         <div className="w-full max-w-[474px]">
           <div
-            className="bg-white rounded-[15px] px-[87px] py-12 w-full"
+            className="bg-white rounded-[15px] px-6 sm:px-12 md:px-[87px] py-8 sm:py-12 w-full"
             style={{ boxShadow: "0px 2px 25px rgba(0, 0, 0, 0.15)" }}
           >
             {/* Header */}
