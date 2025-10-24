@@ -4,14 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  MapPin,
-  Clock,
-  DollarSign,
-  Bookmark,
-  Share2,
-  CircleCheckBig,
-} from "lucide-react";
+import { MapPin, Clock, DollarSign, Bookmark, Share2, CircleCheckBig } from "lucide-react";
 import { ShareDialog } from "@/components/ShareDialog";
 import Navbar from "@/components/Navbar";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
@@ -35,25 +28,15 @@ const InternshipDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [internship, setInternship] = useState<Tables<"internships"> | null>(
-    null
-  );
+  const [internship, setInternship] = useState<Tables<"internships"> | null>(null);
   const [unit, setUnit] = useState<any | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [savingInternship, setSavingInternship] = useState(false);
-  const {
-    hasApplied,
-    isLoading: isCheckingStatus,
-    markAsApplied,
-  } = useApplicationStatus(id || "");
-  const {
-    isSaved,
-    isLoading: isCheckingSaved,
-    refetch: refetchSaved,
-  } = useIsSaved(id || "");
+  const { hasApplied, isLoading: isCheckingStatus, markAsApplied } = useApplicationStatus(id || "");
+  const { isSaved, isLoading: isCheckingSaved, refetch: refetchSaved } = useIsSaved(id || "");
 
   const handleSaveInternship = async () => {
     if (!id) return;
@@ -72,11 +55,7 @@ const InternshipDetail = () => {
         return;
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
+      const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).single();
 
       if (!profile) {
         toast({
@@ -132,11 +111,7 @@ const InternshipDetail = () => {
       if (!id) return;
 
       try {
-        const { data, error } = await supabase
-          .from("internships")
-          .select("*")
-          .eq("id", id)
-          .single();
+        const { data, error } = await supabase.from("internships").select("*").eq("id", id).single();
 
         if (error) throw error;
         setInternship(data);
@@ -186,9 +161,7 @@ const InternshipDetail = () => {
         <Navbar />
         <div className="max-w-5xl mx-auto px-6 py-8 text-center">
           <h1 className="text-2xl font-bold mb-4">Internship Not Found</h1>
-          <Button onClick={() => navigate("/internships")}>
-            Back to Internships
-          </Button>
+          <Button onClick={() => navigate("/internships")}>Back to Internships</Button>
         </div>
       </div>
     );
@@ -204,35 +177,37 @@ const InternshipDetail = () => {
       <Navbar />
 
       {/* Main Content */}
-      <div className="max-w-5xl mx-auto ">
-        <div className="space-y-8 mt-8 rounded-3xl border border-gray-200 p-10">
+      <div className="container lg:px-[7.5rem] lg:py-10">
+        <div className="space-y-8 rounded-3xl border border-gray-200 p-10">
           {/* Header Card */}
           <Card className="mb-6  border-0 shadow-none">
             <CardContent className="border-0 p-0">
               <div className="flex items-start justify-between pb-7 border-b border-gray-200 gap-6">
                 {/* Left Side - Company Logo & Info */}
                 <div className="flex gap-7 flex-1">
-                  <div className="w-[6.25rem] h-[6.25rem] rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0">
+                  <div
+                    className={`${
+                      unit.avatar_url
+                        ? "bg-transparent border border-gray-200"
+                        : "bg-gradient-to-br from-teal-400 to-teal-600"
+                    } w-[6.25rem] h-[6.25rem] rounded-full  flex items-center justify-center flex-shrink-0`}
+                  >
                     <span className="text-3xl text-white font-bold">
                       {unit?.avatar_url ? (
                         <img
                           src={unit.avatar_url}
                           alt={unit.unit_name || internship.company_name}
-                          className="w-full h-full rounded-2xl object-cover"
+                          className="w-full h-full rounded-full object-cover"
                         />
                       ) : (
-                        <span className="text-3xl text-white font-bold">
-                          {internship.company_name.charAt(0)}
-                        </span>
+                        <span className="text-3xl text-white font-bold">{internship.company_name.charAt(0)}</span>
                       )}
                     </span>
                   </div>
 
                   <div className="flex-1">
                     <h1 className="text-3xl font-bold">{internship.title}</h1>
-                    <p className="text-lg text-muted-foreground font-medium mb-2.5">
-                      {internship.company_name}
-                    </p>
+                    <p className="text-lg text-muted-foreground font-medium mb-2.5">{internship.company_name}</p>
 
                     <div className="flex flex-wrap gap-4 text-sm">
                       {internship.location && (
@@ -261,17 +236,11 @@ const InternshipDetail = () => {
                 <div className="flex gap-2 items-start">
                   <Button
                     size="sm"
-                    className={`flex items-center ${
-                      isSaved
-                        ? "text-gray-400 bg-white"
-                        : "text-gray-600 bg-white"
-                    }`}
+                    className={`flex items-center ${isSaved ? "text-gray-400 bg-white" : "text-gray-600 bg-white"}`}
                     onClick={handleSaveInternship}
                     disabled={savingInternship || isCheckingSaved}
                   >
-                    <Bookmark
-                      className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`}
-                    />
+                    <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
                     <span>{isSaved ? "Saved" : "Save"}</span>
                   </Button>
                   <Button
@@ -320,9 +289,7 @@ const InternshipDetail = () => {
           {/* Requirements from the Candidates */}
           {requirements.length > 0 && (
             <section className="border-b border-gray-200 pb-7">
-              <h2 className="text-xl font-medium mb-4">
-                Requirements from the Candidates
-              </h2>
+              <h2 className="text-xl font-medium mb-4">Requirements from the Candidates</h2>
               <ul className="space-y-3">
                 {requirements.map((item: string, idx: number) => (
                   <li key={idx} className="flex items-start gap-3">
@@ -355,11 +322,7 @@ const InternshipDetail = () => {
               <h2 className="text-xl font-medium mb-4">Required Skills</h2>
               <div className="flex flex-wrap gap-2">
                 {skillsRequired.map((skill: string, idx: number) => (
-                  <Badge
-                    key={idx}
-                    variant="outline"
-                    className="px-4 py-2 border-gray-600"
-                  >
+                  <Badge key={idx} variant="outline" className="px-4 py-2 border-gray-600">
                     {skill}
                   </Badge>
                 ))}
@@ -374,12 +337,9 @@ const InternshipDetail = () => {
             <CardContent className="p-0">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl text-gray-900 font-bold mb-5">
-                    Ready to Apply
-                  </h2>
+                  <h2 className="text-2xl text-gray-900 font-bold mb-5">Ready to Apply</h2>
                   <p className="text-muted-foreground">
-                    Join {internship.company_name} and make a meaningful impact
-                    in {internship.location || "Auroville"}
+                    Join {internship.company_name} and make a meaningful impact in {internship.location || "Auroville"}
                   </p>
                 </div>
                 <Button
@@ -396,31 +356,35 @@ const InternshipDetail = () => {
         </div>
 
         {/* Company Info */}
-        <div className="mt-2.5 mb-10 rounded-3xl border border-gray-200 p-10">
+        <div className="mt-2.5 rounded-3xl border border-gray-200 p-10">
           <Card className="border-0 shadow-none pb-7 border-b border-gray-200">
             <CardContent className="p-0">
-              <div className="flex gap-6 items-start">
-                <div className="w-[6.25rem] h-[6.25rem] rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0">
-                  {unit?.avatar_url ? (
-                    <img
-                      src={unit.avatar_url}
-                      alt={unit.unit_name}
-                      className="w-full h-full rounded-2xl object-cover"
-                    />
-                  ) : (
-                    <span className="text-3xl text-white font-bold">
-                      {unit.unit_name?.charAt(0)}
-                    </span>
-                  )}
+              <div className="flex gap-6 flex-1">
+                <div
+                  className={`${
+                    unit.avatar_url
+                      ? "bg-transparent border border-gray-200"
+                      : "bg-gradient-to-br from-teal-400 to-teal-600"
+                  } w-[6.25rem] h-[6.25rem] rounded-full  flex items-center justify-center flex-shrink-0`}
+                >
+                  <span className="text-3xl text-white font-bold">
+                    {unit?.avatar_url ? (
+                      <img
+                        src={unit.avatar_url}
+                        alt={unit.unit_name || internship.company_name}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-3xl text-white font-bold">{internship.company_name.charAt(0)}</span>
+                    )}
+                  </span>
                 </div>
 
                 <div className="flex-1">
                   {unit.contact_email && (
                     <div>
                       <h2 className="text-2xl font-bold">{unit.unit_name}</h2>
-                      <p className="font-[500] text-gray-500">
-                        {unit.contact_email}
-                      </p>
+                      <p className="font-[500] text-gray-500">{unit.contact_email}</p>
                     </div>
                   )}
 
@@ -458,9 +422,7 @@ const InternshipDetail = () => {
             <section>
               <h2 className="text-xl font-medium my-4">About the company</h2>
               <div className="flex flex-wrap gap-2">
-                <p className="text-muted-foreground text-justify leading-relaxed">
-                  {unit.description}
-                </p>
+                <p className="text-muted-foreground text-justify leading-relaxed">{unit.description}</p>
               </div>
             </section>
           )}
@@ -481,10 +443,7 @@ const InternshipDetail = () => {
       )}
 
       {/* Success Dialog */}
-      <ApplicationSuccessDialog
-        isOpen={showSuccessDialog}
-        onClose={() => setShowSuccessDialog(false)}
-      />
+      <ApplicationSuccessDialog isOpen={showSuccessDialog} onClose={() => setShowSuccessDialog(false)} />
 
       {/* Share Dialog */}
       {internship && (
