@@ -189,8 +189,8 @@ const Internship = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex gap-5 px-6 pt-10">
+      <div className="container lg:px-[7.5rem] lg:py-10">
+        <div className="flex gap-5">
           {/* Sidebar Filters */}
           <div className="w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col h-[90vh] sticky top-6">
             <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
