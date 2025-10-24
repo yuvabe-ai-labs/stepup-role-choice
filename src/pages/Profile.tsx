@@ -119,13 +119,14 @@ const Profile = () => {
       <Navbar />
 
       {/* Hero Background */}
-      <div className="relative h-72 bg-gradient-to-r from-primary to-primary-foreground">
-        <div className="absolute inset-0 bg-black/20" />
+
+      <div className="relative h-[17.625rem] bg-gradient-to-r from-primary to-primary-foreground">
+        {/* <div className="  bg-black/20" /> */}
       </div>
 
-      <div className="px-28 -mt-36 mb-6 relative z-1">
+      <div className="-mt-[8.25rem] pt-0 container lg:px-[7.5rem] lg:py-10">
         {/* Profile Header */}
-        <Card className="mb-2 h-[185px] border-gray-200 bg-white rounded-3xl">
+        <Card className="relative mb-2 h-[185px] border-gray-200 bg-white rounded-3xl">
           <CardContent className="p-6">
             <div className="flex items-start space-x-6">
               <div className="relative group">
