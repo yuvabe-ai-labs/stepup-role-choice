@@ -86,7 +86,8 @@ const RecommendedInternships = () => {
         // Fetch internships with unit data
         const { data: internshipsData, error: internshipsError } = await supabase
           .from("internships")
-          .select(`
+          .select(
+            `
             *,
             profiles!internships_created_by_fkey (
               id,
@@ -95,7 +96,8 @@ const RecommendedInternships = () => {
                 unit_name
               )
             )
-          `)
+          `,
+          )
           .eq("status", "active")
           .order("created_at", { ascending: false });
 
@@ -167,16 +169,16 @@ const RecommendedInternships = () => {
   // Set default selected internship when data loads or from URL params
   useEffect(() => {
     const idFromUrl = searchParams.get("id");
-    
+
     if (idFromUrl && internships.length > 0) {
       // Check if the internship from URL exists in the list
-      const exists = internships.some(int => int.id === idFromUrl);
+      const exists = internships.some((int) => int.id === idFromUrl);
       if (exists) {
         setSelectedInternship(idFromUrl);
         return;
       }
     }
-    
+
     // Default to first internship if no URL param or invalid ID
     if (internships.length > 0 && !selectedInternship) {
       setSelectedInternship(internships[0].id);
@@ -186,7 +188,7 @@ const RecommendedInternships = () => {
   // Scroll to top when internship selection changes
   useEffect(() => {
     if (contentRef.current) {
-      contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      contentRef.current.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [selectedInternship]);
 
