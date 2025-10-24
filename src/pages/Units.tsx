@@ -1,8 +1,4 @@
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -61,15 +57,9 @@ const Units = () => {
     return new Date(s);
   };
 
-  const uniqueUnits = [
-    ...new Set(units.map((u) => u.unit_name).filter(Boolean)),
-  ];
-  const uniqueIndustries = [
-    ...new Set(units.map((u) => u.industry).filter(Boolean)),
-  ];
-  const uniqueDepartments = [
-    ...new Set(units.flatMap((u) => u.skills_offered).filter(Boolean)),
-  ];
+  const uniqueUnits = [...new Set(units.map((u) => u.unit_name).filter(Boolean))];
+  const uniqueIndustries = [...new Set(units.map((u) => u.industry).filter(Boolean))];
+  const uniqueDepartments = [...new Set(units.flatMap((u) => u.skills_offered).filter(Boolean))];
 
   const interestAreas = [
     ...new Set(
@@ -77,9 +67,9 @@ const Units = () => {
         typeof u.focus_areas === "object" && u.focus_areas
           ? Object.values(u.focus_areas)
           : typeof u.focus_areas_backup === "object" && u.focus_areas_backup
-          ? Object.keys(u.focus_areas_backup)
-          : []
-      )
+            ? Object.keys(u.focus_areas_backup)
+            : [],
+      ),
     ),
   ];
 
@@ -88,9 +78,7 @@ const Units = () => {
     const list = filters[category] as string[];
     setFilters({
       ...filters,
-      [category]: list.includes(value)
-        ? list.filter((v) => v !== value)
-        : [...list, value],
+      [category]: list.includes(value) ? list.filter((v) => v !== value) : [...list, value],
     });
   };
 
@@ -123,8 +111,7 @@ const Units = () => {
   };
 
   const filteredUnits = units.filter((unit) => {
-    if (filters.units.length && !filters.units.includes(unit.unit_name))
-      return false;
+    if (filters.units.length && !filters.units.includes(unit.unit_name)) return false;
     if (filters.industries.length) {
       const ind = unit.industry;
       if (!ind || !filters.industries.includes(ind)) return false;
@@ -132,9 +119,7 @@ const Units = () => {
     if (
       filters.departments.length &&
       !filters.departments.some((skill) =>
-        Array.isArray(unit.skills_offered)
-          ? unit.skills_offered.includes(skill)
-          : false
+        Array.isArray(unit.skills_offered) ? unit.skills_offered.includes(skill) : false,
       )
     )
       return false;
@@ -143,22 +128,15 @@ const Units = () => {
       const areas: string[] = [];
       if (typeof unit.focus_areas === "object" && unit.focus_areas)
         areas.push(...Object.values(unit.focus_areas).map(String));
-      if (
-        typeof unit.focus_areas_backup === "object" &&
-        unit.focus_areas_backup
-      )
+      if (typeof unit.focus_areas_backup === "object" && unit.focus_areas_backup)
         areas.push(...Object.keys(unit.focus_areas_backup).map(String));
       if (!filters.interestAreas.some((a) => areas.includes(a))) return false;
     }
 
     if (filters.postingDate.from || filters.postingDate.to) {
       const unitDate = parsePgTimestamp(unit.created_at).getTime();
-      const from = filters.postingDate.from
-        ? new Date(filters.postingDate.from).getTime()
-        : -Infinity;
-      const to = filters.postingDate.to
-        ? new Date(filters.postingDate.to).getTime()
-        : Infinity;
+      const from = filters.postingDate.from ? new Date(filters.postingDate.from).getTime() : -Infinity;
+      const to = filters.postingDate.to ? new Date(filters.postingDate.to).getTime() : Infinity;
       if (Number.isNaN(unitDate)) return false;
       if (unitDate < from || unitDate > to) return false;
     }
@@ -181,17 +159,13 @@ const Units = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex gap-5 py-10">
+      <div className="container lg:px-[7.5rem] lg:py-10">
+        <div className="flex gap-5">
           {/* Sidebar Filters */}
           <div className="w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col h-[90vh] sticky top-6">
             <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
               <h2 className="text-lg font-bold">Filters</h2>
-              <Button
-                variant="ghost"
-                className="text-primary text-sm font-medium"
-                onClick={resetFilters}
-              >
+              <Button variant="ghost" className="text-primary text-sm font-medium" onClick={resetFilters}>
                 Reset all
               </Button>
             </div>
@@ -261,9 +235,7 @@ const Units = () => {
           {/* Main content remains unchanged */}
           <div className="flex-1">
             <div className="mb-6">
-              <h1 className="text-2xl text-gray-600 font-medium ">
-                Explore {filteredUnits.length} Units
-              </h1>
+              <h1 className="text-2xl text-gray-600 font-medium ">Explore {filteredUnits.length} Units</h1>
             </div>
 
             {error ? (
@@ -282,14 +254,8 @@ const Units = () => {
               </div>
             ) : filteredUnits.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  No units found matching your filters.
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={resetFilters}
-                  className="mt-4"
-                >
+                <p className="text-muted-foreground">No units found matching your filters.</p>
+                <Button variant="outline" onClick={resetFilters} className="mt-4">
                   Clear Filters
                 </Button>
               </div>
@@ -315,9 +281,7 @@ const Units = () => {
                           />
                         ) : (
                           <div className="text-white text-center">
-                            <h3 className="text-2xl font-bold">
-                              {unit.unit_name.toUpperCase()}
-                            </h3>
+                            <h3 className="text-2xl font-bold">{unit.unit_name.toUpperCase()}</h3>
                           </div>
                         )}
                         <Badge className="absolute top-3 left-3 bg-white/60 text-foreground hover:bg-white/60">
@@ -345,15 +309,11 @@ const Units = () => {
                                   className="object-contain w-10 h-10"
                                 />
                               ) : (
-                                <span className="text-xs text-white font-bold">
-                                  {unit.unit_name[0].toUpperCase()}
-                                </span>
+                                <span className="text-xs text-white font-bold">{unit.unit_name[0].toUpperCase()}</span>
                               )}
                             </div>
                             <div>
-                              <p className="text-sm font-semibold line-clamp-1">
-                                {unit.unit_name}
-                              </p>
+                              <p className="text-sm font-semibold line-clamp-1">{unit.unit_name}</p>
                             </div>
                           </div>
                           <Button
@@ -381,26 +341,14 @@ const Units = () => {
 };
 
 /* ------------------ UPDATED FilterSection ------------------ */
-const FilterSection = ({
-  label,
-  searchValue,
-  onSearch,
-  list,
-  selected,
-  onToggle,
-  showAll,
-  setShowAll,
-}: any) => {
+const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle, showAll, setShowAll }: any) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowDropdown(false);
       }
     };
@@ -414,15 +362,11 @@ const FilterSection = ({
     setShowDropdown(value.trim().length > 0);
   };
 
-  const filteredSearchResults = list.filter((item: string) =>
-    item.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  const filteredSearchResults = list.filter((item: string) => item.toLowerCase().includes(searchValue.toLowerCase()));
 
   return (
     <div className="relative">
-      <Label className="text-sm font-medium text-gray-500 mb-3 block">
-        {label}
-      </Label>
+      <Label className="text-sm font-medium text-gray-500 mb-3 block">{label}</Label>
 
       {/* ✅ Single Search Input */}
       <div className="relative mb-3">
@@ -458,9 +402,7 @@ const FilterSection = ({
             </div>
           ))}
           {filteredSearchResults.length === 0 && (
-            <div className="px-3 py-2 text-sm text-muted-foreground">
-              No {label} found.
-            </div>
+            <div className="px-3 py-2 text-sm text-muted-foreground">No {label} found.</div>
           )}
         </div>
       )}
@@ -469,19 +411,12 @@ const FilterSection = ({
       <div className="space-y-3 mt-3">
         {(showAll ? list : list.slice(0, 4)).map((item: string) => (
           <div key={item} className="flex items-center space-x-2">
-            <Checkbox
-              checked={selected.includes(item)}
-              onCheckedChange={() => onToggle(item)}
-            />
+            <Checkbox checked={selected.includes(item)} onCheckedChange={() => onToggle(item)} />
             <span className="text-sm">{item}</span>
           </div>
         ))}
         {list.length > 4 && (
-          <Button
-            variant="link"
-            className="p-0 text-primary text-sm"
-            onClick={() => setShowAll(!showAll)}
-          >
+          <Button variant="link" className="p-0 text-primary text-sm" onClick={() => setShowAll(!showAll)}>
             {showAll ? "Show Less" : `+${list.length - 4} More`}
           </Button>
         )}
@@ -491,16 +426,9 @@ const FilterSection = ({
 };
 
 /* ------------------ PostingDateFilter unchanged ------------------ */
-const PostingDateFilter = ({
-  filters,
-  activeDateRange,
-  onSelectDate,
-  onDateChange,
-}: any) => (
+const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChange }: any) => (
   <div>
-    <Label className="text-sm font-semibold text-muted-foreground mb-3 block">
-      Posting Date
-    </Label>
+    <Label className="text-sm font-semibold text-muted-foreground mb-3 block">Posting Date</Label>
     <div className="flex flex-col space-y-3">
       <div className="flex flex-wrap gap-2 justify-between">
         {["from", "to"].map((key) => (
@@ -514,18 +442,14 @@ const PostingDateFilter = ({
                 {filters.postingDate[key]
                   ? new Date(filters.postingDate[key]).toLocaleDateString()
                   : key === "from"
-                  ? "From"
-                  : "To"}
+                    ? "From"
+                    : "To"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="p-0" align="start">
               <Calendar
                 mode="single"
-                selected={
-                  filters.postingDate[key]
-                    ? new Date(filters.postingDate[key])
-                    : undefined
-                }
+                selected={filters.postingDate[key] ? new Date(filters.postingDate[key]) : undefined}
                 onSelect={(date) =>
                   onDateChange({
                     ...filters,
@@ -550,11 +474,7 @@ const PostingDateFilter = ({
             className="rounded-full flex-1"
             onClick={() => onSelectDate(range)}
           >
-            {range === "today"
-              ? "Today"
-              : range === "week"
-              ? "This Week"
-              : "This Month"}
+            {range === "today" ? "Today" : range === "week" ? "This Week" : "This Month"}
           </Button>
         ))}
       </div>
