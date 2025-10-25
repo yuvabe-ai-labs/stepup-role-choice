@@ -34,11 +34,7 @@ const ProfileSidebar = ({ savedCount = 0 }: ProfileSidebarProps) => {
       if (!user) return;
 
       try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("user_id", user.id)
-          .maybeSingle();
+        const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
 
         if (!error && data) {
           setProfile(data);
@@ -77,34 +73,25 @@ const ProfileSidebar = ({ savedCount = 0 }: ProfileSidebarProps) => {
   }, [user]);
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-sm">
       {/* Profile Card */}
-      <Card className="p-4 sm:p-6 bg-white shadow-sm border border-gray-200 rounded-3xl">
+      <Card className="p-6 bg-white shadow-sm border border-gray-200 rounded-3xl">
         {/* Profile Info Section */}
         <div className="text-center mb-6">
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
-              <CircularProgress
-                percentage={profileCompletion}
-                size={90}
-                strokeWidth={3}
-              >
+              <CircularProgress percentage={profileCompletion} size={90} strokeWidth={3}>
                 <Avatar className="h-20 w-20">
-                  <AvatarImage
-                    src={(studentProfile as any)?.avatar_url || ""}
-                  />
+                  <AvatarImage src={(studentProfile as any)?.avatar_url || ""} />
                   <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-                    {profile?.full_name?.charAt(0) ||
-                      user?.email?.charAt(0).toUpperCase()}
+                    {profile?.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </CircularProgress>
             </div>
 
             <div>
-              <h3 className="font-semibold text-lg text-gray-900">
-                {profile?.full_name}
-              </h3>
+              <h3 className="font-semibold text-lg text-gray-900">{profile?.full_name}</h3>
               <p className="text-sm text-gray-500">{profile?.role}</p>
             </div>
 
@@ -118,31 +105,30 @@ const ProfileSidebar = ({ savedCount = 0 }: ProfileSidebarProps) => {
         </div>
 
         {/* Profile Performance Section */}
-        <Card className="p-4 sm:p-6 bg-white shadow-sm border border-gray-200 rounded-3xl">
+        <Card className="p-6 bg-white shadow-sm border border-gray-200 rounded-3xl">
           <div className="flex items-center justify-between mb-4">
             <h4 className="font-semibold text-gray-800">Profile Performance</h4>
             <Info className="w-4 h-4 text-gray-800" />
           </div>
 
-          <div className="grid grid-cols-2 gap-6 mb-6 divide-x divide-gray-200">
+          <div className="grid grid-cols-3 gap-6">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Applied</p>
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl font-bold text-gray-900">
-                  {appliedCount}
-                </span>
+              <p className="text-base text-gray-600 mb-1 flex justify-center">Applied</p>
+              <div className="flex items-center justify-center space-x-2">
+                <div className="text-4xl font-semibold text-gray-600">{appliedCount}</div>
 
                 {/* need to implement in future */}
                 {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}
               </div>
             </div>
 
-            <div className="pl-6">
-              <p className="text-sm text-gray-600 mb-1">Saved</p>
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl font-bold text-gray-900">
-                  {savedCount}
-                </span>
+            {/* Divider */}
+            <div className="h-full w-px bg-gray-300 mx-auto"></div>
+
+            <div>
+              <p className="text-base text-gray-600 mb-1 flex justify-center">Saved</p>
+              <div className="flex items-center justify-center space-x-2">
+                <span className="text-4xl font-semibold text-gray-600">{savedCount}</span>
 
                 {/* need to implement in future */}
                 {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}
