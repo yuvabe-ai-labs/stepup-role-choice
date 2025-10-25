@@ -68,6 +68,7 @@ const RecommendedInternships = () => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [userSkills, setUserSkills] = useState<string[]>([]);
   const [savedInternshipsSet, setSavedInternshipsSet] = useState<Set<string>>(new Set());
+  const [isSaving, setIsSaving] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const { hasApplied, isLoading: isCheckingStatus, markAsApplied } = useApplicationStatus(selectedInternship);
@@ -195,13 +196,28 @@ const RecommendedInternships = () => {
   const selectedInternshipData = internships.find((int) => int.id === selectedInternship) || internships[0];
 
   const handleSaveInternship = async () => {
-    if (!selectedInternship) return;
+    if (!selectedInternship || isSaving) return;
+
+    const isSaved = savedInternshipsSet.has(selectedInternship);
+
+    // Immediate optimistic UI update
+    const newSavedSet = new Set(savedInternshipsSet);
+    if (isSaved) {
+      newSavedSet.delete(selectedInternship);
+    } else {
+      newSavedSet.add(selectedInternship);
+    }
+    setSavedInternshipsSet(newSavedSet);
+
+    setIsSaving(true);
 
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
+        // Revert optimistic update
+        setSavedInternshipsSet(savedInternshipsSet);
         toast({
           title: "Authentication Required",
           description: "Please sign in to save internships.",
@@ -213,6 +229,8 @@ const RecommendedInternships = () => {
       const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).single();
 
       if (!profile) {
+        // Revert optimistic update
+        setSavedInternshipsSet(savedInternshipsSet);
         toast({
           title: "Error",
           description: "Profile not found.",
@@ -221,18 +239,7 @@ const RecommendedInternships = () => {
         return;
       }
 
-      const isSaved = savedInternshipsSet.has(selectedInternship);
-
-      // Optimistic update
-      const newSavedSet = new Set(savedInternshipsSet);
-      if (isSaved) {
-        newSavedSet.delete(selectedInternship);
-      } else {
-        newSavedSet.add(selectedInternship);
-      }
-      setSavedInternshipsSet(newSavedSet);
-
-      // Perform API call
+      // Perform API call in background
       if (isSaved) {
         const { error } = await supabase
           .from("saved_internships")
@@ -243,13 +250,13 @@ const RecommendedInternships = () => {
         if (error) {
           // Revert on error
           setSavedInternshipsSet(savedInternshipsSet);
+          toast({
+            title: "Error",
+            description: "Failed to remove internship.",
+            variant: "destructive",
+          });
           throw error;
         }
-
-        toast({
-          title: "Removed",
-          description: "Internship removed from saved list.",
-        });
       } else {
         const { error } = await supabase.from("saved_internships").insert({
           student_id: profile.id,
@@ -259,21 +266,18 @@ const RecommendedInternships = () => {
         if (error) {
           // Revert on error
           setSavedInternshipsSet(savedInternshipsSet);
+          toast({
+            title: "Error",
+            description: "Failed to save internship.",
+            variant: "destructive",
+          });
           throw error;
         }
-
-        toast({
-          title: "Saved",
-          description: "Internship saved successfully!",
-        });
       }
     } catch (error: any) {
       console.error("Error saving internship:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to save internship.",
-        variant: "destructive",
-      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -459,6 +463,7 @@ const RecommendedInternships = () => {
                 <div className="flex flex-wrap gap-2 sm:gap-3 w-full lg:w-auto">
                   <Button
                     size="sm"
+                    disabled={isSaving}
                     className={`flex items-center space-x-1.5 px-4 py-2 ${
                       savedInternshipsSet.has(selectedInternship) ? "text-gray-400 bg-white" : "text-gray-600 bg-white"
                     }`}
