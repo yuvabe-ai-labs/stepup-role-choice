@@ -22,8 +22,6 @@ export const useUnitProfileCompletion = ({
       unitProfile.unit_name,
       unitProfile.unit_type,
       unitProfile.industry,
-      unitProfile.logo_url,
-      unitProfile.cover_image_url,
       unitProfile.description,
       unitProfile.mission,
       unitProfile.values,
@@ -32,14 +30,15 @@ export const useUnitProfileCompletion = ({
       unitProfile.address,
       unitProfile.website_url,
 
+      // Image fields (check avatar_url OR logo_url, banner_url OR cover_image_url)
+      (unitProfile as any)?.avatar_url || unitProfile.logo_url,
+      (unitProfile as any)?.banner_url || unitProfile.cover_image_url,
+
+      // Glimpse video
+      (unitProfile as any)?.glimpse,
+
       // Array fields (check if they have content)
       Array.isArray(unitProfile.projects) && unitProfile.projects.length > 0,
-      Array.isArray(unitProfile.focus_areas) &&
-        unitProfile.focus_areas.length > 0,
-      Array.isArray(unitProfile.skills_offered) &&
-        unitProfile.skills_offered.length > 0,
-      Array.isArray(unitProfile.opportunities_offered) &&
-        unitProfile.opportunities_offered.length > 0,
       Array.isArray(unitProfile.social_links) &&
         unitProfile.social_links.length > 0,
       Array.isArray(unitProfile.gallery_images) &&
