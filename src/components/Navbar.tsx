@@ -24,8 +24,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo.png";
-// import logo from "@/assets/YuvaNext.svg";
+// import logo from "@/assets/logo-2.png";
+import logo from "@/assets/YuvaNext.svg";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
