@@ -15,11 +15,9 @@ import {
   Building2,
   ZoomIn,
   Video,
-  ExternalLink,
-  Link,
-  Plus,
   ChevronLeft,
   ChevronRight,
+  Camera,
 } from "lucide-react";
 import { useUnitProfileData } from "@/hooks/useUnitProfileData";
 import { UnitDetailsDialog } from "@/components/unit/UnitDetailsDialog";
@@ -32,7 +30,6 @@ import { useEffect, useState, useRef } from "react";
 import { CircularProgress } from "@/components/CircularProgress";
 import { useUnitProfileCompletion } from "@/hooks/useUnitProfileCompletion";
 import { ImageUploadDialog } from "@/components/ImageUploadDialog";
-import { Camera } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const UnitProfile = () => {
@@ -121,7 +118,7 @@ const UnitProfile = () => {
       <Navbar />
 
       {/* Hero Background - Banner */}
-      <div className="relative h-48 bg-gradient-to-r from-primary to-primary-foreground group">
+      <div className="relative h-48 sm:h-56 md:h-64 lg:h-72 bg-gradient-to-r from-primary to-primary-foreground group">
         {(unitProfile as any)?.banner_url ? (
           <img
             src={(unitProfile as any).banner_url}
@@ -139,17 +136,17 @@ const UnitProfile = () => {
         )}
         <button
           onClick={() => setIsBannerDialogOpen(true)}
-          className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
         >
-          <Camera className="w-5 h-5" />
+          <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </div>
 
-      <div className="container mx-auto px-24 -mt-24 mb-6 relative z-10">
+      <div className="-mt-16 sm:-mt-20 md:-mt-24 pt-0 container px-4 sm:px-6 lg:px-24 py-4 lg:py-10 mb-6 relative z-10">
         {/* Profile Header */}
-        <Card className="mb-4 bg-white rounded-3xl">
-          <CardContent className="p-6">
-            <div className="flex items-start space-x-6">
+        <Card className="mb-2 sm:mb-4 bg-white rounded-3xl border-gray-200">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
               <div className="relative group">
                 <CircularProgress
                   percentage={profileCompletion}
@@ -180,9 +177,9 @@ const UnitProfile = () => {
                 </button>
               </div>
 
-              <div className="flex-1">
+              <div className="flex-1 w-full">
                 <div className="flex items-center space-x-2 mb-2">
-                  <h1 className="text-2xl font-bold">
+                  <h1 className="text-xl sm:text-2xl font-bold">
                     {unitProfile?.unit_name ||
                       profile?.full_name ||
                       "Unit Name"}
@@ -198,13 +195,13 @@ const UnitProfile = () => {
                     </UnitDetailsDialog>
                   )}
                 </div>
-                <p className="text-muted-foreground mb-2">
+                <p className="text-sm sm:text-base text-muted-foreground mb-2">
                   {unitProfile?.unit_type || "Organization"} •{" "}
                   {unitProfile?.industry || "Industry"}
                 </p>
 
                 <div className="mb-4 flex items-start gap-2">
-                  <p className="text-sm text-muted-foreground flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground flex-1">
                     {unitProfile?.description ||
                       "Tell the world about your organization - what you do, who you serve, and what makes you unique."}
                   </p>
@@ -217,10 +214,10 @@ const UnitProfile = () => {
                   </UnitDescriptionDialog>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                   <div className="flex items-center space-x-1">
-                    <Mail className="w-4 h-4" />
-                    <span>
+                    <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="truncate max-w-[200px] sm:max-w-none">
                       {unitProfile?.contact_email ||
                         profile?.email ||
                         user?.email ||
@@ -229,19 +226,21 @@ const UnitProfile = () => {
                   </div>
                   {unitProfile?.contact_phone && (
                     <div className="flex items-center space-x-1">
-                      <Phone className="w-4 h-4" />
+                      <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
                       <span>{unitProfile.contact_phone}</span>
                     </div>
                   )}
                   {unitProfile?.address && (
                     <div className="flex items-center space-x-1">
-                      <MapPin className="w-4 h-4" />
-                      <span>{unitProfile.address}</span>
+                      <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="truncate max-w-[150px] sm:max-w-none">
+                        {unitProfile.address}
+                      </span>
                     </div>
                   )}
                   {unitProfile?.website_url && (
                     <div className="flex items-center space-x-1">
-                      <Globe className="w-4 h-4" />
+                      <Globe className="w-3 h-3 sm:w-4 sm:h-4" />
                       <a
                         href={unitProfile.website_url}
                         target="_blank"
@@ -258,13 +257,15 @@ const UnitProfile = () => {
           </CardContent>
         </Card>
 
-        <div className="grid lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 sm:gap-4">
           {/* Left Sidebar - Quick Links */}
-          <div className="lg:col-span-1">
-            <Card className="rounded-3xl">
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-4">Quick Links</h3>
-                <div className="space-y-3 text-sm">
+          <div className="lg:col-span-1 mb-4 lg:mb-0">
+            <Card className="rounded-3xl border-gray-200">
+              <CardContent className="p-4 sm:p-6">
+                <h3 className="font-semibold text-base sm:text-lg mb-4">
+                  Quick Links
+                </h3>
+                <div className="space-y-3 text-xs sm:text-sm">
                   <div className="flex items-center justify-between">
                     <span>Unit Details</span>
                     <UnitDetailsDialog
@@ -331,7 +332,7 @@ const UnitProfile = () => {
                     </UnitDescriptionDialog>
                   </div>
 
-                  <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center justify-between">
                     <span>Values</span>
                     <UnitDescriptionDialog
                       description={unitProfile?.values || ""}
@@ -394,14 +395,18 @@ const UnitProfile = () => {
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-3 space-y-4">
+          <div className="lg:col-span-3 space-y-2 sm:space-y-4">
             {/* Projects */}
-            <Card className="rounded-3xl">
-              <CardContent className="p-6">
+            <Card className="rounded-3xl border-gray-200">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold">Projects</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold">Projects</h3>
                   <UnitProjectDialog onSave={addProjectEntry}>
-                    <Button variant="ghost" size="sm" className="text-primary">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-primary text-xs sm:text-sm"
+                    >
                       Add Project
                     </Button>
                   </UnitProjectDialog>
@@ -410,15 +415,15 @@ const UnitProfile = () => {
                 {projects.length > 0 ? (
                   <div className="divide-y divide-border">
                     {projects.map((project: any, index: number) => (
-                      <div key={index} className="py-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-base text-foreground">
+                      <div key={index} className="py-3 sm:py-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-sm sm:text-base text-foreground">
                               {project.project_name || "Untitled Project"}
                             </h4>
 
                             {project.client_name && (
-                              <p className="text-sm text-muted-foreground mt-0.5">
+                              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                                 {project.client_name}
                               </p>
                             )}
@@ -444,7 +449,7 @@ const UnitProfile = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => removeProjectEntry(project.id)}
-                            className="text-muted-foreground hover:text-destructive ml-2"
+                            className="text-muted-foreground hover:text-destructive flex-shrink-0"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -453,90 +458,99 @@ const UnitProfile = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Showcase the projects and initiatives your organization has
                     worked on.
                   </p>
                 )}
               </CardContent>
             </Card>
+
             {/* Mission */}
-            <Card className="rounded-3xl">
-              <CardContent className="p-6">
+            <Card className="rounded-3xl border-gray-200">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
                     Mission
                     <UnitDescriptionDialog
                       description={unitProfile?.mission || ""}
                       onSave={(mission) => updateUnitProfile({ mission })}
                       title="Edit Mission"
                     >
-                      <Pencil className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
+                      <Pencil className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-pointer hover:text-primary" />
                     </UnitDescriptionDialog>
                   </h3>
                 </div>
                 <div className="rounded-xl min-h-[100px]">
-                  <p className="text-muted-foreground whitespace-pre-wrap">
+                  <p className="text-xs sm:text-sm text-muted-foreground whitespace-pre-wrap">
                     {unitProfile?.mission ||
                       "Define your organization's mission statement - the purpose and primary objectives that drive your work."}
                   </p>
                 </div>
               </CardContent>
             </Card>
+
             {/* Values */}
-            <Card className="rounded-3xl">
-              <CardContent className="p-6">
+            <Card className="rounded-3xl border-gray-200">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center mb-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
                     Values
                     <UnitDescriptionDialog
                       description={unitProfile?.values || ""}
                       onSave={(values) => updateUnitProfile({ values })}
                       title="Edit Values"
                     >
-                      <Pencil className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary" />
+                      <Pencil className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground cursor-pointer hover:text-primary" />
                     </UnitDescriptionDialog>
                   </h3>
                 </div>
 
                 <div className="rounded-xl min-h-[100px]">
-                  <p className="text-muted-foreground whitespace-pre-wrap">
+                  <p className="text-xs sm:text-sm text-muted-foreground whitespace-pre-wrap">
                     {unitProfile?.values ||
                       "Describe the principles and ethics that define your organization's culture and decisions."}
                   </p>
                 </div>
               </CardContent>
             </Card>
+
             {/* Social Links */}
-            <Card className="rounded-3xl">
-              <CardContent className="p-6">
+            <Card className="rounded-3xl border-gray-200">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">Social Links</h2>
+                  <h2 className="text-base sm:text-lg font-semibold">
+                    Social Links
+                  </h2>
                   <UnitSocialLinksDialog
                     onSave={handleSocialLinksSave}
                     currentLinks={socialLinks}
                   >
-                    <Button variant="ghost" size="sm" className="text-primary">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-primary text-xs sm:text-sm"
+                    >
                       Add Links
                     </Button>
                   </UnitSocialLinksDialog>
                 </div>
 
                 {socialLinks.length > 0 ? (
-                  <div>
+                  <div className="space-y-3 sm:space-y-4">
                     {socialLinks.map((link: any, index: number) => (
                       <div
                         key={index}
-                        className="grid grid-cols-5 items-center mt-4"
+                        className="flex flex-col sm:grid sm:grid-cols-5 gap-2 sm:items-center"
                       >
-                        <p className="font-medium capitalize">
+                        <p className="font-medium capitalize text-sm sm:text-base">
                           {link.platform}
                         </p>
                         <a
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:underline break-all grid col-span-3 border rounded-xl px-3 py-2"
+                          className="text-xs sm:text-sm text-blue-600 hover:underline break-all sm:col-span-3 border border-gray-400 rounded-xl px-3 py-2"
                         >
                           {link.url}
                         </a>
@@ -544,7 +558,7 @@ const UnitProfile = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeSocialLink(link.id)}
-                          className="text-muted-foreground hover:text-destructive justify-self-end"
+                          className="text-muted-foreground hover:text-destructive sm:justify-self-end self-end"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -552,7 +566,7 @@ const UnitProfile = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     No social links added yet.
                   </p>
                 )}
@@ -560,17 +574,17 @@ const UnitProfile = () => {
             </Card>
 
             {/* Glimpse of the Unit */}
-            <Card className="rounded-3xl">
-              <CardContent className="p-6">
+            <Card className="rounded-3xl border-gray-200">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className=" text-xl font-semibold flex items-center gap-2">
-                    <Video className="w-5 h-5" />
+                  <h3 className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+                    <Video className="w-4 h-4 sm:w-5 sm:h-5" />
                     Glimpse of the Unit
                   </h3>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-primary"
+                    className="text-primary text-xs sm:text-sm"
                     onClick={() => setIsGlimpseDialogOpen(true)}
                   >
                     {glimpseUrl ? "Edit Video" : "Add Video"}
@@ -589,9 +603,9 @@ const UnitProfile = () => {
                     </video>
                   </div>
                 ) : (
-                  <div className="text-center py-12 border-2 border-dashed rounded-xl">
-                    <Video className="w-12 h-12 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-muted-foreground">
+                  <div className="text-center py-8 sm:py-12 border-2 border-dashed rounded-xl">
+                    <Video className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-xs sm:text-sm text-muted-foreground px-4">
                       Add a video to give visitors a glimpse of your
                       organization
                     </p>
@@ -601,14 +615,14 @@ const UnitProfile = () => {
             </Card>
 
             {/* Gallery */}
-            <Card className="rounded-3xl">
-              <CardContent className="p-6">
+            <Card className="rounded-3xl border-gray-200">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold">Gallery</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold">Gallery</h3>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-primary"
+                    className="text-primary text-xs sm:text-sm"
                     onClick={() => setIsGalleryDialogOpen(true)}
                   >
                     {galleryImages.length > 0 ? "Manage Gallery" : "Add Images"}
@@ -616,8 +630,8 @@ const UnitProfile = () => {
                 </div>
 
                 {galleryImages.length > 0 ? (
-                  <div className="flex items-center space-x-4">
-                    {/* Left Chevron outside */}
+                  <div className="flex items-center space-x-2 sm:space-x-4">
+                    {/* Left Chevron */}
                     <button
                       onClick={() =>
                         scrollRef.current?.scrollBy({
@@ -625,15 +639,15 @@ const UnitProfile = () => {
                           behavior: "smooth",
                         })
                       }
-                      className="bg-white border border-border rounded-full shadow-md p-2 hover:bg-accent"
+                      className="hidden sm:block bg-white border border-border rounded-full shadow-md p-2 hover:bg-accent flex-shrink-0"
                     >
-                      <ChevronLeft className="w-5 h-5" />
+                      <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
 
                     {/* Scrollable Image Container */}
                     <div
                       ref={scrollRef}
-                      className="flex overflow-x-auto space-x-4 scroll-smooth no-scrollbar"
+                      className="flex overflow-x-auto space-x-3 sm:space-x-4 scroll-smooth no-scrollbar"
                       style={{
                         scrollbarWidth: "none",
                         msOverflowStyle: "none",
@@ -642,7 +656,7 @@ const UnitProfile = () => {
                       {galleryImages.map((image: string, index: number) => (
                         <div
                           key={index}
-                          className="relative flex-shrink-0 w-64 h-64 rounded-lg overflow-hidden border border-border group cursor-pointer"
+                          className="relative flex-shrink-0 w-48 h-48 sm:w-64 sm:h-64 rounded-lg overflow-hidden border border-border group cursor-pointer"
                           onClick={() => setViewImage(image)}
                         >
                           <img
@@ -651,13 +665,13 @@ const UnitProfile = () => {
                             className="w-full h-full object-cover"
                           />
                           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <ZoomIn className="w-8 h-8 text-white" />
+                            <ZoomIn className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                           </div>
                         </div>
                       ))}
                     </div>
 
-                    {/* Right Chevron outside */}
+                    {/* Right Chevron */}
                     <button
                       onClick={() =>
                         scrollRef.current?.scrollBy({
@@ -665,15 +679,15 @@ const UnitProfile = () => {
                           behavior: "smooth",
                         })
                       }
-                      className="bg-white border border-border rounded-full shadow-md p-2 hover:bg-accent"
+                      className="hidden sm:block bg-white border border-border rounded-full shadow-md p-2 hover:bg-accent flex-shrink-0"
                     >
-                      <ChevronRight className="w-5 h-5" />
+                      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <Building2 className="w-12 h-12 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-muted-foreground">
+                  <div className="text-center py-6 sm:py-8">
+                    <Building2 className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-xs sm:text-sm text-muted-foreground px-4">
                       Add photos to showcase your organization's work, events,
                       and team.
                     </p>
