@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Send, Sparkles } from "lucide-react";
 import chatbotAvatar from "@/assets/chatbot.png";
-import logo from "@/assets/logo-2.png";
+import logo from "@/assets/logo.png";
 import { useIntern } from "@/hooks/useInternships";
 import {
   useInternshipRecommendations,
