@@ -352,7 +352,7 @@ const AllApplications = () => {
                     return (
                       <Card
                         key={application.id}
-                        className="border border-border/50 hover:shadow-lg transition-shadow w-full max-w-s min-h-[300px] rounded-3xl"
+                        className="border border-border/50 hover:shadow-lg transition-shadow w-full max-w-s min-h-[460px] rounded-3xl"
                       >
                         <CardContent className="p-8 space-y-5">
                           {/* Header Section */}
@@ -409,23 +409,23 @@ const AllApplications = () => {
                               : "Passionate UI/UX designer with 3+ years of experience creating user-centered digital experiences."}
                           </p>
 
-                          {/* Skills (Single Line) */}
-                          <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
-                            {displaySkills
-                              .slice(0, 3)
-                              .map((skill: string, index: number) => (
+                          {/* Skills */}
+                          <div className="flex flex-wrap gap-3">
+                            {displaySkills.map(
+                              (skill: string, index: number) => (
                                 <Badge
                                   key={index}
                                   variant="outline"
-                                  className="text-[11px] text-gray-600 bg-muted/40 rounded-full px-3 py-1.5 flex-shrink-0"
+                                  className="text-[11px] text-gray-600 bg-muted/40 rounded-full px-3 py-1.5"
                                 >
                                   {skill}
                                 </Badge>
-                              ))}
+                              )
+                            )}
                             {skills.length > 3 && (
                               <Badge
                                 variant="outline"
-                                className="text-[11px] text-gray-600 bg-muted/40 rounded-full px-3 py-1.5 flex-shrink-0"
+                                className="text-[11px] text-gray-600 bg-muted/40 rounded-full px-3 py-1.5"
                               >
                                 +{skills.length - 3}
                               </Badge>
@@ -434,6 +434,54 @@ const AllApplications = () => {
 
                           {/* Divider */}
                           <div className="border-t border-border/40"></div>
+
+                          {/* AI Analysis Section */}
+                          <div className="bg-white rounded-2xl p-3 shadow-sm">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Sparkles className="w-5 h-5 text-purple-600" />
+                                <span className="text-base font-medium text-purple-600">
+                                  AI Analysis for the profile
+                                </span>
+                              </div>
+
+                              {/* Circular Progress */}
+                              <div className="relative w-12 h-12">
+                                <svg className="w-12 h-12 transform -rotate-90">
+                                  <circle
+                                    cx="24"
+                                    cy="24"
+                                    r="18"
+                                    stroke="#e5e7eb"
+                                    strokeWidth="3"
+                                    fill="none"
+                                  />
+                                  <circle
+                                    cx="24"
+                                    cy="24"
+                                    r="18"
+                                    stroke="#10b981"
+                                    strokeWidth="3"
+                                    fill="none"
+                                    strokeDasharray={`${2 * Math.PI * 18}`}
+                                    strokeDashoffset={`${
+                                      2 * Math.PI * 18 * (1 - matchScore / 100)
+                                    }`}
+                                    strokeLinecap="round"
+                                  />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <span className="text-sm font-bold">
+                                    {matchScore}%
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <p className="text-sm text-muted-foreground">
+                              {matchScore}% Skill matches for this role
+                            </p>
+                          </div>
 
                           {/* View Profile Button */}
                           <Button

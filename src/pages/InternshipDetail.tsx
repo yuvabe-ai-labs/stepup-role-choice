@@ -176,105 +176,94 @@ const InternshipDetail = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Main Content */}
-      <div className="container lg:px-[7.5rem] lg:py-10">
-        <div className="space-y-8 rounded-3xl border border-gray-200 p-10">
-          {/* Header Card */}
-          <Card className="mb-6  border-0 shadow-none">
-            <CardContent className="border-0 p-0">
-              <div className="flex items-start justify-between pb-7 border-b border-gray-200 gap-6">
-                {/* Left Side - Company Logo & Info */}
-                <div className="flex gap-7 flex-1">
-                  <div
-                    className={`${
-                      unit.avatar_url
-                        ? "bg-transparent border border-gray-200"
-                        : "bg-gradient-to-br from-teal-400 to-teal-600"
-                    } w-[6.25rem] h-[6.25rem] rounded-full  flex items-center justify-center flex-shrink-0`}
-                  >
-                    <span className="text-3xl text-white font-bold">
-                      {unit?.avatar_url ? (
-                        <img
-                          src={unit.avatar_url}
-                          alt={unit.unit_name || internship.company_name}
-                          className="w-full h-full rounded-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-3xl text-white font-bold">{internship.company_name.charAt(0)}</span>
-                      )}
-                    </span>
-                  </div>
-
-                  <div className="flex-1">
-                    <h1 className="text-3xl font-bold">{internship.title}</h1>
-                    <p className="text-lg text-muted-foreground font-medium mb-2.5">{internship.company_name}</p>
-
-                    <div className="flex flex-wrap gap-4 text-sm">
-                      {internship.location && (
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <MapPin className="w-4 h-4" />
-                          <span>{internship.location}</span>
-                        </div>
-                      )}
-                      {internship.duration && (
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <Clock className="w-4 h-4" />
-                          <span>{internship.duration}</span>
-                        </div>
-                      )}
-                      {internship.is_paid && (
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <DollarSign className="w-4 h-4" />
-                          <span>Paid</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+      <div className="max-w-5xl mx-auto rounded-3xl border my-8 p-10">
+        {/* Header Card */}
+        <Card className="mb-6  border-0 shadow-none">
+          <CardContent className="border-0 p-0">
+            <div className="flex items-start justify-between gap-6">
+              {/* Left Side - Company Logo & Info */}
+              <div className="flex gap-6 flex-1">
+                <div className="w-[6.25rem] h-[6.25rem] rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-3xl text-white font-bold">{internship.company_name.charAt(0)}</span>
                 </div>
 
-                {/* Right Side - Action Buttons */}
-                <div className="flex gap-2 items-start">
-                  <Button
-                    size="sm"
-                    className={`flex items-center ${isSaved ? "text-gray-400 bg-white" : "text-gray-600 bg-white"}`}
-                    onClick={handleSaveInternship}
-                    disabled={savingInternship || isCheckingSaved}
-                  >
-                    <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
-                    <span>{isSaved ? "Saved" : "Save"}</span>
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="flex items-center text-gray-700 bg-white"
-                    onClick={() => setShowShareDialog(true)}
-                  >
-                    <Share2 className="w-4 h-4" />
-                    <span>Share</span>
-                  </Button>
-                  <Button
-                    variant="gradient"
-                    className="rounded-full text-white"
-                    disabled={hasApplied || isCheckingStatus}
-                    onClick={() => setShowApplicationDialog(true)}
-                  >
-                    {hasApplied ? "Applied" : "Apply Now"}
-                  </Button>
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold mb-2">{internship.title}</h1>
+                  <p className="text-lg text-muted-foreground mb-3">{internship.company_name}</p>
+
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    {internship.location && (
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <MapPin className="w-4 h-4" />
+                        <span>{internship.location}</span>
+                      </div>
+                    )}
+                    {internship.duration && (
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Clock className="w-4 h-4" />
+                        <span>{internship.duration}</span>
+                      </div>
+                    )}
+                    {internship.is_paid && (
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <DollarSign className="w-4 h-4" />
+                        <span>Paid</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+
+              {/* Right Side - Action Buttons */}
+              <div className="flex gap-2 items-start">
+                <Button
+                  size="sm"
+                  className={`flex items-center  px-4 py-2 ${
+                    isSaved ? "text-gray-400 bg-white" : "text-gray-600 bg-white"
+                  }`}
+                  onClick={handleSaveInternship}
+                  disabled={savingInternship || isCheckingSaved}
+                >
+                  <Bookmark className={`w-4 h-4 ${isSaved ? "fill" : ""}`} />
+                  <span>{isSaved ? "Saved" : "Save"}</span>
+                </Button>
+                <Button 
+                  size="sm" 
+                  className="flex items-center px-4 py-2 text-gray-700 bg-white"
+                  onClick={() => setShowShareDialog(true)}
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>Share</span>
+                </Button>
+                <Button
+                  className="bg-orange-500 hover:bg-orange-600 rounded-full text-white px-6"
+                  disabled={hasApplied || isCheckingStatus}
+                  onClick={() => setShowApplicationDialog(true)}
+                >
+                  {hasApplied ? "Applied" : "Apply Now"}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <hr className="my-8" />
+        {/* Main Content */}
+        <div className="space-y-8">
           {/* About the Internship */}
-          <section className="border-b border-gray-200 pb-7">
-            <h2 className="text-xl font-medium mb-4">About the Internship</h2>
+          <section>
+            <h2 className="text-2xl font-bold mb-4">About the Internship</h2>
             <p className="text-muted-foreground leading-relaxed text-justify">
               {internship.description || "No description available."}
             </p>
           </section>
 
+          {internship.description && <hr />}
+
           {/* Key Responsibilities */}
           {responsibilities.length > 0 && (
-            <section className="border-b border-gray-200 pb-7">
-              <h2 className="text-xl font-medium mb-4">Key Responsibilities</h2>
+            <section>
+              <h2 className="text-2xl font-bold mb-4">Key Responsibilities</h2>
               <ul className="space-y-3">
                 {responsibilities.map((item: string, idx: number) => (
                   <li key={idx} className="flex items-start gap-3">
@@ -286,10 +275,12 @@ const InternshipDetail = () => {
             </section>
           )}
 
+          {responsibilities.length > 0 && <hr />}
+
           {/* Requirements from the Candidates */}
           {requirements.length > 0 && (
-            <section className="border-b border-gray-200 pb-7">
-              <h2 className="text-xl font-medium mb-4">Requirements from the Candidates</h2>
+            <section>
+              <h2 className="text-2xl font-bold mb-4">Requirements from the Candidates</h2>
               <ul className="space-y-3">
                 {requirements.map((item: string, idx: number) => (
                   <li key={idx} className="flex items-start gap-3">
@@ -301,10 +292,12 @@ const InternshipDetail = () => {
             </section>
           )}
 
+          {requirements.length > 0 && <hr />}
+
           {/* What You Will Get */}
           {benefits.length > 0 && (
-            <section className="border-b border-gray-200 pb-7">
-              <h2 className="text-xl font-medium mb-4">What You Will Get</h2>
+            <section>
+              <h2 className="text-2xl font-bold mb-4">What You Will Get</h2>
               <ul className="space-y-3">
                 {benefits.map((item: string, idx: number) => (
                   <li key={idx} className="flex items-start gap-3">
@@ -316,35 +309,36 @@ const InternshipDetail = () => {
             </section>
           )}
 
+          {benefits.length > 0 && <hr />}
+
           {/* Required Skills */}
           {skillsRequired.length > 0 && (
             <section>
-              <h2 className="text-xl font-medium mb-4">Required Skills</h2>
+              <h2 className="text-2xl font-bold mb-4">Required Skills</h2>
               <div className="flex flex-wrap gap-2">
                 {skillsRequired.map((skill: string, idx: number) => (
-                  <Badge key={idx} variant="outline" className="px-4 py-2 border-gray-600">
+                  <Badge key={idx} variant="outline" className="px-4 py-2">
                     {skill}
                   </Badge>
                 ))}
               </div>
             </section>
           )}
-        </div>
 
-        {/* Ready to Apply */}
-        <div className="my-2.5 rounded-3xl border border-gray-200 p-10">
+          {skillsRequired.length > 0 && <hr />}
+
+          {/* Ready to Apply */}
           <Card className="border-0 shadow-none">
             <CardContent className="p-0">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl text-gray-900 font-bold mb-5">Ready to Apply</h2>
+                  <h2 className="text-2xl font-bold mb-2">Ready to Apply</h2>
                   <p className="text-muted-foreground">
                     Join {internship.company_name} and make a meaningful impact in {internship.location || "Auroville"}
                   </p>
                 </div>
                 <Button
-                  variant="gradient"
-                  className="text-white rounded-full"
+                  className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-8"
                   disabled={hasApplied || isCheckingStatus}
                   onClick={() => setShowApplicationDialog(true)}
                 >
@@ -353,31 +347,15 @@ const InternshipDetail = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        {/* Company Info */}
-        <div className="mt-2.5 rounded-3xl border border-gray-200 p-10">
-          <Card className="border-0 shadow-none pb-7 border-b border-gray-200">
+          <hr />
+
+          {/* Company Info */}
+          <Card className="border-0 shadow-none">
             <CardContent className="p-0">
-              <div className="flex gap-6 flex-1">
-                <div
-                  className={`${
-                    unit.avatar_url
-                      ? "bg-transparent border border-gray-200"
-                      : "bg-gradient-to-br from-teal-400 to-teal-600"
-                  } w-[6.25rem] h-[6.25rem] rounded-full  flex items-center justify-center flex-shrink-0`}
-                >
-                  <span className="text-3xl text-white font-bold">
-                    {unit?.avatar_url ? (
-                      <img
-                        src={unit.avatar_url}
-                        alt={unit.unit_name || internship.company_name}
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-3xl text-white font-bold">{internship.company_name.charAt(0)}</span>
-                    )}
-                  </span>
+              <div className="flex gap-6 items-start">
+                <div className="w-[6.25rem] h-[6.25rem] rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-3xl text-white font-bold">{unit.unit_name.charAt(0)}</span>
                 </div>
 
                 <div className="flex-1">
@@ -397,7 +375,7 @@ const InternshipDetail = () => {
                 </div>
 
                 <Button
-                  variant="gradient"
+                  variant="outline"
                   className="border-none bg-orange-500 hover:bg-orange-600 text-white rounded-full px-8"
                   onClick={() => {
                     if (unit.id) {
@@ -417,12 +395,14 @@ const InternshipDetail = () => {
             </CardContent>
           </Card>
 
+          <hr />
+
           {/* About Company */}
           {unit.description && (
             <section>
-              <h2 className="text-xl font-medium my-4">About the company</h2>
+              <h2 className="text-2xl font-bold my-4">About the company</h2>
               <div className="flex flex-wrap gap-2">
-                <p className="text-muted-foreground text-justify leading-relaxed">{unit.description}</p>
+                <p className="text-muted-foreground leading-relaxed">{unit.description}</p>
               </div>
             </section>
           )}

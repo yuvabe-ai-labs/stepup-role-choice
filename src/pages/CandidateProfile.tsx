@@ -12,14 +12,6 @@ import {
   User,
   CopyCheck,
   Ban,
-  Linkedin,
-  Instagram,
-  Facebook,
-  Twitter,
-  Globe,
-  Youtube,
-  Palette,
-  Dribbble,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,16 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import ScheduleInterviewDialog from "@/components/ScheduleInterviewDialog";
 
@@ -66,10 +48,6 @@ const CandidateProfile = () => {
   const { data, loading, error, refetch } = useCandidateProfile(id || "");
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [pendingStatus, setPendingStatus] = useState<
-    "applied" | "shortlisted" | "rejected" | "interviewed" | "hired" | null
-  >(null);
 
   const getStatusLabel = (status: string) => {
     const statusMap: Record<string, string> = {
@@ -80,51 +58,6 @@ const CandidateProfile = () => {
       hired: "Select Candidate",
     };
     return statusMap[status] || status;
-  };
-
-  const getStatusBg = (status: string) => {
-    switch (status) {
-      case "shortlisted":
-        return "bg-green-500 text-white";
-      case "interviewed":
-        return "bg-gradient-to-r from-[#07636C] to-[#0694A2] text-white";
-      case "applied":
-      case "rejected":
-        return "bg-red-500 text-white";
-      case "hired":
-        return "bg-blue-500 text-white";
-      default:
-        return "bg-gray-200 text-gray-700";
-    }
-  };
-
-  const getDialogContent = (status: string) => {
-    switch (status) {
-      case "shortlisted":
-        return {
-          title: "Shortlist Candidate?",
-          description: `Are you sure you want to shortlist ${data?.profile.full_name}? This will move them to the next stage of the hiring process.`,
-          icon: <Heart className="w-6 h-6 text-green-500" />,
-        };
-      case "applied":
-        return {
-          title: "Not Shortlist Candidate?",
-          description: `Are you sure you want to mark ${data?.profile.full_name} as not shortlisted? You can change this status later if needed.`,
-          icon: <Ban className="w-6 h-6 text-red-500" />,
-        };
-      case "hired":
-        return {
-          title: "Select Candidate?",
-          description: `Are you sure you want to select ${data?.profile.full_name} for this position? This will mark them as hired.`,
-          icon: <CopyCheck className="w-6 h-6 text-blue-500" />,
-        };
-      default:
-        return {
-          title: "Update Status?",
-          description: `Are you sure you want to update the status for ${data?.profile.full_name}?`,
-          icon: <User className="w-6 h-6" />,
-        };
-    }
   };
 
   const handleStatusChange = async (
@@ -138,21 +71,11 @@ const CandidateProfile = () => {
       return;
     }
 
-    // Store pending status and show confirmation dialog
-    setPendingStatus(newStatus);
-    setShowConfirmDialog(true);
-  };
-
-  const handleConfirmStatusChange = async () => {
-    if (!data?.application.id || !pendingStatus) return;
-
     setIsUpdatingStatus(true);
-    setShowConfirmDialog(false);
-
     try {
       const { error: updateError } = await supabase
         .from("applications")
-        .update({ status: pendingStatus })
+        .update({ status: newStatus })
         .eq("id", data.application.id);
 
       if (updateError) throw updateError;
@@ -164,7 +87,7 @@ const CandidateProfile = () => {
       toast({
         title: "Status Updated",
         description: `Application status changed to ${getStatusLabel(
-          pendingStatus
+          newStatus
         )}`,
         duration: 3000,
       });
@@ -178,13 +101,7 @@ const CandidateProfile = () => {
       });
     } finally {
       setIsUpdatingStatus(false);
-      setPendingStatus(null);
     }
-  };
-
-  const handleCancelStatusChange = () => {
-    setShowConfirmDialog(false);
-    setPendingStatus(null);
   };
 
   if (loading) {
@@ -223,15 +140,9 @@ const CandidateProfile = () => {
   const skills = safeParse(data.studentProfile.skills, []);
   const interests = safeParse(data.studentProfile.interests, []);
   const achievements = safeParse(data.studentProfile.achievements, []);
-  const projects = safeParse(data.studentProfile.projects, []);
-  const internships = safeParse(data.studentProfile.internships, []);
-  const courses = safeParse(data.studentProfile.completed_courses, []);
   const education = safeParse(data.studentProfile.education, []);
-  const links = safeParse(data.studentProfile.links, []);
 
   const matchScore = data.application.profile_match_score || 0;
-
-  const dialogContent = pendingStatus ? getDialogContent(pendingStatus) : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -290,7 +201,7 @@ const CandidateProfile = () => {
 
         {/* Profile Header Card */}
         <div className="container mx-auto px-10 py-2">
-          <Card className="mb-4 rounded-3xl">
+          <Card className="mb-8 rounded-3xl shadow">
             <CardContent className="p-8">
               <div className="flex items-start gap-6">
                 <Avatar className="w-24 h-24">
@@ -340,53 +251,64 @@ const CandidateProfile = () => {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-3">
-                      <Select
-                        value={data.application.status}
-                        onValueChange={handleStatusChange}
-                        disabled={isUpdatingStatus}
-                      >
-                        {/* Trigger with dynamic background */}
-                        <SelectTrigger
-                          className={`w-64 rounded-full px-6 ${getStatusBg(
-                            data.application.status
-                          )}`}
+                    <Button className="gap-2 rounded-full">
+                      <Download className="w-4 h-4" />
+                      Download Profile
+                    </Button>
+                    <Select
+                      value={data.application.status}
+                      onValueChange={handleStatusChange}
+                      disabled={isUpdatingStatus}
+                    >
+                      {/* Rounded trigger */}
+                      <SelectTrigger className="w-48 rounded-full text-gray-700">
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
+
+                      {/* Rounded dropdown content */}
+                      <SelectContent className="rounded-2xl">
+                        {/* Each item styled without the checkmark */}
+                        <SelectItem
+                          value="shortlisted"
+                          className="focus:bg-accent/50 focus:text-accent-foreground data-[state=checked]:bg-transparent data-[state=checked]:text-foreground"
                         >
-                          <SelectValue placeholder="Select Status" />
-                        </SelectTrigger>
+                          <div className="flex items-center gap-2">
+                            <Heart className="w-4 h-4" />
+                            Shortlisted
+                          </div>
+                        </SelectItem>
 
-                        {/* Dropdown content */}
-                        <SelectContent className="rounded-2xl">
-                          <SelectItem value="shortlisted">
-                            <div className="flex items-center gap-2 px-4">
-                              <Heart className="w-4 h-4" />
-                              Shortlisted
-                            </div>
-                          </SelectItem>
+                        <SelectItem
+                          value="applied"
+                          className="focus:bg-accent/50 focus:text-accent-foreground data-[state=checked]:bg-transparent data-[state=checked]:text-foreground"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Ban className="w-4 h-4" />
+                            Not Shortlisted
+                          </div>
+                        </SelectItem>
 
-                          <SelectItem value="applied">
-                            <div className="flex items-center gap-2 px-4">
-                              <Ban className="w-4 h-4" />
-                              Not Shortlisted
-                            </div>
-                          </SelectItem>
+                        <SelectItem
+                          value="hired"
+                          className="focus:bg-accent/50 focus:text-accent-foreground data-[state=checked]:bg-transparent data-[state=checked]:text-foreground"
+                        >
+                          <div className="flex items-center gap-2">
+                            <CopyCheck className="w-4 h-4" />
+                            Select Candidate
+                          </div>
+                        </SelectItem>
 
-                          <SelectItem value="hired">
-                            <div className="flex items-center gap-2 px-4">
-                              <CopyCheck className="w-4 h-4" />
-                              Select Candidate
-                            </div>
-                          </SelectItem>
-
-                          <SelectItem value="interviewed">
-                            <div className="flex items-center gap-2 px-4">
-                              <User className="w-4 h-4" />
-                              Schedule Interview
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        <SelectItem
+                          value="interviewed"
+                          className="focus:bg-accent/50 focus:text-accent-foreground data-[state=checked]:bg-transparent data-[state=checked]:text-foreground"
+                        >
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4" />
+                            Schedule Interview
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
@@ -394,15 +316,13 @@ const CandidateProfile = () => {
           </Card>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-[30%_69%] gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-[35%_62%] gap-8">
             {/* Left Column */}
-            <div className="space-y-3">
+            <div className="space-y-8">
               {/* Skills & Expertise */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-2xl font-bold mb-6">
-                    Skills & Expertise
-                  </h3>
+                  <h3 className="text-xl font-bold mb-6">Skills & Expertise</h3>
                   <div className="space-y-4">
                     {skills.length > 0 ? (
                       skills.map((skill: any, idx: number) => {
@@ -433,55 +353,32 @@ const CandidateProfile = () => {
                 </CardContent>
               </Card>
 
-              {/* Internships */}
+              {/* Internship History */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-2xl font-bold mb-4">Internships</h3>
-                  {internships.length > 0 ? (
-                    <ul className="space-y-4">
-                      {internships.map((internship: any) => (
-                        <li key={internship.id} className="text-base">
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-lg">
-                              {internship.title}
-                            </span>
-                            <span className="text-sm text-muted-foreground">
-                              {internship.is_current
-                                ? "Ongoing"
-                                : `${new Date(
-                                    internship.start_date
-                                  ).toLocaleDateString()} - ${
-                                    internship.end_date
-                                      ? new Date(
-                                          internship.end_date
-                                        ).toLocaleDateString()
-                                      : "N/A"
-                                  }`}
-                            </span>
-                          </div>
-
-                          <p className="text-muted-foreground text-base mt-1">
-                            Company:{" "}
-                            <span className="font-medium text-foreground">
-                              {internship.company || "—"}
-                            </span>
-                          </p>
-
-                          {internship.description ? (
-                            <p className="text-muted-foreground text-[15px] leading-relaxed mt-1">
-                              {internship.description}
+                  <h3 className="text-xl font-bold mb-6">Internship History</h3>
+                  {data.internships.length > 0 ? (
+                    <div className="space-y-4">
+                      {data.internships.map((internship) => (
+                        <div
+                          key={internship.id}
+                          className="flex items-start justify-between pb-4 border-b last:border-0"
+                        >
+                          <div>
+                            <h4 className="font-semibold">{internship.role}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {internship.company}
                             </p>
-                          ) : (
-                            <span className="italic text-muted-foreground text-sm">
-                              No description available
-                            </span>
-                          )}
-                        </li>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            View
+                          </Button>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   ) : (
-                    <p className="text-base text-muted-foreground">
-                      No internships listed
+                    <p className="text-sm text-muted-foreground">
+                      No internship history
                     </p>
                   )}
                 </CardContent>
@@ -489,11 +386,11 @@ const CandidateProfile = () => {
             </div>
 
             {/* Right Column */}
-            <div className="space-y-3">
+            <div className="space-y-8">
               {/* Interests */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-2xl font-bold mb-4">Interests</h3>
+                  <h3 className="text-xl font-bold mb-4">Interests</h3>
                   <div className="flex flex-wrap gap-2">
                     {interests.length > 0 ? (
                       interests.map((interest: string, idx: number) => (
@@ -514,121 +411,22 @@ const CandidateProfile = () => {
                 </CardContent>
               </Card>
 
-              {/* Completed Courses */}
+              {/* Achievements */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-2xl font-bold mb-4">Completed Courses</h3>
-                  {courses.length > 0 ? (
-                    <ul className="space-y-4">
-                      {courses.map((course: any) => (
-                        <li key={course.id} className="text-base">
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-lg">
-                              {course.title}
-                            </span>
-                            <span className="text-sm text-muted-foreground">
-                              {course.completion_date
-                                ? new Date(
-                                    course.completion_date
-                                  ).toLocaleDateString()
-                                : ""}
-                            </span>
-                          </div>
-                          <p className="text-muted-foreground text-base mt-1">
-                            Provider:{" "}
-                            <span className="font-medium">
-                              {course.provider}
-                            </span>
-                          </p>
-                          {course.certificate_url ? (
-                            <a
-                              href={course.certificate_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline text-base"
-                            >
-                              View Certificate
-                            </a>
-                          ) : (
-                            <span className="italic text-muted-foreground text-sm">
-                              No certificate available
-                            </span>
-                          )}
-                        </li>
+                  <h3 className="text-xl font-bold mb-4">Achievements</h3>
+                  {achievements.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {achievements.map((achievement: string, idx: number) => (
+                        <div key={idx} className="flex items-start gap-2">
+                          <Star className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm">{achievement}</span>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   ) : (
-                    <p className="text-base text-muted-foreground">
-                      No completed courses listed
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Projects */}
-              <Card className="rounded-3xl">
-                <CardContent className="p-6">
-                  <h3 className="text-2xl font-bold mb-4">Projects</h3>
-                  {projects.length > 0 ? (
-                    <ul className="space-y-4">
-                      {projects.map((project: any) => (
-                        <li key={project.id} className="text-base">
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-lg">
-                              {project.title}
-                            </span>
-                            <span className="text-sm text-muted-foreground">
-                              {project.is_current
-                                ? "Ongoing"
-                                : `${new Date(
-                                    project.start_date
-                                  ).toLocaleDateString()} - ${new Date(
-                                    project.end_date
-                                  ).toLocaleDateString()}`}
-                            </span>
-                          </div>
-
-                          {project.description && (
-                            <p className="text-muted-foreground text-[15px] leading-relaxed mt-1">
-                              {project.description}
-                            </p>
-                          )}
-
-                          {project.technologies?.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {project.technologies.map(
-                                (tech: string, idx: number) => (
-                                  <span
-                                    key={idx}
-                                    className="text-xs bg-muted px-2 py-1 rounded-full"
-                                  >
-                                    {tech}
-                                  </span>
-                                )
-                              )}
-                            </div>
-                          )}
-
-                          {project.project_url ? (
-                            <a
-                              href={project.project_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline text-base mt-1 block"
-                            >
-                              View Project
-                            </a>
-                          ) : (
-                            <span className="italic text-muted-foreground text-sm mt-1 block">
-                              No project link available
-                            </span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-base text-muted-foreground">
-                      No projects listed
+                    <p className="text-sm text-muted-foreground">
+                      No achievements listed
                     </p>
                   )}
                 </CardContent>
@@ -637,52 +435,50 @@ const CandidateProfile = () => {
               {/* Education */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-2xl font-bold mb-6">Education</h3>
+                  <h3 className="text-xl font-bold mb-6">Education</h3>
                   {education.length > 0 ? (
-                    <div className="space-y-5">
+                    <div className="space-y-4">
                       {education.map((edu: any, idx: number) => (
                         <div
                           key={idx}
                           className="flex items-start justify-between pb-4 border-b last:border-0"
                         >
                           <div>
-                            <h4 className="font-semibold text-lg">
+                            <h4 className="font-semibold">
                               {edu.degree || edu.name || "Education"}
                             </h4>
-                            <p className="text-base text-muted-foreground">
+                            <p className="text-sm text-muted-foreground">
                               {edu.institution ||
                                 edu.school ||
                                 edu.college ||
                                 "Educational Institution"}
                             </p>
                             {edu.field_of_study && (
-                              <p className="text-base text-muted-foreground mt-1">
+                              <p className="text-sm text-muted-foreground mt-1">
                                 {edu.field_of_study}
                               </p>
                             )}
                             {edu.description && (
-                              <p className="text-base mt-2 leading-relaxed">
-                                {edu.description}
-                              </p>
+                              <p className="text-sm mt-2">{edu.description}</p>
                             )}
                           </div>
                           <div className="text-right">
-                            <p className="text-base font-medium">
+                            <p className="text-sm font-medium">
                               {edu.start_year || edu.start_date} -{" "}
                               {edu.end_year || edu.end_date || "Present"}
                             </p>
                             {edu.score && (
-                              <p className="text-base text-primary font-semibold">
+                              <p className="text-sm text-primary font-semibold">
                                 {edu.score}
                               </p>
                             )}
                             {edu.grade && (
-                              <p className="text-base text-primary font-semibold">
+                              <p className="text-sm text-primary font-semibold">
                                 {edu.grade}
                               </p>
                             )}
                             {edu.gpa && (
-                              <p className="text-base text-primary font-semibold">
+                              <p className="text-sm text-primary font-semibold">
                                 GPA: {edu.gpa}
                               </p>
                             )}
@@ -691,7 +487,7 @@ const CandidateProfile = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-base text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       No education records
                     </p>
                   )}
@@ -701,87 +497,84 @@ const CandidateProfile = () => {
               {/* Links */}
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
-                  <h3 className="text-2xl font-bold mb-4">Links</h3>
-
-                  <div className="flex flex-wrap gap-3 items-center">
-                    {(() => {
-                      const getSocialIcon = (link: any) => {
-                        const url = (link.url || "").toLowerCase();
-                        const platform = (link.platform || "").toLowerCase();
-
-                        if (
-                          platform.includes("linkedin") ||
-                          url.includes("linkedin.com")
-                        )
-                          return Linkedin;
-                        if (
-                          platform.includes("instagram") ||
-                          url.includes("instagram.com")
-                        )
-                          return Instagram;
-                        if (
-                          platform.includes("facebook") ||
-                          url.includes("facebook.com")
-                        )
-                          return Facebook;
-                        if (
-                          platform.includes("twitter") ||
-                          platform.includes("x") ||
-                          url.includes("twitter.com") ||
-                          url.includes("x.com")
-                        )
-                          return Twitter;
-                        if (
-                          platform.includes("youtube") ||
-                          url.includes("youtube.com")
-                        )
-                          return Youtube;
-                        if (
-                          platform.includes("behance") ||
-                          url.includes("behance.net")
-                        )
-                          return Palette;
-                        if (
-                          platform.includes("dribbble") ||
-                          url.includes("dribbble.com")
-                        )
-                          return Dribbble;
-                        return Globe;
-                      };
-
-                      if (!links || links.length === 0) {
-                        return (
-                          <p className="text-sm text-muted-foreground">
-                            No links provided
-                          </p>
-                        );
-                      }
-
-                      return (
-                        <div className="flex flex-wrap gap-3">
-                          {links.map((link: any, idx: number) => {
-                            const Icon = getSocialIcon(link);
-                            return (
-                              <Button
-                                key={idx}
-                                variant="outline"
-                                size="icon"
-                                className="rounded-full"
-                                asChild
-                              >
-                                <a
-                                  href={link.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <Icon className="w-4 h-4" />
-                                </a>
-                              </Button>
-                            );
-                          })}
-                        </div>
-                      );
-                    })()}
+                  <h3 className="text-xl font-bold mb-4">Links</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {data.studentProfile.linkedin_url && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        asChild
+                      >
+                        <a
+                          href={data.studentProfile.linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          LinkedIn
+                        </a>
+                      </Button>
+                    )}
+                    {data.studentProfile.behance_url && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        asChild
+                      >
+                        <a
+                          href={data.studentProfile.behance_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Behance
+                        </a>
+                      </Button>
+                    )}
+                    {data.studentProfile.dribbble_url && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        asChild
+                      >
+                        <a
+                          href={data.studentProfile.dribbble_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Dribbble
+                        </a>
+                      </Button>
+                    )}
+                    {data.studentProfile.website_url && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        asChild
+                      >
+                        <a
+                          href={data.studentProfile.website_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Website
+                        </a>
+                      </Button>
+                    )}
+                    {!data.studentProfile.linkedin_url &&
+                      !data.studentProfile.behance_url &&
+                      !data.studentProfile.dribbble_url &&
+                      !data.studentProfile.website_url && (
+                        <p className="text-sm text-muted-foreground">
+                          No links provided
+                        </p>
+                      )}
                   </div>
                 </CardContent>
               </Card>
@@ -789,45 +582,6 @@ const CandidateProfile = () => {
           </div>
         </div>
       </div>
-
-      {/* Status Confirmation Dialog */}
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent className="rounded-3xl">
-          <AlertDialogHeader>
-            <div className="flex items-center gap-3 mb-2">
-              {dialogContent?.icon}
-              <AlertDialogTitle className="text-xl">
-                {dialogContent?.title}
-              </AlertDialogTitle>
-            </div>
-            <AlertDialogDescription className="text-base">
-              {dialogContent?.description}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={handleCancelStatusChange}
-              className="rounded-full"
-            >
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmStatusChange}
-              className={`rounded-full ${
-                pendingStatus === "shortlisted"
-                  ? "bg-green-500 hover:bg-green-600"
-                  : pendingStatus === "applied"
-                  ? "bg-red-500 hover:bg-red-600"
-                  : pendingStatus === "hired"
-                  ? "bg-blue-500 hover:bg-blue-600"
-                  : ""
-              }`}
-            >
-              {isUpdatingStatus ? "Updating..." : "Confirm"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {/* Schedule Interview Dialog */}
       <ScheduleInterviewDialog

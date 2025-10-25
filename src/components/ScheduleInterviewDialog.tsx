@@ -146,7 +146,7 @@ export default function ScheduleInterviewDialog({
 
       toast({
         title: "Interview Scheduled",
-        description: `Zoom Meet link has been sent to ${candidateName}`,
+        description: `Google Meet link has been sent to ${candidateName}`,
       });
 
       onOpenChange(false);
@@ -317,16 +317,17 @@ export default function ScheduleInterviewDialog({
                 onClick={() =>
                   setFormData({ ...formData, meetingType: "google" })
                 }
-                className={`w-full flex items-center gap-3 p-3 rounded-lg ${
+                className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors ${
                   formData.meetingType === "google"
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 hover:bg-gray-50"
                 }`}
               >
-                <div className="w-6 h-6 bg-[#2196F3] rounded flex items-center justify-center">
-                  {/* <Video className="w-4 h-4 text-white" /> */}
-                  <Video className="w-4 h-4 text-white fill-current" />
+                <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-green-500 rounded flex items-center justify-center">
+                  <Video className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-sm text-gray-500 font-medium">
-                  Add Zoom Meet video conferencing
+                <span className="text-sm text-gray-700">
+                  Add Google Meet video conferencing
                 </span>
               </button>
             </div>
@@ -337,7 +338,7 @@ export default function ScheduleInterviewDialog({
             <Button
               onClick={handleSubmit}
               disabled={isLoading}
-              className="bg-[#2196F3] rounded-full text-white px-8 h-11"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 h-11"
             >
               {isLoading ? "Scheduling..." : "Save"}
             </Button>

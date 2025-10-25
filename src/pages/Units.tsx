@@ -159,55 +159,54 @@ const Units = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container lg:px-[7.5rem] lg:py-10">
-        <div className="flex gap-5">
-          {/* Sidebar Filters */}
-          <div className="w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col h-[90vh] sticky top-6">
-            <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
-              <h2 className="text-lg font-bold">Filters</h2>
-              <Button variant="ghost" className="text-primary text-sm font-medium" onClick={resetFilters}>
-                Reset all
-              </Button>
-            </div>
+      <div className="flex gap-6 p-6">
+        {/* Sidebar Filters */}
+        <div className="w-80 bg-card pt-5 border rounded-3xl flex flex-col h-[90vh] sticky top-6">
+          <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
+            <h2 className="text-lg font-bold">Filters</h2>
+            <Button variant="ghost" className="text-primary text-sm font-medium" onClick={resetFilters}>
+              Reset all
+            </Button>
+          </div>
 
-            <div className="px-6 pb-6 overflow-y-auto flex-1 space-y-6">
-              <FilterSection
-                label="Units"
-                searchValue={searchUnits}
-                onSearch={setSearchUnits}
-                list={uniqueUnits}
-                selected={filters.units}
-                onToggle={(v) => toggleFilter("units", v)}
-                showAll={showAllUnits}
-                setShowAll={setShowAllUnits}
-              />
-              <FilterSection
-                label="Industry"
-                searchValue={searchIndustries}
-                onSearch={setSearchIndustries}
-                list={uniqueIndustries}
-                selected={filters.industries}
-                onToggle={(v) => toggleFilter("industries", v)}
-                showAll={showAllIndustries}
-                setShowAll={setShowAllIndustries}
-              />
-              <FilterSection
-                label="Department"
-                searchValue={searchDepartments}
-                onSearch={setSearchDepartments}
-                list={uniqueDepartments}
-                selected={filters.departments}
-                onToggle={(v) => toggleFilter("departments", v)}
-                showAll={showAllDepartments}
-                setShowAll={setShowAllDepartments}
-              />
-              <PostingDateFilter
-                filters={filters}
-                activeDateRange={activeDateRange}
-                onSelectDate={(range) => DateRange(range)}
-                onDateChange={setFilters}
-              />
-              {/* <div>
+          <div className="px-6 pb-6 overflow-y-auto flex-1 space-y-6">
+            <FilterSection
+              label="Units"
+              searchValue={searchUnits}
+              onSearch={setSearchUnits}
+              list={uniqueUnits}
+              selected={filters.units}
+              onToggle={(v) => toggleFilter("units", v)}
+              showAll={showAllUnits}
+              setShowAll={setShowAllUnits}
+            />
+            <FilterSection
+              label="Industry"
+              searchValue={searchIndustries}
+              onSearch={setSearchIndustries}
+              list={uniqueIndustries}
+              selected={filters.industries}
+              onToggle={(v) => toggleFilter("industries", v)}
+              showAll={showAllIndustries}
+              setShowAll={setShowAllIndustries}
+            />
+            <FilterSection
+              label="Department"
+              searchValue={searchDepartments}
+              onSearch={setSearchDepartments}
+              list={uniqueDepartments}
+              selected={filters.departments}
+              onToggle={(v) => toggleFilter("departments", v)}
+              showAll={showAllDepartments}
+              setShowAll={setShowAllDepartments}
+            />
+            <PostingDateFilter
+              filters={filters}
+              activeDateRange={activeDateRange}
+              onSelectDate={(range) => DateRange(range)}
+              onDateChange={setFilters}
+            />
+            {/* <div>
               <Label className="text-sm font-semibold text-muted-foreground mb-3 block">
                 Interest Areas
               </Label>
@@ -229,111 +228,105 @@ const Units = () => {
                 ))}
               </div>
             </div> */}
-            </div>
+          </div>
+        </div>
+
+        {/* Main content remains unchanged */}
+        <div className="flex-1">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold">Explore {filteredUnits.length} Units</h1>
           </div>
 
-          {/* Main content remains unchanged */}
-          <div className="flex-1">
-            <div className="mb-6">
-              <h1 className="text-2xl text-gray-600 font-medium ">Explore {filteredUnits.length} Units</h1>
+          {error ? (
+            <p className="text-destructive">{error}</p>
+          ) : loading ? (
+            <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="overflow-hidden rounded-3xl">
+                  <Skeleton className="h-48 w-full" />
+                  <CardContent className="p-4">
+                    <Skeleton className="h-6 w-full mb-2" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </CardContent>
+                </Card>
+              ))}
             </div>
+          ) : filteredUnits.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No units found matching your filters.</p>
+              <Button variant="outline" onClick={resetFilters} className="mt-4">
+                Clear Filters
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+              {filteredUnits.map((unit, index) => {
+                const gradient = getUnitGradient(index);
 
-            {error ? (
-              <p className="text-destructive">{error}</p>
-            ) : loading ? (
-              <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="overflow-hidden rounded-3xl">
-                    <Skeleton className="h-48 w-full" />
+                return (
+                  <Card key={unit.id} className="overflow-hidden rounded-3xl hover:shadow-lg transition-all">
+                    {/* Card Header with Gradient */}
+                    <div
+                      className={`${gradient} rounded-3xl h-48 m-1 relative flex flex-col items-center justify-center text-white`}
+                    >
+                      {unit.avatar_url ? (
+                        <img
+                          src={unit.banner_url}
+                          alt={unit.unit_name}
+                          className="w-full h-full object-cover rounded-3xl"
+                        />
+                      ) : (
+                        <div className="text-white text-center">
+                          <h3 className="text-2xl font-bold">{unit.unit_name.toUpperCase()}</h3>
+                        </div>
+                      )}
+                      <Badge className="absolute top-3 left-3 bg-white/60 text-foreground">
+                        {formatDistanceToNow(new Date(unit.created_at), {
+                          addSuffix: true,
+                        })}
+                      </Badge>
+
+                      {unit.is_aurovillian && (
+                        <Badge className="absolute top-3 right-3 bg-green-500 text-white">Auroville</Badge>
+                      )}
+                    </div>
+
+                    {/* Card Content with Logo */}
                     <CardContent className="p-4">
-                      <Skeleton className="h-6 w-full mb-2" />
-                      <Skeleton className="h-4 w-3/4" />
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-full overflow-hidden border flex items-center justify-center bg-black">
+                            {unit.avatar_url ? (
+                              <img
+                                src={unit.avatar_url}
+                                alt={`${unit.unit_name} logo`}
+                                className="object-contain w-10 h-10"
+                              />
+                            ) : (
+                              <span className="text-xs text-white font-bold">{unit.unit_name[0].toUpperCase()}</span>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold line-clamp-1">{unit.unit_name}</p>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          className="bg-gradient-to-br from-[#C94100] to-[#FFB592] hover:bg-orange-600 text-white rounded-3xl px-3"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/units/${unit.id}`);
+                          }}
+                        >
+                          View
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
-                ))}
-              </div>
-            ) : filteredUnits.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No units found matching your filters.</p>
-                <Button variant="outline" onClick={resetFilters} className="mt-4">
-                  Clear Filters
-                </Button>
-              </div>
-            ) : (
-              <div className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-3">
-                {filteredUnits.map((unit, index) => {
-                  const gradient = getUnitGradient(index);
-
-                  return (
-                    <Card
-                      key={unit.id}
-                      className="overflow-hidden border-gray-200 rounded-3xl hover:shadow-lg transition-all"
-                    >
-                      {/* Card Header with Gradient */}
-                      <div
-                        className={`${gradient} rounded-3xl h-48 m-1 relative flex flex-col items-center justify-center text-white`}
-                      >
-                        {unit.avatar_url ? (
-                          <img
-                            src={unit.banner_url}
-                            alt={unit.unit_name}
-                            className="w-full h-full object-cover rounded-3xl"
-                          />
-                        ) : (
-                          <div className="text-white text-center">
-                            <h3 className="text-2xl font-bold">{unit.unit_name.toUpperCase()}</h3>
-                          </div>
-                        )}
-                        <Badge className="absolute top-3 left-3 bg-white/60 text-foreground hover:bg-white/60">
-                          {formatDistanceToNow(new Date(unit.created_at), {
-                            addSuffix: true,
-                          })}
-                        </Badge>
-
-                        {/* {unit.is_aurovillian && (
-                        <Badge className="absolute top-3 right-3 bg-gray-50 text-gray-600">
-                          Auroville
-                        </Badge>
-                      )} */}
-                      </div>
-
-                      {/* Card Content with Logo */}
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 rounded-full overflow-hidden border flex items-center justify-center bg-black">
-                              {unit.avatar_url ? (
-                                <img
-                                  src={unit.avatar_url}
-                                  alt={`${unit.unit_name} logo`}
-                                  className="object-contain w-10 h-10"
-                                />
-                              ) : (
-                                <span className="text-xs text-white font-bold">{unit.unit_name[0].toUpperCase()}</span>
-                              )}
-                            </div>
-                            <div>
-                              <p className="text-sm font-semibold line-clamp-1">{unit.unit_name}</p>
-                            </div>
-                          </div>
-                          <Button
-                            size="sm"
-                            className="bg-gradient-to-br from-[#C94100] to-[#FFB592] hover:bg-orange-600 text-white rounded-3xl px-3"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/units/${unit.id}`);
-                            }}
-                          >
-                            View
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -366,16 +359,16 @@ const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle,
 
   return (
     <div className="relative">
-      <Label className="text-sm font-medium text-gray-500 mb-3 block">{label}</Label>
+      <Label className="text-sm font-semibold text-muted-foreground mb-3 block">{label}</Label>
 
       {/* ✅ Single Search Input */}
       <div className="relative mb-3">
-        <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder={`Search ${label}...`}
           value={searchValue}
           onChange={handleSearchChange}
-          className="pl-8 border-gray-400 rounded-3xl"
+          className="pl-8 rounded-3xl"
           onFocus={() => searchValue.trim().length > 0 && setShowDropdown(true)}
         />
       </div>
