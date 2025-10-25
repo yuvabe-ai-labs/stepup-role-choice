@@ -24,7 +24,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo-2.png";
+// import logo from "@/assets/logo-2.png";
+import logo from "@/assets/YuvaNext.svg";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -144,7 +145,7 @@ const Navbar = () => {
               <img
                 src={logo}
                 alt="Company Logo"
-                className="h-4 sm:h-5 w-auto cursor-pointer"
+                className="h-12 sm:h-13 w-auto cursor-pointer"
               />
             </a>
           </div>
