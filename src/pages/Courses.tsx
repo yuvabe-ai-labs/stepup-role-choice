@@ -463,3 +463,5 @@ const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChang
     </div>
   </div>
 );
+
+export default Courses;
