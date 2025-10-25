@@ -104,7 +104,6 @@ const UnitDashboard = () => {
   });
 
   const handleInternshipCreated = () => {
-    // Refresh the page to reload internships
     window.location.reload();
   };
 
@@ -133,7 +132,6 @@ const UnitDashboard = () => {
     try {
       setUpdating(deletingInternship.id);
 
-      // Delete the internship from database
       const { error: deleteError } = await supabase
         .from("internships")
         .delete()
@@ -143,7 +141,7 @@ const UnitDashboard = () => {
 
       setShowDeleteDialog(false);
       setDeletingInternship(null);
-      window.location.reload(); // Refresh the list after deletion
+      window.location.reload();
     } catch (err: any) {
       console.error("Error deleting job:", err);
       alert("Failed to delete job description");
@@ -164,7 +162,7 @@ const UnitDashboard = () => {
 
       if (updateError) throw updateError;
 
-      window.location.reload(); // Refresh the list after update
+      window.location.reload();
     } catch (err: any) {
       console.error("Error updating job status:", err);
       alert("Failed to update job status");
@@ -209,101 +207,107 @@ const UnitDashboard = () => {
     return "text-red-600";
   };
 
-  // Filter hired candidates for Candidates Management tab
   const hiredCandidates = applications.filter((app) => app.status === "hired");
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card className="rounded-2xl">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                     Total Applications
                   </p>
                   {loading ? (
-                    <Skeleton className="h-10 w-16 my-1" />
+                    <Skeleton className="h-8 sm:h-10 w-12 sm:w-16 my-1" />
                   ) : (
                     <>
-                      <p className="text-3xl font-bold">{stats.total}</p>
+                      <p className="text-2xl sm:text-3xl font-bold">
+                        {stats.total}
+                      </p>
                       <p className="text-xs text-muted-foreground">All time</p>
                     </>
                   )}
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-6 h-6 text-blue-600" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="rounded-2xl">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                     Total Job Descriptions
                   </p>
                   {loading ? (
-                    <Skeleton className="h-10 w-16 my-1" />
+                    <Skeleton className="h-8 sm:h-10 w-12 sm:w-16 my-1" />
                   ) : (
                     <>
-                      <p className="text-3xl font-bold">{stats.totalJobs}</p>
+                      <p className="text-2xl sm:text-3xl font-bold">
+                        {stats.totalJobs}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         Active & Closed
                       </p>
                     </>
                   )}
                 </div>
-                <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-teal-600" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="rounded-2xl">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                     Interview Scheduled
                   </p>
                   {loading ? (
-                    <Skeleton className="h-10 w-16 my-1" />
+                    <Skeleton className="h-8 sm:h-10 w-12 sm:w-16 my-1" />
                   ) : (
                     <>
-                      <p className="text-3xl font-bold">{stats.interviews}</p>
+                      <p className="text-2xl sm:text-3xl font-bold">
+                        {stats.interviews}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         Candidates
                       </p>
                     </>
                   )}
                 </div>
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-orange-600" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="rounded-2xl">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                     Hired This Month
                   </p>
                   {loading ? (
-                    <Skeleton className="h-10 w-16 my-1" />
+                    <Skeleton className="h-8 sm:h-10 w-12 sm:w-16 my-1" />
                   ) : (
                     <>
-                      <p className="text-3xl font-bold">
+                      <p className="text-2xl sm:text-3xl font-bold">
                         {stats.hiredThisMonth}
                       </p>
                       <p className="text-xs text-muted-foreground">
@@ -314,8 +318,8 @@ const UnitDashboard = () => {
                     </>
                   )}
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Briefcase className="w-6 h-6 text-green-600" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                 </div>
               </div>
             </CardContent>
@@ -326,47 +330,52 @@ const UnitDashboard = () => {
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="space-y-6"
+          className="space-y-4 sm:space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-4 bg-gray-100/70 backdrop-blur-sm  rounded-3xl shadow-inner border border-gray-200 h-16 shadow-[inset_0_4px_10px_rgba(0,0,0,0.2)]">
-            <TabsTrigger
-              value="applications"
-              className="rounded-3xl px-5 py-4 text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm transition-all duration-200"
-            >
-              Applications
-            </TabsTrigger>
-            <TabsTrigger
-              value="job-descriptions"
-              className="rounded-3xl px-5 py-4 text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm transition-all duration-200"
-            >
-              Job Descriptions
-            </TabsTrigger>
-            <TabsTrigger
-              value="candidates"
-              className="rounded-3xl px-5 py-4 text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm transition-all duration-200"
-            >
-              Candidates Management
-            </TabsTrigger>
-            <TabsTrigger
-              value="reports"
-              className="rounded-3xl px-5 py-4 text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm transition-all duration-200"
-            >
-              Reports
-            </TabsTrigger>
-          </TabsList>
+          {/* Mobile: Scrollable tabs */}
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="grid w-full min-w-max sm:min-w-0 grid-cols-4 bg-gray-100/70 backdrop-blur-sm rounded-3xl shadow-inner border border-gray-200 h-12 sm:h-16 shadow-[inset_0_4px_10px_rgba(0,0,0,0.2)]">
+              <TabsTrigger
+                value="applications"
+                className="rounded-3xl px-3 sm:px-5 py-2 sm:py-4 text-xs sm:text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm transition-all duration-200 whitespace-nowrap"
+              >
+                Applications
+              </TabsTrigger>
+              <TabsTrigger
+                value="job-descriptions"
+                className="rounded-3xl px-3 sm:px-5 py-2 sm:py-4 text-xs sm:text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm transition-all duration-200 whitespace-nowrap"
+              >
+                Job Descriptions
+              </TabsTrigger>
+              <TabsTrigger
+                value="candidates"
+                className="rounded-3xl px-3 sm:px-5 py-2 sm:py-4 text-xs sm:text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm transition-all duration-200 whitespace-nowrap"
+              >
+                Candidates
+              </TabsTrigger>
+              <TabsTrigger
+                value="reports"
+                className="rounded-3xl px-3 sm:px-5 py-2 sm:py-4 text-xs sm:text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm transition-all duration-200 whitespace-nowrap"
+              >
+                Reports
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Applications Tab */}
           <TabsContent
             value="applications"
-            className="container mx-auto px-10 py-2"
+            className="px-0 sm:px-4 lg:px-10 py-2"
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold">All Applications</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h2 className="text-xl sm:text-2xl font-semibold">
+                All Applications
+              </h2>
               <Select
                 value={filterStatus}
                 onValueChange={(value) => setFilterStatus(value)}
               >
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Select Filter" />
                 </SelectTrigger>
                 <SelectContent>
@@ -379,11 +388,11 @@ const UnitDashboard = () => {
             </div>
 
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {[...Array(6)].map((_, i) => (
                   <Card key={i} className="border border-border/50">
-                    <CardContent className="p-6">
-                      <Skeleton className="w-20 h-20 rounded-full mx-auto mb-4" />
+                    <CardContent className="p-4 sm:p-6">
+                      <Skeleton className="w-16 h-16 sm:w-20 sm:h-20 rounded-full mx-auto mb-4" />
                       <Skeleton className="h-5 w-32 mx-auto mb-2" />
                       <Skeleton className="h-4 w-24 mx-auto mb-3" />
                       <Skeleton className="h-3 w-full mb-4" />
@@ -403,7 +412,7 @@ const UnitDashboard = () => {
                         filterStatus.slice(1)
                       } Applications`}
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {filterStatus === "all"
                     ? "Applications for your internships will appear here."
                     : `No ${filterStatus} applications found.`}
@@ -411,7 +420,7 @@ const UnitDashboard = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {filteredApplications.slice(0, 9).map((application) => {
                     const skills = safeParse(
                       application.studentProfile?.skills,
@@ -422,18 +431,16 @@ const UnitDashboard = () => {
                       .map((s: any) =>
                         typeof s === "string" ? s : s.name || s
                       );
-                    const matchScore = application.profile_match_score;
+
                     return (
                       <Card
                         key={application.id}
-                        className="border border-border/50 hover:shadow-lg transition-shadow w-full max-w-s min-h-[300] rounded-3xl"
+                        className="border border-border/50 hover:shadow-lg transition-shadow rounded-3xl"
                       >
-                        <CardContent className="p-8 space-y-5">
-                          {/* Header Section */}
-                          <div className="flex items-center gap-5">
-                            {/* Avatar with green ring */}
+                        <CardContent className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-5">
+                          <div className="flex items-center gap-3 sm:gap-5">
                             <div className="relative flex-shrink-0">
-                              <Avatar className="w-20 h-20 ring-4 ring-green-500">
+                              <Avatar className="w-16 h-16 sm:w-20 sm:h-20 ring-4 ring-green-500">
                                 <AvatarImage
                                   src={
                                     application.studentProfile?.avatar_url ||
@@ -441,7 +448,7 @@ const UnitDashboard = () => {
                                   }
                                   alt={application.profile.full_name}
                                 />
-                                <AvatarFallback className="text-lg font-semibold">
+                                <AvatarFallback className="text-base sm:text-lg font-semibold">
                                   {application.profile.full_name
                                     .split(" ")
                                     .map((n) => n[0])
@@ -450,26 +457,24 @@ const UnitDashboard = () => {
                               </Avatar>
                             </div>
 
-                            {/* Name and Title */}
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-lg mb-1 text-gray-900">
+                              <h3 className="font-semibold text-base sm:text-lg mb-1 text-gray-900 truncate">
                                 {application.profile.full_name}
                               </h3>
-                              <p className="text-sm text-muted-foreground mb-2">
+                              <p className="text-xs sm:text-sm text-muted-foreground mb-2 truncate">
                                 {application.internship.title}
                               </p>
                               <Badge
                                 className={`${getStatusColor(
                                   application.status
-                                )} text-sm px-3 py-1`}
+                                )} text-xs sm:text-sm px-2 sm:px-3 py-1`}
                               >
                                 {getStatusLabel(application.status)}
                               </Badge>
                             </div>
                           </div>
 
-                          {/* Bio */}
-                          <p className="text-base text-gray-700 leading-relaxed">
+                          <p className="text-sm sm:text-base text-gray-700 leading-relaxed line-clamp-3">
                             {typeof application.studentProfile?.bio === "string"
                               ? application.studentProfile.bio
                               : Array.isArray(application.studentProfile?.bio)
@@ -477,14 +482,13 @@ const UnitDashboard = () => {
                               : "Passionate about creating user-centered digital experiences."}
                           </p>
 
-                          {/* Skills */}
-                          <div className="flex flex-wrap gap-3">
+                          <div className="flex flex-wrap gap-2 sm:gap-3">
                             {displaySkills.map(
                               (skill: string, index: number) => (
                                 <Badge
                                   key={index}
                                   variant="outline"
-                                  className="text-[11px] text-gray-600 bg-muted/40 rounded-full px-3 py-1.5"
+                                  className="text-[10px] sm:text-[11px] text-gray-600 bg-muted/40 rounded-full px-2 sm:px-3 py-1 sm:py-1.5"
                                 >
                                   {skill}
                                 </Badge>
@@ -493,23 +497,19 @@ const UnitDashboard = () => {
                             {skills.length > 3 && (
                               <Badge
                                 variant="outline"
-                                className="text-[11px] text-gray-600 bg-muted/40 rounded-full px-3 py-1.5"
+                                className="text-[10px] sm:text-[11px] text-gray-600 bg-muted/40 rounded-full px-2 sm:px-3 py-1 sm:py-1.5"
                               >
                                 +{skills.length - 3}
                               </Badge>
                             )}
                           </div>
 
-                          {/* Divider */}
                           <div className="border-t border-border/40"></div>
 
-                          {/* AI Analysis Section */}
-
-                          {/* View Profile Button */}
                           <Button
                             variant="outline"
                             size="lg"
-                            className="w-full border-2 border-teal-500 text-teal-600 hover:bg-teal-50 text-sm py-3 rounded-full mt-4"
+                            className="w-full border-2 border-teal-500 text-teal-600 hover:bg-teal-50 text-sm py-3 rounded-full"
                             onClick={() =>
                               navigate(`/candidate/${application.id}`)
                             }
@@ -522,12 +522,11 @@ const UnitDashboard = () => {
                   })}
                 </div>
 
-                {/* View All button - always show if there are applications */}
                 {filteredApplications.length > 0 && (
-                  <div className="flex justify-center mt-8">
+                  <div className="flex justify-center mt-6 sm:mt-8">
                     <Button
                       variant="outline"
-                      className="px-8"
+                      className="px-6 sm:px-8"
                       onClick={() => navigate("/all-applications")}
                     >
                       View All
@@ -541,13 +540,15 @@ const UnitDashboard = () => {
           {/* Job Descriptions Tab */}
           <TabsContent
             value="job-descriptions"
-            className="container mx-auto px-10 py-2"
+            className="px-0 sm:px-4 lg:px-10 py-2"
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold">Job Descriptions</h2>
-              <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h2 className="text-xl sm:text-2xl font-semibold">
+                Job Descriptions
+              </h2>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <Select value={jobFilter} onValueChange={setJobFilter}>
-                  <SelectTrigger className="w-[180px] rounded-full text-gray-400">
+                  <SelectTrigger className="w-full sm:w-[180px] rounded-full text-gray-400">
                     <SelectValue placeholder="Select Filter" />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl">
@@ -557,20 +558,20 @@ const UnitDashboard = () => {
                   </SelectContent>
                 </Select>
                 <Button
-                  className="bg-teal-600 hover:bg-teal-700 rounded-full"
+                  className="bg-teal-600 hover:bg-teal-700 rounded-full w-full sm:w-auto"
                   onClick={() => setShowCreateDialog(true)}
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-4 h-4 mr-2" />
                   Create New JD
                 </Button>
               </div>
             </div>
 
             {internshipsLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {[...Array(6)].map((_, i) => (
                   <Card key={i}>
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                       <Skeleton className="h-6 w-32 mb-4" />
                       <Skeleton className="h-4 w-24 mb-2" />
                       <Skeleton className="h-4 w-full mb-2" />
@@ -585,13 +586,13 @@ const UnitDashboard = () => {
                 <h3 className="text-lg font-medium mb-2">
                   No Job Descriptions
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-sm px-4">
                   Create your first job posting to start receiving applications.
                 </p>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {internships
                     .filter((internship) => {
                       if (jobFilter === "all") return true;
@@ -610,13 +611,12 @@ const UnitDashboard = () => {
                       return (
                         <Card
                           key={internship.id}
-                          className="relative rounded-3xl border border-black-50 max-w-lg"
+                          className="relative rounded-3xl border border-black-50"
                         >
-                          <CardContent className="p-6">
-                            <div className="flex items-center justify-between mb-6">
-                              {/* Title + Badge together */}
-                              <div className="flex items-center gap-3">
-                                <h3 className="font-semibold text-lg leading-tight">
+                          <CardContent className="p-4 sm:p-6">
+                            <div className="flex items-start justify-between mb-4 sm:mb-6 gap-2">
+                              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                                <h3 className="font-semibold text-base sm:text-lg leading-tight truncate">
                                   {internship.title}
                                 </h3>
                                 <Badge
@@ -624,7 +624,7 @@ const UnitDashboard = () => {
                                     internship.status === "active"
                                       ? "bg-green-500 text-white hover:bg-green-500"
                                       : "bg-red-500 text-white hover:bg-red-500"
-                                  } text-xs px-3 py-1`}
+                                  } text-xs px-2 sm:px-3 py-1 whitespace-nowrap flex-shrink-0`}
                                 >
                                   {internship.status === "active"
                                     ? "Active"
@@ -632,13 +632,12 @@ const UnitDashboard = () => {
                                 </Badge>
                               </div>
 
-                              {/* Dropdown Menu */}
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="h-8 w-8 p-0"
+                                    className="h-8 w-8 p-0 flex-shrink-0"
                                   >
                                     <EllipsisIcon className="w-4 h-4" />
                                   </Button>
@@ -696,8 +695,8 @@ const UnitDashboard = () => {
                               </DropdownMenu>
                             </div>
 
-                            <div className="space-y-3 mb-6">
-                              <div className="flex justify-between text-sm">
+                            <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+                              <div className="flex justify-between text-xs sm:text-sm">
                                 <span className="text-muted-foreground">
                                   Applications:
                                 </span>
@@ -705,7 +704,7 @@ const UnitDashboard = () => {
                                   {applicationCount} Applied
                                 </span>
                               </div>
-                              <div className="flex justify-between text-sm">
+                              <div className="flex justify-between text-xs sm:text-sm">
                                 <span className="text-muted-foreground">
                                   Duration:
                                 </span>
@@ -713,7 +712,7 @@ const UnitDashboard = () => {
                                   {internship.duration || "Not specified"}
                                 </span>
                               </div>
-                              <div className="flex justify-between text-sm">
+                              <div className="flex justify-between text-xs sm:text-sm">
                                 <span className="text-muted-foreground">
                                   Created on:
                                 </span>
@@ -731,7 +730,7 @@ const UnitDashboard = () => {
 
                             <Button
                               variant="outline"
-                              className="w-full rounded-full"
+                              className="w-full rounded-full text-sm"
                               onClick={() =>
                                 navigate(
                                   `/internship-applicants/${internship.id}`
@@ -748,7 +747,7 @@ const UnitDashboard = () => {
                 </div>
 
                 {internships.length > 6 && (
-                  <div className="flex justify-center mt-8">
+                  <div className="flex justify-center mt-6 sm:mt-8">
                     <Button variant="link" className="text-primary font-medium">
                       View More
                     </Button>
@@ -759,167 +758,42 @@ const UnitDashboard = () => {
           </TabsContent>
 
           {/* Candidates Management Tab */}
-          {/* <TabsContent value="candidates" className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold">Candidate Management</h2>
-              <div className="relative">
+          <TabsContent
+            value="candidates"
+            className="space-y-6 px-0 sm:px-4 lg:px-10"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h2 className="text-xl sm:text-2xl font-semibold">
+                Candidate Management
+              </h2>
+              <div className="relative w-full sm:w-auto">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
                   type="text"
                   placeholder="Select by names"
-                  className="pl-10 w-[250px]"
-                />
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[...Array(4)].map((_, i) => (
-                  <Card key={i}>
-                    <CardContent className="p-6">
-                      <Skeleton className="h-20 w-full mb-4" />
-                      <Skeleton className="h-4 w-full mb-2" />
-                      <Skeleton className="h-10 w-full" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : hiredCandidates.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="text-lg font-medium mb-2">
-                  No Hired Candidates
-                </h3>
-                <p className="text-muted-foreground">
-                  Candidates you hire will appear here for management.
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {hiredCandidates.slice(0, 6).map((candidate) => {
-                    const progress = Math.floor(Math.random() * 60 + 20);
-
-                    return (
-                      <Card key={candidate.id}>
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="text-sm text-muted-foreground">
-                              {candidate.internship.title}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {candidate.internship.duration || "6 Months"} |
-                              Full time
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-4 mb-4">
-                            <Avatar className="w-16 h-16">
-                              <AvatarImage
-                                src=""
-                                alt={candidate.profile.full_name}
-                              />
-                              <AvatarFallback>
-                                {candidate.profile.full_name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <h3 className="font-semibold text-lg">
-                                {candidate.profile.full_name}
-                              </h3>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                                Available now
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2 mb-4">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="font-medium">
-                                Projects Progress
-                              </span>
-                              <span className="text-muted-foreground">
-                                Due on Oct 10
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-2xl font-bold">
-                                {progress}%
-                              </span>
-                              <Progress value={progress} className="flex-1" />
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="flex -space-x-2">
-                                <Avatar className="w-8 h-8 border-2 border-background">
-                                  <AvatarFallback className="text-xs">
-                                    D
-                                  </AvatarFallback>
-                                </Avatar>
-                                <Avatar className="w-8 h-8 border-2 border-background">
-                                  <AvatarFallback className="text-xs">
-                                    A
-                                  </AvatarFallback>
-                                </Avatar>
-                              </div>
-                              <span className="text-xs text-muted-foreground">
-                                Guided by{" "}
-                                <span className="font-medium">Darshini</span> &{" "}
-                                <span className="font-medium">Abinesh</span>
-                              </span>
-                            </div>
-                            <Button variant="outline" size="sm">
-                              More Details
-                              <ArrowRight className="w-4 h-4 ml-2" />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-
-                {hiredCandidates.length > 6 && (
-                  <div className="flex justify-center mt-8">
-                    <Button variant="link" className="text-primary font-medium">
-                      View all
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
-          </TabsContent> */}
-          <TabsContent value="candidates" className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold">Candidate Management</h2>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  type="text"
-                  placeholder="Select by names"
-                  className="pl-10 w-[250px]"
+                  className="pl-10 w-full sm:w-[250px]"
                   disabled
                 />
               </div>
             </div>
 
             <div className="flex justify-center items-center py-12">
-              <Card className="max-w-md w-full">
-                <CardContent className="p-8 text-center">
+              <Card className="max-w-md w-full mx-4">
+                <CardContent className="p-6 sm:p-8 text-center">
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Users className="w-8 h-8 text-primary" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Coming Soon</h3>
-                  <p className="text-muted-foreground mb-6">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-2">
+                    Coming Soon
+                  </h3>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-6">
                     Candidate management feature will be available soon.
                   </p>
-                  <Button disabled variant="outline">
+                  <Button
+                    disabled
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                  >
                     Feature Coming Soon
                   </Button>
                 </CardContent>
@@ -928,52 +802,34 @@ const UnitDashboard = () => {
           </TabsContent>
 
           {/* Reports Tab */}
-          <TabsContent value="reports" className="container mx-auto px-10 py-2">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold">Reports for this Month</h2>
-              {/* <Select defaultValue="current">
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Select Month" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="current">Current Month</SelectItem>
-        <SelectItem value="last">Last Month</SelectItem>
-        <SelectItem value="custom">Custom Range</SelectItem>
-      </SelectContent>
-    </Select> */}
+          <TabsContent value="reports" className="px-0 sm:px-4 lg:px-10 py-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h2 className="text-xl sm:text-2xl font-semibold">
+                Reports for this Month
+              </h2>
             </div>
 
             <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold">Weekly Applications</h3>
-                  <div className="flex items-center gap-6">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                  <h3 className="text-base sm:text-lg font-semibold">
+                    Weekly Applications
+                  </h3>
+                  <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-cyan-300"></div>
-                      <span className="text-sm text-gray-600">
-                        Previous Week
-                      </span>
+                      <span className="text-gray-600">Previous Week</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-teal-600"></div>
-                      <span className="text-sm text-gray-600">This Week</span>
+                      <span className="text-gray-600">This Week</span>
                     </div>
-                    {/* <Select defaultValue="week">
-            <SelectTrigger className="w-[130px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="week">This Week</SelectItem>
-              <SelectItem value="month">This Month</SelectItem>
-            </SelectContent>
-          </Select> */}
                   </div>
                 </div>
 
                 {reportsLoading ? (
-                  <div className="h-[400px] flex gap-4 p-4 relative">
-                    {/* Horizontal grid lines skeleton */}
-                    <div className="absolute left-12 right-0 top-0 bottom-8 pointer-events-none">
+                  <div className="h-[300px] sm:h-[400px] flex gap-2 sm:gap-4 p-2 sm:p-4 relative overflow-x-auto">
+                    <div className="absolute left-8 sm:left-12 right-0 top-0 bottom-8 pointer-events-none">
                       {[0, 1, 2, 3, 4, 5].map((i) => (
                         <div
                           key={i}
@@ -983,17 +839,15 @@ const UnitDashboard = () => {
                       ))}
                     </div>
 
-                    {/* Y-axis labels skeleton */}
-                    <div className="absolute left-0 top-0 bottom-8 w-12 flex flex-col justify-between text-xs text-gray-600">
+                    <div className="absolute left-0 top-0 bottom-8 w-8 sm:w-12 flex flex-col justify-between text-xs text-gray-600">
                       {[0, 1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="text-right pr-2">
-                          <Skeleton className="h-3 w-8 inline-block" />
+                        <div key={i} className="text-right pr-1 sm:pr-2">
+                          <Skeleton className="h-3 w-6 sm:w-8 inline-block" />
                         </div>
                       ))}
                     </div>
 
-                    {/* Chart bars skeleton */}
-                    <div className="flex-1 flex items-end justify-around gap-8 ml-12">
+                    <div className="flex-1 flex items-end justify-around gap-2 sm:gap-8 ml-8 sm:ml-12 min-w-[500px] sm:min-w-0">
                       {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
                         (day) => (
                           <div
@@ -1002,38 +856,32 @@ const UnitDashboard = () => {
                           >
                             <div
                               className="relative flex items-end justify-center"
-                              style={{ height: "300px", width: "48px" }}
+                              style={{ height: "200px", width: "32px" }}
                             >
-                              {/* Larger bar skeleton (back layer) */}
                               <Skeleton
                                 className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-2xl"
                                 style={{
-                                  height: `${Math.random() * 200 + 50}px`,
-                                  width: "36px",
+                                  height: `${Math.random() * 150 + 30}px`,
+                                  width: "24px",
                                 }}
                               />
-
-                              {/* Smaller bar skeleton (front layer) */}
                               <Skeleton
                                 className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-2xl z-10"
                                 style={{
-                                  height: `${Math.random() * 150 + 30}px`,
-                                  width: "28px",
+                                  height: `${Math.random() * 100 + 20}px`,
+                                  width: "18px",
                                 }}
                               />
                             </div>
-
-                            {/* Day label skeleton */}
-                            <Skeleton className="h-4 w-8" />
+                            <Skeleton className="h-3 w-8" />
                           </div>
                         )
                       )}
                     </div>
                   </div>
                 ) : (
-                  <div className="h-[400px] flex gap-4 p-4 relative">
-                    {/* Horizontal grid lines */}
-                    <div className="absolute left-12 right-0 top-0 bottom-8 pointer-events-none">
+                  <div className="h-[300px] sm:h-[400px] flex gap-2 sm:gap-4 p-2 sm:p-4 relative overflow-x-auto">
+                    <div className="absolute left-8 sm:left-12 right-0 top-0 bottom-8 pointer-events-none">
                       {[0, 1, 2, 3, 4, 5].map((i) => (
                         <div
                           key={i}
@@ -1043,8 +891,7 @@ const UnitDashboard = () => {
                       ))}
                     </div>
 
-                    {/* Y-axis labels */}
-                    <div className="absolute left-0 top-0 bottom-8 w-12 flex flex-col justify-between text-xs text-gray-600">
+                    <div className="absolute left-0 top-0 bottom-8 w-8 sm:w-12 flex flex-col justify-between text-xs text-gray-600">
                       {(() => {
                         const maxApplications = Math.max(
                           ...weeklyData.flatMap((d) => [
@@ -1053,7 +900,6 @@ const UnitDashboard = () => {
                           ]),
                           1
                         );
-
                         let range, step;
                         if (maxApplications <= 10) {
                           range = 10;
@@ -1075,7 +921,7 @@ const UnitDashboard = () => {
                         const labels = [];
                         for (let i = 0; i <= 5; i++) {
                           labels.push(
-                            <div key={i} className="text-right pr-2">
+                            <div key={i} className="text-right pr-1 sm:pr-2">
                               {range - i * step}
                             </div>
                           );
@@ -1084,8 +930,7 @@ const UnitDashboard = () => {
                       })()}
                     </div>
 
-                    {/* Chart bars */}
-                    <div className="flex-1 flex items-end justify-around gap-8 ml-12">
+                    <div className="flex-1 flex items-end justify-around gap-2 sm:gap-8 ml-8 sm:ml-12 min-w-[500px] sm:min-w-0">
                       {weeklyData.map((dayData) => {
                         const maxApplications = Math.max(
                           ...weeklyData.flatMap((d) => [
@@ -1094,7 +939,6 @@ const UnitDashboard = () => {
                           ]),
                           1
                         );
-
                         let range;
                         if (maxApplications <= 10) range = 10;
                         else if (maxApplications <= 50) range = 50;
@@ -1103,11 +947,10 @@ const UnitDashboard = () => {
                           range = Math.ceil(maxApplications / 100) * 100;
                         else range = Math.ceil(maxApplications / 500) * 500;
 
-                        const scaleFactor = 280 / range;
+                        const scaleFactor = 200 / range;
                         const prevWeekHeight =
                           dayData.previousWeek * scaleFactor;
                         const thisWeekHeight = dayData.thisWeek * scaleFactor;
-
                         const isThisWeekLarger =
                           dayData.thisWeek >= dayData.previousWeek;
 
@@ -1118,9 +961,8 @@ const UnitDashboard = () => {
                           >
                             <div
                               className="relative flex items-end justify-center"
-                              style={{ height: "300px", width: "48px" }}
+                              style={{ height: "200px", width: "32px" }}
                             >
-                              {/* Larger bar (back layer) */}
                               <div
                                 className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-2xl transition-all hover:opacity-80 cursor-pointer ${
                                   isThisWeekLarger
@@ -1134,11 +976,9 @@ const UnitDashboard = () => {
                                       : prevWeekHeight,
                                     8
                                   )}px`,
-                                  width: "36px",
+                                  width: "24px",
                                 }}
                               ></div>
-
-                              {/* Smaller bar (front layer) */}
                               <div
                                 className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-2xl transition-all hover:opacity-80 cursor-pointer z-10 ${
                                   isThisWeekLarger
@@ -1152,13 +992,11 @@ const UnitDashboard = () => {
                                       : thisWeekHeight,
                                     8
                                   )}px`,
-                                  width: "28px",
+                                  width: "18px",
                                 }}
                               ></div>
                             </div>
-
-                            {/* Day label - moved lower with mt-4 */}
-                            <span className="text-sm text-gray-600 ">
+                            <span className="text-xs sm:text-sm text-gray-600">
                               {dayData.day}
                             </span>
                           </div>
@@ -1171,63 +1009,63 @@ const UnitDashboard = () => {
             </Card>
 
             {/* Quick Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">
+                      <p className="text-xs sm:text-sm font-medium text-gray-600">
                         Total Applications
                       </p>
                       {reportsLoading ? (
-                        <Skeleton className="h-8 w-16 my-1" />
+                        <Skeleton className="h-6 sm:h-8 w-12 sm:w-16 my-1" />
                       ) : (
-                        <p className="text-2xl font-bold">
+                        <p className="text-xl sm:text-2xl font-bold">
                           {reportStats.totalApplications}
                         </p>
                       )}
                     </div>
-                    <Users className="w-8 h-8 text-blue-500" />
+                    <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">
+                      <p className="text-xs sm:text-sm font-medium text-gray-600">
                         Hired Candidates
                       </p>
                       {reportsLoading ? (
-                        <Skeleton className="h-8 w-16 my-1" />
+                        <Skeleton className="h-6 sm:h-8 w-12 sm:w-16 my-1" />
                       ) : (
-                        <p className="text-2xl font-bold">
+                        <p className="text-xl sm:text-2xl font-bold">
                           {reportStats.hiredCandidates}
                         </p>
                       )}
                     </div>
-                    <CheckCircle className="w-8 h-8 text-green-500" />
+                    <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">
+                      <p className="text-xs sm:text-sm font-medium text-gray-600">
                         Active Internships
                       </p>
                       {reportsLoading ? (
-                        <Skeleton className="h-8 w-16 my-1" />
+                        <Skeleton className="h-6 sm:h-8 w-12 sm:w-16 my-1" />
                       ) : (
-                        <p className="text-2xl font-bold">
+                        <p className="text-xl sm:text-2xl font-bold">
                           {reportStats.activeInternships}
                         </p>
                       )}
                     </div>
-                    <Briefcase className="w-8 h-8 text-orange-500" />
+                    <Briefcase className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
                   </div>
                 </CardContent>
               </Card>
@@ -1238,27 +1076,28 @@ const UnitDashboard = () => {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-sm">
               This will permanently delete the job description "
               {deletingInternship?.title}". This action cannot be undone and
               will remove all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
             <AlertDialogCancel
               onClick={() => {
                 setShowDeleteDialog(false);
                 setDeletingInternship(null);
               }}
+              className="w-full sm:w-auto"
             >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
             >
               {updating === deletingInternship?.id ? "Deleting..." : "Delete"}
             </AlertDialogAction>
@@ -1276,7 +1115,6 @@ const UnitDashboard = () => {
         internship={editingInternship}
       />
 
-      {/* Create Internship Dialog */}
       <CreateInternshipDialog
         isOpen={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
