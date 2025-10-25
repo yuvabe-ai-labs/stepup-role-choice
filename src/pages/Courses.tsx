@@ -21,7 +21,7 @@ const Courses = () => {
   const navigate = useNavigate();
   const { courses: allCourses, loading: coursesLoading } = useCourses();
   const [providers, setProviders] = useState<Array<{ id: string; name: string }>>([]);
-  
+
   const [filters, setFilters] = useState({
     providers: [] as string[],
     titles: [] as string[],
@@ -39,16 +39,14 @@ const Courses = () => {
   useEffect(() => {
     const fetchProviders = async () => {
       const uniqueCreatorIds = [...new Set(allCourses.map((c) => c.created_by))];
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .in("id", uniqueCreatorIds);
-      
+
+      const { data } = await supabase.from("units").select("id, unit_name").in("id", uniqueCreatorIds);
+
       if (data) {
-        setProviders(data.map((p) => ({ id: p.id, name: p.full_name })));
+        setProviders(data.map((p) => ({ id: p.id, name: p.unit_name })));
       }
     };
-    
+
     if (allCourses.length > 0) {
       fetchProviders();
     }
@@ -179,7 +177,7 @@ const Courses = () => {
                 showAll={showAllProviders}
                 setShowAll={setShowAllProviders}
               />
-              
+
               <FilterSection
                 label="Course Title"
                 searchValue={searchTitles}
@@ -219,7 +217,8 @@ const Courses = () => {
           <div className="flex-1 w-full">
             <div className="mb-4 sm:mb-6">
               <h1 className="text-xl sm:text-2xl text-gray-600 font-medium">
-                Explore {filteredCourses.length} Course{filteredCourses.length !== 1 ? "s" : ""}
+                Explore {filteredCourses.length} Course
+                {filteredCourses.length !== 1 ? "s" : ""}
               </h1>
             </div>
 
@@ -270,7 +269,7 @@ const Courses = () => {
                       </div>
 
                       {/* Title */}
-                      <h3 className="font-bold text-lg line-clamp-2">{course.title}</h3>
+                      <h3 className="font-bold text-lg line-clamp-1">{course.title}</h3>
 
                       {/* Description */}
                       <p className="text-sm text-muted-foreground line-clamp-3">
@@ -282,7 +281,9 @@ const Courses = () => {
                         className="w-full rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all"
                         variant="outline"
                       >
-                        Know more
+                        <a href={course.website_url} target="_blank">
+                          Know more
+                        </a>
                       </Button>
                     </CardContent>
                   </Card>
@@ -462,5 +463,3 @@ const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChang
     </div>
   </div>
 );
-
-export default Courses;
