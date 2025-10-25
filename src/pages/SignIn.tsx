@@ -27,11 +27,15 @@ const SignIn = () => {
       console.error("[SignIn] Sign in failed:", error);
 
       // Parse the error message from Edge Function
-      let errorMessage = error.message || "Something went wrong. Please try again.";
+      let errorMessage =
+        error.message || "Something went wrong. Please try again.";
 
       // Check if it's the Edge Function error
-      if (errorMessage.includes("Edge Function returned a non-2xx status code")) {
-        errorMessage = "Incorrect email or password. Please check your credentials and try again.";
+      if (
+        errorMessage.includes("Edge Function returned a non-2xx status code")
+      ) {
+        errorMessage =
+          "Incorrect email or password. Please check your credentials and try again.";
       }
       // Check for specific error patterns in the message
       else if (
@@ -40,11 +44,16 @@ const SignIn = () => {
         errorMessage.toLowerCase().includes("credentials") ||
         errorMessage.includes("Invalid login credentials")
       ) {
-        errorMessage = "Incorrect email or password. Please check your credentials and try again.";
+        errorMessage =
+          "Incorrect email or password. Please check your credentials and try again.";
       }
       // Check for email not confirmed
-      else if (errorMessage.includes("Email not confirmed") || errorMessage.includes("email_not_confirmed")) {
-        errorMessage = "Please check your email and verify your account before signing in.";
+      else if (
+        errorMessage.includes("Email not confirmed") ||
+        errorMessage.includes("email_not_confirmed")
+      ) {
+        errorMessage =
+          "Please check your email and verify your account before signing in.";
       }
 
       toast({
@@ -73,11 +82,15 @@ const SignIn = () => {
     if (error) {
       localStorage.removeItem("pendingRole");
 
-      let errorMessage = error.message || "Authentication failed. Please try again.";
+      let errorMessage =
+        error.message || "Authentication failed. Please try again.";
 
       // Handle Edge Function errors for OAuth
-      if (errorMessage.includes("Edge Function returned a non-2xx status code")) {
-        errorMessage = "Authentication failed. Please try again or use a different sign-in method.";
+      if (
+        errorMessage.includes("Edge Function returned a non-2xx status code")
+      ) {
+        errorMessage =
+          "Authentication failed. Please try again or use a different sign-in method.";
       }
 
       toast({
@@ -95,15 +108,19 @@ const SignIn = () => {
       {/* Left Side - Illustration */}
       <div className="flex-1 hidden lg:flex items-center justify-center bg-gray-50">
         <div className="max-w-lg">
-          <img src={signupIllustration} alt="Signin Illustration" className="w-full h-auto" />
+          <img
+            src={signupIllustration}
+            alt="Signin Illustration"
+            className="w-full h-auto"
+          />
         </div>
       </div>
 
       {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center bg-white px-6">
+      <div className="flex-1 flex items-center justify-center bg-white px-4 sm:px-6">
         <div className="w-full max-w-[474px]">
           <div
-            className="bg-white rounded-[15px] px-[87px] py-12 w-full"
+            className="bg-white rounded-[15px] px-6 sm:px-12 md:px-[87px] py-8 sm:py-12 w-full"
             style={{ boxShadow: "0px 2px 25px rgba(0, 0, 0, 0.15)" }}
           >
             {/* Header */}
@@ -112,7 +129,8 @@ const SignIn = () => {
                 className="text-[20px] font-medium leading-[35px] mb-2"
                 style={{
                   color: "#1F2A37",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
+                  fontFamily:
+                    "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
                 }}
               >
                 Sign in to your account
@@ -121,7 +139,8 @@ const SignIn = () => {
                 className="text-[12px] leading-[15px]"
                 style={{
                   color: "#9CA3AF",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
+                  fontFamily:
+                    "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
                 }}
               >
                 Welcome back! Please enter your details below
@@ -129,7 +148,7 @@ const SignIn = () => {
             </div>
 
             {/* OAuth Buttons */}
-            <div className="flex gap-3 mb-6">
+            {/* <div className="flex gap-3 mb-6">
               <button
                 onClick={() => handleOAuthSignIn("google")}
                 disabled={loading}
@@ -182,22 +201,29 @@ const SignIn = () => {
                   Sign in with Apple
                 </span>
               </button>
-            </div>
+            </div> */}
 
             {/* Divider */}
-            <div className="flex items-center mb-6">
+            {/* <div className="flex items-center mb-6">
               <div className="flex-1 h-px bg-[#D1D5DB]"></div>
-              <span className="px-3 text-[10px] leading-3" style={{ color: "#9CA3AF" }}>
+              <span
+                className="px-3 text-[10px] leading-3"
+                style={{ color: "#9CA3AF" }}
+              >
                 or
               </span>
               <div className="flex-1 h-px bg-[#D1D5DB]"></div>
-            </div>
+            </div> */}
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-[12px] mb-2" style={{ color: "#4B5563" }}>
+                <label
+                  htmlFor="email"
+                  className="block text-[12px] mb-2"
+                  style={{ color: "#4B5563" }}
+                >
                   Email Address *
                 </label>
                 <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center">
@@ -216,7 +242,11 @@ const SignIn = () => {
 
               {/* Password */}
               <div>
-                <label htmlFor="password" className="block text-[12px] mb-2" style={{ color: "#4B5563" }}>
+                <label
+                  htmlFor="password"
+                  className="block text-[12px] mb-2"
+                  style={{ color: "#4B5563" }}
+                >
                   Password *
                 </label>
                 <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center gap-2">
@@ -252,11 +282,19 @@ const SignIn = () => {
                     className="w-3 h-3 rounded border-[#D1D5DB] text-[#76A9FA] focus:ring-[#76A9FA] focus:ring-1"
                     disabled={loading}
                   />
-                  <label htmlFor="keepLoggedIn" className="text-[12px] cursor-pointer" style={{ color: "#4B5563" }}>
+                  <label
+                    htmlFor="keepLoggedIn"
+                    className="text-[12px] cursor-pointer"
+                    style={{ color: "#4B5563" }}
+                  >
                     Keep me logged in
                   </label>
                 </div>
-                <Link to="/forgot-password" className="text-[12px] hover:underline" style={{ color: "#3F83F8" }}>
+                <Link
+                  to="/forgot-password"
+                  className="text-[12px] hover:underline"
+                  style={{ color: "#3F83F8" }}
+                >
                   Forgot Password?
                 </Link>
               </div>
@@ -276,7 +314,11 @@ const SignIn = () => {
             <div className="text-center mt-6">
               <span className="text-[12px]" style={{ color: "#9CA3AF" }}>
                 Don't have an account?{" "}
-                <Link to={`/auth/${role}/signup`} className="font-medium hover:underline" style={{ color: "#3F83F8" }}>
+                <Link
+                  to={`/auth/${role}/signup`}
+                  className="font-medium hover:underline"
+                  style={{ color: "#3F83F8" }}
+                >
                   Sign Up
                 </Link>
               </span>

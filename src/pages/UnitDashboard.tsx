@@ -16,6 +16,7 @@ import {
   Pencil,
   Ban,
   CheckCircle,
+  Trash2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,6 +40,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useUnitApplications } from "@/hooks/useUnitApplications";
 import { useInternships } from "@/hooks/useInternships";
 import CreateInternshipDialog from "@/components/CreateInternshipDialog";
@@ -69,6 +80,8 @@ const UnitDashboard = () => {
   const [selectedInternship, setSelectedInternship] = useState<any>(null);
   const [editingInternship, setEditingInternship] = useState<any>(null);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [deletingInternship, setDeletingInternship] = useState<any>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const {
     weeklyData,
     monthlyData,
@@ -106,6 +119,36 @@ const UnitDashboard = () => {
     const internship = internships.find((i) => i.id === internshipId);
     if (internship) {
       setEditingInternship(internship);
+    }
+  };
+
+  const handleDeleteClick = (internship: any) => {
+    setDeletingInternship(internship);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingInternship) return;
+
+    try {
+      setUpdating(deletingInternship.id);
+
+      // Delete the internship from database
+      const { error: deleteError } = await supabase
+        .from("internships")
+        .delete()
+        .eq("id", deletingInternship.id);
+
+      if (deleteError) throw deleteError;
+
+      setShowDeleteDialog(false);
+      setDeletingInternship(null);
+      window.location.reload(); // Refresh the list after deletion
+    } catch (err: any) {
+      console.error("Error deleting job:", err);
+      alert("Failed to delete job description");
+    } finally {
+      setUpdating(null);
     }
   };
 
@@ -313,7 +356,6 @@ const UnitDashboard = () => {
           </TabsList>
 
           {/* Applications Tab */}
-          {/* Applications Tab */}
           <TabsContent
             value="applications"
             className="container mx-auto px-10 py-2"
@@ -384,7 +426,7 @@ const UnitDashboard = () => {
                     return (
                       <Card
                         key={application.id}
-                        className="border border-border/50 hover:shadow-lg transition-shadow w-full max-w-s min-h-[460px] rounded-3xl"
+                        className="border border-border/50 hover:shadow-lg transition-shadow w-full max-w-s min-h-[300] rounded-3xl"
                       >
                         <CardContent className="p-8 space-y-5">
                           {/* Header Section */}
@@ -462,52 +504,6 @@ const UnitDashboard = () => {
                           <div className="border-t border-border/40"></div>
 
                           {/* AI Analysis Section */}
-                          <div className="bg-white rounded-2xl p-3 shadow-sm">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <Sparkles className="w-5 h-5 text-purple-600" />
-                                <span className="text-base font-medium text-purple-600">
-                                  AI Analysis for the profile
-                                </span>
-                              </div>
-
-                              {/* Circular Progress */}
-                              <div className="relative w-12 h-12">
-                                <svg className="w-12 h-12 transform -rotate-90">
-                                  <circle
-                                    cx="24"
-                                    cy="24"
-                                    r="18"
-                                    stroke="#e5e7eb"
-                                    strokeWidth="3"
-                                    fill="none"
-                                  />
-                                  <circle
-                                    cx="24"
-                                    cy="24"
-                                    r="18"
-                                    stroke="#10b981"
-                                    strokeWidth="3"
-                                    fill="none"
-                                    strokeDasharray={`${2 * Math.PI * 18}`}
-                                    strokeDashoffset={`${
-                                      2 * Math.PI * 18 * (1 - matchScore / 100)
-                                    }`}
-                                    strokeLinecap="round"
-                                  />
-                                </svg>
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <span className="text-sm font-bold">
-                                    {matchScore}%
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <p className="text-sm text-muted-foreground">
-                              {matchScore}% Skill matches for this role
-                            </p>
-                          </div>
 
                           {/* View Profile Button */}
                           <Button
@@ -686,6 +682,15 @@ const UnitDashboard = () => {
                                         Activate JD
                                       </span>
                                     )}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleDeleteClick(internship)
+                                    }
+                                    className="text-red-600 focus:text-red-600"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Delete JD
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
@@ -1230,6 +1235,36 @@ const UnitDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the job description "
+              {deletingInternship?.title}". This action cannot be undone and
+              will remove all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setDeletingInternship(null);
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {updating === deletingInternship?.id ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <EditInternshipDialog
         isOpen={!!editingInternship}

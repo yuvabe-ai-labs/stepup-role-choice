@@ -111,21 +111,24 @@ const ProfileSidebar = ({ savedCount = 0 }: ProfileSidebarProps) => {
             <Info className="w-4 h-4 text-gray-800" />
           </div>
 
-          <div className="grid grid-cols-2 gap-6 mb-6 divide-x divide-gray-200">
+          <div className="grid grid-cols-3 gap-6">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Applied</p>
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl font-bold text-gray-900">{appliedCount}</span>
+              <p className="text-base text-gray-600 mb-1 flex justify-center">Applied</p>
+              <div className="flex items-center justify-center space-x-2">
+                <div className="text-4xl font-semibold text-gray-600">{appliedCount}</div>
 
                 {/* need to implement in future */}
                 {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}
               </div>
             </div>
 
-            <div className="pl-6">
-              <p className="text-sm text-gray-600 mb-1">Saved</p>
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl font-bold text-gray-900">{savedCount}</span>
+            {/* Divider */}
+            <div className="h-full w-px bg-gray-300 mx-auto"></div>
+
+            <div>
+              <p className="text-base text-gray-600 mb-1 flex justify-center">Saved</p>
+              <div className="flex items-center justify-center space-x-2">
+                <span className="text-4xl font-semibold text-gray-600">{savedCount}</span>
 
                 {/* need to implement in future */}
                 {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}

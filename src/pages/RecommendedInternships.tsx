@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { MapPin, Clock, DollarSign, Bookmark, Check, Share2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { useIntern } from "@/hooks/useInternships";
 import { useApplicationStatus } from "@/hooks/useApplicationStatus";
 import { useInternshipRecommendations } from "@/hooks/useRecommendations";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
@@ -15,10 +15,16 @@ import { ShareDialog } from "@/components/ShareDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
-import { useIsSaved } from "@/hooks/useSavedInternships";
 import { useToast } from "@/hooks/use-toast";
 
 type Internship = Tables<"internships">;
+
+interface InternshipWithUnit extends Internship {
+  unit_avatar?: string | null;
+  unit_name?: string | null;
+  matchScore?: number;
+  matchPercentage?: number;
+}
 
 // Helper to safely parse JSON
 function safeParse<T>(data: any, fallback: T): T {
@@ -53,61 +59,108 @@ function parseNumberedObject(data: any): string[] {
 const RecommendedInternships = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const { internships: rawInternships = [], loading, error } = useIntern();
+  const [allInternships, setAllInternships] = useState<InternshipWithUnit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedInternship, setSelectedInternship] = useState<string>("");
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [userSkills, setUserSkills] = useState<string[]>([]);
-  const [savingInternship, setSavingInternship] = useState(false);
+  const [savedInternshipsSet, setSavedInternshipsSet] = useState<Set<string>>(new Set());
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const { hasApplied, isLoading: isCheckingStatus, markAsApplied } = useApplicationStatus(selectedInternship);
-  const { isSaved, isLoading: isCheckingSaved, refetch: refetchSaved } = useIsSaved(selectedInternship);
 
-  // Ensure internships is always an array
-  const allInternships = Array.isArray(rawInternships) ? rawInternships : rawInternships ? [rawInternships] : [];
-
-  // Fetch user skills for recommendations
+  // Fetch internships with unit data and user skills
   useEffect(() => {
-    const fetchUserSkills = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
+    const fetchData = async () => {
       try {
-        const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle();
+        setLoading(true);
+        setError(null);
 
-        if (profile) {
-          const { data: studentProfile } = await supabase
-            .from("student_profiles")
-            .select("skills")
-            .eq("profile_id", profile.id)
-            .maybeSingle();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-          if (studentProfile?.skills) {
-            let skills: any[] = [];
+        // Fetch internships with unit data
+        const { data: internshipsData, error: internshipsError } = await supabase
+          .from("internships")
+          .select(
+            `
+            *,
+            profiles!internships_created_by_fkey (
+              id,
+              units (
+                avatar_url,
+                unit_name
+              )
+            )
+          `,
+          )
+          .eq("status", "active")
+          .order("created_at", { ascending: false });
 
-            if (typeof studentProfile.skills === "string") {
-              try {
-                const parsed = JSON.parse(studentProfile.skills);
-                skills = Array.isArray(parsed) ? parsed : studentProfile.skills.split(",").map((s) => s.trim());
-              } catch {
-                skills = studentProfile.skills.split(",").map((s) => s.trim());
+        if (internshipsError) throw internshipsError;
+
+        // Transform data to include unit info
+        const transformedInternships: InternshipWithUnit[] = (internshipsData || []).map((internship: any) => ({
+          ...internship,
+          unit_avatar: internship.profiles?.units?.[0]?.avatar_url || null,
+          unit_name: internship.profiles?.units?.[0]?.unit_name || null,
+        }));
+
+        setAllInternships(transformedInternships);
+
+        // Fetch user skills and saved internships if logged in
+        if (user) {
+          const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle();
+
+          if (profile) {
+            // Fetch skills
+            const { data: studentProfile } = await supabase
+              .from("student_profiles")
+              .select("skills")
+              .eq("profile_id", profile.id)
+              .maybeSingle();
+
+            if (studentProfile?.skills) {
+              let skills: any[] = [];
+
+              if (typeof studentProfile.skills === "string") {
+                try {
+                  const parsed = JSON.parse(studentProfile.skills);
+                  skills = Array.isArray(parsed) ? parsed : studentProfile.skills.split(",").map((s) => s.trim());
+                } catch {
+                  skills = studentProfile.skills.split(",").map((s) => s.trim());
+                }
+              } else if (Array.isArray(studentProfile.skills)) {
+                skills = studentProfile.skills;
               }
-            } else if (Array.isArray(studentProfile.skills)) {
-              skills = studentProfile.skills;
+
+              setUserSkills(skills);
             }
 
-            setUserSkills(skills);
+            // Fetch saved internships
+            const { data: savedData } = await supabase
+              .from("saved_internships")
+              .select("internship_id")
+              .eq("student_id", profile.id);
+
+            if (savedData) {
+              setSavedInternshipsSet(new Set(savedData.map((item) => item.internship_id)));
+            }
           }
         }
-      } catch (error) {
-        console.error("Error fetching user skills:", error);
+      } catch (error: any) {
+        console.error("Error fetching data:", error);
+        setError(error.message || "Failed to fetch internships");
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUserSkills();
+    fetchData();
   }, []);
 
   // Use the recommendation hook (same as Dashboard)
@@ -116,28 +169,34 @@ const RecommendedInternships = () => {
   // Set default selected internship when data loads or from URL params
   useEffect(() => {
     const idFromUrl = searchParams.get("id");
-    
+
     if (idFromUrl && internships.length > 0) {
       // Check if the internship from URL exists in the list
-      const exists = internships.some(int => int.id === idFromUrl);
+      const exists = internships.some((int) => int.id === idFromUrl);
       if (exists) {
         setSelectedInternship(idFromUrl);
         return;
       }
     }
-    
+
     // Default to first internship if no URL param or invalid ID
     if (internships.length > 0 && !selectedInternship) {
       setSelectedInternship(internships[0].id);
     }
-  }, [internships, selectedInternship, searchParams]);
+  }, [internships, searchParams]);
+
+  // Scroll to top when internship selection changes
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [selectedInternship]);
 
   const selectedInternshipData = internships.find((int) => int.id === selectedInternship) || internships[0];
 
   const handleSaveInternship = async () => {
     if (!selectedInternship) return;
 
-    setSavingInternship(true);
     try {
       const {
         data: { user },
@@ -162,6 +221,18 @@ const RecommendedInternships = () => {
         return;
       }
 
+      const isSaved = savedInternshipsSet.has(selectedInternship);
+
+      // Optimistic update
+      const newSavedSet = new Set(savedInternshipsSet);
+      if (isSaved) {
+        newSavedSet.delete(selectedInternship);
+      } else {
+        newSavedSet.add(selectedInternship);
+      }
+      setSavedInternshipsSet(newSavedSet);
+
+      // Perform API call
       if (isSaved) {
         const { error } = await supabase
           .from("saved_internships")
@@ -169,7 +240,11 @@ const RecommendedInternships = () => {
           .eq("student_id", profile.id)
           .eq("internship_id", selectedInternship);
 
-        if (error) throw error;
+        if (error) {
+          // Revert on error
+          setSavedInternshipsSet(savedInternshipsSet);
+          throw error;
+        }
 
         toast({
           title: "Removed",
@@ -181,15 +256,17 @@ const RecommendedInternships = () => {
           internship_id: selectedInternship,
         });
 
-        if (error) throw error;
+        if (error) {
+          // Revert on error
+          setSavedInternshipsSet(savedInternshipsSet);
+          throw error;
+        }
 
         toast({
           title: "Saved",
           description: "Internship saved successfully!",
         });
       }
-
-      refetchSaved();
     } catch (error: any) {
       console.error("Error saving internship:", error);
       toast({
@@ -197,8 +274,6 @@ const RecommendedInternships = () => {
         description: error.message || "Failed to save internship.",
         variant: "destructive",
       });
-    } finally {
-      setSavingInternship(false);
     }
   };
 
@@ -240,20 +315,20 @@ const RecommendedInternships = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="flex h-[calc(100vh-4rem)]">
+      <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-4rem)]">
         {/* Left Sidebar - Fixed Header + Scrollable List */}
-        <div className="w-80 bg-white border-r border-gray-200 h-full flex flex-col">
+        <div className="w-full lg:w-80 bg-white border-b lg:border-r border-gray-200 h-auto lg:h-full flex flex-col mb-4 lg:mb-0">
           {/* Fixed Top Picks Header */}
-          <div className="bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 text-white p-5 m-4 rounded-lg shadow-sm flex-shrink-0 sticky top-0 z-10">
-            <h2 className="text-lg font-semibold mb-2">Top picks for you</h2>
-            <p className="text-sm opacity-90 leading-relaxed">
+          <div className="bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 text-white p-4 sm:p-5 m-2 sm:m-4 rounded-lg shadow-sm flex-shrink-0 sticky top-0 z-10">
+            <h2 className="text-base sm:text-lg font-semibold mb-2">Top picks for you</h2>
+            <p className="text-xs sm:text-sm opacity-90 leading-relaxed">
               Based on your profile, preferences, and activity like applies, searches, and saves
             </p>
             <p className="text-xs mt-2 opacity-80">{loading ? "..." : internships.length} results</p>
           </div>
 
           {/* Scrollable Internship Cards List */}
-          <div className="px-4 py-4 space-y-1 overflow-y-auto flex-1" style={{ scrollbarWidth: "thin" }}>
+          <div className="px-2 sm:px-4 py-4 space-y-1 overflow-y-auto flex-1 max-h-[400px] lg:max-h-none" style={{ scrollbarWidth: "thin" }}>
             {loading ? (
               Array.from({ length: 3 }).map((_, index) => (
                 <Card key={index} className="cursor-pointer shadow-sm border border-gray-100">
@@ -290,9 +365,12 @@ const RecommendedInternships = () => {
                 >
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-3">
-                      <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-xs font-bold">
-                        {internship.company_name?.charAt(0) || "C"}
-                      </div>
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={internship.unit_avatar || undefined} alt={internship.unit_name || "Unit"} />
+                        <AvatarFallback className="bg-black text-white text-xs font-bold">
+                          {(internship.unit_name || internship.company_name)?.charAt(0) || "C"}
+                        </AvatarFallback>
+                      </Avatar>
                       <Badge className="bg-blue-500 hover:bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
                         Saved{" "}
                         {internship.posted_date
@@ -316,7 +394,7 @@ const RecommendedInternships = () => {
         </div>
 
         {/* Main Content - Independently Scrollable */}
-        <div className="flex-1 bg-white h-full overflow-y-auto" style={{ scrollbarWidth: "thin" }}>
+        <div ref={contentRef} className="flex-1 bg-white h-auto lg:h-full overflow-y-auto px-4 sm:px-6 lg:px-8" style={{ scrollbarWidth: "thin" }}>
           {loading ? (
             <div className="p-8">
               <div className="flex justify-between items-start mb-8">
@@ -344,21 +422,25 @@ const RecommendedInternships = () => {
               <p className="text-gray-500">Select an internship to view details</p>
             </div>
           ) : (
-            <div className="p-8">
+            <div className="p-4 sm:p-6 lg:p-8">
               {/* Header */}
-              <div className="flex justify-between items-start mb-8">
-                <div className="flex items-start space-x-5">
-                  <div className="w-16 h-16 bg-teal-600 text-white rounded-2xl flex items-center justify-center shadow-sm">
-                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-900 mb-1">{selectedInternshipData.title}</h1>
-                    <p className="text-lg text-gray-700 mb-3 font-medium">
+              <div className="flex flex-col lg:flex-row justify-between items-start mb-6 sm:mb-8 gap-4">
+                <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-5 w-full lg:w-auto">
+                  <Avatar className="w-12 h-12 sm:w-16 sm:h-16 shadow-sm flex-shrink-0">
+                    <AvatarImage
+                      src={selectedInternshipData.unit_avatar || undefined}
+                      alt={selectedInternshipData.unit_name || "Unit"}
+                    />
+                    <AvatarFallback className="bg-teal-600 text-white text-lg sm:text-2xl font-bold">
+                      {(selectedInternshipData.unit_name || selectedInternshipData.company_name)?.charAt(0) || "C"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{selectedInternshipData.title}</h1>
+                    <p className="text-base sm:text-lg text-gray-700 mb-3 font-medium">
                       {selectedInternshipData.company_name?.replace(/\n/g, "")}
                     </p>
-                    <div className="flex items-center space-x-5 text-sm text-gray-600">
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-5 text-xs sm:text-sm text-gray-600">
                       <div className="flex items-center">
                         <MapPin className="w-4 h-4 mr-1.5 text-gray-500" />
                         {selectedInternshipData.location}
@@ -374,17 +456,18 @@ const RecommendedInternships = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex space-x-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3 w-full lg:w-auto">
                   <Button
                     size="sm"
                     className={`flex items-center space-x-1.5 px-4 py-2 ${
-                      isSaved ? "text-gray-400 bg-white" : "text-gray-600 bg-white"
+                      savedInternshipsSet.has(selectedInternship) ? "text-gray-400 bg-white" : "text-gray-600 bg-white"
                     }`}
                     onClick={handleSaveInternship}
-                    disabled={savingInternship || isCheckingSaved}
                   >
-                    <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
-                    <span>{isSaved ? "Saved" : "Save"}</span>
+                    <Bookmark
+                      className={`w-4 h-4 ${savedInternshipsSet.has(selectedInternship) ? "fill-current" : ""}`}
+                    />
+                    <span>{savedInternshipsSet.has(selectedInternship) ? "Saved" : "Save"}</span>
                   </Button>
                   <Button
                     size="sm"
@@ -405,8 +488,8 @@ const RecommendedInternships = () => {
               </div>
 
               {/* About the Internship */}
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">About the Internship</h2>
+              <div className="mb-6 sm:mb-8">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">About the Internship</h2>
                 <div className="text-gray-700 leading-relaxed">
                   <p>{selectedInternshipData.description}</p>
                 </div>
@@ -414,8 +497,8 @@ const RecommendedInternships = () => {
 
               {/* Key Responsibilities */}
               {responsibilities.length > 0 && (
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Key Responsibilities</h2>
+                <div className="mb-6 sm:mb-8">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Key Responsibilities</h2>
                   <div className="space-y-3">
                     {responsibilities.map((responsibility, index) => (
                       <div key={index} className="flex items-start space-x-3">
@@ -431,8 +514,8 @@ const RecommendedInternships = () => {
 
               {/* Requirements */}
               {requirements.length > 0 && (
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Requirements from the Candidates</h2>
+                <div className="mb-6 sm:mb-8">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Requirements from the Candidates</h2>
                   <div className="space-y-3">
                     {requirements.map((requirement, index) => (
                       <div key={index} className="flex items-start space-x-3">
@@ -448,8 +531,8 @@ const RecommendedInternships = () => {
 
               {/* Skills Required */}
               {skills.length > 0 && (
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Skills Required</h2>
+                <div className="mb-6 sm:mb-8">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Skills Required</h2>
                   <div className="flex flex-wrap gap-2">
                     {skills.map((skill, index) => (
                       <Badge key={index} variant="secondary" className="bg-gray-100 text-gray-700 px-3 py-1">
@@ -462,8 +545,8 @@ const RecommendedInternships = () => {
 
               {/* Benefits */}
               {benefits.length > 0 && (
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Benefits</h2>
+                <div className="mb-6 sm:mb-8">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Benefits</h2>
                   <div className="space-y-3">
                     {benefits.map((benefit, index) => (
                       <div key={index} className="flex items-start space-x-3">

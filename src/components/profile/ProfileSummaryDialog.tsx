@@ -1,5 +1,11 @@
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
@@ -7,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import AIEditIcon from "../ui/custom-icons";
+import AIIcon from "../ui/custom-icons";
 
 const summarySchema = z.object({
   cover_letter: z
@@ -24,7 +30,11 @@ interface ProfileSummaryDialogProps {
   onSave: (summary: string) => Promise<void>;
 }
 
-export const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ children, summary, onSave }) => {
+export const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({
+  children,
+  summary,
+  onSave,
+}) => {
   const [open, setOpen] = React.useState(false);
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [generatedText, setGeneratedText] = React.useState("");
@@ -75,7 +85,11 @@ export const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ chil
 
       // 🧠 Fix: handle different possible return formats
       const enhancedText =
-        data?.response || data?.text || data?.data?.response || (typeof data === "string" ? data : "") || "";
+        data?.response ||
+        data?.text ||
+        data?.data?.response ||
+        (typeof data === "string" ? data : "") ||
+        "";
 
       if (!enhancedText) {
         throw new Error("No response received from AI function");
@@ -123,11 +137,15 @@ export const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ chil
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold text-gray-900 mb-1">Profile Summary</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-gray-900 mb-1">
+            Profile Summary
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
           <div className="relative bg-gradient-to-r from-[#DF10FF] to-[#005EFF] px-[1px] py-[1px] rounded-2xl text-white">
-            <p className="pl-4 my-1 text-[12px]">AI Assistance - Type something which you want to enhance</p>
+            <div className="pl-4 my-1 text-[12px]">
+              AI Assistance - Type something which you want to enhance
+            </div>
             <div className="bg-white p-2 rounded-2xl text-gray-400">
               <Textarea
                 id="cover_letter"
@@ -151,18 +169,22 @@ export const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ chil
             >
               {isGenerating ? (
                 <>
-                  <AIEditIcon /> Generating...
+                  <AIIcon /> Generating...
                 </>
               ) : (
                 <>
-                  <AIEditIcon />
+                  <AIIcon />
                   Create
                 </>
               )}
             </Button>
           </div>
 
-          {errors.cover_letter && <p className="px-4 text-[12px] text-rose-600">{errors.cover_letter.message}</p>}
+          {errors.cover_letter && (
+            <p className="px-4 text-[12px] text-rose-600">
+              {errors.cover_letter.message}
+            </p>
+          )}
 
           <div className="flex justify-end">
             <Button
@@ -174,7 +196,11 @@ export const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ chil
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || isGenerating} className="rounded-full ml-2">
+            <Button
+              type="submit"
+              disabled={isSubmitting || isGenerating}
+              className="rounded-full ml-2"
+            >
               {isSubmitting ? "Saving..." : "Save"}
             </Button>
           </div>

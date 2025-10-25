@@ -7,13 +7,13 @@ import yuvanextIllustration from "@/assets/stepup-illustration.jpg";
 const Landing = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-muted">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}
-        <header className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
+        <header className="text-center mb-8 sm:mb-12">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
             YuvaNext
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
             Take the next step in your journey. Choose your path to get started.
           </p>
         </header>
@@ -33,9 +33,9 @@ const Landing = () => {
           </div>
 
           {/* Right Side - Role Selection */}
-          <div className="order-1 lg:order-2 space-y-6">
-            <div className="text-center lg:text-left mb-8">
-              <h2 className="text-3xl font-bold text-foreground mb-4">
+          <div className="order-1 lg:order-2 space-y-4 sm:space-y-6">
+            <div className="text-center lg:text-left mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
                 Choose Your Role
               </h2>
               <p className="text-muted-foreground text-lg">

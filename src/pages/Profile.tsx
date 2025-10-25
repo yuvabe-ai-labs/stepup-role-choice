@@ -18,7 +18,7 @@ import { CourseDialog } from "@/components/profile/CourseDialog";
 import { InterestDialog } from "@/components/profile/InterestDialog";
 import { InternshipDialog } from "@/components/profile/InternshipDialog";
 import { ProfileSummaryDialog } from "@/components/profile/ProfileSummaryDialog";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { CircularProgress } from "@/components/CircularProgress";
 import { LinkDialog } from "@/components/profile/LinkDialog";
 import AIEditIcon from "@/components/ui/custom-icons";
@@ -119,15 +119,16 @@ const Profile = () => {
       <Navbar />
 
       {/* Hero Background */}
-      <div className="relative h-48 bg-gradient-to-r from-primary to-primary-foreground">
-        <div className="absolute inset-0 bg-black/20" />
+
+      <div className="relative h-[17.625rem] bg-gradient-to-r from-primary to-primary-foreground">
+        {/* <div className="  bg-black/20" /> */}
       </div>
 
-      <div className="container mx-auto px-24 -mt-24 mb-6 relative z-10">
+      <div className="-mt-[8.25rem] pt-0 container px-4 sm:px-6 lg:px-[7.5rem] py-4 lg:py-10">
         {/* Profile Header */}
-        <Card className="mb-2 bg-white rounded-3xl">
-          <CardContent className="p-6">
-            <div className="flex items-start space-x-6">
+        <Card className="relative mb-2 min-h-[185px] h-auto border-gray-200 bg-white rounded-3xl">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
               <div className="relative group">
                 <CircularProgress percentage={profileCompletion} size={90} strokeWidth={3}>
                   <Avatar className="h-20 w-20">
@@ -161,11 +162,11 @@ const Profile = () => {
                     </>
                   )}
                 </div>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-muted-foreground mb-2">
                   {profile?.role === "student" ? studentProfile.headline : profile?.role || "User"}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
                   <div className="flex items-center space-x-1">
                     <Mail className="w-4 h-4" />
                     <span>{profile?.email || user?.email || "No email provided"}</span>
@@ -179,21 +180,31 @@ const Profile = () => {
                   <div className="flex items-center space-x-1">
                     <MapPin className="w-4 h-4" />
                     <span>
-                      {studentProfile.location[0].toLocaleUpperCase() + studentProfile.location.slice(1) ||
-                        "Location not provided"}
+                      {studentProfile?.location
+                        ? studentProfile.location[0].toLocaleUpperCase() + studentProfile.location.slice(1)
+                        : "Location not provided"}
                     </span>
                   </div>
                 </div>
+                <p className="text-muted-foreground text-sm text-gray-400 mt-2.5">
+                  {`Last updated - ${
+                    studentProfile.updated_at
+                      ? formatDistanceToNow(new Date(studentProfile.updated_at), {
+                          addSuffix: true,
+                        })
+                      : "recently"
+                  }`}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <div className="grid lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
           {/* Left Sidebar - Quick Links */}
-          <div className="lg:col-span-1">
-            <Card className="rounded-3xl">
+          <div className="lg:col-span-1 mb-4 lg:mb-0">
+            <Card className="rounded-3xl border-gray-200">
               <CardContent className="p-6">
-                <h3 className="font-semibold mb-4">Quick Links</h3>
+                <h3 className="font-semibold text-lg mb-4">Quick Links</h3>
                 <div className="space-y-3 text-sm">
                   {/* Profile Summary */}
                   <div className="flex items-center justify-between">
@@ -307,15 +318,15 @@ const Profile = () => {
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-2">
             {/* Profile Summary */}
-            <Card className="rounded-3xl">
+            <Card className="rounded-3xl border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="font-semibold">Profile Summary</h3>
+                  <h3 className="text-lg font-semibold">Profile Summary</h3>
                   <ProfileSummaryDialog summary={studentProfile?.cover_letter || ""} onSave={updateCoverLetter}>
                     <Pen className="w-4 h-4 text-gray-500 cursor-pointer hover:text-primary" />
                   </ProfileSummaryDialog>
                 </div>
-                <div className="border rounded-2xl p-3 min-h-28">
+                <div className="border border-gray-400 rounded-2xl p-3 min-h-28">
                   <p className="text-muted-foreground">
                     {studentProfile?.cover_letter || (
                       <p className="flex pr-2 items-center gap-1">
@@ -329,10 +340,10 @@ const Profile = () => {
             </Card>
 
             {/* Completed Courses */}
-            <Card className="rounded-3xl">
+            <Card className="rounded-3xl border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Completed Courses</h3>
+                  <h3 className="text-lg font-semibold">Completed Courses</h3>
                   <CourseDialog onSave={addCourseEntry}>
                     <Button variant="ghost" size="sm" className="text-primary">
                       Add Completed Course
@@ -342,30 +353,32 @@ const Profile = () => {
                 <div className="space-y-4">
                   {completedCourses.length > 0 ? (
                     completedCourses.map((course: any, index: number) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-4 border border-border rounded-lg"
-                      >
-                        <div>
-                          <h4 className="font-medium">{course.title || "Course Title"}</h4>
-                          <p className="text-sm text-muted-foreground">{course.provider || "Provider"}</p>
-                          <p className="text-sm text-muted-foreground">
-                            Completed on{" "}
-                            {course.completion_date
-                              ? format(new Date(course.completion_date), "MMM dd, yyyy")
-                              : "Date not specified"}
-                          </p>
+                      <div key={index}>
+                        <div className="flex items-center justify-between  rounded-lg">
+                          <div>
+                            <h4 className="font-medium">{course.title || "Course Title"}</h4>
+                            <p className="text-sm text-muted-foreground">{course.provider || "Provider"}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Completed on{" "}
+                              {course.completion_date
+                                ? format(new Date(course.completion_date), "MMM dd, yyyy")
+                                : "Date not specified"}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeCourseEntry(course.id)}
+                              className="text-muted-foreground hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeCourseEntry(course.id)}
-                            className="text-muted-foreground hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+                        {course.title !== completedCourses.at(-1).title ? (
+                          <hr className="border-0.5 border-gray-200  mt-2.5" />
+                        ) : undefined}
                       </div>
                     ))
                   ) : (
@@ -376,10 +389,10 @@ const Profile = () => {
             </Card>
 
             {/* Key Skills */}
-            <Card className="rounded-3xl">
+            <Card className="rounded-3xl border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="font-semibold">Key Skills</h3>
+                  <h3 className="text-lg font-semibold">Key Skills</h3>
                   <SkillsDialog studentProfile={studentProfile} onUpdate={updateStudentProfile}>
                     <Pen className="w-4 h-4 text-gray-500 cursor-pointer hover:text-primary" />
                   </SkillsDialog>
@@ -387,12 +400,16 @@ const Profile = () => {
                 <div className="flex flex-wrap gap-2">
                   {skills.length > 0 ? (
                     skills.map((skill: string, index: number) => (
-                      <Badge key={index} variant="outline" className="px-3 py-1 flex items-center gap-1 bg-transparent">
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="px-4 py-2 border-gray-400 flex items-center gap-1 bg-transparent"
+                      >
                         {skill}
-                        <X
+                        {/* <X
                           className="w-3 h-3 cursor-pointer hover:text-destructive"
                           onClick={() => removeSkill(skill)}
-                        />
+                        /> */}
                       </Badge>
                     ))
                   ) : (
@@ -405,10 +422,10 @@ const Profile = () => {
             </Card>
 
             {/* Education */}
-            <Card className="rounded-3xl">
+            <Card className="rounded-3xl border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Education</h3>
+                  <h3 className="text-lg font-semibold">Education</h3>
                   <EducationDialog onSave={addEducationEntry}>
                     <Button variant="ghost" size="sm" className="text-primary">
                       Add Education
@@ -418,7 +435,7 @@ const Profile = () => {
                 <div className="space-y-4">
                   {education.length > 0 ? (
                     education.map((edu: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-4 border rounded-xl">
+                      <div key={index} className="flex items-center justify-between rounded-xl">
                         <div>
                           <h4 className="font-medium">{edu.degree || "Degree"}</h4>
                           <p className="text-sm text-muted-foreground">{edu.institution || "Institution"}</p>
@@ -428,7 +445,7 @@ const Profile = () => {
                             <p className="text-sm">
                               {edu.start_year || "Start"} - {edu.end_year || "Present"}
                             </p>
-                            {edu.score && <p className="text-sm text-primary font-medium">{edu.score}</p>}
+                            {edu.score && <p className="text-sm text-primary font-medium">{edu.score} - CGPA</p>}
                           </div>
                           <Button
                             variant="ghost"
@@ -449,10 +466,10 @@ const Profile = () => {
             </Card>
 
             {/* Projects */}
-            <Card className="rounded-3xl">
+            <Card className="rounded-3xl border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Projects</h3>
+                  <h3 className="text-lg font-semibold">Projects</h3>
                   <ProjectDialog onSave={addProjectEntry}>
                     <Button variant="ghost" size="sm" className="text-primary">
                       Add Project
@@ -462,7 +479,7 @@ const Profile = () => {
                 {projects.length > 0 ? (
                   <div className="space-y-4">
                     {projects.map((project: any, index: number) => (
-                      <div key={index} className="p-4 border border-border rounded-xl">
+                      <div key={index} className="rounded-xl">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h4 className="font-medium">{project.title || "Project Title"}</h4>
@@ -506,10 +523,10 @@ const Profile = () => {
             </Card>
 
             {/* Interests */}
-            <Card className="rounded-3xl">
+            <Card className="rounded-3xl border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Interests</h3>
+                  <h3 className="text-lg font-semibold">Interests</h3>
                   <InterestDialog interests={interests} onSave={updateInterests}>
                     <Button variant="ghost" size="sm" className="text-primary">
                       Add Interest
@@ -519,12 +536,16 @@ const Profile = () => {
                 {interests.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {interests.map((interest: string, index: number) => (
-                      <Badge key={index} variant="outline" className="px-3 py-1 flex items-center gap-1">
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="px-4 py-2 flex items-center gap-1 border-gray-400"
+                      >
                         {interest}
-                        <X
+                        {/* <X
                           className="w-3 h-3 cursor-pointer hover:text-destructive"
                           onClick={() => removeInterest(interest)}
-                        />
+                        /> */}
                       </Badge>
                     ))}
                   </div>
@@ -535,10 +556,10 @@ const Profile = () => {
             </Card>
 
             {/* Internships */}
-            <Card className="rounded-3xl">
+            <Card className="rounded-3xl border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Internships</h3>
+                  <h3 className="text-lg font-semibold">Internships</h3>
                   <InternshipDialog onSave={addInternshipEntry}>
                     <Button variant="ghost" size="sm" className="text-primary">
                       Add Internship
@@ -548,7 +569,7 @@ const Profile = () => {
                 {internships.length > 0 ? (
                   <div className="space-y-4">
                     {internships.map((internship: any, index: number) => (
-                      <div key={index} className="p-4 border border-border rounded-lg">
+                      <div key={index} className="rounded-lg">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h4 className="font-medium">{internship.title || "Internship Title"}</h4>
@@ -587,10 +608,10 @@ const Profile = () => {
             </Card>
 
             {/* Personal Details */}
-            <Card className="rounded-3xl">
+            <Card className="rounded-3xl border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="font-semibold">Personal Details</h3>
+                  <h3 className="text-lg font-semibold">Personal Details</h3>
                   {profile && (
                     <PersonalDetailsDialog
                       profile={profile}
@@ -628,10 +649,10 @@ const Profile = () => {
             </Card>
 
             {/* Languages */}
-            <Card className="rounded-3xl">
+            <Card className="rounded-3xl border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Languages</h3>
+                  <h3 className="text-lg font-semibold">Languages</h3>
                   <PersonalDetailsDialog
                     profile={profile}
                     studentProfile={studentProfile}
@@ -700,7 +721,7 @@ const Profile = () => {
 
             {/* links */}
             <div className="mt-8">
-              <Card className="rounded-3xl">
+              <Card className="rounded-3xl border-gray-200">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold">Links</h2>
@@ -720,7 +741,7 @@ const Profile = () => {
                             href={link.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm text-blue-600 hover:underline break-all grid col-span-3 border rounded-xl px-3 py-2"
+                            className="text-sm text-blue-600 hover:underline break-all grid col-span-3 border border-gray-400 rounded-xl px-3 py-2"
                           >
                             {link.url}
                           </a>
