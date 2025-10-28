@@ -271,6 +271,7 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
   };
 
   const handleAIAssist = async (fieldName: keyof FormData) => {
+    console.log("AI Assist triggered for:", fieldName);
     setAiLoading(fieldName as string);
 
     try {
@@ -281,33 +282,37 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
 
       switch (fieldName) {
         case "description":
-          prompt = `Write a clear and professional "About Internship" description for a ${jobTitle} internship position. The description should be 1-2 paragraphs explaining what the internship is about, what the intern will be doing. Make it engaging and suitable for all types of internship roles.${
-            currentValue
-              ? ` Current description: "${currentValue}". Please improve and rewrite it.`
-              : ""
-          }`;
+          prompt = `Write a single, concise, professional paragraph describing a ${jobTitle} internship.
+  Avoid introductions like "Here's a draft" or "About the internship".
+  Focus only on what the internship is about and what the intern will be doing, in 5-7 lines.
+  Return only the paragraph text, no bullet points or titles.${
+    currentValue
+      ? ` Current description: "${currentValue}". Please rewrite it as one clear paragraph.`
+      : ""
+  }`;
           break;
+
         case "responsibilities":
-          prompt = `Write 5-7 key "responsibilities" for a ${jobTitle} internship. Format as bullet points, one per line. Make them clear, actionable, and relevant to the role.${
-            currentValue
-              ? ` Current responsibilities: "${currentValue}". Please improve and expand on them.`
-              : ""
-          }`;
+          prompt = `Write 5-7 key responsibilities for a ${jobTitle} internship.
+  Each responsibility must be on a new line, without numbering or bullet characters.
+  Avoid any introduction, summary, or phrases like "Here are the responsibilities".
+  Return only the clean list of responsibilities.${
+    currentValue
+      ? ` Current responsibilities: "${currentValue}". Please rewrite and clean them.`
+      : ""
+  }`;
           break;
+
         case "benefits":
-          prompt = `List 4-6 post-internship benefits that a candidate would receive after completing a ${jobTitle} internship. Format as bullet points, one per line. Include things like certificates, recommendations, networking opportunities, skill development, etc.${
-            currentValue
-              ? ` Current benefits: "${currentValue}". Please improve and expand on them.`
-              : ""
-          }`;
+          prompt = `List 4-6 post-internship benefits that a candidate would receive after completing a ${jobTitle} internship.
+  Return only the clean list, one benefit per line, no extra text or introduction.`;
           break;
+
         case "skills_required":
-          prompt = `List 5-8 essential skills required for a ${jobTitle} internship. Format as a comma-separated list. Include both technical and soft skills relevant to the role.${
-            currentValue
-              ? ` Current skills: "${currentValue}". Please improve and expand on them.`
-              : ""
-          }`;
+          prompt = `List 5-8 essential skills required for a ${jobTitle} internship.
+  Return as a comma-separated list, with no extra explanation or headers.`;
           break;
+
         default:
           prompt = `Help improve the following text for a ${jobTitle} internship: ${currentValue}`;
       }
@@ -333,10 +338,27 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
 
       if (aiResponse?.response) {
         let cleanResponse = aiResponse.response
+          // Remove markdown and filler phrases
           .replace(/\*\*/g, "")
           .replace(/\*/g, "")
           .replace(/^#+\s/gm, "")
+          .replace(/^(here('|’)s|sure|of course|okay|let'?s).*\n/i, "")
+          .replace(/^about .*internship.*\n?/i, "")
           .trim();
+
+        // For description — keep only first paragraph
+        if (fieldName === "description") {
+          cleanResponse = cleanResponse.split(/\n\s*\n/)[0].trim();
+        }
+
+        // For responsibilities/benefits — keep only clean lines
+        if (["responsibilities", "benefits"].includes(fieldName)) {
+          cleanResponse = cleanResponse
+            .split(/\n+/)
+            .map((line) => line.replace(/^[-•\d.]\s*/, "").trim())
+            .filter((line) => line.length > 0)
+            .join("\n");
+        }
 
         setValue(fieldName, cleanResponse, { shouldValidate: true });
 
@@ -349,8 +371,16 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
           title: "AI Suggestion Applied",
           description: "The content has been generated successfully!",
         });
+      } else {
+        console.error("AI response in unexpected format:", aiResponse);
+        toast({
+          title: "AI Assist Failed",
+          description:
+            "Received unexpected response from AI. Please try again.",
+          variant: "destructive",
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("AI Assist error:", error);
       toast({
         title: "AI Assist Failed",

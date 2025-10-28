@@ -132,6 +132,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
   ]);
 
   const [conversationHistory, setConversationHistory] = useState<any[]>([]);
+  const [isPaidState, setIsPaidState] = React.useState<boolean | null>(null); // ✅ renamed
 
   const {
     control,
@@ -157,6 +158,8 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
       application_deadline: undefined,
     },
   });
+  const jobTitle = watch("title");
+  const isJobRoleFilled = jobTitle && jobTitle.trim().length > 0;
 
   const isPaid = watch("isPaid");
 
@@ -315,33 +318,37 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
 
       switch (fieldName) {
         case "description":
-          prompt = `Write a clear and professional "About Internship" description for a ${jobTitle} internship position. The description should be 1-2 paragraphs explaining what the internship is about, what the intern will be doing. Make it engaging and suitable for all types of internship roles.${
+          prompt = `Write a single, concise, professional paragraph describing a ${jobTitle} internship.
+Avoid introductions like "Here's a draft" or "About the internship".
+Focus only on what the internship is about and what the intern will be doing, in 5-7 lines.
+Return only the paragraph text, no bullet points or titles.${
             currentValue
-              ? ` Current description: "${currentValue}". Please improve and rewrite it.`
+              ? ` Current description: "${currentValue}". Please rewrite it as one clear paragraph.`
               : ""
           }`;
           break;
+
         case "responsibilities":
-          prompt = `Write 5-7 key "responsibilities" for a ${jobTitle} internship. Format as bullet points, one per line. Make them clear, actionable, and relevant to the role.${
+          prompt = `Write 5-7 key responsibilities for a ${jobTitle} internship.
+Each responsibility must be on a new line, without numbering or bullet characters.
+Avoid any introduction, summary, or phrases like "Here are the responsibilities".
+Return only the clean list of responsibilities.${
             currentValue
-              ? ` Current responsibilities: "${currentValue}". Please improve and expand on them.`
+              ? ` Current responsibilities: "${currentValue}". Please rewrite and clean them.`
               : ""
           }`;
           break;
+
         case "benefits":
-          prompt = `List 4-6 post-internship benefits that a candidate would receive after completing a ${jobTitle} internship. Format as bullet points, one per line. Include things like certificates, recommendations, networking opportunities, skill development, etc.${
-            currentValue
-              ? ` Current benefits: "${currentValue}". Please improve and expand on them.`
-              : ""
-          }`;
+          prompt = `List 4-6 post-internship benefits that a candidate would receive after completing a ${jobTitle} internship.
+Return only the clean list, one benefit per line, no extra text or introduction.`;
           break;
+
         case "skills_required":
-          prompt = `List 5-8 essential skills required for a ${jobTitle} internship. Format as a comma-separated list. Include both technical and soft skills relevant to the role.${
-            currentValue
-              ? ` Current skills: "${currentValue}". Please improve and expand on them.`
-              : ""
-          }`;
+          prompt = `List 5-8 essential skills required for a ${jobTitle} internship.
+Return as a comma-separated list, with no extra explanation or headers.`;
           break;
+
         default:
           prompt = `Help improve the following text for a ${jobTitle} internship: ${currentValue}`;
       }
@@ -362,17 +369,32 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
           },
         }
       );
-      console.log(prompt);
-      console.log("AI Response:", aiResponse);
 
       if (error) throw error;
 
       if (aiResponse?.response) {
         let cleanResponse = aiResponse.response
+          // Remove markdown and filler phrases
           .replace(/\*\*/g, "")
           .replace(/\*/g, "")
           .replace(/^#+\s/gm, "")
+          .replace(/^(here('|’)s|sure|of course|okay|let'?s).*\n/i, "")
+          .replace(/^about .*internship.*\n?/i, "")
           .trim();
+
+        // For description — keep only first paragraph
+        if (fieldName === "description") {
+          cleanResponse = cleanResponse.split(/\n\s*\n/)[0].trim();
+        }
+
+        // For responsibilities/benefits — keep only clean lines
+        if (["responsibilities", "benefits"].includes(fieldName)) {
+          cleanResponse = cleanResponse
+            .split(/\n+/)
+            .map((line) => line.replace(/^[-•\d.]\s*/, "").trim())
+            .filter((line) => line.length > 0)
+            .join("\n");
+        }
 
         setValue(fieldName, cleanResponse, { shouldValidate: true });
 
@@ -393,22 +415,14 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
             "Received unexpected response from AI. Please try again.",
           variant: "destructive",
         });
-        setConversationHistory((prevHistory) => [
-          ...prevHistory,
-          { role: "ai", content: `Error: Unexpected AI response format.` },
-        ]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("AI Assist error:", error);
       toast({
         title: "AI Assist Failed",
         description: "Unable to generate AI suggestion. Please try again.",
         variant: "destructive",
       });
-      setConversationHistory((prevHistory) => [
-        ...prevHistory,
-        { role: "ai", content: `Error generating response: ${error.message}` },
-      ]);
     } finally {
       setAiLoading(null);
     }
@@ -517,7 +531,10 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                         <Button
                           type="button"
                           size="sm"
-                          onClick={() => field.onChange(true)}
+                          onClick={() => {
+                            field.onChange(true);
+                            setIsPaidState(true);
+                          }}
                           className={`rounded-full px-6 border border-black ${
                             field.value
                               ? "bg-gray-200 text-black hover:bg-gray-300 hover:!text-black"
@@ -527,6 +544,7 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                           Paid
                         </Button>
                       </div>
+
                       {isPaid && (
                         <Controller
                           name="payment"
@@ -541,11 +559,15 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                           )}
                         />
                       )}
+
                       <div className="flex items-center gap-2">
                         <Button
                           type="button"
                           size="sm"
-                          onClick={() => field.onChange(false)}
+                          onClick={() => {
+                            field.onChange(false);
+                            setIsPaidState(false);
+                          }}
                           className={`rounded-full px-6 border border-black ${
                             !field.value
                               ? "bg-gray-200 text-black hover:bg-gray-300 hover:!text-black"
@@ -585,9 +607,13 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                     <Button
                       type="button"
                       size="sm"
-                      className="absolute bottom-2 right-2 bg-teal-600 hover:bg-teal-700 rounded-full"
+                      className={`absolute bottom-2 right-2 rounded-full ${
+                        isJobRoleFilled
+                          ? "bg-teal-600 hover:bg-teal-700"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      }`}
                       onClick={() => handleAIAssist("description")}
-                      disabled={aiLoading === "description"}
+                      disabled={!isJobRoleFilled || aiLoading === "description"}
                     >
                       <Sparkles className="w-4 h-4 mr-1" />
                       {aiLoading === "description"
@@ -623,9 +649,15 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                     <Button
                       type="button"
                       size="sm"
-                      className="absolute bottom-2 right-2 bg-teal-600 hover:bg-teal-700 rounded-full"
+                      className={`absolute bottom-2 right-2 rounded-full ${
+                        isJobRoleFilled
+                          ? "bg-teal-600 hover:bg-teal-700"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      }`}
                       onClick={() => handleAIAssist("responsibilities")}
-                      disabled={aiLoading === "responsibilities"}
+                      disabled={
+                        !isJobRoleFilled || aiLoading === "responsibilities"
+                      }
                     >
                       <Sparkles className="w-4 h-4 mr-1" />
                       {aiLoading === "responsibilities"
@@ -662,9 +694,13 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                     <Button
                       type="button"
                       size="sm"
-                      className="absolute bottom-2 right-2 bg-teal-600 hover:bg-teal-700 rounded-full"
+                      className={`absolute bottom-2 right-2 rounded-full ${
+                        isJobRoleFilled
+                          ? "bg-teal-600 hover:bg-teal-700"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      }`}
                       onClick={() => handleAIAssist("benefits")}
-                      disabled={aiLoading === "benefits"}
+                      disabled={!isJobRoleFilled || aiLoading === "benefits"}
                     >
                       <Sparkles className="w-4 h-4 mr-1" />
                       {aiLoading === "benefits"
@@ -700,9 +736,15 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
                     <Button
                       type="button"
                       size="sm"
-                      className="absolute bottom-2 right-2 bg-teal-600 hover:bg-teal-700 rounded-full"
+                      className={`absolute bottom-2 right-2 rounded-full ${
+                        isJobRoleFilled
+                          ? "bg-teal-600 hover:bg-teal-700"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      }`}
                       onClick={() => handleAIAssist("skills_required")}
-                      disabled={aiLoading === "skills_required"}
+                      disabled={
+                        !isJobRoleFilled || aiLoading === "skills_required"
+                      }
                     >
                       <Sparkles className="w-4 h-4 mr-1" />
                       {aiLoading === "skills_required"
