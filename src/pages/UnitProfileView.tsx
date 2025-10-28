@@ -180,7 +180,7 @@ const UnitProfileView = () => {
               <CardContent className="p-8">
                 <div className="flex items-start gap-6">
                   <Avatar className="w-24 h-24 rounded-lg">
-                    <AvatarImage src={unit.avatar_url || undefined} alt={unit.unit_name || profile.full_name} />
+                    <AvatarImage src={unit.image || undefined} alt={unit.unit_name || profile.full_name} />
                     <AvatarFallback className="text-2xl rounded-lg">
                       {(unit.unit_name || profile.full_name).charAt(0)}
                     </AvatarFallback>
@@ -332,9 +332,9 @@ const UnitProfileView = () => {
                       Play Video
                     </Button>
                   </div>
-                  {unit.avatar_url && (
+                  {unit.image && (
                     <img
-                      src={unit.avatar_url}
+                      src={unit.image}
                       alt="Unit glimpse"
                       className="w-full h-full object-cover"
                     />

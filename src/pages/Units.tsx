@@ -66,7 +66,9 @@ const Units = () => {
       units.flatMap((u) =>
         typeof u.focus_areas === "object" && u.focus_areas
           ? Object.values(u.focus_areas)
-          : [],
+          : typeof u.focus_areas_backup === "object" && u.focus_areas_backup
+            ? Object.keys(u.focus_areas_backup)
+            : [],
       ),
     ),
   ];
@@ -126,6 +128,8 @@ const Units = () => {
       const areas: string[] = [];
       if (typeof unit.focus_areas === "object" && unit.focus_areas)
         areas.push(...Object.values(unit.focus_areas).map(String));
+      if (typeof unit.focus_areas_backup === "object" && unit.focus_areas_backup)
+        areas.push(...Object.keys(unit.focus_areas_backup).map(String));
       if (!filters.interestAreas.some((a) => areas.includes(a))) return false;
     }
 
