@@ -22,12 +22,19 @@ interface CompleteProfileData {
   // education: any[];
 }
 
-const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onClose, internship, onSuccess }) => {
+const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({
+  isOpen,
+  onClose,
+  internship,
+  onSuccess,
+}) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [profileData, setProfileData] = useState<CompleteProfileData | null>(null);
+  const [profileData, setProfileData] = useState<CompleteProfileData | null>(
+    null
+  );
 
   // Checkbox states - first 6 are disabled and checked, last 2 are optional
   const [sections, setSections] = useState({
@@ -64,7 +71,8 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
           .eq("profile_id", profile.id)
           .maybeSingle();
 
-        if (studentError && studentError.code !== "PGRST116") throw studentError;
+        if (studentError && studentError.code !== "PGRST116")
+          throw studentError;
 
         // Fetch education records
         // const { data: education, error: educationError } = await supabase
@@ -106,7 +114,9 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
         .map(([section]) => section);
 
       // Calculate match score (comprehensive)
-      const { calculateComprehensiveMatchScore } = await import("@/utils/matchScore");
+      const { calculateComprehensiveMatchScore } = await import(
+        "@/utils/matchScore"
+      );
       const matchScore = calculateComprehensiveMatchScore(
         {
           studentProfile: profileData.studentProfile,
@@ -114,7 +124,7 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
           internships: internships,
           profile: profileData.profile,
         },
-        internship,
+        internship
       );
       console.log("Match score calculated (comprehensive):", matchScore);
 
@@ -128,7 +138,9 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
         profile_match_score: matchScore,
       };
 
-      const { error } = await supabase.from("applications").insert(applicationData);
+      const { error } = await supabase
+        .from("applications")
+        .insert(applicationData);
 
       if (error) throw error;
 
@@ -174,10 +186,16 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
 
   const skills = parseJsonField(profileData?.studentProfile?.skills, []);
   const education = parseJsonField(profileData?.studentProfile?.education, []);
-  const courses = parseJsonField(profileData?.studentProfile?.completed_courses, []);
+  const courses = parseJsonField(
+    profileData?.studentProfile?.completed_courses,
+    []
+  );
   const interests = parseJsonField(profileData?.studentProfile?.interests, []);
   const projects = parseJsonField(profileData?.studentProfile?.projects, []);
-  const internships = parseJsonField(profileData?.studentProfile?.internships, []);
+  const internships = parseJsonField(
+    profileData?.studentProfile?.internships,
+    []
+  );
 
   // Validation: Check if sections are complete
   const sectionValidation = useMemo(() => {
@@ -191,7 +209,8 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
         profileData.profile.date_of_birth
       ),
       profile_summary: !!(
-        profileData.studentProfile?.cover_letter && profileData.studentProfile.cover_letter.length >= 10
+        profileData.studentProfile?.cover_letter &&
+        profileData.studentProfile.cover_letter.length >= 10
       ),
       courses: courses.length > 0,
       key_skills: skills.length > 0,
@@ -200,7 +219,15 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
       projects: projects.length > 0,
       internship: internships.length > 0,
     };
-  }, [profileData, skills, courses, interests, projects, internships, education]);
+  }, [
+    profileData,
+    skills,
+    courses,
+    interests,
+    projects,
+    internships,
+    education,
+  ]);
 
   // Check if required sections are complete
   const canSubmit = useMemo(() => {
@@ -219,12 +246,18 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
       <DialogContent className="p-0 pl-[30px] max-w-6xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="bg-white pl-0 px-8 py-6  border-gray-200 flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-gray-900">Send Your Profile to the Unit</h2>
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Send Your Profile to the Unit
+          </h2>
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || isLoading || !profileData || !canSubmit}
             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            title={!canSubmit ? "Please complete all required sections to submit" : ""}
+            title={
+              !canSubmit
+                ? "Please complete all required sections to submit"
+                : ""
+            }
           >
             <Send className="h-8" />
             {isSubmitting ? "Sending..." : "Send Profile"}
@@ -382,16 +415,22 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   <div className="bg-white rounded-[20px] p-[20px] shadow-sm border border-gray-200">
                     <div className="flex items-start gap-4">
                       <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                        {profileData.profile.full_name?.charAt(0)?.toUpperCase() || "U"}
+                        {profileData.profile.full_name
+                          ?.charAt(0)
+                          ?.toUpperCase() || "U"}
                       </div>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-gray-900 mb-1">
                           {profileData.profile.full_name || "Not provided"}
                         </h3>
-                        <p className="text-gray-600 mb-3">
+                        {/* <p className="text-gray-600 mb-3">
                           {profileData.studentProfile?.bio?.map(
                             (v) => `${v} ${profileData.studentProfile?.bio[-1] !== v ? "|" : ""} `,
                           ) || "No bio available"}
+                        </p> */}
+                        <p className="text-gray-600 mb-3">
+                          {profileData.studentProfile?.headline ||
+                            "No bio available"}
                         </p>
                         <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                           <div className="flex items-center gap-1">
@@ -404,7 +443,9 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                           </div>
                           <div className="flex items-center gap-1">
                             <MapPin className="w-4 h-4" />
-                            {profileData.studentProfile?.location || profileData.profile.address || "Not provided"}
+                            {profileData.studentProfile?.location ||
+                              profileData.profile.address ||
+                              "Not provided"}
                           </div>
                         </div>
                       </div>
@@ -414,32 +455,53 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   {/* Personal Details */}
                   {sections.personal_details && (
                     <div className="bg-white rounded-[20px] p-6 shadow-sm border border-gray-200">
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">Personal Details</h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">
+                        Personal Details
+                      </h3>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-sm text-gray-500 mb-1">Personal</p>
                           <p className="text-gray-900">
                             {profileData.profile.gender || "Not specified"},{" "}
-                            {profileData.profile.marital_status || "Single/ Unmarried"}
+                            {profileData.profile.marital_status ||
+                              "Single/ Unmarried"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500 mb-1">Graduated</p>
+                          <p className="text-sm text-gray-500 mb-1">
+                            Graduated
+                          </p>
                           <p className="text-gray-900">
-                            {profileData.studentProfile.education?.some((edu: any) => !edu.end_year) ? "No" : "Yes"}
+                            {profileData.studentProfile.education?.some(
+                              (edu: any) => !edu.end_year
+                            )
+                              ? "No"
+                              : "Yes"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500 mb-1">Date Of Birth</p>
-                          <p className="text-gray-900">{formatDate(profileData.profile.date_of_birth)}</p>
+                          <p className="text-sm text-gray-500 mb-1">
+                            Date Of Birth
+                          </p>
+                          <p className="text-gray-900">
+                            {formatDate(profileData.profile.date_of_birth)}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500 mb-1">Differently Abled</p>
-                          <p className="text-gray-900">{profileData.profile.differently_abled ? "Yes" : "No"}</p>
+                          <p className="text-sm text-gray-500 mb-1">
+                            Differently Abled
+                          </p>
+                          <p className="text-gray-900">
+                            {profileData.profile.differently_abled
+                              ? "Yes"
+                              : "No"}
+                          </p>
                         </div>
                         <div className="col-span-2">
                           <p className="text-sm text-gray-500 mb-1">Address</p>
-                          <p className="text-gray-900">{profileData.profile.address || "Not provided"}</p>
+                          <p className="text-gray-900">
+                            {profileData.profile.address || "Not provided"}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -448,9 +510,12 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   {/* Profile Summary */}
                   {sections.profile_summary && (
                     <div className="bg-white rounded-[20px] p-6 shadow-sm border border-gray-200">
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">Profile Summary</h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">
+                        Profile Summary
+                      </h3>
                       <p className="text-gray-700 leading-relaxed">
-                        {profileData.studentProfile?.cover_letter || "No profile summary available"}
+                        {profileData.studentProfile?.cover_letter ||
+                          "No profile summary available"}
                       </p>
                     </div>
                   )}
@@ -458,14 +523,25 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   {/* Courses */}
                   {sections.courses && courses.length > 0 && (
                     <div className="bg-white rounded-[20px] p-6 shadow-sm border border-gray-200">
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">Courses</h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">
+                        Courses
+                      </h3>
                       <div className="space-y-3">
                         {courses.map((course: any, index: number) => (
-                          <div key={index} className="border-l-4 border-blue-500 pl-4">
-                            <h4 className="font-semibold text-gray-900">{course.title || course.name}</h4>
-                            <p className="text-sm text-gray-600">{course.provider || "Provider not specified"}</p>
+                          <div
+                            key={index}
+                            className="border-l-4 border-blue-500 pl-4"
+                          >
+                            <h4 className="font-semibold text-gray-900">
+                              {course.title || course.name}
+                            </h4>
+                            <p className="text-sm text-gray-600">
+                              {course.provider || "Provider not specified"}
+                            </p>
                             {course.completion_date && (
-                              <p className="text-xs text-gray-500">Completed: {formatDate(course.completion_date)}</p>
+                              <p className="text-xs text-gray-500">
+                                Completed: {formatDate(course.completion_date)}
+                              </p>
                             )}
                           </div>
                         ))}
@@ -476,14 +552,18 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   {/* Key Skills */}
                   {sections.key_skills && skills.length > 0 && (
                     <div className="bg-white rounded-[20px] p-6 shadow-sm border border-gray-200">
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">Key Skills</h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">
+                        Key Skills
+                      </h3>
                       <div className="flex flex-wrap gap-2">
                         {skills.map((skill: any, index: number) => (
                           <span
                             key={index}
                             className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
                           >
-                            {typeof skill === "string" ? skill : skill.name || skill.title}
+                            {typeof skill === "string"
+                              ? skill
+                              : skill.name || skill.title}
                           </span>
                         ))}
                       </div>
@@ -493,11 +573,18 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   {/* Education */}
                   {sections.education && education.length > 0 && (
                     <div className="bg-white rounded-[20px] p-6 shadow-sm border border-gray-200">
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">Education</h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">
+                        Education
+                      </h3>
                       <div className="space-y-4">
                         {education.map((edu: any) => (
-                          <div key={edu.id} className="border-l-4 border-green-500 pl-4">
-                            <h4 className="font-semibold text-gray-900">{edu.degree}</h4>
+                          <div
+                            key={edu.id}
+                            className="border-l-4 border-green-500 pl-4"
+                          >
+                            <h4 className="font-semibold text-gray-900">
+                              {edu.degree}
+                            </h4>
                             <p className="text-gray-700">{edu.institution}</p>
                             <p className="text-sm text-gray-600">
                               {edu.start_year} - {edu.end_year || "Present"}
@@ -512,10 +599,15 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   {/* Interests */}
                   {sections.interests && interests.length > 0 && (
                     <div className="bg-white rounded-[20px] p-6 shadow-sm border border-gray-200">
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">Interests</h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">
+                        Interests
+                      </h3>
                       <div className="flex flex-wrap gap-2">
                         {interests.map((interest: string, index: number) => (
-                          <span key={index} className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm"
+                          >
                             {interest}
                           </span>
                         ))}
@@ -526,19 +618,31 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   {/* Projects */}
                   {sections.projects && projects.length > 0 && (
                     <div className="bg-white rounded-[20px] p-6 shadow-sm border border-gray-200">
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">Projects</h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">
+                        Projects
+                      </h3>
                       <div className="space-y-4">
                         {projects.map((project: any, index: number) => (
-                          <div key={index} className="border-l-4 border-orange-500 pl-4">
-                            <h4 className="font-semibold text-gray-900">{project.title}</h4>
-                            <p className="text-gray-700 text-sm mb-2">{project.description}</p>
+                          <div
+                            key={index}
+                            className="border-l-4 border-orange-500 pl-4"
+                          >
+                            <h4 className="font-semibold text-gray-900">
+                              {project.title}
+                            </h4>
+                            <p className="text-gray-700 text-sm mb-2">
+                              {project.description}
+                            </p>
                             {project.technologies && (
                               <div className="flex flex-wrap gap-1">
                                 {(Array.isArray(project.technologies)
                                   ? project.technologies
                                   : [project.technologies]
                                 ).map((tech: string, i: number) => (
-                                  <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                                  <span
+                                    key={i}
+                                    className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
+                                  >
                                     {tech}
                                   </span>
                                 ))}
@@ -553,18 +657,31 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({ isOpen, onC
                   {/* Internship History */}
                   {sections.internship && internships.length > 0 && (
                     <div className="bg-white rounded-[20px] p-6 shadow-sm border border-gray-200">
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">Internship History</h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">
+                        Internship History
+                      </h3>
                       <div className="space-y-4">
                         {internships.map((internship: any, index: number) => (
-                          <div key={internship.id || index} className="border-l-4 border-teal-500 pl-4">
-                            <h4 className="font-semibold text-gray-900">{internship.title || internship.role}</h4>
-                            <p className="text-gray-700">{internship.company}</p>
+                          <div
+                            key={internship.id || index}
+                            className="border-l-4 border-teal-500 pl-4"
+                          >
+                            <h4 className="font-semibold text-gray-900">
+                              {internship.title || internship.role}
+                            </h4>
+                            <p className="text-gray-700">
+                              {internship.company}
+                            </p>
                             <p className="text-sm text-gray-600">
                               {formatDate(internship.start_date)} -{" "}
-                              {internship.end_date ? formatDate(internship.end_date) : "Present"}
+                              {internship.end_date
+                                ? formatDate(internship.end_date)
+                                : "Present"}
                             </p>
                             {internship.description && (
-                              <p className="text-sm text-gray-600 mt-1">{internship.description}</p>
+                              <p className="text-sm text-gray-600 mt-1">
+                                {internship.description}
+                              </p>
                             )}
                           </div>
                         ))}

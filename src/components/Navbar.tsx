@@ -26,6 +26,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 // import logo from "@/assets/logo-2.png";
 import logo from "@/assets/YuvaNext.svg";
+import logoName from "@/assets/YuvaNext_name.svg";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -138,14 +139,42 @@ const Navbar = () => {
   return (
     <>
       <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70 shadow-sm">
-        <div className="container flex h-16 items-center justify-between px-4 sm:px-6 md:px-8 lg:px-20">
+        <div className="container h-16 px-4 sm:px-6 md:px-8 lg:px-20 flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center">
+          {/* Mobile: Menu Left, Logo Center, Bell Right */}
+          <div className="flex w-full  items-center ">
+            <div className="lg:hidden items-center justify-between">
+              {/* Mobile Menu Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden h-9 w-9"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                <button className="flex items-center justify-between bg-[var(--indigo-50,#F0F5FF)] rounded-full pl-2 sm:pl-3 pr-1 gap-1 sm:gap-2 py-1.5 shadow-sm w-fit">
+                  {/* Three Bars */}
+                  <div className="flex flex-col justify-center space-y-[3px] m-1.5">
+                    <div className="h-[3px] w-3 bg-gray-500 rounded-full self-start"></div>
+                    <div className="h-[3px] w-[26px] bg-gray-500 rounded-full mx-auto"></div>
+                    <div className="h-[3px] w-3 bg-gray-500 rounded-full self-end"></div>
+                  </div>
+                </button>
+              </Button>
+            </div>
+
             <a href="/dashboard">
+              {/* Mobile Logo */}
+              <img
+                src={logoName}
+                className="h-10 w-auto cursor-pointer block md:hidden"
+                alt="Mobile Logo"
+              />
+
+              {/* Desktop Logo */}
               <img
                 src={logo}
-                alt="Company Logo"
-                className="h-12 sm:h-13 w-auto cursor-pointer"
+                className="h-12 w-auto cursor-pointer hidden md:block"
+                alt="Desktop Logo"
               />
             </a>
           </div>
@@ -171,7 +200,7 @@ const Navbar = () => {
           )}
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4 ml-auto lg:ml-0">
             {/* Search Bar - Desktop */}
             <div className="relative hidden lg:block">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -183,32 +212,18 @@ const Navbar = () => {
             </div>
 
             {/* Search Icon - Mobile */}
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               className="lg:hidden h-9 w-9"
               onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
             >
               <Search className="h-5 w-5 text-black" />
-            </Button>
+            </Button> */}
 
             {/* Notifications */}
             <Button variant="ghost" size="icon" className="relative h-9 w-9">
               <Bell className="h-5 w-5 text-black fill-black" />
-            </Button>
-
-            {/* Mobile Menu Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden h-9 w-9"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
             </Button>
 
             {/* User Avatar with Dropdown - Desktop */}
@@ -308,7 +323,7 @@ const Navbar = () => {
             className="fixed inset-0 bg-black/20 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="fixed right-0 top-16 bottom-0 w-72 bg-white shadow-xl overflow-y-auto">
+          <div className="fixed left-0 top-16 bottom-0 w-72 bg-white shadow-xl overflow-y-auto">
             <div className="flex flex-col h-full">
               {/* User Profile Section */}
               <div className="p-6 border-b">

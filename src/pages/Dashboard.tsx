@@ -172,7 +172,7 @@ const Dashboard = () => {
       <div className="container px-4 sm:px-6 lg:px-[7.5rem] py-4 lg:py-10">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-2.5">
           {/* Left Sidebar - Profile - Fixed */}
-          <div className="lg:col-span-1 mb-4 lg:mb-0">
+          <div className="hidden md:block lg:col-span-1 mb-4 lg:mb-0">
             <div className="lg:sticky lg:top-8">
               <ProfileSidebar savedCount={savedInternships.length} />
             </div>
@@ -184,11 +184,11 @@ const Dashboard = () => {
             style={{ scrollbarWidth: "thin" }}
           >
             {/* Hero Section */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+            <div className="flex overflow-x-auto gap-4  sm:grid-col-1 sm:grid-cols-2 md:grid-cols-3 [&::-webkit-scrollbar]:w-0">
               {heroCards.map((card) => (
                 <Card
                   key={card.id}
-                  className={`${card.color} border-0 shadow-sm rounded-3xl`}
+                  className={` ${card.color} border-0 shadow-sm rounded-3xl w-[100vw] min-w-[92vw] snap-center md:w-auto md:min-w-0 lg:flex-1 `}
                 >
                   <CardContent className="p-6">
                     <div className="min-h-[120px] flex flex-col justify-center">
@@ -219,7 +219,7 @@ const Dashboard = () => {
 
             {/* Recommended Internships */}
             <section>
-              <Card className="p-6 bg-white shadow-sm border border-gray-200 rounded-3xl">
+              <Card className="p-6 bg-white shadow-sm border border-gray-200 rounded-3xl ">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold">Recommended for you</h2>
                   <Button
@@ -251,7 +251,13 @@ const Dashboard = () => {
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
 
-                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                      <div
+                        className=" flex overflow-x-auto gap-4 snap-x snap-mandatory
+    sm:grid sm:grid-cols-2
+    md:grid-cols-3
+    [&::-webkit-scrollbar]:w-0
+    px-1"
+                      >
                         {recommendedInternships
                           .slice(
                             currentInternshipIndex,
@@ -288,14 +294,14 @@ const Dashboard = () => {
                             return (
                               <Card
                                 key={internship.id}
-                                className={`${colorClass} shadow-sm hover:shadow-md transition-shadow cursor-pointer rounded-xl`}
+                                className={`${colorClass} shadow-sm hover:shadow-md transition-shadow cursor-pointer rounded-xl  min-w-[60vw] snap-center md:w-auto md:min-w-0 lg:flex-1 [&::-webkit-scrollbar]:w-0`}
                                 onClick={() =>
                                   navigate(
                                     `/recommended-internships?id=${internship.id}`
                                   )
                                 }
                               >
-                                <CardHeader className="pb-2.5">
+                                <CardHeader className="pb-2.5 color">
                                   <div className="flex justify-between items-start mb-2">
                                     <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center text-background font-bold text-sm">
                                       {matchingUnit?.avatar_url ? (
@@ -395,7 +401,12 @@ const Dashboard = () => {
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
-                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                      <div
+                        className="flex overflow-x-auto gap-4 snap-x snap-mandatory
+    sm:grid sm:grid-cols-2
+    md:grid-cols-3
+    hide-scrollbar [&::-webkit-scrollbar]:w-0"
+                      >
                         {recommendedCourses
                           .slice(currentCourseIndex, currentCourseIndex + 3)
                           .map((course, idx) => {
@@ -412,7 +423,7 @@ const Dashboard = () => {
                             return (
                               <Card
                                 key={course.id}
-                                className="overflow-hidden rounded-3xl hover:shadow-lg transition-all"
+                                className="overflow-hidden rounded-3xl hover:shadow-lg transition-all min-w-[60vw] snap-center md:w-auto md:min-w-0 lg:flex-1 "
                                 onClick={() => navigate("/courses")}
                               >
                                 <div
@@ -501,7 +512,7 @@ const Dashboard = () => {
                         variant="outline"
                         size="icon"
                         onClick={nextCourse}
-                        className="flex-shrink-0 rounded-full"
+                        className="flex-shrink-0 rounded-full hidden md:block"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
@@ -568,13 +579,19 @@ const Dashboard = () => {
                               : appliedInternships
                           )
                         }
-                        className="flex-shrink-0 rounded-full"
+                        className="flex-shrink-0 rounded-full hidden md:block"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
 
                       {/* Activity Cards */}
-                      <div className="flex-1 grid md:grid-cols-3 gap-2.5">
+                      <div
+                        className="flex overflow-x-auto gap-4 snap-x snap-mandatory
+    sm:grid sm:grid-cols-2
+    md:grid-cols-3
+    hide-scrollbar
+    px-1 [&::-webkit-scrollbar]:w-0"
+                      >
                         {(activityView === "saved"
                           ? savedInternships
                           : appliedInternships
@@ -612,7 +629,7 @@ const Dashboard = () => {
                             return (
                               <Card
                                 key={internship.id}
-                                className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300"
+                                className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300 min-w-[60vw]"
                                 onClick={() =>
                                   navigate(`/internships/${internship.id}`)
                                 }
@@ -678,7 +695,7 @@ const Dashboard = () => {
                               : appliedInternships
                           )
                         }
-                        className="flex-shrink-0 rounded-full"
+                        className="flex-shrink-0 rounded-full hidden md:block"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
