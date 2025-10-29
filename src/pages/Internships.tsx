@@ -269,37 +269,43 @@ const Internship = () => {
           </div>
 
           {/* Main content remains unchanged */}
-          {/* Mobile Header */}
-          <div className="flex items-center justify-between mb-4 md:hidden">
-            {/* Back Button */}
-            <button
-              className="text-gray-500"
-              onClick={() => window.history.back()}
-            >
-              ←
-            </button>
-
-            <h1 className="text-lg font-bold text-gray-600">
-              Explore {filteredInternships.length} Internship
-              {filteredInternships.length !== 1 ? "s" : ""}
-            </h1>
-
-            {/* Filter Button */}
-            <button
-              className="text-primary font-medium"
-              onClick={() => setShowMobileFilters(true)}
-            >
-              Filter
-            </button>
-          </div>
 
           <div className="flex-1 w-full">
-            <div className="mb-4 sm:mb-6">
+            {/* Mobile Header */}
+            <div className="flex items-center justify-between mb-4 md:hidden">
+              {/* Back Button */}
+              <button
+                className="text-gray-500"
+                onClick={() => window.history.back()}
+              >
+                ←
+              </button>
+
+              <h1 className="text-lg font-bold text-gray-600">
+                Explore {filteredInternships.length} Internship
+                {filteredInternships.length !== 1 ? "s" : ""}
+              </h1>
+
+              {/* Filter Button */}
+              <button
+                className="text-primary font-medium"
+                onClick={() => setShowMobileFilters(true)}
+              >
+                Filter
+              </button>
+            </div>
+            <div className="hidden lg:block mb-6">
+              <h1 className="text-2xl text-gray-600 font-medium">
+                Explore {filteredInternships.length} Internship
+                {filteredInternships.length !== 1 ? "s" : ""}
+              </h1>
+            </div>
+            {/* <div className="mb-4 sm:mb-6">
               <h1 className="text-xl sm:text-2xl text-gray-600 font-medium">
                 Explore {filteredInternships.length} Internship
                 {internships.length !== 1 ? "s" : ""}
               </h1>
-            </div>
+            </div> */}
 
             {error ? (
               <p className="text-destructive">{error}</p>
