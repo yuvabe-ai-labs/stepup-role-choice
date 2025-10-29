@@ -120,6 +120,11 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
 
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentDay = currentDate.getDate();
+
   const {
     control,
     handleSubmit,
@@ -146,6 +151,65 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
   });
 
   const isPaid = watch("isPaid");
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
+
+  // Function to check if a date is disabled (in the past)
+  const isDateDisabled = (date: number, month: string, year: string) => {
+    if (!month || !year) return false;
+
+    const selectedTimestamp = new Date(
+      parseInt(year),
+      parseInt(month) - 1,
+      date
+    ).setHours(0, 0, 0, 0);
+
+    const todayTimestamp = new Date().setHours(0, 0, 0, 0);
+
+    return selectedTimestamp < todayTimestamp;
+  };
+
+  // Get available dates based on selected month and year
+  const getAvailableDates = () => {
+    if (!selectedMonth || !selectedYear) {
+      return Array.from({ length: 31 }, (_, i) => i + 1);
+    }
+
+    const year = parseInt(selectedYear);
+    const month = parseInt(selectedMonth);
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    return Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  };
+
+  // Get available months based on selected year
+  const getAvailableMonths = () => {
+    if (!selectedYear) return months;
+
+    const year = parseInt(selectedYear);
+    if (year > currentYear) return months;
+
+    // Current year - only show current month onwards
+    return months.slice(currentMonth - 1);
+  };
+
+  const dates = getAvailableDates();
+  const availableMonths = getAvailableMonths();
 
   useEffect(() => {
     if (internship && isOpen) {
@@ -187,6 +251,32 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
       });
     }
   }, [internship, isOpen, reset]);
+
+  // Sync date selection with form and validate
+  useEffect(() => {
+    if (selectedDate && selectedMonth && selectedYear) {
+      const date = new Date(
+        parseInt(selectedYear),
+        parseInt(selectedMonth) - 1,
+        parseInt(selectedDate)
+      );
+
+      // Check if selected date is in the past
+      if (date.setHours(0, 0, 0, 0) >= new Date().setHours(0, 0, 0, 0)) {
+        // Trigger form validation by touching a field
+        setValue("title", watch("title"), { shouldValidate: true });
+      }
+    }
+  }, [selectedDate, selectedMonth, selectedYear, setValue, watch]);
+
+  // Reset date when month or year changes if it becomes invalid
+  useEffect(() => {
+    if (selectedDate && selectedMonth && selectedYear) {
+      if (isDateDisabled(parseInt(selectedDate), selectedMonth, selectedYear)) {
+        setSelectedDate("");
+      }
+    }
+  }, [selectedMonth, selectedYear]);
 
   const handleAddLanguage = () => {
     const newLanguages = [
@@ -338,20 +428,17 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
 
       if (aiResponse?.response) {
         let cleanResponse = aiResponse.response
-          // Remove markdown and filler phrases
           .replace(/\*\*/g, "")
           .replace(/\*/g, "")
           .replace(/^#+\s/gm, "")
-          .replace(/^(here('|’)s|sure|of course|okay|let'?s).*\n/i, "")
+          .replace(/^(here('|'|â€™)s|sure|of course|okay|let'?s).*\n/i, "")
           .replace(/^about .*internship.*\n?/i, "")
           .trim();
 
-        // For description — keep only first paragraph
         if (fieldName === "description") {
           cleanResponse = cleanResponse.split(/\n\s*\n/)[0].trim();
         }
 
-        // For responsibilities/benefits — keep only clean lines
         if (["responsibilities", "benefits"].includes(fieldName)) {
           cleanResponse = cleanResponse
             .split(/\n+/)
@@ -391,24 +478,6 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
       setAiLoading(null);
     }
   };
-
-  const dates = Array.from({ length: 31 }, (_, i) => i + 1);
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -777,113 +846,21 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
             </div>
 
             {/* Last date to apply */}
-            {/* <div className="space-y-3">
-              <Label className="text-sm font-medium">Last date to apply</Label>
-              <div className="flex gap-3">
-                <div className="relative flex-1">
-                  <select
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border rounded-full bg-white"
-                  >
-                    <option value="">Date</option>
-                    {dates.map((date) => (
-                      <option key={date} value={date}>
-                        {date}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" />
-                </div>
-
-                <div className="relative flex-1">
-                  <select
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border rounded-full bg-white"
-                  >
-                    <option value="">Month</option>
-                    {months.map((month, index) => (
-                      <option key={month} value={index + 1}>
-                        {month}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" />
-                </div>
-
-                <div className="relative flex-1">
-                  <select
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border rounded-full bg-white"
-                  >
-                    <option value="">Year</option>
-                    {years.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" />
-                </div>
-              </div>
-              {selectedDate && selectedMonth && selectedYear && (
-                <p className="text-sm text-gray-600">
-                  Selected: {selectedDate}/{selectedMonth}/{selectedYear}
-                </p>
-              )}
-            </div> */}
-
             <div className="space-y-3">
               <label className="block text-sm font-normal text-gray-700">
                 Last date to apply
               </label>
 
               <div className="flex gap-3">
-                {/* Date Dropdown */}
-                <div className="relative flex-1">
-                  <select
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-full appearance-none bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-9"
-                  >
-                    <option value="">Date</option>
-                    {dates.map((date) => (
-                      <option key={date} value={date} className="text-gray-700">
-                        {date}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
-                </div>
-
-                {/* Month Dropdown */}
-                <div className="relative flex-1">
-                  <select
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                    className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-full appearance-none bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-9"
-                  >
-                    <option value="">Month</option>
-                    {months.map((month, index) => (
-                      <option
-                        key={month}
-                        value={index + 1}
-                        className="text-gray-700"
-                      >
-                        {month}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                </div>
-
                 {/* Year Dropdown */}
                 <div className="relative flex-1">
                   <select
                     value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedYear(e.target.value);
+                      setSelectedMonth("");
+                      setSelectedDate("");
+                    }}
                     className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-full appearance-none bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-9"
                   >
                     <option value="">Year</option>
@@ -894,6 +871,69 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
                     ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                </div>
+
+                {/* Month Dropdown */}
+                <div className="relative flex-1">
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => {
+                      setSelectedMonth(e.target.value);
+                      setSelectedDate("");
+                    }}
+                    disabled={!selectedYear}
+                    className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-full appearance-none bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-9 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Month</option>
+                    {availableMonths.map((month, index) => {
+                      const monthValue =
+                        selectedYear && parseInt(selectedYear) === currentYear
+                          ? currentMonth + index
+                          : index + 1;
+                      return (
+                        <option
+                          key={month}
+                          value={monthValue}
+                          className="text-gray-700"
+                        >
+                          {month}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                </div>
+
+                {/* Date Dropdown */}
+                <div className="relative flex-1">
+                  <select
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    disabled={!selectedMonth || !selectedYear}
+                    className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-full appearance-none bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-9 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Date</option>
+                    {dates.map((date) => {
+                      const disabled = isDateDisabled(
+                        date,
+                        selectedMonth,
+                        selectedYear
+                      );
+                      return (
+                        <option
+                          key={date}
+                          value={date}
+                          disabled={disabled}
+                          className={
+                            disabled ? "text-gray-400" : "text-gray-700"
+                          }
+                        >
+                          {date}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
                 </div>
               </div>
 
