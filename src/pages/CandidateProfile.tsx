@@ -458,32 +458,47 @@ const CandidateProfile = () => {
 
                     <Select
                       value={data.application.status}
-                      onValueChange={(value) =>
-                        handleStatusChange(value as StatusType)
-                      }
+                      onValueChange={handleStatusChange}
                       disabled={isUpdatingStatus}
                     >
+                      {/* Trigger with dynamic background */}
                       <SelectTrigger
                         className={`w-64 rounded-full px-6 ${getStatusBg(
                           data.application.status
                         )}`}
                       >
-                        <SelectValue />
+                        <SelectValue placeholder="Select Status" />
                       </SelectTrigger>
 
+                      {/* Dropdown content */}
                       <SelectContent className="rounded-2xl">
-                        {statusOptions
-                          .filter(
-                            (option) => option.value !== data.application.status
-                          )
-                          .map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              <div className="flex items-center gap-2 px-4">
-                                <option.icon className="w-4 h-4" />
-                                {option.label}
-                              </div>
-                            </SelectItem>
-                          ))}
+                        <SelectItem value="shortlisted">
+                          <div className="flex items-center gap-2 px-4">
+                            <Heart className="w-4 h-4" />
+                            Shortlisted
+                          </div>
+                        </SelectItem>
+
+                        <SelectItem value="applied">
+                          <div className="flex items-center gap-2 px-4">
+                            <Ban className="w-4 h-4" />
+                            Not Shortlisted
+                          </div>
+                        </SelectItem>
+
+                        <SelectItem value="hired">
+                          <div className="flex items-center gap-2 px-4">
+                            <CopyCheck className="w-4 h-4" />
+                            Select Candidate
+                          </div>
+                        </SelectItem>
+
+                        <SelectItem value="interviewed">
+                          <div className="flex items-center gap-2 px-4">
+                            <User className="w-4 h-4" />
+                            Schedule Interview
+                          </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
