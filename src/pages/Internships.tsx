@@ -1,4 +1,8 @@
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +17,12 @@ import { ChevronRight, CalendarIcon, Search, Clock } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useIntern } from "@/hooks/useInternships";
 import { useUnits } from "@/hooks/useUnits";
-import { differenceInDays, differenceInHours, differenceInMinutes, formatDistanceToNow } from "date-fns";
+import {
+  differenceInDays,
+  differenceInHours,
+  differenceInMinutes,
+  formatDistanceToNow,
+} from "date-fns";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 
 const Internship = () => {
@@ -37,6 +46,7 @@ const Internship = () => {
   const [showAllUnits, setShowAllUnits] = useState(false);
   const [showAllTitles, setShowAlltitles] = useState(false);
   const [showAllIndustries, setShowAllIndustries] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const resetFilters = () => {
     setFilters({
@@ -62,8 +72,12 @@ const Internship = () => {
     return new Date(s);
   };
 
-  const uniqueUnits = [...new Set(internships.map((i) => i.company_name).filter(Boolean))];
-  const uniqueTitles = [...new Set(internships.map((i) => i.title).filter(Boolean))];
+  const uniqueUnits = [
+    ...new Set(internships.map((i) => i.company_name).filter(Boolean)),
+  ];
+  const uniqueTitles = [
+    ...new Set(internships.map((i) => i.title).filter(Boolean)),
+  ];
   // const uniqueIndustries = [
   //   ...new Set(units.flatMap((u) => u.industry).filter(Boolean)),
   // ];
@@ -88,7 +102,9 @@ const Internship = () => {
     const list = filters[category] as string[];
     setFilters({
       ...filters,
-      [category]: list.includes(value) ? list.filter((v) => v !== value) : [...list, value],
+      [category]: list.includes(value)
+        ? list.filter((v) => v !== value)
+        : [...list, value],
     });
   };
 
@@ -129,7 +145,11 @@ const Internship = () => {
   // });
 
   const filteredInternships = internships.filter((internship) => {
-    if (filters.internships.length && !filters.internships.includes(internship.company_name)) return false;
+    if (
+      filters.internships.length &&
+      !filters.internships.includes(internship.company_name)
+    )
+      return false;
     if (filters.titles.length) {
       const ind = internship.title;
       if (!ind || !filters.titles.includes(ind)) return false;
@@ -165,8 +185,12 @@ const Internship = () => {
 
     if (filters.postingDate.from || filters.postingDate.to) {
       const unitDate = parsePgTimestamp(internship.created_at).getTime();
-      const from = filters.postingDate.from ? new Date(filters.postingDate.from).getTime() : -Infinity;
-      const to = filters.postingDate.to ? new Date(filters.postingDate.to).getTime() : Infinity;
+      const from = filters.postingDate.from
+        ? new Date(filters.postingDate.from).getTime()
+        : -Infinity;
+      const to = filters.postingDate.to
+        ? new Date(filters.postingDate.to).getTime()
+        : Infinity;
       if (Number.isNaN(unitDate)) return false;
       if (unitDate < from || unitDate > to) return false;
     }
@@ -192,10 +216,14 @@ const Internship = () => {
       <div className="container px-4 sm:px-6 lg:px-[7.5rem] py-4 lg:py-10">
         <div className="flex flex-col lg:flex-row gap-5">
           {/* Sidebar Filters */}
-          <div className="w-full lg:w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col lg:h-[90vh] lg:sticky lg:top-6 mb-4 lg:mb-0">
+          <div className="w-full lg:w-80 bg-card pt-5 border border-gray-200 rounded-3xl lg:flex flex-col lg:h-[90vh] lg:sticky lg:top-6 mb-4 lg:mb-0 hidden">
             <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
               <h2 className="text-lg font-bold">Filters</h2>
-              <Button variant="ghost" className="text-primary text-sm font-medium" onClick={resetFilters}>
+              <Button
+                variant="ghost"
+                className="text-primary text-sm font-medium"
+                onClick={resetFilters}
+              >
                 Reset all
               </Button>
             </div>
@@ -241,13 +269,43 @@ const Internship = () => {
           </div>
 
           {/* Main content remains unchanged */}
+
           <div className="flex-1 w-full">
-            <div className="mb-4 sm:mb-6">
+            {/* Mobile Header */}
+            <div className="flex items-center justify-between mb-4 md:hidden">
+              {/* Back Button */}
+              <button
+                className="text-gray-500"
+                onClick={() => window.history.back()}
+              >
+                ←
+              </button>
+
+              <h1 className="text-lg font-bold text-gray-600">
+                Explore {filteredInternships.length} Internship
+                {filteredInternships.length !== 1 ? "s" : ""}
+              </h1>
+
+              {/* Filter Button */}
+              <button
+                className="text-primary font-medium"
+                onClick={() => setShowMobileFilters(true)}
+              >
+                Filter
+              </button>
+            </div>
+            <div className="hidden lg:block mb-6">
+              <h1 className="text-2xl text-gray-600 font-medium">
+                Explore {filteredInternships.length} Internship
+                {filteredInternships.length !== 1 ? "s" : ""}
+              </h1>
+            </div>
+            {/* <div className="mb-4 sm:mb-6">
               <h1 className="text-xl sm:text-2xl text-gray-600 font-medium">
                 Explore {filteredInternships.length} Internship
                 {internships.length !== 1 ? "s" : ""}
               </h1>
-            </div>
+            </div> */}
 
             {error ? (
               <p className="text-destructive">{error}</p>
@@ -276,13 +334,17 @@ const Internship = () => {
 
                     const timeAgo = getShortTimeAgo(dateToUse);
 
-                    const matchingUnit = units.find((unit) => unit.profile_id === internship.created_by);
+                    const matchingUnit = units.find(
+                      (unit) => unit.profile_id === internship.created_by
+                    );
 
                     return (
                       <Card
                         key={internship.id}
                         className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300"
-                        onClick={() => navigate(`/internships/${internship.id}`)}
+                        onClick={() =>
+                          navigate(`/internships/${internship.id}`)
+                        }
                       >
                         <div className="space-y-2">
                           <div className="flex items-start justify-between">
@@ -302,19 +364,24 @@ const Internship = () => {
 
                           {internship.title ? (
                             <h3 className="text-4 font-semibold text-gray-900 line-clamp-2">
-                              {internship.title.length > 20 ? `${internship.title.slice(0, 21)}...` : internship.title}
+                              {internship.title.length > 20
+                                ? `${internship.title.slice(0, 21)}...`
+                                : internship.title}
                             </h3>
                           ) : (
                             "Title"
                           )}
 
                           <p className="text-sm text-gray-500 line-clamp-3">
-                            {internship.description || "No description available"}
+                            {internship.description ||
+                              "No description available"}
                           </p>
                           <div className="flex items-center gap-4 text-sm text-gray-600">
                             <div className="flex items-center gap-1">
                               <Clock className="w-4 h-4" />
-                              <span>{internship.duration || "Not specified"}</span>
+                              <span>
+                                {internship.duration || "Not specified"}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -332,14 +399,26 @@ const Internship = () => {
 };
 
 /* ------------------ UPDATED FilterSection ------------------ */
-const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle, showAll, setShowAll }: any) => {
+const FilterSection = ({
+  label,
+  searchValue,
+  onSearch,
+  list,
+  selected,
+  onToggle,
+  showAll,
+  setShowAll,
+}: any) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
@@ -353,11 +432,15 @@ const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle,
     setShowDropdown(value.trim().length > 0);
   };
 
-  const filteredSearchResults = list.filter((item: string) => item.toLowerCase().includes(searchValue.toLowerCase()));
+  const filteredSearchResults = list.filter((item: string) =>
+    item.toLowerCase().includes(searchValue.toLowerCase())
+  );
 
   return (
     <div className="relative">
-      <Label className="text-sm font-medium text-gray-500 mb-3 block">{label}</Label>
+      <Label className="text-sm font-medium text-gray-500 mb-3 block">
+        {label}
+      </Label>
 
       {/* ✅ Single Search Input */}
       <div className="relative mb-3">
@@ -393,7 +476,9 @@ const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle,
             </div>
           ))}
           {filteredSearchResults.length === 0 && (
-            <div className="px-3 py-2 text-sm text-muted-foreground">No {label} found.</div>
+            <div className="px-3 py-2 text-sm text-muted-foreground">
+              No {label} found.
+            </div>
           )}
         </div>
       )}
@@ -402,12 +487,19 @@ const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle,
       <div className="space-y-3 mt-3">
         {(showAll ? list : list.slice(0, 4)).map((item: string) => (
           <div key={item} className="flex items-center space-x-2">
-            <Checkbox checked={selected.includes(item)} onCheckedChange={() => onToggle(item)} />
+            <Checkbox
+              checked={selected.includes(item)}
+              onCheckedChange={() => onToggle(item)}
+            />
             <span className="text-sm">{item}</span>
           </div>
         ))}
         {list.length > 4 && (
-          <Button variant="link" className="p-0 text-primary text-sm" onClick={() => setShowAll(!showAll)}>
+          <Button
+            variant="link"
+            className="p-0 text-primary text-sm"
+            onClick={() => setShowAll(!showAll)}
+          >
             {showAll ? "Show Less" : `+${list.length - 4} More`}
           </Button>
         )}
@@ -417,9 +509,16 @@ const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle,
 };
 
 /* ------------------ PostingDateFilter unchanged ------------------ */
-const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChange }: any) => (
+const PostingDateFilter = ({
+  filters,
+  activeDateRange,
+  onSelectDate,
+  onDateChange,
+}: any) => (
   <div>
-    <Label className="text-sm font-semibold text-muted-foreground mb-3 block">Posting Date</Label>
+    <Label className="text-sm font-semibold text-muted-foreground mb-3 block">
+      Posting Date
+    </Label>
     <div className="flex flex-col space-y-3">
       <div className="flex flex-wrap gap-2 justify-between">
         {["from", "to"].map((key) => (
@@ -433,14 +532,18 @@ const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChang
                 {filters.postingDate[key]
                   ? new Date(filters.postingDate[key]).toLocaleDateString()
                   : key === "from"
-                    ? "From"
-                    : "To"}
+                  ? "From"
+                  : "To"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="p-0" align="start">
               <Calendar
                 mode="single"
-                selected={filters.postingDate[key] ? new Date(filters.postingDate[key]) : undefined}
+                selected={
+                  filters.postingDate[key]
+                    ? new Date(filters.postingDate[key])
+                    : undefined
+                }
                 onSelect={(date) =>
                   onDateChange({
                     ...filters,
@@ -465,7 +568,11 @@ const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChang
             className="rounded-full flex-1"
             onClick={() => onSelectDate(range)}
           >
-            {range === "today" ? "Today" : range === "week" ? "This Week" : "This Month"}
+            {range === "today"
+              ? "Today"
+              : range === "week"
+              ? "This Week"
+              : "This Month"}
           </Button>
         ))}
       </div>

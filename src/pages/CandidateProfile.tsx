@@ -20,6 +20,7 @@ import {
   Youtube,
   Palette,
   Dribbble,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +31,8 @@ import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import { useCandidateProfile } from "@/hooks/useCandidateProfile";
 import { supabase } from "@/integrations/supabase/client";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import {
   Select,
   SelectContent,
@@ -47,7 +50,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import ScheduleInterviewDialog from "@/components/ScheduleInterviewDialog";
 
 const safeParse = (data: any, fallback: any) => {
@@ -67,6 +70,25 @@ const CandidateProfile = () => {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDownloaded, setIsDownloaded] = useState(false);
+
+  type StatusType =
+    | "applied"
+    | "shortlisted"
+    | "rejected"
+    | "interviewed"
+    | "hired";
+
+  const statusOptions: { value: StatusType; label: string; icon: any }[] = [
+    { value: "shortlisted", label: "Shortlisted", icon: Heart },
+    { value: "applied", label: "Not Shortlisted", icon: Ban },
+    { value: "rejected", label: "Not Selected", icon: XCircle },
+    { value: "hired", label: "Select Candidate", icon: CopyCheck },
+    { value: "interviewed", label: "Schedule Interview", icon: User },
+  ];
+
   const [pendingStatus, setPendingStatus] = useState<
     "applied" | "shortlisted" | "rejected" | "interviewed" | "hired" | null
   >(null);
@@ -233,6 +255,60 @@ const CandidateProfile = () => {
 
   const dialogContent = pendingStatus ? getDialogContent(pendingStatus) : null;
 
+  const handleGeneratePDF = async () => {
+    if (!profileRef.current) return;
+
+    const element = profileRef.current;
+
+    const canvas = await html2canvas(element, {
+      scale: 1.2,
+      useCORS: true, // Required for avatar
+      allowTaint: true,
+    });
+
+    const imgData = canvas.toDataURL("image/jpeg", 2.8);
+    // JPEG + compression drastically reduces size
+
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(
+      imgData,
+      "JPEG",
+      0,
+      position,
+      pdfWidth,
+      imgHeight,
+      undefined,
+      "FAST"
+    );
+    heightLeft -= pdf.internal.pageSize.getHeight();
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(
+        imgData,
+        "JPEG",
+        0,
+        position,
+        pdfWidth,
+        imgHeight,
+        undefined,
+        "FAST"
+      );
+      heightLeft -= pdf.internal.pageSize.getHeight();
+    }
+
+    pdf.save(`${data.profile.full_name}-Profile.pdf`);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -289,7 +365,7 @@ const CandidateProfile = () => {
         </div>
 
         {/* Profile Header Card */}
-        <div className="container mx-auto px-10 py-2">
+        <div className="container mx-auto px-10 py-2" ref={profileRef}>
           <Card className="mb-4 rounded-3xl">
             <CardContent className="p-8">
               <div className="flex items-start gap-6">
@@ -318,75 +394,113 @@ const CandidateProfile = () => {
                       : "Passionate professional with experience creating meaningful impact."}
                   </p>
 
-                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
+                  <div className="flex flex-row gap-4 text-sm text-muted-foreground mb-6">
                     {data.profile.email && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 leading-none">
                         <Mail className="w-4 h-4" />
                         <span>{data.profile.email}</span>
                       </div>
                     )}
                     {data.profile.phone && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 leading-none">
                         <Phone className="w-4 h-4" />
                         <span>{data.profile.phone}</span>
                       </div>
                     )}
                     {data.studentProfile.location && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 leading-none">
                         <MapPin className="w-4 h-4" />
                         <span>{data.studentProfile.location}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-3">
-                      <Select
-                        value={data.application.status}
-                        onValueChange={handleStatusChange}
-                        disabled={isUpdatingStatus}
+                  <div className={`flex items-center gap-3 `}>
+                    <Button
+                      onClick={handleGeneratePDF}
+                      disabled={isLoading}
+                      className="no-pdf w-64 rounded-full px-6 text-white transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-[#07636C] to-[#0694A2] hover:opacity-90"
+                    >
+                      {isLoading ? (
+                        <>
+                          <svg
+                            className="animate-spin h-5 w-5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <circle
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              strokeOpacity="0.25"
+                            ></circle>
+                            <path
+                              d="M12 2a10 10 0 0 1 10 10"
+                              strokeOpacity="0.75"
+                            ></path>
+                          </svg>
+                          Loading...
+                        </>
+                      ) : isDownloaded ? (
+                        <>
+                          <Check className="w-5 h-5" />
+                          Downloaded
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-5 h-5" />
+                          Download Profile
+                        </>
+                      )}
+                    </Button>
+
+                    <Select
+                      value={data.application.status}
+                      onValueChange={handleStatusChange}
+                      disabled={isUpdatingStatus}
+                    >
+                      {/* Trigger with dynamic background */}
+                      <SelectTrigger
+                        className={`w-64 rounded-full px-6 ${getStatusBg(
+                          data.application.status
+                        )}`}
                       >
-                        {/* Trigger with dynamic background */}
-                        <SelectTrigger
-                          className={`w-64 rounded-full px-6 ${getStatusBg(
-                            data.application.status
-                          )}`}
-                        >
-                          <SelectValue placeholder="Select Status" />
-                        </SelectTrigger>
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
 
-                        {/* Dropdown content */}
-                        <SelectContent className="rounded-2xl">
-                          <SelectItem value="shortlisted">
-                            <div className="flex items-center gap-2 px-4">
-                              <Heart className="w-4 h-4" />
-                              Shortlisted
-                            </div>
-                          </SelectItem>
+                      {/* Dropdown content */}
+                      <SelectContent className="rounded-2xl">
+                        <SelectItem value="shortlisted">
+                          <div className="flex items-center gap-2 px-4">
+                            <Heart className="w-4 h-4" />
+                            Shortlisted
+                          </div>
+                        </SelectItem>
 
-                          <SelectItem value="applied">
-                            <div className="flex items-center gap-2 px-4">
-                              <Ban className="w-4 h-4" />
-                              Not Shortlisted
-                            </div>
-                          </SelectItem>
+                        <SelectItem value="applied">
+                          <div className="flex items-center gap-2 px-4">
+                            <Ban className="w-4 h-4" />
+                            Not Shortlisted
+                          </div>
+                        </SelectItem>
 
-                          <SelectItem value="hired">
-                            <div className="flex items-center gap-2 px-4">
-                              <CopyCheck className="w-4 h-4" />
-                              Select Candidate
-                            </div>
-                          </SelectItem>
+                        <SelectItem value="hired">
+                          <div className="flex items-center gap-2 px-4">
+                            <CopyCheck className="w-4 h-4" />
+                            Select Candidate
+                          </div>
+                        </SelectItem>
 
-                          <SelectItem value="interviewed">
-                            <div className="flex items-center gap-2 px-4">
-                              <User className="w-4 h-4" />
-                              Schedule Interview
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        <SelectItem value="interviewed">
+                          <div className="flex items-center gap-2 px-4">
+                            <User className="w-4 h-4" />
+                            Schedule Interview
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>

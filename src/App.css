@@ -47,3 +47,21 @@
 .read-the-docs {
   color: #888;
 }
+
+.no-pdf {
+  display: block;
+}
+
+@media print {
+  .no-pdf {
+    display: none !important;
+  }
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}

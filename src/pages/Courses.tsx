@@ -1,4 +1,8 @@
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -15,12 +19,19 @@ import { useInfiniteCourses } from "@/hooks/useInfiniteCourses";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useCourses } from "@/hooks/useCourses";
 import { supabase } from "@/integrations/supabase/client";
-import { differenceInDays, differenceInHours, differenceInMinutes, formatDistanceToNow } from "date-fns";
+import {
+  differenceInDays,
+  differenceInHours,
+  differenceInMinutes,
+  formatDistanceToNow,
+} from "date-fns";
 
 const Courses = () => {
   const navigate = useNavigate();
   const { courses: allCourses, loading: coursesLoading } = useCourses();
-  const [providers, setProviders] = useState<Array<{ id: string; name: string }>>([]);
+  const [providers, setProviders] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
 
   const [filters, setFilters] = useState({
     providers: [] as string[],
@@ -38,9 +49,14 @@ const Courses = () => {
   // Fetch course providers
   useEffect(() => {
     const fetchProviders = async () => {
-      const uniqueCreatorIds = [...new Set(allCourses.map((c) => c.created_by))];
+      const uniqueCreatorIds = [
+        ...new Set(allCourses.map((c) => c.created_by)),
+      ];
 
-      const { data } = await supabase.from("units").select("id, unit_name").in("id", uniqueCreatorIds);
+      const { data } = await supabase
+        .from("units")
+        .select("id, unit_name")
+        .in("id", uniqueCreatorIds);
 
       if (data) {
         setProviders(data.map((p) => ({ id: p.id, name: p.unit_name })));
@@ -75,14 +91,18 @@ const Courses = () => {
   };
 
   const uniqueProviderNames = providers.map((p) => p.name);
-  const uniqueTitles = [...new Set(allCourses.map((c) => c.title).filter(Boolean))];
+  const uniqueTitles = [
+    ...new Set(allCourses.map((c) => c.title).filter(Boolean)),
+  ];
 
   const toggleFilter = (category: keyof typeof filters, value: string) => {
     if (category === "postingDate") return;
     const list = filters[category] as string[];
     setFilters({
       ...filters,
-      [category]: list.includes(value) ? list.filter((v) => v !== value) : [...list, value],
+      [category]: list.includes(value)
+        ? list.filter((v) => v !== value)
+        : [...list, value],
     });
   };
 
@@ -117,21 +137,33 @@ const Courses = () => {
   const filteredCourses = allCourses.filter((course) => {
     // Filter by provider
     if (filters.providers.length) {
-      const providerName = providers.find((p) => p.id === course.created_by)?.name;
-      if (!providerName || !filters.providers.includes(providerName)) return false;
+      const providerName = providers.find(
+        (p) => p.id === course.created_by
+      )?.name;
+      if (!providerName || !filters.providers.includes(providerName))
+        return false;
     }
 
     // Filter by title
-    if (filters.titles.length && !filters.titles.includes(course.title)) return false;
+    if (filters.titles.length && !filters.titles.includes(course.title))
+      return false;
 
     // Filter by difficulty
-    if (filters.difficulty.length && !filters.difficulty.includes(course.difficulty_level || "")) return false;
+    if (
+      filters.difficulty.length &&
+      !filters.difficulty.includes(course.difficulty_level || "")
+    )
+      return false;
 
     // Filter by posting date
     if (filters.postingDate.from || filters.postingDate.to) {
       const courseDate = parsePgTimestamp(course.created_at).getTime();
-      const from = filters.postingDate.from ? new Date(filters.postingDate.from).getTime() : -Infinity;
-      const to = filters.postingDate.to ? new Date(filters.postingDate.to).getTime() : Infinity;
+      const from = filters.postingDate.from
+        ? new Date(filters.postingDate.from).getTime()
+        : -Infinity;
+      const to = filters.postingDate.to
+        ? new Date(filters.postingDate.to).getTime()
+        : Infinity;
       if (Number.isNaN(courseDate)) return false;
       if (courseDate < from || courseDate > to) return false;
     }
@@ -161,7 +193,11 @@ const Courses = () => {
           <div className="w-full lg:w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col lg:h-[90vh] lg:sticky lg:top-6 mb-4 lg:mb-0">
             <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
               <h2 className="text-lg font-bold">Filters</h2>
-              <Button variant="ghost" className="text-primary text-sm font-medium" onClick={resetFilters}>
+              <Button
+                variant="ghost"
+                className="text-primary text-sm font-medium"
+                onClick={resetFilters}
+              >
                 Reset all
               </Button>
             </div>
@@ -190,13 +226,17 @@ const Courses = () => {
               />
 
               <div>
-                <Label className="text-sm font-medium text-gray-500 mb-3 block">Course Level</Label>
+                <Label className="text-sm font-medium text-gray-500 mb-3 block">
+                  Course Level
+                </Label>
                 <div className="space-y-3">
                   {["Beginner", "Intermediate", "Advanced"].map((level) => (
                     <div key={level} className="flex items-center space-x-2">
                       <Checkbox
                         checked={filters.difficulty.includes(level)}
-                        onCheckedChange={() => toggleFilter("difficulty", level)}
+                        onCheckedChange={() =>
+                          toggleFilter("difficulty", level)
+                        }
                       />
                       <span className="text-sm">{level}</span>
                     </div>
@@ -233,17 +273,29 @@ const Courses = () => {
                   "bg-gradient-to-br from-teal-500 to-blue-600",
                   "bg-gradient-to-br from-yellow-500 to-orange-600",
                 ];
-                const gradient = gradients[Math.floor(Math.random() * gradients.length)];
+                const gradient =
+                  gradients[Math.floor(Math.random() * gradients.length)];
 
                 return (
-                  <Card key={course.id} className="overflow-hidden rounded-3xl hover:shadow-lg transition-all">
+                  <Card
+                    key={course.id}
+                    className="overflow-hidden rounded-3xl hover:shadow-lg transition-all"
+                  >
                     {/* Course Image/Gradient Header */}
-                    <div className={`h-40 ${gradient} relative flex items-center justify-center`}>
+                    <div
+                      className={`h-40 ${gradient} relative flex items-center justify-center`}
+                    >
                       {course.image_url ? (
-                        <img src={course.image_url} alt={course.title} className="w-full h-full object-cover" />
+                        <img
+                          src={course.image_url}
+                          alt={course.title}
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <div className="text-white text-center">
-                          <h3 className="text-2xl font-bold">{course.category || "Course"}</h3>
+                          <h3 className="text-2xl font-bold">
+                            {course.category || "Course"}
+                          </h3>
                         </div>
                       )}
                       {/* Time ago badge */}
@@ -262,29 +314,35 @@ const Courses = () => {
                           <span>{course.duration || "8 weeks"}</span>
                         </div>
                         {course.difficulty_level && (
-                          <Badge className={`${getDifficultyColor(course.difficulty_level)} text-white`}>
+                          <Badge
+                            className={`${getDifficultyColor(
+                              course.difficulty_level
+                            )} text-white`}
+                          >
                             {course.difficulty_level}
                           </Badge>
                         )}
                       </div>
 
                       {/* Title */}
-                      <h3 className="font-bold text-lg line-clamp-1">{course.title}</h3>
+                      <h3 className="font-bold text-lg line-clamp-1">
+                        {course.title}
+                      </h3>
 
                       {/* Description */}
                       <p className="text-sm text-muted-foreground line-clamp-3">
-                        {course.description || "Build your skills with this comprehensive course..."}
+                        {course.description ||
+                          "Build your skills with this comprehensive course..."}
                       </p>
 
                       {/* Know More Button */}
-                      <Button
-                        className="w-full rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all"
-                        variant="outline"
+                      <a
+                        href={course.website_url}
+                        target="_blank"
+                        className="w-full inline-block text-center rounded-full border py-1 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all"
                       >
-                        <a href={course.website_url} target="_blank">
-                          Know more
-                        </a>
-                      </Button>
+                        Know more
+                      </a>
                     </CardContent>
                   </Card>
                 );
@@ -293,7 +351,10 @@ const Courses = () => {
               {/* Loading Skeletons */}
               {coursesLoading &&
                 Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={`skeleton-${i}`} className="overflow-hidden rounded-xl">
+                  <Card
+                    key={`skeleton-${i}`}
+                    className="overflow-hidden rounded-xl"
+                  >
                     <Skeleton className="h-40 w-full" />
                     <CardContent className="p-4 space-y-3">
                       <Skeleton className="h-4 w-full" />
@@ -307,8 +368,14 @@ const Courses = () => {
 
             {!coursesLoading && filteredCourses.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">No courses found matching your filters.</p>
-                <Button variant="outline" onClick={resetFilters} className="mt-4">
+                <p className="text-muted-foreground">
+                  No courses found matching your filters.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={resetFilters}
+                  className="mt-4"
+                >
                   Clear Filters
                 </Button>
               </div>
@@ -321,14 +388,26 @@ const Courses = () => {
 };
 
 /* ------------------ FilterSection Component ------------------ */
-const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle, showAll, setShowAll }: any) => {
+const FilterSection = ({
+  label,
+  searchValue,
+  onSearch,
+  list,
+  selected,
+  onToggle,
+  showAll,
+  setShowAll,
+}: any) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
@@ -342,11 +421,15 @@ const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle,
     setShowDropdown(value.trim().length > 0);
   };
 
-  const filteredSearchResults = list.filter((item: string) => item.toLowerCase().includes(searchValue.toLowerCase()));
+  const filteredSearchResults = list.filter((item: string) =>
+    item.toLowerCase().includes(searchValue.toLowerCase())
+  );
 
   return (
     <div className="relative">
-      <Label className="text-sm font-medium text-gray-500 mb-3 block">{label}</Label>
+      <Label className="text-sm font-medium text-gray-500 mb-3 block">
+        {label}
+      </Label>
 
       {/* Search Input */}
       <div className="relative mb-3">
@@ -388,12 +471,19 @@ const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle,
       <div className="space-y-3 mt-3">
         {(showAll ? list : list.slice(0, 4)).map((item: string) => (
           <div key={item} className="flex items-center space-x-2">
-            <Checkbox checked={selected.includes(item)} onCheckedChange={() => onToggle(item)} />
+            <Checkbox
+              checked={selected.includes(item)}
+              onCheckedChange={() => onToggle(item)}
+            />
             <span className="text-sm">{item}</span>
           </div>
         ))}
         {list.length > 4 && (
-          <Button variant="link" className="p-0 text-primary text-sm" onClick={() => setShowAll(!showAll)}>
+          <Button
+            variant="link"
+            className="p-0 text-primary text-sm"
+            onClick={() => setShowAll(!showAll)}
+          >
             {showAll ? "Show Less" : `+${list.length - 4} More`}
           </Button>
         )}
@@ -403,9 +493,16 @@ const FilterSection = ({ label, searchValue, onSearch, list, selected, onToggle,
 };
 
 /* ------------------ PostingDateFilter Component ------------------ */
-const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChange }: any) => (
+const PostingDateFilter = ({
+  filters,
+  activeDateRange,
+  onSelectDate,
+  onDateChange,
+}: any) => (
   <div>
-    <Label className="text-sm font-semibold text-muted-foreground mb-3 block">Posting Date</Label>
+    <Label className="text-sm font-semibold text-muted-foreground mb-3 block">
+      Posting Date
+    </Label>
     <div className="flex flex-col space-y-3">
       <div className="flex flex-wrap gap-2 justify-between">
         {["from", "to"].map((key) => (
@@ -419,14 +516,18 @@ const PostingDateFilter = ({ filters, activeDateRange, onSelectDate, onDateChang
                 {filters.postingDate[key]
                   ? new Date(filters.postingDate[key]).toLocaleDateString()
                   : key === "from"
-                    ? "From"
-                    : "To"}
+                  ? "From"
+                  : "To"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="p-0" align="start">
               <Calendar
                 mode="single"
-                selected={filters.postingDate[key] ? new Date(filters.postingDate[key]) : undefined}
+                selected={
+                  filters.postingDate[key]
+                    ? new Date(filters.postingDate[key])
+                    : undefined
+                }
                 onSelect={(date) =>
                   onDateChange({
                     ...filters,
