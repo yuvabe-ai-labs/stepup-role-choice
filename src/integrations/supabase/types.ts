@@ -1,4 +1,10 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
@@ -56,7 +62,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
-          },
+          }
         ];
       };
       course_enrollments: {
@@ -104,12 +110,11 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
-          },
+          }
         ];
       };
       courses: {
         Row: {
-          website_url: string;
           category: string | null;
           created_at: string;
           created_by: string;
@@ -123,6 +128,7 @@ export type Database = {
           status: Database["public"]["Enums"]["course_status"];
           title: string;
           updated_at: string;
+          website_url: string | null;
         };
         Insert: {
           category?: string | null;
@@ -138,6 +144,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["course_status"];
           title: string;
           updated_at?: string;
+          website_url?: string | null;
         };
         Update: {
           category?: string | null;
@@ -153,15 +160,16 @@ export type Database = {
           status?: Database["public"]["Enums"]["course_status"];
           title?: string;
           updated_at?: string;
+          website_url?: string | null;
         };
         Relationships: [
           {
             foreignKeyName: "courses_created_by_fkey";
             columns: ["created_by"];
             isOneToOne: false;
-            referencedRelation: "profiles";
+            referencedRelation: "units";
             referencedColumns: ["id"];
-          },
+          }
         ];
       };
       internships: {
@@ -247,7 +255,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
-          },
+          }
         ];
       };
       interviews: {
@@ -294,8 +302,44 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "applications";
             referencedColumns: ["id"];
-          },
+          }
         ];
+      };
+      notifications: {
+        Row: {
+          created_at: string;
+          id: string;
+          is_read: boolean;
+          message: string;
+          related_id: string | null;
+          title: string;
+          type: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          is_read?: boolean;
+          message: string;
+          related_id?: string | null;
+          title: string;
+          type?: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          is_read?: boolean;
+          message?: string;
+          related_id?: string | null;
+          title?: string;
+          type?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
       };
       profiles: {
         Row: {
@@ -398,7 +442,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "student_profiles";
             referencedColumns: ["profile_id"];
-          },
+          }
         ];
       };
       student_internships: {
@@ -439,7 +483,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "student_profiles";
             referencedColumns: ["profile_id"];
-          },
+          }
         ];
       };
       student_profiles: {
@@ -552,7 +596,7 @@ export type Database = {
             isOneToOne: true;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
-          },
+          }
         ];
       };
       units: {
@@ -565,21 +609,16 @@ export type Database = {
           created_at: string;
           description: string | null;
           focus_areas: Json | null;
-          focus_areas_backup: Json | null;
           gallery_images: Json | null;
-          glimps: Json | null;
           glimpse: Json | null;
           id: string;
-          image: string | null;
           industry: string | null;
           is_aurovillian: boolean | null;
           mission: string | null;
           opportunities_offered: Json | null;
-          opportunities_offered_backup: Json | null;
           profile_id: string;
           projects: Json | null;
           skills_offered: Json | null;
-          skills_offered_backup: Json | null;
           social_links: Json | null;
           unit_name: string | null;
           unit_type: string | null;
@@ -596,21 +635,16 @@ export type Database = {
           created_at?: string;
           description?: string | null;
           focus_areas?: Json | null;
-          focus_areas_backup?: Json | null;
           gallery_images?: Json | null;
-          glimps?: Json | null;
           glimpse?: Json | null;
           id?: string;
-          image?: string | null;
           industry?: string | null;
           is_aurovillian?: boolean | null;
           mission?: string | null;
           opportunities_offered?: Json | null;
-          opportunities_offered_backup?: Json | null;
           profile_id: string;
           projects?: Json | null;
           skills_offered?: Json | null;
-          skills_offered_backup?: Json | null;
           social_links?: Json | null;
           unit_name?: string | null;
           unit_type?: string | null;
@@ -627,21 +661,16 @@ export type Database = {
           created_at?: string;
           description?: string | null;
           focus_areas?: Json | null;
-          focus_areas_backup?: Json | null;
           gallery_images?: Json | null;
-          glimps?: Json | null;
           glimpse?: Json | null;
           id?: string;
-          image?: string | null;
           industry?: string | null;
           is_aurovillian?: boolean | null;
           mission?: string | null;
           opportunities_offered?: Json | null;
-          opportunities_offered_backup?: Json | null;
           profile_id?: string;
           projects?: Json | null;
           skills_offered?: Json | null;
-          skills_offered_backup?: Json | null;
           social_links?: Json | null;
           unit_name?: string | null;
           unit_type?: string | null;
@@ -656,7 +685,7 @@ export type Database = {
             isOneToOne: true;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
-          },
+          }
         ];
       };
     };
@@ -664,14 +693,16 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      is_unit_user: {
-        Args: Record<PropertyKey, never>;
-        Returns: boolean;
-      };
+      is_unit_user: { Args: never; Returns: boolean };
     };
     Enums: {
       app_role: "student" | "unit" | "admin";
-      application_status: "applied" | "shortlisted" | "rejected" | "interviewed" | "hired";
+      application_status:
+        | "applied"
+        | "shortlisted"
+        | "rejected"
+        | "interviewed"
+        | "hired";
       course_status: "active" | "inactive" | "draft";
       enrollment_status: "enrolled" | "completed" | "dropped";
       internship_status: "active" | "closed" | "draft";
@@ -684,7 +715,10 @@ export type Database = {
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
+type DefaultSchema = DatabaseWithoutInternals[Extract<
+  keyof Database,
+  "public"
+>];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
@@ -695,7 +729,7 @@ export type Tables<
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never = never
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
 }
@@ -705,21 +739,25 @@ export type Tables<
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R;
-      }
-      ? R
-      : never
-    : never;
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+      DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+      DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R;
+    }
+    ? R
+    : never
+  : never;
 
 export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never = never
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
 }
@@ -729,20 +767,22 @@ export type TablesInsert<
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I;
-      }
-      ? I
-      : never
-    : never;
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+      Insert: infer I;
+    }
+    ? I
+    : never
+  : never;
 
 export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never = never
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
 }
@@ -752,27 +792,29 @@ export type TablesUpdate<
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U;
-      }
-      ? U
-      : never
-    : never;
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+      Update: infer U;
+    }
+    ? U
+    : never
+  : never;
 
 export type Enums<
-  DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never = never
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never;
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
@@ -782,20 +824,26 @@ export type CompositeTypes<
     schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never = never
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never;
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never;
 
 export const Constants = {
   public: {
     Enums: {
       app_role: ["student", "unit", "admin"],
-      application_status: ["applied", "shortlisted", "rejected", "interviewed", "hired"],
+      application_status: [
+        "applied",
+        "shortlisted",
+        "rejected",
+        "interviewed",
+        "hired",
+      ],
       course_status: ["active", "inactive", "draft"],
       enrollment_status: ["enrolled", "completed", "dropped"],
       internship_status: ["active", "closed", "draft"],

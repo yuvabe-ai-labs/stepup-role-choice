@@ -719,9 +719,23 @@ const UnitDashboard = () => {
                                 <span className="font-medium">
                                   {new Date(
                                     internship.created_at
-                                  ).toLocaleDateString("en-GB", {
-                                    day: "2-digit",
-                                    month: "2-digit",
+                                  ).toLocaleDateString("en-US", {
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                  })}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-xs sm:text-sm">
+                                <span className="text-muted-foreground">
+                                  Deadline:
+                                </span>
+                                <span className="font-medium">
+                                  {new Date(
+                                    internship.application_deadline
+                                  ).toLocaleDateString("en-US", {
+                                    day: "numeric",
+                                    month: "long",
                                     year: "numeric",
                                   })}
                                 </span>
