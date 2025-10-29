@@ -13,7 +13,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronRight, CalendarIcon, Search, Clock } from "lucide-react";
+import FilterIcon from "@/assets/filter.svg";
+import {
+  ChevronRight,
+  ChevronLeft,
+  CalendarIcon,
+  Search,
+  Clock,
+  Filter,
+} from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useIntern } from "@/hooks/useInternships";
 import { useUnits } from "@/hooks/useUnits";
@@ -272,28 +280,31 @@ const Internship = () => {
 
           <div className="flex-1 w-full">
             {/* Mobile Header */}
-            <div className="flex items-center justify-between mb-4 md:hidden">
-              {/* Back Button */}
-              <button
-                className="text-gray-500"
-                onClick={() => window.history.back()}
-              >
-                ←
-              </button>
+            <div className="flex items-center justify-between mb-4 md:hidden w-full">
+              {/* Left group: Back + Title */}
+              <div className="flex items-center gap-2">
+                <button
+                  className="text-gray-500 text-xl"
+                  onClick={() => window.history.back()}
+                >
+                  <ChevronLeft size={28} strokeWidth={2} />
+                </button>
 
-              <h1 className="text-lg font-bold text-gray-600">
-                Explore {filteredInternships.length} Internship
-                {filteredInternships.length !== 1 ? "s" : ""}
-              </h1>
+                <h1 className="text-lg font-bold text-gray-600">
+                  Explore {filteredInternships.length} Internship
+                  {filteredInternships.length !== 1 ? "s" : ""}
+                </h1>
+              </div>
 
-              {/* Filter Button */}
+              {/* Right: Filter button */}
               <button
-                className="text-primary font-medium"
+                className="text-primary text-xl font-medium"
                 onClick={() => setShowMobileFilters(true)}
               >
-                Filter
+                <img src={FilterIcon} alt="Filter" className="w-6 h-6" />
               </button>
             </div>
+
             <div className="hidden lg:block mb-6">
               <h1 className="text-2xl text-gray-600 font-medium">
                 Explore {filteredInternships.length} Internship
