@@ -1,6 +1,5 @@
 import {
   Search,
-  Bell,
   Menu,
   User,
   FileText,
@@ -24,6 +23,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { NotificationDropdown } from "@/components/NotificationDropdown";
 // import logo from "@/assets/logo-2.png";
 import logo from "@/assets/YuvaNext.svg";
 
@@ -193,9 +193,7 @@ const Navbar = () => {
             </Button>
 
             {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative h-9 w-9">
-              <Bell className="h-5 w-5 text-black fill-black" />
-            </Button>
+            <NotificationDropdown />
 
             {/* Mobile Menu Toggle */}
             <Button
