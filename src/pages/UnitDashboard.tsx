@@ -913,27 +913,56 @@ const UnitDashboard = () => {
               </h2>
             </div>
 
-            <Card>
+            <Card className="rounded-2xl">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                  <h3 className="text-base sm:text-lg font-semibold">
+                  <h3 className="text-base sm:text-2xl font-semibold">
                     Weekly Applications
                   </h3>
                   <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-cyan-300"></div>
+                      <div className="w-8 h-2 rounded-full bg-cyan-300"></div>
                       <span className="text-gray-600">Previous Week</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-teal-600"></div>
+                      <div className="w-8 h-2 rounded-full bg-teal-600"></div>
                       <span className="text-gray-600">This Week</span>
                     </div>
                   </div>
                 </div>
 
                 {reportsLoading ? (
-                  <div className="h-[300px] sm:h-[400px] flex items-center justify-center">
-                    <Skeleton className="h-full w-full" />
+                  <div className="h-[300px] sm:h-[400px] w-full">
+                    {/* Grid lines skeleton */}
+                    <div className="h-full w-full relative">
+                      {/* Horizontal grid lines */}
+                      {[...Array(5)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="absolute w-full border-t border-gray-200"
+                          style={{ top: `${(i + 1) * 20}%` }}
+                        />
+                      ))}
+
+                      {/* Bar chart skeleton */}
+                      <div className="absolute bottom-0 left-0 right-0 h-[85%] flex items-end justify-around px-8">
+                        {/* 7 days of the week */}
+                        {[20, 10, 5, 45, 8, 15, 12].map((height, i) => (
+                          <div
+                            key={i}
+                            className="flex flex-col items-center gap-2 flex-1"
+                          >
+                            {/* Bar */}
+                            <Skeleton
+                              className="w-8 sm:w-10 rounded-t-2xl"
+                              style={{ height: `${height}%` }}
+                            />
+                            {/* Day label */}
+                            <Skeleton className="h-3 w-8" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <ChartContainer
@@ -949,45 +978,53 @@ const UnitDashboard = () => {
                     }}
                     className="h-[300px] sm:h-[400px] w-full"
                   >
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height={400}>
                       <BarChart
                         data={weeklyData}
-                        margin={{
-                          top: 20,
-                          right: 30,
-                          left: 20,
-                          bottom: 5,
-                        }}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <CartesianGrid
+                          vertical={false}
+                          strokeDasharray="0"
+                          stroke="#DDDDDF"
+                        />
                         <XAxis
                           dataKey="day"
                           className="text-xs"
                           tick={{ fill: "hsl(var(--muted-foreground))" }}
+                          axisLine={false}
+                          tickLine={false}
                         />
+
                         <YAxis
                           className="text-xs"
                           tick={{ fill: "hsl(var(--muted-foreground))" }}
                           allowDecimals={false}
+                          axisLine={false}
+                          tickLine={false}
                         />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Legend
-                          wrapperStyle={{
-                            paddingTop: "20px",
-                          }}
-                          iconType="circle"
+
+                        <ChartTooltip
+                          content={<ChartTooltipContent />}
+                          cursor={false}
                         />
                         <Bar
                           dataKey="previousWeek"
-                          fill="hsl(187, 71%, 66%)"
-                          radius={[8, 8, 0, 0]}
-                          name="Previous Week"
+                          fill="rgba(127, 229, 255, 0.8)"
+                          radius={[20, 20, 0, 0]}
+                          barSize={40}
+                          stackId="overlay"
+                          label={false}
                         />
+
+                        {/* Foreground (This Week) */}
                         <Bar
                           dataKey="thisWeek"
-                          fill="hsl(173, 58%, 39%)"
-                          radius={[8, 8, 0, 0]}
-                          name="This Week"
+                          fill="rgba(0, 128, 128, 0.9)"
+                          radius={[20, 20, 0, 0]}
+                          barSize={30}
+                          stackId="overlay"
+                          label={false}
                         />
                       </BarChart>
                     </ResponsiveContainer>
