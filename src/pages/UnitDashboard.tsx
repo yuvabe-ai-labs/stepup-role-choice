@@ -17,6 +17,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -917,182 +932,66 @@ const UnitDashboard = () => {
                 </div>
 
                 {reportsLoading ? (
-                  <div className="h-[300px] sm:h-[400px] flex gap-2 sm:gap-4 p-2 sm:p-4 relative overflow-x-auto">
-                    <div className="absolute left-8 sm:left-12 right-0 top-0 bottom-8 pointer-events-none">
-                      {[0, 1, 2, 3, 4, 5].map((i) => (
-                        <div
-                          key={i}
-                          className="absolute w-full border-t border-gray-200"
-                          style={{ top: `${(i / 5) * 100}%` }}
-                        ></div>
-                      ))}
-                    </div>
-
-                    <div className="absolute left-0 top-0 bottom-8 w-8 sm:w-12 flex flex-col justify-between text-xs text-gray-600">
-                      {[0, 1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="text-right pr-1 sm:pr-2">
-                          <Skeleton className="h-3 w-6 sm:w-8 inline-block" />
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex-1 flex items-end justify-around gap-2 sm:gap-8 ml-8 sm:ml-12 min-w-[500px] sm:min-w-0">
-                      {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
-                        (day) => (
-                          <div
-                            key={day}
-                            className="flex flex-col items-center gap-2"
-                          >
-                            <div
-                              className="relative flex items-end justify-center"
-                              style={{ height: "200px", width: "32px" }}
-                            >
-                              <Skeleton
-                                className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-2xl"
-                                style={{
-                                  height: `${Math.random() * 150 + 30}px`,
-                                  width: "24px",
-                                }}
-                              />
-                              <Skeleton
-                                className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-2xl z-10"
-                                style={{
-                                  height: `${Math.random() * 100 + 20}px`,
-                                  width: "18px",
-                                }}
-                              />
-                            </div>
-                            <Skeleton className="h-3 w-8" />
-                          </div>
-                        )
-                      )}
-                    </div>
+                  <div className="h-[300px] sm:h-[400px] flex items-center justify-center">
+                    <Skeleton className="h-full w-full" />
                   </div>
                 ) : (
-                  <div className="h-[300px] sm:h-[400px] flex gap-2 sm:gap-4 p-2 sm:p-4 relative overflow-x-auto">
-                    <div className="absolute left-8 sm:left-12 right-0 top-0 bottom-8 pointer-events-none">
-                      {[0, 1, 2, 3, 4, 5].map((i) => (
-                        <div
-                          key={i}
-                          className="absolute w-full border-t border-gray-200"
-                          style={{ top: `${(i / 5) * 100}%` }}
-                        ></div>
-                      ))}
-                    </div>
-
-                    <div className="absolute left-0 top-0 bottom-8 w-8 sm:w-12 flex flex-col justify-between text-xs text-gray-600">
-                      {(() => {
-                        const maxApplications = Math.max(
-                          ...weeklyData.flatMap((d) => [
-                            d.previousWeek,
-                            d.thisWeek,
-                          ]),
-                          1
-                        );
-                        let range, step;
-                        if (maxApplications <= 10) {
-                          range = 10;
-                          step = 2;
-                        } else if (maxApplications <= 50) {
-                          range = 50;
-                          step = 10;
-                        } else if (maxApplications <= 100) {
-                          range = 100;
-                          step = 20;
-                        } else if (maxApplications <= 500) {
-                          range = Math.ceil(maxApplications / 100) * 100;
-                          step = range / 5;
-                        } else {
-                          range = Math.ceil(maxApplications / 500) * 500;
-                          step = range / 5;
-                        }
-
-                        const labels = [];
-                        for (let i = 0; i <= 5; i++) {
-                          labels.push(
-                            <div key={i} className="text-right pr-1 sm:pr-2">
-                              {range - i * step}
-                            </div>
-                          );
-                        }
-                        return labels;
-                      })()}
-                    </div>
-
-                    <div className="flex-1 flex items-end justify-around gap-2 sm:gap-8 ml-8 sm:ml-12 min-w-[500px] sm:min-w-0">
-                      {weeklyData.map((dayData) => {
-                        const maxApplications = Math.max(
-                          ...weeklyData.flatMap((d) => [
-                            d.previousWeek,
-                            d.thisWeek,
-                          ]),
-                          1
-                        );
-                        let range;
-                        if (maxApplications <= 10) range = 10;
-                        else if (maxApplications <= 50) range = 50;
-                        else if (maxApplications <= 100) range = 100;
-                        else if (maxApplications <= 500)
-                          range = Math.ceil(maxApplications / 100) * 100;
-                        else range = Math.ceil(maxApplications / 500) * 500;
-
-                        const scaleFactor = 200 / range;
-                        const prevWeekHeight =
-                          dayData.previousWeek * scaleFactor;
-                        const thisWeekHeight = dayData.thisWeek * scaleFactor;
-                        const isThisWeekLarger =
-                          dayData.thisWeek >= dayData.previousWeek;
-
-                        return (
-                          <div
-                            key={dayData.day}
-                            className="flex flex-col items-center gap-2"
-                          >
-                            <div
-                              className="relative flex items-end justify-center"
-                              style={{ height: "200px", width: "32px" }}
-                            >
-                              <div
-                                className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-2xl transition-all hover:opacity-80 cursor-pointer ${
-                                  isThisWeekLarger
-                                    ? "bg-teal-600"
-                                    : "bg-cyan-300"
-                                }`}
-                                style={{
-                                  height: `${Math.max(
-                                    isThisWeekLarger
-                                      ? thisWeekHeight
-                                      : prevWeekHeight,
-                                    8
-                                  )}px`,
-                                  width: "24px",
-                                }}
-                              ></div>
-                              <div
-                                className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-2xl transition-all hover:opacity-80 cursor-pointer z-10 ${
-                                  isThisWeekLarger
-                                    ? "bg-cyan-300"
-                                    : "bg-teal-600"
-                                }`}
-                                style={{
-                                  height: `${Math.max(
-                                    isThisWeekLarger
-                                      ? prevWeekHeight
-                                      : thisWeekHeight,
-                                    8
-                                  )}px`,
-                                  width: "18px",
-                                }}
-                              ></div>
-                            </div>
-                            <span className="text-xs sm:text-sm text-gray-600">
-                              {dayData.day}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  <ChartContainer
+                    config={{
+                      previousWeek: {
+                        label: "Previous Week",
+                        color: "hsl(187, 71%, 66%)",
+                      },
+                      thisWeek: {
+                        label: "This Week",
+                        color: "hsl(173, 58%, 39%)",
+                      },
+                    }}
+                    className="h-[300px] sm:h-[400px] w-full"
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={weeklyData}
+                        margin={{
+                          top: 20,
+                          right: 30,
+                          left: 20,
+                          bottom: 5,
+                        }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis
+                          dataKey="day"
+                          className="text-xs"
+                          tick={{ fill: "hsl(var(--muted-foreground))" }}
+                        />
+                        <YAxis
+                          className="text-xs"
+                          tick={{ fill: "hsl(var(--muted-foreground))" }}
+                          allowDecimals={false}
+                        />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Legend
+                          wrapperStyle={{
+                            paddingTop: "20px",
+                          }}
+                          iconType="circle"
+                        />
+                        <Bar
+                          dataKey="previousWeek"
+                          fill="hsl(187, 71%, 66%)"
+                          radius={[8, 8, 0, 0]}
+                          name="Previous Week"
+                        />
+                        <Bar
+                          dataKey="thisWeek"
+                          fill="hsl(173, 58%, 39%)"
+                          radius={[8, 8, 0, 0]}
+                          name="This Week"
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
                 )}
               </CardContent>
             </Card>
