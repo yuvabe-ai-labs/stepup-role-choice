@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Send, Sparkles } from "lucide-react";
 import chatbotAvatar from "@/assets/chatbot.png";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-3.png";
 import { useIntern } from "@/hooks/useInternships";
 import {
   useInternshipRecommendations,
@@ -1605,7 +1605,7 @@ const Chatbot = () => {
 
           {/* Chatbot Avatar - shown once above first message */}
           {messages.length > 0 && (
-            <div className="flex justify-start mb-4 sticky top-0 bg-[#FDFDFD] z-10">
+            <div className="flex justify-start mb-4 sticky top-0  z-10">
               <div className="w-16 h-16 rounded-full overflow-hidden">
                 <img
                   src={chatbotAvatar}

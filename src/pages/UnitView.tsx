@@ -78,13 +78,13 @@ const UnitView = () => {
         {unit.banner_url && <img src={unit.banner_url} alt={unit.unit_name} className="w-full h-full object-cover" />}
       </div>
 
-      <div className="-mt-[8.25rem] pt-0 container lg:px-[7.5rem] lg:py-10">
+      <div className="md:-mt-[8.25rem] pt-0 container p-0 md:px-[7.5rem]  md:py-10">
         {/* Hero Section with Unit Info */}
-        <Card className="relative border border-gray-200 mb-2.5 overflow-hidden border-border bg-white rounded-3xl">
+        <Card className="relative border border-gray-200 md:mb-2.5 overflow-hidden border-border bg-white rounded-none md:rounded-3xl">
           <CardContent className="p-[1.875rem]">
             <div className="flex flex-col md:flex-row items-start gap-7">
               {/* Unit Logo */}
-              <div className="w-32 h-32 rounded-full bg-background border-4 border-background shadow-md flex items-center justify-center text-4xl font-bold text-foreground overflow-hidden">
+              <div className="hidden md:block w-32 h-32 rounded-full bg-background border-4 border-background shadow-md text-4xl font-bold text-foreground overflow-hidden">
                 {(unit as any).avatar_url ? (
                   <img src={(unit as any).avatar_url} alt={unit.unit_name} className="w-full h-full object-cover" />
                 ) : (
@@ -94,7 +94,17 @@ const UnitView = () => {
 
               {/* Unit Details */}
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-foreground mb-2">{unit.unit_name}</h1>
+                <h1 className="text-3xl font-bold text-foreground mb-2 flex gap-2.5">
+                  {/* Unit Logo For Mobile*/}
+                  <div className="w-10 h-10 md:hidden rounded-full bg-background border-4 border-background shadow-md text-4xl font-bold text-foreground overflow-hidden">
+                    {(unit as any).avatar_url ? (
+                      <img src={(unit as any).avatar_url} alt={unit.unit_name} className="w-full h-full object-cover" />
+                    ) : (
+                      unit.unit_name?.charAt(0) || "U"
+                    )}
+                  </div>
+                  {unit.unit_name}
+                </h1>
                 <p className="text-muted-foreground mb-3 pr-4">
                   {unit.description || "A unit focused on creating meaningful experiences."}
                 </p>
@@ -198,8 +208,8 @@ const UnitView = () => {
         {/* Main Content Grid */}
         <div>
           {/* Left Column - Open Internship Positions */}
-          <div className="">
-            <div className="border border-gray-200 p-8 rounded-3xl">
+          <div>
+            <div className="border border-gray-200 p-8 rounded-none md:rounded-3xl">
               <h2 className="text-xl font-medium text-foreground mb-5">Open Internship Positions</h2>
 
               {internships.length === 0 ? (
@@ -251,14 +261,14 @@ const UnitView = () => {
                                 {/* View Button */}
                                 <Button
                                   variant="gradient"
-                                  className="rounded-full text-white"
+                                  className="rounded-full text-white invisible md:visible"
                                   onClick={() => navigate(`/internships/${internship.id}`)}
                                 >
                                   View
                                 </Button>
                               </div>
 
-                              <p className="text-sm text-gray-400 mb-3 line-clamp-2 pr-[8.56rem]">
+                              <p className="text-sm text-gray-400 mb-3 line-clamp-2 lg:pr-[8.56rem]">
                                 {internship.description}
                               </p>
 
@@ -274,6 +284,15 @@ const UnitView = () => {
                                   ))}
                                 </div>
                               )}
+
+                              {/* View Button */}
+                              <Button
+                                variant="gradient"
+                                className="rounded-full bg-clip-text text-transparent border border-orange-600 visible w-full bg-transparent md:invisible mt-4"
+                                onClick={() => navigate(`/internships/${internship.id}`)}
+                              >
+                                View
+                              </Button>
                             </div>
                           </div>
                         </CardContent>
@@ -364,8 +383,8 @@ const UnitView = () => {
         </div>
 
         {/* Mission & Values Section */}
-        <div className="mt-2.5 space-y-2.5">
-          <Card className="border border-gray-200 rounded-3xl">
+        <div className="md:mt-2.5 space-y-2.5">
+          <Card className="border border-gray-200 rounded-none md:rounded-3xl">
             <CardContent className="p-7">
               <h2 className="text-xl font-medium text-gray-900 mb-5">Mission & Values</h2>
 
@@ -413,7 +432,7 @@ const UnitView = () => {
           const displayImages = galleryImages.slice(0, 3);
 
           return (
-            <Card className="mt-2.5 border-gray-200">
+            <Card className="md:mt-2.5 border-gray-200 rounded-none md:rounded-3xl">
               <CardContent className="p-7">
                 <div className="flex items-center mb-5">
                   <h3 className="text-xl font-medium text-foreground">Glimpse of the Unit</h3>
@@ -425,10 +444,10 @@ const UnitView = () => {
                   </video>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 mt-2.5">
+                <div className="grid grid-cols-3 gap-2.5 mt-2.5">
                   {displayImages.map((imageUrl, index) => (
                     <div key={index} className="relative aspect-square bg-muted overflow-hidden">
-                      <img src={imageUrl} alt={`Gallery image ${index + 1}`} className="w-full h-full object-cover" />
+                      <img src={imageUrl} alt={`Gallery image ${index + 1}`} className="w-full h-full object-cover " />
                     </div>
                   ))}
                 </div>
