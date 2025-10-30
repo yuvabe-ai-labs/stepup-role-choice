@@ -143,7 +143,7 @@ const Navbar = () => {
           {/* Logo */}
           {/* Mobile: Menu Left, Logo Center, Bell Right */}
           <div className="flex w-full  items-center ">
-            <div className="lg:hidden items-center justify-between">
+            <div className="lg:hidden p-3 items-center justify-between">
               {/* Mobile Menu Toggle */}
               <Button
                 variant="ghost"
