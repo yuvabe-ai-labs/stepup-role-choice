@@ -224,7 +224,7 @@ const Internship = () => {
       <div className="container px-4 sm:px-6 lg:px-[7.5rem] py-4 lg:py-10">
         <div className="flex flex-col lg:flex-row gap-5">
           {/* Sidebar Filters */}
-          <div className="w-full lg:w-80 bg-card pt-5 border border-gray-200 rounded-3xl lg:flex flex-col lg:h-[90vh] lg:sticky lg:top-6 mb-4 lg:mb-0 hidden">
+          <div className="hidden lg:flex w-full lg:w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex-col lg:h-[90vh] lg:sticky lg:top-6 mb-4 lg:mb-0">
             <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
               <h2 className="text-lg font-bold">Filters</h2>
               <Button
@@ -275,12 +275,65 @@ const Internship = () => {
               />
             </div>
           </div>
+          {showMobileFilters && (
+            <>
+              {/* Overlay - close when clicked */}
+              <div
+                className="fixed inset-0 bg-black/40 z-40 md:hidden"
+                onClick={() => setShowMobileFilters(false)}
+              />
+
+              {/* Slide-in Filter Panel */}
+              <div className="md:hidden fixed top-0 left-0 h-full w-[75%] bg-white z-50 p-4 overflow-y-auto shadow-xl">
+                {/* Header inside filter */}
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-bold">Filters</h2>
+                  <button
+                    className="text-primary text-xl"
+                    onClick={() => setShowMobileFilters(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Same filter components */}
+                <FilterSection
+                  label="Units"
+                  searchValue={searchUnits}
+                  onSearch={setSearchUnits}
+                  list={uniqueUnits}
+                  selected={filters.internships}
+                  onToggle={(v) => toggleFilter("internships", v)}
+                  showAll={showAllUnits}
+                  setShowAll={setShowAllUnits}
+                />
+
+                <FilterSection
+                  label="Internships Title"
+                  searchValue={searchTitles}
+                  onSearch={setSearchTitles}
+                  list={uniqueTitles}
+                  selected={filters.titles}
+                  onToggle={(v) => toggleFilter("titles", v)}
+                  showAll={showAllTitles}
+                  setShowAll={setShowAlltitles}
+                />
+
+                <PostingDateFilter
+                  filters={filters}
+                  activeDateRange={activeDateRange}
+                  onSelectDate={(range) => DateRange(range)}
+                  onDateChange={setFilters}
+                />
+              </div>
+            </>
+          )}
 
           {/* Main content remains unchanged */}
 
           <div className="flex-1 w-full">
             {/* Mobile Header */}
-            <div className="flex items-center justify-between mb-4 md:hidden w-full">
+            <div className="flex items-center justify-between mb-4 lg:hidden w-full">
               {/* Left group: Back + Title */}
               <div className="flex items-center gap-2">
                 <button

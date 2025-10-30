@@ -4,6 +4,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import FilterIcon from "@/assets/filter.svg";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CalendarIcon, Search, Clock } from "lucide-react";
+import { CalendarIcon, Search, Clock, ChevronLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useInfiniteCourses } from "@/hooks/useInfiniteCourses";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
@@ -45,6 +46,7 @@ const Courses = () => {
   const [searchTitles, setSearchTitles] = useState("");
   const [showAllProviders, setShowAllProviders] = useState(false);
   const [showAllTitles, setShowAllTitles] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Fetch course providers
   useEffect(() => {
@@ -67,6 +69,18 @@ const Courses = () => {
       fetchProviders();
     }
   }, [allCourses]);
+
+  useEffect(() => {
+    if (showMobileFilters) {
+      document.body.style.overflow = "hidden"; // ✅ stop background scroll
+    } else {
+      document.body.style.overflow = "auto"; // ✅ restore scrolling
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [showMobileFilters]);
 
   const resetFilters = () => {
     setFilters({
@@ -190,7 +204,7 @@ const Courses = () => {
       <div className="container px-4 sm:px-6 lg:px-[7.5rem] py-4 lg:py-10">
         <div className="flex flex-col lg:flex-row gap-5">
           {/* Left Sidebar - Filters */}
-          <div className="w-full lg:w-80 bg-card pt-5 border border-gray-200 rounded-3xl flex flex-col lg:h-[90vh] lg:sticky lg:top-6 mb-4 lg:mb-0">
+          <div className=" hidden w-full lg:w-80 bg-card pt-5 border border-gray-200 rounded-3xl lg:flex flex-col lg:h-[90vh] lg:sticky lg:top-6 mb-4 lg:mb-0">
             <div className="flex items-center justify-between mb-4 px-6 py-3 border-b bg-card sticky top-0 z-10">
               <h2 className="text-lg font-bold">Filters</h2>
               <Button
@@ -252,15 +266,124 @@ const Courses = () => {
               />
             </div>
           </div>
+          {showMobileFilters && (
+            <>
+              {/* Overlay */}
+              <div
+                className="fixed inset-0 bg-black/40 z-40 md:hidden"
+                onClick={() => setShowMobileFilters(false)}
+              />
+
+              {/* Slide-in Panel */}
+              <div
+                className="md:hidden fixed top-0 left-0 h-full w-[75%] bg-white z-50
+        p-4 overflow-y-auto shadow-xl space-y-8"
+              >
+                {/* Header */}
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-bold">Filters</h2>
+                  <button
+                    className="text-primary text-xl"
+                    onClick={() => setShowMobileFilters(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Course Providers */}
+                <FilterSection
+                  label="Course Providers"
+                  searchValue={searchProviders}
+                  onSearch={setSearchProviders}
+                  list={uniqueProviderNames}
+                  selected={filters.providers}
+                  onToggle={(v) => toggleFilter("providers", v)}
+                  showAll={showAllProviders}
+                  setShowAll={setShowAllProviders}
+                />
+
+                {/* Course Title */}
+                <FilterSection
+                  label="Course Title"
+                  searchValue={searchTitles}
+                  onSearch={setSearchTitles}
+                  list={uniqueTitles}
+                  selected={filters.titles}
+                  onToggle={(v) => toggleFilter("titles", v)}
+                  showAll={showAllTitles}
+                  setShowAll={setShowAllTitles}
+                />
+
+                {/* ✅ Course Level - moved into drawer */}
+                <div className="mt-6">
+                  <Label className="text-sm font-medium text-gray-500 mb-3 block">
+                    Course Level
+                  </Label>
+                  <div className="space-y-3">
+                    {["Beginner", "Intermediate", "Advanced"].map((level) => (
+                      <div key={level} className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={filters.difficulty.includes(level)}
+                          onCheckedChange={() =>
+                            toggleFilter("difficulty", level)
+                          }
+                        />
+                        <span className="text-sm">{level}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ✅ Posting Date Filter - moved into drawer */}
+                <PostingDateFilter
+                  filters={filters}
+                  activeDateRange={activeDateRange}
+                  onSelectDate={(range) => DateRange(range)}
+                  onDateChange={setFilters}
+                />
+              </div>
+            </>
+          )}
 
           {/* Main Content */}
           <div className="flex-1 w-full">
-            <div className="mb-4 sm:mb-6">
-              <h1 className="text-xl sm:text-2xl text-gray-600 font-medium">
+            <div className="flex items-center justify-between mb-4 lg:hidden w-full">
+              {/* Left group: Back + Title */}
+              <div className="flex items-center gap-2">
+                <button
+                  className="text-gray-500 text-xl"
+                  onClick={() => window.history.back()}
+                >
+                  <ChevronLeft size={28} strokeWidth={2} />
+                </button>
+
+                <h1 className="text-lg font-bold text-gray-600">
+                  Explore {filteredCourses.length} Course
+                  {filteredCourses.length !== 1 ? "s" : ""}
+                </h1>
+              </div>
+
+              {/* Right: Filter button */}
+              <button
+                className="text-primary text-xl font-medium"
+                onClick={() => setShowMobileFilters(true)}
+              >
+                <img src={FilterIcon} alt="Filter" className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="hidden lg:block mb-6">
+              <h1 className="text-2xl text-gray-600 font-medium">
                 Explore {filteredCourses.length} Course
                 {filteredCourses.length !== 1 ? "s" : ""}
               </h1>
             </div>
+            {/* <div className="mb-4 sm:mb-6">
+              <h1 className="text-xl sm:text-2xl text-gray-600 font-medium">
+                Explore {filteredCourses.length} Course
+                {filteredCourses.length !== 1 ? "s" : ""}
+              </h1>
+            </div> */}
 
             {/* Courses Grid */}
             <div className="grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
