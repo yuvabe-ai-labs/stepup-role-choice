@@ -1,5 +1,9 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import {
+  BedrockRuntimeClient,
+  InvokeModelCommand,
+} from "npm:@aws-sdk/client-bedrock-runtime@3.699.0";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -10,7 +14,7 @@ Your task is to ask the user predefined questions one by one, wait for their res
 Do not skip or merge questions. Ask in a friendly and clear tone.  
 
 The questions to ask in order are:  
-1. What’s the best number to reach you on?  
+1. What's the best number to reach you on?  
 2. How do you identify your Gender?  
 
 After collecting basic details, transition with: "Thanks [Name]! Now let's know you professionally. Help me with all your professional details here"
@@ -90,92 +94,91 @@ serve(async (req) => {
         }
       );
     }
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) {
-      throw new Error("GEMINI_API_KEY is not configured");
+    // Get AWS credentials from environment
+    const AWS_ACCESS_KEY_ID = Deno.env.get("AWS_ACCESS_KEY_ID");
+    const AWS_SECRET_ACCESS_KEY = Deno.env.get("AWS_SECRET_ACCESS_KEY");
+    const AWS_REGION = Deno.env.get("AWS_REGION") || "us-east-1";
+    if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY) {
+      throw new Error("AWS credentials are not configured");
     }
-    console.log("Sending request to Gemini API...");
+    console.log("Sending request to AWS Bedrock...");
     // Choose the appropriate system prompt based on user role
-    const SYSTEM_PROMPT =
-      userRole === "unit" ? UNIT_SYSTEM_PROMPT : STUDENT_SYSTEM_PROMPT;
-    // Prepare the conversation context
+    let SYSTEM_PROMPT = "";
+    if (userRole === "unit") {
+      SYSTEM_PROMPT = UNIT_SYSTEM_PROMPT;
+    } else if (userRole === "student") {
+      SYSTEM_PROMPT = STUDENT_SYSTEM_PROMPT;
+    } else if (userRole === "profile_summary") {
+      SYSTEM_PROMPT = `You are "Yuvanext," an AI writing assistant specialized in improving user profile summaries. 
+
+Your task:
+- Enhance the provided text to make it professional and engaging.
+- Return only the improved summary text. Do NOT include greetings, explanations, or any unrelated content.
+- If the input exceeds 1000 characters, shorten it to a maximum of 980 characters while preserving the meaning.
+- If the user asks anything unrelated to profile summaries, politely reply that your role is limited to improving profile summaries.
+
+Always output the refined summary text only.
+`;
+    } else {
+      SYSTEM_PROMPT = "You are a helpful AI assistant.";
+    }
+    // Initialize Bedrock client with timeout
+    const client = new BedrockRuntimeClient({
+      region: AWS_REGION,
+      credentials: {
+        accessKeyId: AWS_ACCESS_KEY_ID,
+        secretAccessKey: AWS_SECRET_ACCESS_KEY,
+      },
+      requestHandler: {
+        requestTimeout: 50000,
+      },
+    });
+    // Prepare messages for OpenAI format
     const messages = [
       {
-        role: "user",
-        parts: [
-          {
-            text: SYSTEM_PROMPT,
-          },
-        ],
+        role: "system",
+        content:
+          SYSTEM_PROMPT +
+          "\n\nIMPORTANT: Respond directly without showing your reasoning process. Do not include any <reasoning> tags or internal thoughts in your response.",
       },
       ...conversationHistory.map((msg) => ({
-        role: msg.role === "user" ? "user" : "model",
-        parts: [
-          {
-            text: msg.content,
-          },
-        ],
+        role: msg.role === "user" ? "user" : "assistant",
+        content: msg.content,
       })),
       {
         role: "user",
-        parts: [
-          {
-            text: message,
-          },
-        ],
+        content: message,
       },
     ];
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: messages,
-          generationConfig: {
-            temperature: 0.7,
-            topK: 1,
-            topP: 1,
-            maxOutputTokens: 2048,
-          },
-          safetySettings: [
-            {
-              category: "HARM_CATEGORY_HARASSMENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE",
-            },
-            {
-              category: "HARM_CATEGORY_HATE_SPEECH",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE",
-            },
-            {
-              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE",
-            },
-            {
-              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE",
-            },
-          ],
-        }),
-      }
+    // Prepare the request for OpenAI model
+    const payload = {
+      messages: messages,
+      max_tokens: 1024,
+      temperature: 0.7,
+      top_p: 0.9,
+    };
+    const command = new InvokeModelCommand({
+      modelId: "openai.gpt-oss-20b-1:0",
+      contentType: "application/json",
+      accept: "application/json",
+      body: JSON.stringify(payload),
+    });
+    // Add timeout wrapper
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Request timeout")), 55000)
     );
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Gemini API Error:", response.status, errorText);
-      // Handle quota exceeded error specifically
-      if (response.status === 429) {
-        throw new Error("API_QUOTA_EXCEEDED");
-      }
-      throw new Error(`Gemini API Error: ${response.status}`);
-    }
-    const data = await response.json();
-    console.log("Gemini API Response:", data);
-    const botResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const response = await Promise.race([client.send(command), timeoutPromise]);
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    console.log("Bedrock API Response:", responseBody);
+    // OpenAI format response parsing
+    let botResponse = responseBody.choices?.[0]?.message?.content;
     if (!botResponse) {
-      throw new Error("No response from Gemini API");
+      throw new Error("No response from Bedrock API");
     }
+    // ✅ Remove any <reasoning>...</reasoning> blocks
+    botResponse = botResponse
+      .replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, "")
+      .trim();
     return new Response(
       JSON.stringify({
         response: botResponse,
@@ -189,15 +192,33 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Error in gemini-chat function:", error);
-    // Handle specific error types
-    if (error.message === "API_QUOTA_EXCEEDED") {
+    console.error("Error in bedrock-chat function:", error);
+    // Handle timeout
+    if (error.message === "Request timeout") {
       return new Response(
         JSON.stringify({
           error:
-            "The AI service has reached its daily limit. Please try again tomorrow or contact support.",
+            "The request took too long. Please try with a shorter message.",
           success: false,
-          errorType: "QUOTA_EXCEEDED",
+          errorType: "TIMEOUT",
+        }),
+        {
+          status: 408,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+    // Handle specific error types
+    if (error.name === "ThrottlingException") {
+      return new Response(
+        JSON.stringify({
+          error:
+            "The AI service is currently busy. Please try again in a moment.",
+          success: false,
+          errorType: "THROTTLING",
         }),
         {
           status: 429,

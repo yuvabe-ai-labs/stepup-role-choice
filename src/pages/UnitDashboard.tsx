@@ -1,45 +1,7 @@
-import { useState } from "react";
-import {
-  Bell,
-  Menu,
-  Search,
-  Users,
-  FileText,
-  Calendar,
-  Briefcase,
-  EllipsisIcon,
-  Sparkles,
-  ArrowRight,
-  Filter,
-  Plus,
-  Eye,
-  Pencil,
-  Ban,
-  CheckCircle,
-  Trash2,
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import CreateInternshipDialog from "@/components/CreateInternshipDialog";
+import EditInternshipDialog from "@/components/EditInternshipDialog";
+import InternshipDetailsView from "@/components/InternshipDetailsView";
+import Navbar from "@/components/Navbar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,15 +12,46 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useUnitApplications } from "@/hooks/useUnitApplications";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useInternships } from "@/hooks/useInternships";
-import CreateInternshipDialog from "@/components/CreateInternshipDialog";
-import EditInternshipDial from "@/components/EditInternshipDialog";
-import { supabase } from "@/integrations/supabase/client";
-import InternshipDetailsView from "@/components/InternshipDetailsView";
-import Navbar from "@/components/Navbar";
-import EditInternshipDialog from "@/components/EditInternshipDialog";
+import { useUnitApplications } from "@/hooks/useUnitApplications";
 import { useUnitReports } from "@/hooks/useUnitReports";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  ArrowRight,
+  Briefcase,
+  Calendar,
+  CheckCircle,
+  EllipsisIcon,
+  Eye,
+  FileText,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+  Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -82,12 +75,48 @@ const UnitDashboard = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [deletingInternship, setDeletingInternship] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [activatingInternship, setActivatingInternship] = useState<any>(null);
   const {
     weeklyData,
     monthlyData,
     stats: reportStats,
     loading: reportsLoading,
   } = useUnitReports();
+
+  // Auto-close internships when deadline passes
+  useEffect(() => {
+    const checkAndCloseExpiredInternships = async () => {
+      if (internshipsLoading || internships.length === 0) return;
+
+      const now = new Date();
+      const expiredInternships = internships.filter((internship) => {
+        if (internship.status !== "active") return false;
+        const deadline = new Date(internship.application_deadline);
+        return deadline < now;
+      });
+
+      if (expiredInternships.length > 0) {
+        try {
+          // Update all expired internships to closed status
+          const updatePromises = expiredInternships.map((internship) =>
+            supabase
+              .from("internships")
+              .update({ status: "closed" })
+              .eq("id", internship.id)
+          );
+
+          await Promise.all(updatePromises);
+
+          // Reload to reflect changes
+          window.location.reload();
+        } catch (err) {
+          console.error("Error auto-closing expired internships:", err);
+        }
+      }
+    };
+
+    checkAndCloseExpiredInternships();
+  }, [internships, internshipsLoading]);
 
   if (selectedInternship) {
     return (
@@ -150,25 +179,62 @@ const UnitDashboard = () => {
     }
   };
 
-  const handleToggleStatus = async (id: string, currentStatus: string) => {
-    try {
-      setUpdating(id);
-      const newStatus = currentStatus === "active" ? "closed" : "active";
+  const handleToggleStatus = async (internship: any) => {
+    // If status is closed, open edit dialog to update deadline before activating
+    if (internship.status !== "active") {
+      setActivatingInternship(internship);
+      setEditingInternship(internship);
+    } else {
+      // If status is active, close it directly
+      try {
+        setUpdating(internship.id);
 
-      const { error: updateError } = await supabase
-        .from("internships")
-        .update({ status: newStatus })
-        .eq("id", id);
+        const { error: updateError } = await supabase
+          .from("internships")
+          .update({ status: "closed" })
+          .eq("id", internship.id);
 
-      if (updateError) throw updateError;
+        if (updateError) throw updateError;
 
-      window.location.reload();
-    } catch (err: any) {
-      console.error("Error updating job status:", err);
-      alert("Failed to update job status");
-    } finally {
-      setUpdating(null);
+        window.location.reload();
+      } catch (err: any) {
+        console.error("Error updating job status:", err);
+        alert("Failed to update job status");
+      } finally {
+        setUpdating(null);
+      }
     }
+  };
+
+  const handleEditSuccess = async () => {
+    // If we're activating an internship, update its status after edit
+    if (activatingInternship) {
+      try {
+        const { error: updateError } = await supabase
+          .from("internships")
+          .update({ status: "active" })
+          .eq("id", activatingInternship.id);
+
+        if (updateError) throw updateError;
+
+        setActivatingInternship(null);
+        setEditingInternship(null);
+        window.location.reload();
+      } catch (err: any) {
+        console.error("Error activating job:", err);
+        alert("Failed to activate job description");
+        setActivatingInternship(null);
+        setEditingInternship(null);
+      }
+    } else {
+      setEditingInternship(null);
+      window.location.reload();
+    }
+  };
+
+  const handleEditClose = () => {
+    setActivatingInternship(null);
+    setEditingInternship(null);
   };
 
   const getStatusColor = (status: string) => {
@@ -662,12 +728,9 @@ const UnitDashboard = () => {
                                     <Pencil className="w-4 h-4 mr-2" />
                                     Edit JD
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem
+                                  {/* <DropdownMenuItem
                                     onClick={() =>
-                                      handleToggleStatus(
-                                        internship.id,
-                                        internship.status
-                                      )
+                                      handleToggleStatus(internship)
                                     }
                                   >
                                     {internship.status === "active" ? (
@@ -681,7 +744,19 @@ const UnitDashboard = () => {
                                         Activate JD
                                       </span>
                                     )}
-                                  </DropdownMenuItem>
+                                  </DropdownMenuItem> */}
+                                  {internship.status !== "active" && (
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleToggleStatus(internship)
+                                      }
+                                    >
+                                      <span className="flex items-center text-green-500">
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        Activate JD
+                                      </span>
+                                    </DropdownMenuItem>
+                                  )}
                                   <DropdownMenuItem
                                     onClick={() =>
                                       handleDeleteClick(internship)
@@ -1121,11 +1196,8 @@ const UnitDashboard = () => {
 
       <EditInternshipDialog
         isOpen={!!editingInternship}
-        onClose={() => setEditingInternship(null)}
-        onSuccess={() => {
-          setEditingInternship(null);
-          window.location.reload();
-        }}
+        onClose={handleEditClose}
+        onSuccess={handleEditSuccess}
         internship={editingInternship}
       />
 
