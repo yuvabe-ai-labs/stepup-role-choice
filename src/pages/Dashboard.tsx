@@ -401,12 +401,7 @@ const Dashboard = () => {
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
-                      <div
-                        className="flex overflow-x-auto gap-4 snap-x snap-mandatory
-    sm:grid sm:grid-cols-2
-    md:grid-cols-3
-    hide-scrollbar [&::-webkit-scrollbar]:w-0"
-                      >
+                      <div className="flex overflow-x-auto gap-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 md:grid-cols-3 [&::-webkit-scrollbar]:w-0 px-1">
                         {recommendedCourses
                           .slice(currentCourseIndex, currentCourseIndex + 3)
                           .map((course, idx) => {
@@ -512,7 +507,7 @@ const Dashboard = () => {
                         variant="outline"
                         size="icon"
                         onClick={nextCourse}
-                        className="flex-shrink-0 rounded-full hidden md:block"
+                        className="flex-shrink-0 rounded-full hidden sm:flex"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
@@ -567,7 +562,7 @@ const Dashboard = () => {
                   </div>
                 ) : (
                   <div className="relative">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2 sm:space-x-4">
                       {/* Left Button */}
                       <Button
                         variant="outline"
@@ -579,18 +574,16 @@ const Dashboard = () => {
                               : appliedInternships
                           )
                         }
-                        className="flex-shrink-0 rounded-full hidden md:block"
+                        className="flex-shrink-0 rounded-full hidden sm:flex"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
 
                       {/* Activity Cards */}
                       <div
-                        className="flex overflow-x-auto gap-4 snap-x snap-mandatory
-    sm:grid sm:grid-cols-2
-    md:grid-cols-3
-    hide-scrollbar
-    px-1 [&::-webkit-scrollbar]:w-0"
+                        className="flex overflow-x-auto  snap-x snap-mandatory
+    sm:grid sm:grid-cols-2 gap-4
+    md:grid-cols-3 px-1 [&::-webkit-scrollbar]:w-0"
                       >
                         {(activityView === "saved"
                           ? savedInternships
@@ -629,7 +622,7 @@ const Dashboard = () => {
                             return (
                               <Card
                                 key={internship.id}
-                                className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300 min-w-[60vw]"
+                                className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300 min-w-[60vw] sm:min-w-0 sm:w-full"
                                 onClick={() =>
                                   navigate(`/internships/${internship.id}`)
                                 }
@@ -695,7 +688,7 @@ const Dashboard = () => {
                               : appliedInternships
                           )
                         }
-                        className="flex-shrink-0 rounded-full hidden md:block"
+                        className="flex-shrink-0 rounded-full hidden sm:flex"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>

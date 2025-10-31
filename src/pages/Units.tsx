@@ -176,7 +176,7 @@ const Units = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container lg:px-[7.5rem] lg:py-10">
+      <div className="container px-4 lg:px-[7.5rem] lg:py-10">
         <div className="flex gap-5">
           {/* Sidebar Filters */}
           <div className="hidden w-80 bg-card pt-5 border border-gray-200 rounded-3xl lg:flex flex-col h-[90vh] sticky top-6">
