@@ -34,7 +34,11 @@ const ProfileSidebar = ({ savedCount = 0 }: ProfileSidebarProps) => {
       if (!user) return;
 
       try {
-        const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
         if (!error && data) {
           setProfile(data);
@@ -80,18 +84,27 @@ const ProfileSidebar = ({ savedCount = 0 }: ProfileSidebarProps) => {
         <div className="text-center mb-6">
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
-              <CircularProgress percentage={profileCompletion} size={90} strokeWidth={3}>
+              <CircularProgress
+                percentage={profileCompletion}
+                size={90}
+                strokeWidth={3}
+              >
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={(studentProfile as any)?.avatar_url || ""} />
+                  <AvatarImage
+                    src={(studentProfile as any)?.avatar_url || ""}
+                  />
                   <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-                    {profile?.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
+                    {profile?.full_name?.charAt(0) ||
+                      user?.email?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </CircularProgress>
             </div>
 
             <div>
-              <h3 className="font-semibold text-lg text-gray-900">{profile?.full_name}</h3>
+              <h3 className="font-semibold text-lg text-gray-900">
+                {profile?.full_name}
+              </h3>
               <p className="text-sm text-gray-500">{profile?.role}</p>
             </div>
 
@@ -113,9 +126,13 @@ const ProfileSidebar = ({ savedCount = 0 }: ProfileSidebarProps) => {
 
           <div className="grid grid-cols-3 gap-6">
             <div>
-              <p className="text-base text-gray-600 mb-1 flex justify-center">Applied</p>
+              <p className="text-base text-gray-600 mb-1 flex justify-center">
+                Applied
+              </p>
               <div className="flex items-center justify-center space-x-2">
-                <div className="text-4xl font-semibold text-gray-600">{appliedCount}</div>
+                <div className="text-2xl font-semibold text-gray-600">
+                  {appliedCount}
+                </div>
 
                 {/* need to implement in future */}
                 {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}
@@ -126,9 +143,13 @@ const ProfileSidebar = ({ savedCount = 0 }: ProfileSidebarProps) => {
             <div className="h-full w-px bg-gray-300 mx-auto"></div>
 
             <div>
-              <p className="text-base text-gray-600 mb-1 flex justify-center">Saved</p>
+              <p className="text-base text-gray-600 mb-1 flex justify-center">
+                Saved
+              </p>
               <div className="flex items-center justify-center space-x-2">
-                <span className="text-4xl font-semibold text-gray-600">{savedCount}</span>
+                <span className="text-2xl font-semibold text-gray-600">
+                  {savedCount}
+                </span>
 
                 {/* need to implement in future */}
                 {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}

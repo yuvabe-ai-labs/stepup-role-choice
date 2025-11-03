@@ -184,7 +184,7 @@ const Dashboard = () => {
             style={{ scrollbarWidth: "thin" }}
           >
             {/* Hero Section */}
-            <div className="flex overflow-x-auto gap-4  sm:grid-col-1 sm:grid-cols-2 md:grid-cols-3 [&::-webkit-scrollbar]:w-0">
+            {/* <div className="flex overflow-x-auto gap-4  sm:grid-col-1 sm:grid-cols-2 md:grid-cols-3 [&::-webkit-scrollbar]:w-0">
               {heroCards.map((card) => (
                 <Card
                   key={card.id}
@@ -215,11 +215,11 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
               ))}
-            </div>
+            </div> */}
 
             {/* Recommended Internships */}
             <section>
-              <Card className="p-6 bg-white shadow-sm border md:border md:border-gray-200 rounded-3xl ">
+              <Card className="p-6 bg-white shadow-sm md:border md:border-gray-200 rounded-3xl ">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold">Recommended for you</h2>
                   <Button
@@ -368,7 +368,7 @@ const Dashboard = () => {
 
             {/* Certified Courses */}
             <section>
-              <Card className="p-6 bg-white shadow-sm border-none md:border md:border-gray-200 rounded-3xl">
+              <Card className="p-6 bg-white shadow-sm md:border-gray-200 rounded-3xl">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold">
                     Certified Courses for you
@@ -519,7 +519,7 @@ const Dashboard = () => {
 
             {/* Your Activity Section */}
             <section>
-              <Card className="p-6 bg-white shadow-sm border-none md:border md:border-gray-200 rounded-3xl">
+              <Card className="p-6 bg-white shadow-sm md:border md:border-gray-200 rounded-3xl">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold">Your Activity</h2>
                   <div className="flex gap-2">
@@ -580,11 +580,7 @@ const Dashboard = () => {
                       </Button>
 
                       {/* Activity Cards */}
-                      <div
-                        className="flex overflow-x-auto  snap-x snap-mandatory
-    sm:grid sm:grid-cols-2 gap-4
-    md:grid-cols-3 px-1 [&::-webkit-scrollbar]:w-0"
-                      >
+                      <div className="flex overflow-x-auto  snap-x snap-mandatory sm:grid sm:grid-cols-2 gap-4 md:grid-cols-3 px-1 [&::-webkit-scrollbar]:w-0">
                         {(activityView === "saved"
                           ? savedInternships
                           : appliedInternships

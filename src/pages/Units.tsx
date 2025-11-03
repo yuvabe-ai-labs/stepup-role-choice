@@ -426,11 +426,11 @@ const Units = () => {
                                 <img
                                   src={unit.avatar_url}
                                   alt={`${unit.unit_name} logo`}
-                                  className="object-contain w-10 h-10"
+                                  className="w-full h-full object-cover" // key change
                                 />
                               ) : (
                                 <span className="text-xs text-white font-bold">
-                                  {unit.unit_name[0].toUpperCase()}
+                                  {unit.unit_name[0]?.toUpperCase()}
                                 </span>
                               )}
                             </div>
