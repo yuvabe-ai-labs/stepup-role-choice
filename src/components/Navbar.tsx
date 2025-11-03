@@ -151,7 +151,7 @@ const Navbar = () => {
                 className="lg:hidden h-9 w-9"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
-                <button className="flex items-center justify-between bg-[var(--indigo-50,#F0F5FF)] rounded-full pl-2 sm:pl-3 pr-1 gap-1 sm:gap-2 py-1.5 shadow-sm w-fit">
+                <button className="flex items-center justify-between  rounded-full pl-2 sm:pl-3 pr-1 gap-1 sm:gap-2 py-1.5 shadow-sm w-fit">
                   {/* Three Bars */}
                   <div className="flex flex-col justify-center space-y-[3px] m-1.5">
                     <div className="h-[3px] w-3 bg-gray-500 rounded-full self-start"></div>
