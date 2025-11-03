@@ -46,7 +46,7 @@ export const UnitSocialLinksDialog: React.FC<UnitSocialLinksDialogProps> = ({
   const { toast } = useToast();
 
   const platformOptions = [
-    { value: "website", label: "Website" },
+    // { value: "website", label: "Website" },
     { value: "linkedin", label: "LinkedIn" },
     { value: "instagram", label: "Instagram" },
     { value: "facebook", label: "Facebook" },
