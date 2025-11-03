@@ -295,7 +295,8 @@ const UnitDashboard = () => {
       <Navbar />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      {/* <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8"> */}
+      <div className="container px-4 sm:px-6 lg:px-[7.5rem] py-4 lg:py-10">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card className="rounded-2xl">

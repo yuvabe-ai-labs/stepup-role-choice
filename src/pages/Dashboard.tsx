@@ -219,7 +219,7 @@ const Dashboard = () => {
 
             {/* Recommended Internships */}
             <section>
-              <Card className="p-6 bg-white shadow-sm border-none md:border md:border-gray-200 rounded-3xl ">
+              <Card className="p-6 bg-white shadow-sm border md:border md:border-gray-200 rounded-3xl ">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold">Recommended for you</h2>
                   <Button
