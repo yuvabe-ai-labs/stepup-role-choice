@@ -564,28 +564,39 @@ const UnitDashboard = () => {
                               : "Passionate about creating user-centered digital experiences."}
                           </p>
 
-                          <div className="flex flex-wrap gap-2 sm:gap-3">
-                            {displaySkills.map(
-                              (skill: string, index: number) => (
+                          <div className="flex gap-2 sm:gap-3 overflow-hidden">
+                            {skills.length > 3 ? (
+                              <>
+                                {skills
+                                  .slice(0, 3)
+                                  .map((skill: string, index: number) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-[10px] sm:text-[11px] text-gray-600 bg-muted/40 rounded-full px-2 sm:px-3 py-1 sm:py-1.5 whitespace-nowrap flex-shrink-0"
+                                    >
+                                      {skill}
+                                    </Badge>
+                                  ))}
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] sm:text-[11px] text-gray-600 bg-muted/40 rounded-full px-2 sm:px-3 py-1 sm:py-1.5 whitespace-nowrap flex-shrink-0"
+                                >
+                                  +{skills.length - 3}
+                                </Badge>
+                              </>
+                            ) : (
+                              skills.map((skill: string, index: number) => (
                                 <Badge
                                   key={index}
                                   variant="outline"
-                                  className="text-[10px] sm:text-[11px] text-gray-600 bg-muted/40 rounded-full px-2 sm:px-3 py-1 sm:py-1.5"
+                                  className="text-[10px] sm:text-[11px] text-gray-600 bg-muted/40 rounded-full px-2 sm:px-3 py-1 sm:py-1.5 whitespace-nowrap flex-shrink-0"
                                 >
                                   {skill}
                                 </Badge>
-                              )
-                            )}
-                            {skills.length > 3 && (
-                              <Badge
-                                variant="outline"
-                                className="text-[10px] sm:text-[11px] text-gray-600 bg-muted/40 rounded-full px-2 sm:px-3 py-1 sm:py-1.5"
-                              >
-                                +{skills.length - 3}
-                              </Badge>
+                              ))
                             )}
                           </div>
-
                           <div className="border-t border-border/40"></div>
 
                           <Button
