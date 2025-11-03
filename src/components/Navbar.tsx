@@ -139,7 +139,8 @@ const Navbar = () => {
   return (
     <>
       <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70 shadow-sm">
-        <div className="container h-16 px-4 sm:px-6 md:px-8 lg:px-20 flex items-center justify-between">
+        {/* <div className="container h-16 px-4 sm:px-6 md:px-8 lg:px-20 flex items-center justify-between"> */}
+        <div className="container h-16 px-4 sm:px-6 md:px-8 lg:px-20 flex items-center relative justify-between">
           {/* Logo */}
           {/* Mobile: Menu Left, Logo Center, Bell Right */}
           <div className="flex w-full  items-center ">
@@ -181,7 +182,7 @@ const Navbar = () => {
 
           {/* Navigation Links - Desktop Only */}
           {navItems.length > 0 && (
-            <div className="hidden lg:flex items-center space-x-4 xl:space-x-8">
+            <div className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2 items-center space-x-6 xl:space-x-10">
               {navItems.map((item) => (
                 <Button
                   key={item.name}
@@ -202,14 +203,14 @@ const Navbar = () => {
           {/* Right Side Actions */}
           <div className="flex items-center space-x-2 sm:space-x-4 ml-auto lg:ml-0">
             {/* Search Bar - Desktop */}
-            <div className="relative hidden lg:block">
+            {/* <div className="relative hidden lg:block">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Search"
                 className="pl-10 w-48 xl:w-64 bg-white border border-gray-300 rounded-full"
               />
-            </div>
+            </div> */}
 
             {/* Search Icon - Mobile */}
             {/* <Button
