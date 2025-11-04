@@ -184,7 +184,7 @@ const Dashboard = () => {
             style={{ scrollbarWidth: "thin" }}
           >
             {/* Hero Section */}
-            <div className="flex overflow-x-auto gap-4  sm:grid-col-1 sm:grid-cols-2 md:grid-cols-3 [&::-webkit-scrollbar]:w-0">
+            {/* <div className="flex overflow-x-auto gap-4  sm:grid-col-1 sm:grid-cols-2 md:grid-cols-3 [&::-webkit-scrollbar]:w-0">
               {heroCards.map((card) => (
                 <Card
                   key={card.id}
@@ -215,11 +215,11 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
               ))}
-            </div>
+            </div> */}
 
             {/* Recommended Internships */}
             <section>
-              <Card className="p-6 bg-white shadow-sm border md:border md:border-gray-200 rounded-3xl ">
+              <Card className="p-6 bg-white shadow-sm md:border md:border-gray-200 rounded-3xl ">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold">Recommended for you</h2>
                   <Button
@@ -368,7 +368,7 @@ const Dashboard = () => {
 
             {/* Certified Courses */}
             <section>
-              <Card className="p-6 bg-white shadow-sm border-none md:border md:border-gray-200 rounded-3xl">
+              <Card className="p-6 bg-white shadow-sm md:border-gray-200 rounded-3xl">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold">
                     Certified Courses for you
@@ -401,12 +401,7 @@ const Dashboard = () => {
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
-                      <div
-                        className="flex overflow-x-auto gap-4 snap-x snap-mandatory
-    sm:grid sm:grid-cols-2
-    md:grid-cols-3
-    hide-scrollbar [&::-webkit-scrollbar]:w-0"
-                      >
+                      <div className="flex overflow-x-auto gap-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 md:grid-cols-3 [&::-webkit-scrollbar]:w-0 px-1">
                         {recommendedCourses
                           .slice(currentCourseIndex, currentCourseIndex + 3)
                           .map((course, idx) => {
@@ -512,7 +507,7 @@ const Dashboard = () => {
                         variant="outline"
                         size="icon"
                         onClick={nextCourse}
-                        className="flex-shrink-0 rounded-full hidden md:block"
+                        className="flex-shrink-0 rounded-full hidden sm:flex"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
@@ -524,7 +519,7 @@ const Dashboard = () => {
 
             {/* Your Activity Section */}
             <section>
-              <Card className="p-6 bg-white shadow-sm border-none md:border md:border-gray-200 rounded-3xl">
+              <Card className="p-6 bg-white shadow-sm md:border md:border-gray-200 rounded-3xl">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold">Your Activity</h2>
                   <div className="flex gap-2">
@@ -567,7 +562,7 @@ const Dashboard = () => {
                   </div>
                 ) : (
                   <div className="relative">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2 sm:space-x-4">
                       {/* Left Button */}
                       <Button
                         variant="outline"
@@ -579,19 +574,13 @@ const Dashboard = () => {
                               : appliedInternships
                           )
                         }
-                        className="flex-shrink-0 rounded-full hidden md:block"
+                        className="flex-shrink-0 rounded-full hidden sm:flex"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
 
                       {/* Activity Cards */}
-                      <div
-                        className="flex overflow-x-auto gap-4 snap-x snap-mandatory
-    sm:grid sm:grid-cols-2
-    md:grid-cols-3
-    hide-scrollbar
-    px-1 [&::-webkit-scrollbar]:w-0"
-                      >
+                      <div className="flex overflow-x-auto  snap-x snap-mandatory sm:grid sm:grid-cols-2 gap-4 md:grid-cols-3 px-1 [&::-webkit-scrollbar]:w-0">
                         {(activityView === "saved"
                           ? savedInternships
                           : appliedInternships
@@ -629,7 +618,7 @@ const Dashboard = () => {
                             return (
                               <Card
                                 key={internship.id}
-                                className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300 min-w-[60vw]"
+                                className="px-5 py-4 hover:shadow-lg transition-all cursor-pointer rounded-xl border border-gray-300 min-w-[60vw] sm:min-w-0 sm:w-full"
                                 onClick={() =>
                                   navigate(`/internships/${internship.id}`)
                                 }
@@ -695,7 +684,7 @@ const Dashboard = () => {
                               : appliedInternships
                           )
                         }
-                        className="flex-shrink-0 rounded-full hidden md:block"
+                        className="flex-shrink-0 rounded-full hidden sm:flex"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>

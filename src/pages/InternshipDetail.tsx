@@ -500,7 +500,7 @@ const InternshipDetail = () => {
         </div>
 
         {/* Ready to Apply */}
-        <section className="p-2 border-b border-gray-200 lg:border-0">
+        <section className="border-b border-gray-200 lg:border-0">
           <div className="my-2.5 rounded-3xl border-0 lg:border lg:border-gray-200 p-2 lg:p-10">
             <Card className="border-0 shadow-none">
               <CardContent className="p-0">
