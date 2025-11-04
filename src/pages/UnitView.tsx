@@ -111,7 +111,7 @@ const UnitView = () => {
           <CardContent className="p-[1.875rem]">
             <div className="flex flex-col md:flex-row items-start gap-7">
               {/* Unit Logo */}
-              <div className="hidden md:block w-32 h-32 rounded-full bg-background border-4 border-background shadow-md text-4xl font-bold text-foreground overflow-hidden">
+              <div className="hidden md:flex items-center justify-center rounded-full md:w-32 md:h-32 bg-background border-4 border-background shadow-md text-6xl font-bold text-foreground overflow-hidden">
                 {(unit as any).avatar_url ? (
                   <img
                     src={(unit as any).avatar_url}
@@ -127,7 +127,7 @@ const UnitView = () => {
               <div className="flex-1">
                 <h1 className="text-3xl font-bold text-foreground mb-2 flex gap-2.5">
                   {/* Unit Logo For Mobile*/}
-                  <div className="w-10 h-10 md:hidden rounded-full bg-background border-4 border-background shadow-md text-4xl font-bold text-foreground overflow-hidden">
+                  <div className="w-10 h-10 flex justify-center items-center md:hidden rounded-full bg-background border-4 border-background shadow-md text-2xl font-bold text-foreground overflow-hidden">
                     {(unit as any).avatar_url ? (
                       <img
                         src={(unit as any).avatar_url}
