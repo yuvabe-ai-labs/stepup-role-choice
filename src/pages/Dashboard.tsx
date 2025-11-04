@@ -237,7 +237,8 @@ const Dashboard = () => {
                   </div>
                 ) : recommendedInternships.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">
-                    No internships available
+                    Please update your skills to see matching internship
+                    opportunities.
                   </p>
                 ) : (
                   <div className="relative">
@@ -246,18 +247,12 @@ const Dashboard = () => {
                         variant="outline"
                         size="icon"
                         onClick={prevInternship}
-                        className="flex-shrink-0 rounded-full hidden sm:flex"
+                        className="flex-shrink-0 rounded-full hidden sm:flex w-7 h-7"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
 
-                      <div
-                        className=" flex overflow-x-auto gap-4 snap-x snap-mandatory
-    sm:grid sm:grid-cols-2
-    md:grid-cols-3
-    [&::-webkit-scrollbar]:w-0
-    px-1"
-                      >
+                      <div className="flex-1 flex overflow-x-auto gap-2.5 snap-x snap-mandatory sm:grid sm:grid-cols-2 md:grid-cols-3 [&::-webkit-scrollbar]:w-0 px-1">
                         {recommendedInternships
                           .slice(
                             currentInternshipIndex,
@@ -319,12 +314,15 @@ const Dashboard = () => {
                                     </Badge>
                                   </div>
                                   <CardTitle className=" m-0 text-gray-800 text-base font-normal flex justify-between items-center">
-                                    {internship.title}
+                                    {internship.title &&
+                                    internship.title.length > 17
+                                      ? `${internship.title.slice(0, 18)}...`
+                                      : internship.title}
                                     <ChevronRight className="w-5 h-5" />
                                   </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
-                                  <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                                  <div className="flex items-center space-x-1 text-xs text-gray-600">
                                     <Clock className="w-3 h-3" />
                                     <span>
                                       {internship.duration || "Not specified"}
@@ -346,7 +344,7 @@ const Dashboard = () => {
                         variant="outline"
                         size="icon"
                         onClick={nextInternship}
-                        className="flex-shrink-0 rounded-full hidden sm:flex"
+                        className="flex-shrink-0 rounded-full hidden sm:flex w-7 h-7"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
@@ -388,7 +386,7 @@ const Dashboard = () => {
                   </div>
                 ) : recommendedCourses.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">
-                    No courses available
+                    Please update your skills to see matching courses.
                   </p>
                 ) : (
                   <div className="relative">
@@ -397,11 +395,11 @@ const Dashboard = () => {
                         variant="outline"
                         size="icon"
                         onClick={prevCourse}
-                        className="flex-shrink-0 rounded-full hidden sm:flex"
+                        className="flex-shrink-0 rounded-full hidden sm:flex w-7 h-7"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
-                      <div className="flex overflow-x-auto gap-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 md:grid-cols-3 [&::-webkit-scrollbar]:w-0 px-1">
+                      <div className="flex-1 flex overflow-x-auto gap-2.5 snap-x snap-mandatory sm:grid sm:grid-cols-2 md:grid-cols-3 [&::-webkit-scrollbar]:w-0 px-1">
                         {recommendedCourses
                           .slice(currentCourseIndex, currentCourseIndex + 3)
                           .map((course, idx) => {
@@ -507,7 +505,7 @@ const Dashboard = () => {
                         variant="outline"
                         size="icon"
                         onClick={nextCourse}
-                        className="flex-shrink-0 rounded-full hidden sm:flex"
+                        className="flex-shrink-0 rounded-full hidden sm:flex w-7 h-7"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
@@ -574,13 +572,13 @@ const Dashboard = () => {
                               : appliedInternships
                           )
                         }
-                        className="flex-shrink-0 rounded-full hidden sm:flex"
+                        className="flex-shrink-0 rounded-full hidden sm:flex w-7 h-7"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
 
                       {/* Activity Cards */}
-                      <div className="flex overflow-x-auto  snap-x snap-mandatory sm:grid sm:grid-cols-2 gap-4 md:grid-cols-3 px-1 [&::-webkit-scrollbar]:w-0">
+                      <div className="flex overflow-x-auto  snap-x snap-mandatory sm:grid sm:grid-cols-2 gap-2.5 md:grid-cols-3 px-1 [&::-webkit-scrollbar]:w-0">
                         {(activityView === "saved"
                           ? savedInternships
                           : appliedInternships
@@ -646,10 +644,8 @@ const Dashboard = () => {
                                   </div>
 
                                   {internship.title ? (
-                                    <h3 className="text-4 font-semibold text-gray-900 line-clamp-2">
-                                      {internship.title.length > 20
-                                        ? `${internship.title.slice(0, 21)}...`
-                                        : internship.title}
+                                    <h3 className="text-4 font-semibold text-gray-900 line-clamp-1">
+                                      {internship.title}
                                     </h3>
                                   ) : (
                                     "Title"
@@ -684,7 +680,7 @@ const Dashboard = () => {
                               : appliedInternships
                           )
                         }
-                        className="flex-shrink-0 rounded-full hidden sm:flex"
+                        className="flex-shrink-0 rounded-full hidden sm:flex w-7 h-7"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
