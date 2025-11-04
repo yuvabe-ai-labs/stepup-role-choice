@@ -528,10 +528,7 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({
                       </h3>
                       <div className="space-y-3">
                         {courses.map((course: any, index: number) => (
-                          <div
-                            key={index}
-                            className="border-l-4 border-blue-500 pl-4"
-                          >
+                          <div key={index}>
                             <h4 className="font-semibold text-gray-900">
                               {course.title || course.name}
                             </h4>
@@ -578,10 +575,7 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({
                       </h3>
                       <div className="space-y-4">
                         {education.map((edu: any) => (
-                          <div
-                            key={edu.id}
-                            className="border-l-4 border-green-500 pl-4"
-                          >
+                          <div key={edu.id}>
                             <h4 className="font-semibold text-gray-900">
                               {edu.degree}
                             </h4>
@@ -604,12 +598,7 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {interests.map((interest: string, index: number) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm"
-                          >
-                            {interest}
-                          </span>
+                          <span key={index}>{interest}</span>
                         ))}
                       </div>
                     </div>
@@ -623,10 +612,7 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({
                       </h3>
                       <div className="space-y-4">
                         {projects.map((project: any, index: number) => (
-                          <div
-                            key={index}
-                            className="border-l-4 border-orange-500 pl-4"
-                          >
+                          <div key={index}>
                             <h4 className="font-semibold text-gray-900">
                               {project.title}
                             </h4>
@@ -662,10 +648,7 @@ const ProfileSummaryDialog: React.FC<ProfileSummaryDialogProps> = ({
                       </h3>
                       <div className="space-y-4">
                         {internships.map((internship: any, index: number) => (
-                          <div
-                            key={internship.id || index}
-                            className="border-l-4 border-teal-500 pl-4"
-                          >
+                          <div key={internship.id || index}>
                             <h4 className="font-semibold text-gray-900">
                               {internship.title || internship.role}
                             </h4>

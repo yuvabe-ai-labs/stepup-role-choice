@@ -6,7 +6,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import Navbar from "@/components/Navbar";
-import { Mail, Phone, MapPin, Trash2, X, Sparkle, Pencil, Pen, CircleCheckBig, CircleX, Camera } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Trash2,
+  X,
+  Sparkle,
+  Pencil,
+  Pen,
+  CircleCheckBig,
+  CircleX,
+  Camera,
+} from "lucide-react";
 import { useProfileData } from "@/hooks/useProfileData";
 import { AvatarUploadDialog } from "@/components/AvatarUploadDialog";
 import { useState } from "react";
@@ -96,7 +108,12 @@ const Profile = () => {
 
   const renderProficiencyDots = (level: number) => {
     return Array.from({ length: 5 }, (_, i) => (
-      <div key={i} className={`w-2 h-2 rounded-full ${i < level ? "bg-primary" : "bg-muted"}`} />
+      <div
+        key={i}
+        className={`w-2 h-2 rounded-full ${
+          i < level ? "bg-primary" : "bg-muted"
+        }`}
+      />
     ));
   };
 
@@ -106,9 +123,14 @@ const Profile = () => {
   const projects = parseJsonField(studentProfile?.projects, []);
   const newInterests = parseJsonField(studentProfile?.interests, []);
 
-  const interests = newInterests.filter((i) => i !== "No Ideas" && i !== "I want to explore");
+  const interests = newInterests.filter(
+    (i) => i !== "No Ideas" && i !== "I want to explore"
+  );
   const languages = parseJsonField(studentProfile?.languages, []);
-  const completedCourses = parseJsonField(studentProfile?.completed_courses, []);
+  const completedCourses = parseJsonField(
+    studentProfile?.completed_courses,
+    []
+  );
 
   const internships = parseJsonField((studentProfile as any)?.internships, []);
 
@@ -130,11 +152,18 @@ const Profile = () => {
           <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
               <div className="relative group">
-                <CircularProgress percentage={profileCompletion} size={90} strokeWidth={3}>
+                <CircularProgress
+                  percentage={profileCompletion}
+                  size={90}
+                  strokeWidth={3}
+                >
                   <Avatar className="h-20 w-20">
-                    <AvatarImage src={(studentProfile as any)?.avatar_url || ""} />
+                    <AvatarImage
+                      src={(studentProfile as any)?.avatar_url || ""}
+                    />
                     <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-                      {profile?.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
+                      {profile?.full_name?.charAt(0) ||
+                        user?.email?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </CircularProgress>
@@ -148,7 +177,9 @@ const Profile = () => {
 
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
-                  <h1 className="text-2xl font-bold">{profile?.full_name.toLocaleUpperCase() || "Student Name"}</h1>
+                  <h1 className="text-2xl font-bold">
+                    {profile?.full_name.toLocaleUpperCase() || "Student Name"}
+                  </h1>
                   {profile && (
                     <>
                       <PersonalDetailsDialog
@@ -163,13 +194,17 @@ const Profile = () => {
                   )}
                 </div>
                 <p className="text-muted-foreground mb-2">
-                  {profile?.role === "student" ? studentProfile.headline : profile?.role || "User"}
+                  {profile?.role === "student"
+                    ? studentProfile.headline
+                    : profile?.role || "User"}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
                   <div className="flex items-center space-x-1">
                     <Mail className="w-4 h-4" />
-                    <span>{profile?.email || user?.email || "No email provided"}</span>
+                    <span>
+                      {profile?.email || user?.email || "No email provided"}
+                    </span>
                   </div>
                   {profile?.phone && (
                     <div className="flex items-center space-x-1">
@@ -181,7 +216,8 @@ const Profile = () => {
                     <MapPin className="w-4 h-4" />
                     <span>
                       {studentProfile?.location
-                        ? studentProfile.location[0].toLocaleUpperCase() + studentProfile.location.slice(1)
+                        ? studentProfile.location[0].toLocaleUpperCase() +
+                          studentProfile.location.slice(1)
                         : "Location not provided"}
                     </span>
                   </div>
@@ -189,9 +225,12 @@ const Profile = () => {
                 <p className="text-muted-foreground text-sm text-gray-400 mt-2.5">
                   {`Last updated - ${
                     studentProfile.updated_at
-                      ? formatDistanceToNow(new Date(studentProfile.updated_at), {
-                          addSuffix: true,
-                        })
+                      ? formatDistanceToNow(
+                          new Date(studentProfile.updated_at),
+                          {
+                            addSuffix: true,
+                          }
+                        )
                       : "recently"
                   }`}
                 </p>
@@ -209,8 +248,15 @@ const Profile = () => {
                   {/* Profile Summary */}
                   <div className="flex items-center justify-between">
                     <span>Profile Summary</span>
-                    <ProfileSummaryDialog summary={studentProfile?.cover_letter || ""} onSave={updateCoverLetter}>
-                      <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                    <ProfileSummaryDialog
+                      summary={studentProfile?.cover_letter || ""}
+                      onSave={updateCoverLetter}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary p-0 h-auto"
+                      >
                         Update
                       </Button>
                     </ProfileSummaryDialog>
@@ -219,7 +265,11 @@ const Profile = () => {
                   <div className="flex items-center justify-between">
                     <span>Courses</span>
                     <CourseDialog onSave={addCourseEntry}>
-                      <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary p-0 h-auto"
+                      >
                         Add
                       </Button>
                     </CourseDialog>
@@ -227,8 +277,15 @@ const Profile = () => {
                   {/* Key Skills */}
                   <div className="flex items-center justify-between">
                     <span>Key Skills</span>
-                    <SkillsDialog studentProfile={studentProfile} onUpdate={updateStudentProfile}>
-                      <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                    <SkillsDialog
+                      studentProfile={studentProfile}
+                      onUpdate={updateStudentProfile}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary p-0 h-auto"
+                      >
                         Add
                       </Button>
                     </SkillsDialog>
@@ -237,7 +294,11 @@ const Profile = () => {
                   <div className="flex items-center justify-between">
                     <span>Education</span>
                     <EducationDialog onSave={addEducationEntry}>
-                      <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary p-0 h-auto"
+                      >
                         Add
                       </Button>
                     </EducationDialog>
@@ -246,7 +307,11 @@ const Profile = () => {
                   <div className="flex items-center justify-between">
                     <span>Projects</span>
                     <ProjectDialog onSave={addProjectEntry}>
-                      <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary p-0 h-auto"
+                      >
                         Add
                       </Button>
                     </ProjectDialog>
@@ -255,10 +320,16 @@ const Profile = () => {
                   <div className="flex items-center justify-between">
                     <span>Interests</span>
                     <InterestDialog
-                      interests={interests.filter((i) => i !== "No Ideas" && i !== "I want to explore")}
+                      interests={interests.filter(
+                        (i) => i !== "No Ideas" && i !== "I want to explore"
+                      )}
                       onSave={updateInterests}
                     >
-                      <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary p-0 h-auto"
+                      >
                         Add
                       </Button>
                     </InterestDialog>
@@ -267,7 +338,11 @@ const Profile = () => {
                   <div className="flex items-center justify-between">
                     <span>Internships</span>
                     <InternshipDialog onSave={addInternshipEntry}>
-                      <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary p-0 h-auto"
+                      >
                         Add
                       </Button>
                     </InternshipDialog>
@@ -281,7 +356,11 @@ const Profile = () => {
                       onUpdate={updateProfile}
                       onUpdateStudent={updateStudentProfile}
                     >
-                      <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary p-0 h-auto"
+                      >
                         Add
                       </Button>
                     </PersonalDetailsDialog>
@@ -295,7 +374,11 @@ const Profile = () => {
                       onUpdate={updateProfile}
                       onUpdateStudent={updateStudentProfile}
                     >
-                      <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary p-0 h-auto"
+                      >
                         Add
                       </Button>
                     </PersonalDetailsDialog>
@@ -305,7 +388,11 @@ const Profile = () => {
                   <div className="flex items-center justify-between">
                     <span>Links</span>
                     <LinkDialog onSave={addInternshipEntry}>
-                      <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary p-0 h-auto"
+                      >
                         Add
                       </Button>
                     </LinkDialog>
@@ -322,7 +409,10 @@ const Profile = () => {
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <h3 className="text-lg font-semibold">Profile Summary</h3>
-                  <ProfileSummaryDialog summary={studentProfile?.cover_letter || ""} onSave={updateCoverLetter}>
+                  <ProfileSummaryDialog
+                    summary={studentProfile?.cover_letter || ""}
+                    onSave={updateCoverLetter}
+                  >
                     <Pen className="w-4 h-4 text-gray-500 cursor-pointer hover:text-primary" />
                   </ProfileSummaryDialog>
                 </div>
@@ -356,12 +446,19 @@ const Profile = () => {
                       <div key={index}>
                         <div className="flex items-center justify-between  rounded-lg">
                           <div>
-                            <h4 className="font-medium">{course.title || "Course Title"}</h4>
-                            <p className="text-sm text-muted-foreground">{course.provider || "Provider"}</p>
+                            <h4 className="font-medium">
+                              {course.title || "Course Title"}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              {course.provider || "Provider"}
+                            </p>
                             <p className="text-sm text-muted-foreground">
                               Completed on{" "}
                               {course.completion_date
-                                ? format(new Date(course.completion_date), "MMM dd, yyyy")
+                                ? format(
+                                    new Date(course.completion_date),
+                                    "MMM dd, yyyy"
+                                  )
                                 : "Date not specified"}
                             </p>
                           </div>
@@ -382,7 +479,9 @@ const Profile = () => {
                       </div>
                     ))
                   ) : (
-                    <p className="text-muted-foreground">No completed courses yet. Add your first course!</p>
+                    <p className="text-muted-foreground">
+                      No completed courses yet. Add your first course!
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -393,7 +492,10 @@ const Profile = () => {
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <h3 className="text-lg font-semibold">Key Skills</h3>
-                  <SkillsDialog studentProfile={studentProfile} onUpdate={updateStudentProfile}>
+                  <SkillsDialog
+                    studentProfile={studentProfile}
+                    onUpdate={updateStudentProfile}
+                  >
                     <Pen className="w-4 h-4 text-gray-500 cursor-pointer hover:text-primary" />
                   </SkillsDialog>
                 </div>
@@ -414,7 +516,8 @@ const Profile = () => {
                     ))
                   ) : (
                     <p className="text-muted-foreground">
-                      No skills added yet. Click the edit icon to add your skills!
+                      No skills added yet. Click the edit icon to add your
+                      skills!
                     </p>
                   )}
                 </div>
@@ -435,17 +538,29 @@ const Profile = () => {
                 <div className="space-y-4">
                   {education.length > 0 ? (
                     education.map((edu: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between rounded-xl">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between rounded-xl"
+                      >
                         <div>
-                          <h4 className="font-medium">{edu.degree || "Degree"}</h4>
-                          <p className="text-sm text-muted-foreground">{edu.institution || "Institution"}</p>
+                          <h4 className="font-medium">
+                            {edu.degree || "Degree"}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {edu.institution || "Institution"}
+                          </p>
                         </div>
                         <div className="flex items-center gap-4">
                           <div className="text-right">
                             <p className="text-sm">
-                              {edu.start_year || "Start"} - {edu.end_year || "Present"}
+                              {edu.start_year || "Start"} -{" "}
+                              {edu.end_year || "Present"}
                             </p>
-                            {edu.score && <p className="text-sm text-primary font-medium">{edu.score} - CGPA</p>}
+                            {edu.score && (
+                              <p className="text-sm text-primary font-medium">
+                                {edu.score} - CGPA
+                              </p>
+                            )}
                           </div>
                           <Button
                             variant="ghost"
@@ -459,7 +574,9 @@ const Profile = () => {
                       </div>
                     ))
                   ) : (
-                    <p className="text-muted-foreground">No education details added yet.</p>
+                    <p className="text-muted-foreground">
+                      No education details added yet.
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -482,7 +599,27 @@ const Profile = () => {
                       <div key={index} className="rounded-xl">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <h4 className="font-medium">{project.title || "Project Title"}</h4>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium truncate">
+                                {project.title || "Project Title"}
+                              </h4>
+                              <p className="text-xs text-muted-foreground ml-2 whitespace-nowrap">
+                                {project.start_date
+                                  ? format(
+                                      new Date(project.start_date),
+                                      "MMM yyyy"
+                                    )
+                                  : "Start date"}{" "}
+                                -{" "}
+                                {project.end_date
+                                  ? format(
+                                      new Date(project.end_date),
+                                      "MMM yyyy"
+                                    )
+                                  : "Present"}
+                              </p>
+                            </div>
+
                             <p className="text-sm text-muted-foreground mt-1">
                               {project.description || "No description"}
                             </p>
@@ -490,17 +627,19 @@ const Profile = () => {
                               Array.isArray(project.technologies) &&
                               project.technologies.length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-2">
-                                  {project.technologies.map((tech: string, techIndex: number) => (
-                                    <Badge key={techIndex} variant="outline" className="text-xs">
-                                      {tech}
-                                    </Badge>
-                                  ))}
+                                  {project.technologies.map(
+                                    (tech: string, techIndex: number) => (
+                                      <Badge
+                                        key={techIndex}
+                                        variant="outline"
+                                        className="text-xs"
+                                      >
+                                        {tech}
+                                      </Badge>
+                                    )
+                                  )}
                                 </div>
                               )}
-                            <p className="text-xs text-muted-foreground mt-2">
-                              {project.start_date ? format(new Date(project.start_date), "MMM yyyy") : "Start date"} -{" "}
-                              {project.end_date ? format(new Date(project.end_date), "MMM yyyy") : "Present"}
-                            </p>
                           </div>
                           <Button
                             variant="ghost"
@@ -516,7 +655,8 @@ const Profile = () => {
                   </div>
                 ) : (
                   <p className="text-muted-foreground">
-                    Stand out by adding details about the projects that you have done so far.
+                    Stand out by adding details about the projects that you have
+                    done so far.
                   </p>
                 )}
               </CardContent>
@@ -527,7 +667,10 @@ const Profile = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold">Interests</h3>
-                  <InterestDialog interests={interests} onSave={updateInterests}>
+                  <InterestDialog
+                    interests={interests}
+                    onSave={updateInterests}
+                  >
                     <Button variant="ghost" size="sm" className="text-primary">
                       Add Interest
                     </Button>
@@ -550,7 +693,9 @@ const Profile = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">Stand out by telling about your interests.</p>
+                  <p className="text-muted-foreground">
+                    Stand out by telling about your interests.
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -572,21 +717,31 @@ const Profile = () => {
                       <div key={index} className="rounded-lg">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <h4 className="font-medium">{internship.title || "Internship Title"}</h4>
-                            <p className="text-sm text-muted-foreground">{internship.company || "Company"}</p>
+                            <h4 className="font-medium">
+                              {internship.title || "Internship Title"}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              {internship.company || "Company"}
+                            </p>
                             <p className="text-sm text-muted-foreground mt-1">
                               {internship.description || "No description"}
                             </p>
                             <p className="text-xs text-muted-foreground mt-2">
                               {internship.start_date
-                                ? format(new Date(internship.start_date), "MMM yyyy")
+                                ? format(
+                                    new Date(internship.start_date),
+                                    "MMM yyyy"
+                                  )
                                 : "Start date"}{" "}
                               -
                               {internship.currently_working
                                 ? " Present"
                                 : internship.end_date
-                                  ? format(new Date(internship.end_date), "MMM yyyy")
-                                  : " End date"}
+                                ? format(
+                                    new Date(internship.end_date),
+                                    "MMM yyyy"
+                                  )
+                                : " End date"}
                             </p>
                           </div>
                           <Button
@@ -602,7 +757,9 @@ const Profile = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">No internships added yet. Add your internship experience!</p>
+                  <p className="text-muted-foreground">
+                    No internships added yet. Add your internship experience!
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -625,24 +782,39 @@ const Profile = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Personal</p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Personal
+                    </p>
                     <p className="font-medium">
-                      {`${profile?.gender}, ${studentProfile?.marital_status}` || "Not specified"}
+                      {`${profile?.gender}, ${studentProfile?.marital_status}` ||
+                        "Not specified"}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Career Break</p>
-                    <p className="font-medium">{studentProfile?.has_career_break ? "Yes" : "No"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Date Of Birth</p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Career Break
+                    </p>
                     <p className="font-medium">
-                      {profile?.date_of_birth ? format(new Date(profile.date_of_birth), "dd MMM yyyy") : "Not provided"}
+                      {studentProfile?.has_career_break ? "Yes" : "No"}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Differently Abled</p>
-                    <p className="font-medium">{studentProfile?.is_differently_abled ? "Yes" : "No"} </p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Date Of Birth
+                    </p>
+                    <p className="font-medium">
+                      {profile?.date_of_birth
+                        ? format(new Date(profile.date_of_birth), "dd MMM yyyy")
+                        : "Not provided"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Differently Abled
+                    </p>
+                    <p className="font-medium">
+                      {studentProfile?.is_differently_abled ? "Yes" : "No"}{" "}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -677,8 +849,13 @@ const Profile = () => {
                       </div>
 
                       {languages.map((lang: any, index: number) => (
-                        <div key={index} className="grid grid-cols-5 items-center rounded-lg">
-                          <span className="font-medium">{lang.name || "Language"}</span>
+                        <div
+                          key={index}
+                          className="grid grid-cols-5 items-center rounded-lg"
+                        >
+                          <span className="font-medium">
+                            {lang.name || "Language"}
+                          </span>
 
                           <div className="flex justify-center items-center">
                             {lang.read ? (
@@ -713,7 +890,9 @@ const Profile = () => {
                       ))}
                     </>
                   ) : (
-                    <p className="text-muted-foreground">No languages added yet.</p>
+                    <p className="text-muted-foreground">
+                      No languages added yet.
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -725,8 +904,15 @@ const Profile = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold">Links</h2>
-                    <LinkDialog existingLinks={studentProfile.links || []} onSave={addLinkEntry}>
-                      <Button variant="ghost" size="sm" className="text-primary">
+                    <LinkDialog
+                      existingLinks={studentProfile.links || []}
+                      onSave={addLinkEntry}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary"
+                      >
                         Add Links
                       </Button>
                     </LinkDialog>
@@ -735,7 +921,10 @@ const Profile = () => {
                   {studentProfile.links.length > 0 ? (
                     <div>
                       {studentProfile.links.map((link: any, index: number) => (
-                        <div key={index} className="grid grid-cols-5 items-center mt-4">
+                        <div
+                          key={index}
+                          className="grid grid-cols-5 items-center mt-4"
+                        >
                           <p className="font-medium">{link.platform}</p>
                           <a
                             href={link.url}
@@ -757,7 +946,9 @@ const Profile = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">No links added yet.</p>
+                    <p className="text-sm text-muted-foreground">
+                      No links added yet.
+                    </p>
                   )}
                 </CardContent>
               </Card>
