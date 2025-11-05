@@ -56,17 +56,35 @@ const SignUp = () => {
     );
 
     if (error) {
-      toast({
-        title: "Sign up failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      // Check if user already exists
+      if (
+        error.message.includes("already registered") ||
+        error.message.includes("User already registered") ||
+        error.message.toLowerCase().includes("already exists")
+      ) {
+        toast({
+          title: "Account already exists",
+          description:
+            "This email is already registered. Please sign in instead.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Sign up failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     } else {
       toast({
         title: "Account created successfully!",
         description:
           "Please check your email to verify your account then sign in to continue.",
       });
+      // Redirect to sign-in page after successful signup
+      setTimeout(() => {
+        navigate(`/auth/${role || "student"}/signin`);
+      }, 2000);
     }
 
     setLoading(false);

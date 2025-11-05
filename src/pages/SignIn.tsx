@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/use-toast";
 import signupIllustration from "@/assets/signup-illustration.png";
+import signupIllustrate from "@/assets/signinillustion.png";
+import signinLogo from "@/assets/signinLogo.svg";
 import { Eye, EyeOff } from "lucide-react";
 
 const SignIn = () => {
@@ -105,14 +107,33 @@ const SignIn = () => {
 
   return (
     <div className="min-h-screen bg-white flex">
-      {/* Left Side - Illustration */}
-      <div className="flex-1 hidden lg:flex items-center justify-center bg-gray-50">
-        <div className="max-w-lg">
+      {/* Left Side */}
+      <div className="hidden lg:flex flex-1 h-screen bg-gray-50 relative p-4">
+        {/* Rounded image container */}
+        <div className="w-full h-full rounded-3xl overflow-hidden relative">
           <img
-            src={signupIllustration}
+            src={signupIllustrate}
             alt="Signin Illustration"
-            className="w-full h-auto"
+            className="w-full h-full object-cover"
           />
+
+          {/* Center content */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-6 px-8">
+            {/* Logo */}
+            <img src={signinLogo} alt="Sign in Logo" className="w-28 h-auto" />
+
+            {/* Paragraph */}
+            <p className="text-white text-base font-medium max-w-sm leading-relaxed">
+              At YuvaNext, we focus on helping young adults take their next step
+              through internships, courses, and real-world opportunities.
+            </p>
+          </div>
+
+          {/* Footer text */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-between px-6 text-white/80 text-xs">
+            <span>Privacy Policy</span>
+            <span>Terms of Use</span>
+          </div>
         </div>
       </div>
 

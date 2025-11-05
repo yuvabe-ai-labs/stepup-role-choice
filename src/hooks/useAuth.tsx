@@ -203,6 +203,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { error };
       }
 
+      // Check if user already exists (Supabase returns data but user has identities already)
+      if (
+        data.user &&
+        data.user.identities &&
+        data.user.identities.length === 0
+      ) {
+        console.log("User already exists");
+        return {
+          error: {
+            message: "User already registered. Please sign in instead.",
+          },
+        };
+      }
+
       // Store role for use after email confirmation
       if (role) {
         localStorage.setItem("pendingRole", role);
