@@ -409,12 +409,6 @@ const Units = () => {
                             addSuffix: true,
                           })}
                         </Badge>
-
-                        {/* {unit.is_aurovillian && (
-                        <Badge className="absolute top-3 right-3 bg-gray-50 text-gray-600">
-                          Auroville
-                        </Badge>
-                      )} */}
                       </div>
 
                       {/* Card Content with Logo */}
