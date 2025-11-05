@@ -2,19 +2,8 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Mail,
-  Phone,
-  MapPin,
-  Clock,
-  Globe,
-  Linkedin,
-  Instagram,
-  Facebook,
-  Twitter,
-} from "lucide-react";
+import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useUnitView } from "@/hooks/useUnitView";
 import ProfileSummaryDialog from "@/components/ProfileSummaryDialog";
@@ -111,7 +100,7 @@ const UnitView = () => {
           <CardContent className="p-[1.875rem]">
             <div className="flex flex-col md:flex-row items-start gap-7">
               {/* Unit Logo */}
-              <div className="hidden md:flex items-center justify-center rounded-full md:w-32 md:h-32 bg-background border-4 border-background shadow-md text-6xl font-bold text-foreground overflow-hidden">
+              <div className="hidden md:block w-32 h-32 rounded-full bg-background border-4 border-background shadow-md text-4xl font-bold text-foreground overflow-hidden">
                 {(unit as any).avatar_url ? (
                   <img
                     src={(unit as any).avatar_url}
@@ -127,7 +116,7 @@ const UnitView = () => {
               <div className="flex-1">
                 <h1 className="text-3xl font-bold text-foreground mb-2 flex gap-2.5">
                   {/* Unit Logo For Mobile*/}
-                  <div className="w-10 h-10 flex justify-center items-center md:hidden rounded-full bg-background border-4 border-background shadow-md text-2xl font-bold text-foreground overflow-hidden">
+                  <div className="w-10 h-10 md:hidden rounded-full bg-background border-4 border-background shadow-md text-4xl font-bold text-foreground overflow-hidden">
                     {(unit as any).avatar_url ? (
                       <img
                         src={(unit as any).avatar_url}
@@ -368,7 +357,7 @@ const UnitView = () => {
                               {/* View Button */}
                               <Button
                                 variant="gradient"
-                                className="rounded-full bg-clip-text text-transparent border border-orange-600 visible w-full bg-transparent md:hidden mt-4"
+                                className="rounded-full bg-clip-text text-transparent border border-orange-600 visible w-full bg-transparent md:invisible mt-4"
                                 onClick={() =>
                                   navigate(`/internships/${internship.id}`)
                                 }
@@ -496,11 +485,9 @@ const UnitView = () => {
           </Card>
         </div>
 
-        {/* Glimpse of the Unit & Gallery*/}
+        {/* Glimpse of the Unit & Gallery */}
         {(() => {
           const glimpseUrl = (unit as any).glimpse;
-          if (!glimpseUrl || typeof glimpseUrl !== "string") return null;
-
           const galleryImagesRaw = (unit as any).gallery_images;
           let galleryImages: string[] = [];
 
@@ -514,8 +501,12 @@ const UnitView = () => {
             galleryImages = [];
           }
 
-          // Only display if there are images
-          if (!galleryImages || galleryImages.length === 0) return null;
+          const hasVideo = glimpseUrl && typeof glimpseUrl === "string";
+          const hasImages =
+            Array.isArray(galleryImages) && galleryImages.length > 0;
+
+          // If neither video nor images exist, return null
+          if (!hasVideo && !hasImages) return null;
 
           // Show up to 3 images
           const displayImages = galleryImages.slice(0, 3);
@@ -528,31 +519,38 @@ const UnitView = () => {
                     Glimpse of the Unit
                   </h3>
                 </div>
-                <div className="relative w-full aspect-video bg-muted overflow-hidden">
-                  <video
-                    controls
-                    className="w-full h-full object-cover"
-                    preload="metadata"
-                  >
-                    <source src={glimpseUrl} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                </div>
 
-                <div className="grid grid-cols-3 gap-2.5 mt-2.5">
-                  {displayImages.map((imageUrl, index) => (
-                    <div
-                      key={index}
-                      className="relative aspect-square bg-muted overflow-hidden"
+                {/* Show video only if available */}
+                {hasVideo && (
+                  <div className="relative w-full aspect-video bg-muted overflow-hidden mb-3">
+                    <video
+                      controls
+                      className="w-full h-full object-cover"
+                      preload="metadata"
                     >
-                      <img
-                        src={imageUrl}
-                        alt={`Gallery image ${index + 1}`}
-                        className="w-full h-full object-cover "
-                      />
-                    </div>
-                  ))}
-                </div>
+                      <source src={glimpseUrl} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                )}
+
+                {/* Show gallery images if available */}
+                {hasImages && (
+                  <div className="grid grid-cols-3 gap-2.5">
+                    {displayImages.map((imageUrl, index) => (
+                      <div
+                        key={index}
+                        className="relative aspect-square bg-muted overflow-hidden"
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={`Gallery image ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           );
