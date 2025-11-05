@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
 // Zoom API integration
 async function createZoomMeeting(summary, description, startDateTime, durationMinutes, attendeeEmail) {
@@ -18,9 +18,9 @@ async function createZoomMeeting(summary, description, startDateTime, durationMi
     method: "POST",
     headers: {
       Authorization: `Basic ${credentials}`,
-      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Type": "application/x-www-form-urlencoded"
     },
-    body: `grant_type=account_credentials&account_id=${ZOOM_ACCOUNT_ID}`,
+    body: `grant_type=account_credentials&account_id=${ZOOM_ACCOUNT_ID}`
   });
   if (!tokenResponse.ok) {
     const errorText = await tokenResponse.text();
@@ -42,16 +42,16 @@ async function createZoomMeeting(summary, description, startDateTime, durationMi
     settings: {
       join_before_host: true,
       mute_upon_entry: true,
-      waiting_room: false,
-    },
+      waiting_room: false
+    }
   };
   const meetingResponse = await fetch(`https://api.zoom.us/v2/users/me/meetings`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
+      "Content-Type": "application/json"
     },
-    body: JSON.stringify(meetingPayload),
+    body: JSON.stringify(meetingPayload)
   });
   if (!meetingResponse.ok) {
     const errorText = await meetingResponse.text();
@@ -68,20 +68,11 @@ async function createZoomMeeting(summary, description, startDateTime, durationMi
   return {
     zoomLink,
     hostLink,
-    meetingId,
+    meetingId
   };
 }
 // Send email with interview details via SMTP
-async function sendInterviewEmail(
-  candidateName,
-  candidateEmail,
-  title,
-  scheduledDate,
-  meetingLink,
-  description,
-  intervieweeName = null,
-  isHost = false,
-) {
+async function sendInterviewEmail(candidateName, candidateEmail, title, scheduledDate, meetingLink, description, intervieweeName = null, isHost = false) {
   const SMTP_HOST = Deno.env.get("SMTP_HOST");
   const SMTP_PORT = parseInt(Deno.env.get("SMTP_PORT") || "587");
   const SMTP_USER = Deno.env.get("SMTP_USER");
@@ -97,7 +88,7 @@ async function sendInterviewEmail(
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: "UTC",
+    timeZone: "UTC"
   });
   // Customize greeting based on recipient
   let greeting = `Dear ${candidateName},`;
@@ -126,13 +117,9 @@ async function sendInterviewEmail(
         </a>
       </div>
       
-      <p>${
-        isHost
-          ? "Please join a few minutes early to test your audio and video."
-          : "Please make sure to join the meeting on time. If you need to reschedule, please contact us as soon as possible."
-      }</p>
+      <p>${isHost ? "Please join a few minutes early to test your audio and video." : "Please make sure to join the meeting on time. If you need to reschedule, please contact us as soon as possible."}</p>
       
-      <p>Best regards,<br>The Hiring Team</p>
+      <p>Best regards,<br>Team YuvaNext</p>
     </div>
   `;
   // Encode email data in base64 for SMTP
@@ -147,14 +134,14 @@ async function sendInterviewEmail(
   // Connect to SMTP server
   const conn = await Deno.connect({
     hostname: SMTP_HOST,
-    port: SMTP_PORT,
+    port: SMTP_PORT
   });
   const writer = conn.writable.getWriter();
   const reader = conn.readable.getReader();
-  const send = (data) => {
+  const send = (data)=>{
     writer.write(encoder.encode(data));
   };
-  const read = async () => {
+  const read = async ()=>{
     const { value } = await reader.read();
     return new TextDecoder().decode(value);
   };
@@ -192,7 +179,7 @@ async function sendInterviewEmail(
   } catch (smtpError) {
     console.error("SMTP error:", smtpError);
     throw new Error(`Failed to send email: ${smtpError.message}`);
-  } finally {
+  } finally{
     try {
       reader.releaseLock();
       writer.releaseLock();
@@ -202,64 +189,41 @@ async function sendInterviewEmail(
     }
   }
 }
-const handler = async (req) => {
+const handler = async (req)=>{
   if (req.method === "OPTIONS") {
     return new Response(null, {
-      headers: corsHeaders,
+      headers: corsHeaders
     });
   }
   try {
     const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
-    const {
-      applicationId,
-      candidateName,
-      candidateEmail,
-      scheduledDate,
-      title,
-      description,
-      durationMinutes = 60,
-      senderEmail,
-      guestEmails,
-    } = await req.json();
+    const { applicationId, candidateName, candidateEmail, scheduledDate, title, description, durationMinutes = 60, senderEmail, guestEmails } = await req.json();
     console.log("Creating Zoom meeting for interview:", {
       title,
       scheduledDate,
-      candidateEmail,
+      candidateEmail
     });
     // Create Zoom meeting
-    const { zoomLink, hostLink, meetingId } = await createZoomMeeting(
-      title,
-      description || "",
-      scheduledDate,
-      durationMinutes,
-      candidateEmail,
-    );
+    const { zoomLink, hostLink, meetingId } = await createZoomMeeting(title, description || "", scheduledDate, durationMinutes, candidateEmail);
     console.log("Zoom meeting created:", zoomLink);
     // Store interview in database
-    const { data: interview, error: dbError } = await supabase
-      .from("interviews")
-      .insert({
-        application_id: applicationId,
-        title,
-        description,
-        scheduled_date: scheduledDate,
-        meeting_link: zoomLink,
-        duration_minutes: durationMinutes,
-        status: "scheduled",
-      })
-      .select()
-      .single();
+    const { data: interview, error: dbError } = await supabase.from("interviews").insert({
+      application_id: applicationId,
+      title,
+      description,
+      scheduled_date: scheduledDate,
+      meeting_link: zoomLink,
+      duration_minutes: durationMinutes,
+      status: "scheduled"
+    }).select().single();
     if (dbError) {
       console.error("Database error:", dbError);
       throw dbError;
     }
     // Update application status to interviewed
-    await supabase
-      .from("applications")
-      .update({
-        status: "interviewed",
-      })
-      .eq("id", applicationId);
+    await supabase.from("applications").update({
+      status: "interviewed"
+    }).eq("id", applicationId);
     console.log("Sending emails...");
     // Send email to candidate with join link
     await sendInterviewEmail(candidateName, candidateEmail, title, scheduledDate, zoomLink, description, null, false);
@@ -270,49 +234,34 @@ const handler = async (req) => {
     }
     // Send emails to guests if provided - with join link
     if (guestEmails && Array.isArray(guestEmails) && guestEmails.length > 0) {
-      for (const guest of guestEmails) {
-        await sendInterviewEmail(
-          guest.name || "Guest",
-          guest.email,
-          title,
-          scheduledDate,
-          zoomLink,
-          description,
-          candidateName,
-          false,
-        );
+      for (const guest of guestEmails){
+        await sendInterviewEmail(guest.name || "Guest", guest.email, title, scheduledDate, zoomLink, description, candidateName, false);
       }
     }
     console.log("Interview scheduled successfully");
-    return new Response(
-      JSON.stringify({
-        success: true,
-        interview,
-        zoomLink,
-        hostLink,
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      },
-    );
+    return new Response(JSON.stringify({
+      success: true,
+      interview,
+      zoomLink,
+      hostLink
+    }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        ...corsHeaders
+      }
+    });
   } catch (error) {
     console.error("Error scheduling interview:", error);
-    return new Response(
-      JSON.stringify({
-        error: error.message || "Failed to schedule interview",
-      }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      },
-    );
+    return new Response(JSON.stringify({
+      error: error.message || "Failed to schedule interview"
+    }), {
+      status: 500,
+      headers: {
+        "Content-Type": "application/json",
+        ...corsHeaders
+      }
+    });
   }
 };
 serve(handler);
