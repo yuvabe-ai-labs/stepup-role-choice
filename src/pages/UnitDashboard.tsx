@@ -36,6 +36,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
@@ -64,6 +66,7 @@ import {
   Search,
   Trash2,
   Users,
+  ChevronDown,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -87,7 +90,7 @@ const UnitDashboard = () => {
   const [updating, setUpdating] = useState<string | null>(null);
   const [selectedInternship, setSelectedInternship] = useState<any>(null);
   const [editingInternship, setEditingInternship] = useState<any>(null);
-  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
   const [deletingInternship, setDeletingInternship] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [activatingInternship, setActivatingInternship] = useState<any>(null);
@@ -143,8 +146,8 @@ const UnitDashboard = () => {
   }
 
   const filteredApplications = applications.filter((application) => {
-    if (filterStatus === "all") return true;
-    return application.status === filterStatus;
+    if (filterStatuses.length === 0) return true;
+    return filterStatuses.includes(application.status);
   });
 
   const handleInternshipCreated = () => {
@@ -288,6 +291,28 @@ const UnitDashboard = () => {
     return "text-red-600";
   };
 
+  const toggleStatusFilter = (status: string) => {
+    setFilterStatuses((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  const getFilterDisplayText = () => {
+    if (filterStatuses.length === 0) return "All Applications";
+    if (filterStatuses.length === 1) {
+      const statusLabels: { [key: string]: string } = {
+        shortlisted: "Shortlisted",
+        interviewed: "Interviewed",
+        rejected: "Rejected",
+        hired: "Hired",
+      };
+      return statusLabels[filterStatuses[0]] || "Select Filter";
+    }
+    return `${filterStatuses.length} selected`;
+  };
+
   const hiredCandidates = applications.filter((app) => app.status === "hired");
 
   return (
@@ -303,7 +328,7 @@ const UnitDashboard = () => {
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  <p className="text-xs sm:text-sm font-medium">
                     Total Applications
                   </p>
                   {loading ? (
@@ -328,7 +353,7 @@ const UnitDashboard = () => {
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  <p className="text-xs sm:text-sm font-medium ">
                     Total Job Descriptions
                   </p>
                   {loading ? (
@@ -355,7 +380,7 @@ const UnitDashboard = () => {
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  <p className="text-xs sm:text-sm font-medium ">
                     Interview Scheduled
                   </p>
                   {loading ? (
@@ -382,7 +407,7 @@ const UnitDashboard = () => {
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  <p className="text-xs sm:text-sm font-medium ">
                     Hired This Month
                   </p>
                   {loading ? (
@@ -450,23 +475,55 @@ const UnitDashboard = () => {
             className="px-0 sm:px-4 lg:px-10 py-2"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <h2 className="text-xl sm:text-2xl font-semibold">
+              <h2 className="flex items-center gap-2 text-xl sm:text-2xl font-semibold">
                 All Applications
               </h2>
-              <Select
-                value={filterStatus}
-                onValueChange={(value) => setFilterStatus(value)}
-              >
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Select Filter" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Applications</SelectItem>
-                  <SelectItem value="shortlisted">Shortlisted</SelectItem>
-                  <SelectItem value="interviewed">Interviewed</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-[200px] justify-between rounded-full"
+                  >
+                    <span className="truncate">{getFilterDisplayText()}</span>
+                    {filterStatuses.length > 0 && (
+                      <Badge
+                        variant="secondary"
+                        className="ml-2 rounded-full px-2 py-0.5"
+                      >
+                        {filterStatuses.length}
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  align="end"
+                  className="w-[220px] rounded-2xl p-2 shadow-md"
+                >
+                  {[
+                    { value: "applied", label: "Applied" },
+                    { value: "shortlisted", label: "Shortlisted" },
+                    { value: "interviewed", label: "Interviewed" },
+                    { value: "rejected", label: "Rejected" },
+                    { value: "hired", label: "Hired" },
+                  ].map((status) => (
+                    <DropdownMenuItem
+                      key={status.value}
+                      onSelect={(e) => e.preventDefault()}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors"
+                      onClick={() => toggleStatusFilter(status.value)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={filterStatuses.includes(status.value)}
+                        readOnly
+                        className="h-4 w-4 rounded border-gray-300 accent-blue-600"
+                      />
+                      <span>{status.label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {loading ? (
@@ -487,17 +544,14 @@ const UnitDashboard = () => {
               <div className="text-center py-12">
                 <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
                 <h3 className="text-lg font-medium mb-2">
-                  {filterStatus === "all"
+                  {filterStatuses.length === 0
                     ? "No Applications Yet"
-                    : `No ${
-                        filterStatus.charAt(0).toUpperCase() +
-                        filterStatus.slice(1)
-                      } Applications`}
+                    : "No Applications Found"}
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                  {filterStatus === "all"
+                  {filterStatuses.length === 0
                     ? "Applications for your internships will appear here."
-                    : `No ${filterStatus} applications found.`}
+                    : "No applications found with the selected filters."}
                 </p>
               </div>
             ) : (
@@ -1118,8 +1172,8 @@ const UnitDashboard = () => {
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription className="text-sm">
               This will permanently delete the job description "
-              {deletingInternship?.title}". This action cannot be undone and
-              will remove all associated data.
+              {deletingInternship?.title}". This action cannot be undone an will
+              remove all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">

@@ -109,8 +109,9 @@ const CandidateProfile = () => {
       case "shortlisted":
         return "bg-green-500 text-white";
       case "interviewed":
-        return "bg-gradient-to-r from-[#07636C] to-[#0694A2] text-white";
+        return "bg-yellow-500 text-white";
       case "applied":
+        return "bg-white text-gray-700 border border-gray-300";
       case "rejected":
         return "bg-red-500 text-white";
       case "hired":
@@ -333,7 +334,7 @@ const CandidateProfile = () => {
 
           {/* Profile Match Section */}
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Profile Match</span>
+            <span className="text-l font-medium">Profile Match</span>
             <div className="relative w-10 h-10">
               <svg className="transform -rotate-90 w-10 h-10">
                 <circle
@@ -365,7 +366,7 @@ const CandidateProfile = () => {
         </div>
 
         {/* Profile Header Card */}
-        <div className="container mx-auto px-10 py-2" ref={profileRef}>
+        <div className="container mx-auto px-2 py-2" ref={profileRef}>
           <Card className="mb-4 rounded-3xl">
             <CardContent className="p-8">
               <div className="flex items-start gap-6">
@@ -419,12 +420,12 @@ const CandidateProfile = () => {
                     <Button
                       onClick={handleGeneratePDF}
                       disabled={isLoading}
-                      className="no-pdf w-64 rounded-full px-6 text-white transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-[#07636C] to-[#0694A2] hover:opacity-90"
+                      className="no-pdf w-52 rounded-full px-3 py-1.5 text-sm text-white transition-all flex items-center justify-center gap-1.5 bg-gradient-to-r from-[#07636C] to-[#0694A2] hover:opacity-90"
                     >
                       {isLoading ? (
                         <>
                           <svg
-                            className="animate-spin h-5 w-5"
+                            className="animate-spin h-4 w-4"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -445,25 +446,29 @@ const CandidateProfile = () => {
                         </>
                       ) : isDownloaded ? (
                         <>
-                          <Check className="w-5 h-5" />
+                          <Check className="w-4 h-4" />
                           Downloaded
                         </>
                       ) : (
                         <>
-                          <Download className="w-5 h-5" />
+                          <Download className="w-4 h-4" />
                           Download Profile
                         </>
                       )}
                     </Button>
 
                     <Select
-                      value={data.application.status}
+                      value={
+                        data.application.status === "applied"
+                          ? ""
+                          : data.application.status
+                      }
                       onValueChange={handleStatusChange}
                       disabled={isUpdatingStatus}
                     >
                       {/* Trigger with dynamic background */}
                       <SelectTrigger
-                        className={`w-64 rounded-full px-6 ${getStatusBg(
+                        className={`w-52 rounded-full px-3 py-1.5 text-sm ${getStatusBg(
                           data.application.status
                         )}`}
                       >
@@ -473,28 +478,28 @@ const CandidateProfile = () => {
                       {/* Dropdown content */}
                       <SelectContent className="rounded-2xl">
                         <SelectItem value="shortlisted">
-                          <div className="flex items-center gap-2 px-4">
+                          <div className="flex items-center gap-1.5 px-3 py-1">
                             <Heart className="w-4 h-4" />
                             Shortlisted
                           </div>
                         </SelectItem>
 
                         <SelectItem value="applied">
-                          <div className="flex items-center gap-2 px-4">
+                          <div className="flex items-center gap-1.5 px-3 py-1">
                             <Ban className="w-4 h-4" />
                             Not Shortlisted
                           </div>
                         </SelectItem>
 
                         <SelectItem value="hired">
-                          <div className="flex items-center gap-2 px-4">
+                          <div className="flex items-center gap-1.5 px-3 py-1">
                             <CopyCheck className="w-4 h-4" />
                             Select Candidate
                           </div>
                         </SelectItem>
 
                         <SelectItem value="interviewed">
-                          <div className="flex items-center gap-2 px-4">
+                          <div className="flex items-center gap-1.5 px-3 py-1">
                             <User className="w-4 h-4" />
                             Schedule Interview
                           </div>
@@ -532,9 +537,9 @@ const CandidateProfile = () => {
                             className="flex items-center justify-between"
                           >
                             <span className="font-medium">{skillName}</span>
-                            <Badge variant="secondary" className="bg-muted">
+                            {/* <Badge variant="secondary" className="bg-muted">
                               {skillLevel}
-                            </Badge>
+                            </Badge> */}
                           </div>
                         );
                       })
