@@ -215,7 +215,9 @@ const CreateInternshipDialog: React.FC<CreateInternshipDialogProps> = ({
       }
 
       // Parse skills and responsibilities into arrays
-      const skillsArray = data.skills_required.split(",").map((s) => s.trim());
+      const skillsArray = data.skills_required
+        .split("\n")
+        .filter((s) => s.trim());
       const responsibilitiesArray = data.responsibilities
         .split("\n")
         .filter((r) => r.trim());
@@ -312,7 +314,7 @@ Return only the clean list, one benefit per line, no extra text or introduction.
 
         case "skills_required":
           prompt = `List 5-8 essential skills required for a ${jobTitle} internship.
-Return as a comma-separated list, with no extra explanation or headers.`;
+Return only the clean list — one skill per line, no commas, no numbering.`;
           break;
 
         default:

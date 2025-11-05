@@ -484,7 +484,15 @@ const InternshipDetail = () => {
           {skillsRequired.length > 0 && (
             <section className="p-2 border-b border-gray-200 lg:border-0">
               <h2 className="text-xl font-medium mb-4">Required Skills</h2>
-              <div className="flex flex-wrap gap-2">
+              <ul className="space-y-3">
+                {skillsRequired.map((skill: string, idx: number) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <CircleCheckBig className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground">{skill}</span>
+                  </li>
+                ))}
+              </ul>
+              {/* <div className="flex flex-wrap gap-2">
                 {skillsRequired.map((skill: string, idx: number) => (
                   <Badge
                     key={idx}
@@ -494,7 +502,7 @@ const InternshipDetail = () => {
                     {skill}
                   </Badge>
                 ))}
-              </div>
+              </div> */}
             </section>
           )}
         </div>

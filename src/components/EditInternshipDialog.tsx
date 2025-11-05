@@ -222,7 +222,7 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
         : internship.benefits || "";
 
       const skillsText = Array.isArray(internship.skills_required)
-        ? internship.skills_required.join(", ")
+        ? internship.skills_required.join("\n")
         : internship.skills_required || "";
 
       const languageReqs = Array.isArray(internship.language_requirements)
@@ -309,7 +309,9 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      const skillsArray = data.skills_required.split(",").map((s) => s.trim());
+      const skillsArray = data.skills_required
+        .split("\n")
+        .filter((s) => s.trim());
       const responsibilitiesArray = data.responsibilities
         .split("\n")
         .filter((r) => r.trim());
@@ -400,7 +402,7 @@ const EditInternshipDialog: React.FC<EditInternshipDialogProps> = ({
 
         case "skills_required":
           prompt = `List 5-8 essential skills required for a ${jobTitle} internship.
-  Return as a comma-separated list, with no extra explanation or headers.`;
+  Return only the clean list — one skill per line, no commas, no numbering.`;
           break;
 
         default:
