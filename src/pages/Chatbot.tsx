@@ -1234,7 +1234,7 @@ const Chatbot = () => {
               <img
                 src={logo}
                 alt="Company Logo"
-                className="h-30 w-auto cursor-pointer"
+                className="h-24 w-auto cursor-pointer"
               />
             </a>
           </div>
@@ -1298,7 +1298,7 @@ const Chatbot = () => {
               <img
                 src={logo}
                 alt="Company Logo"
-                className="h-30 w-auto cursor-pointer"
+                className="h-24 w-auto cursor-pointer"
               />
             </a>
           </div>
@@ -1363,7 +1363,7 @@ const Chatbot = () => {
               <img
                 src={logo}
                 alt="Company Logo"
-                className="h-30 w-auto cursor-pointer"
+                className="h-24 w-auto cursor-pointer"
               />
             </a>
           </div>
@@ -1582,7 +1582,7 @@ const Chatbot = () => {
               <img
                 src={logo}
                 alt="Company Logo"
-                className="h-30 w-auto cursor-pointer"
+                className="h-24 w-auto cursor-pointer"
               />
             </a>
           </div>
