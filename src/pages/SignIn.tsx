@@ -123,7 +123,7 @@ const SignIn = () => {
             <img src={signinLogo} alt="Sign in Logo" className="w-28 h-auto" />
 
             {/* Paragraph */}
-            <p className="text-white text-base font-medium max-w-sm leading-relaxed">
+            <p className="text-white text-base font-medium max-w-xl leading-relaxed">
               At YuvaNext, we focus on helping young adults take their next step
               through internships, courses, and real-world opportunities.
             </p>
@@ -131,8 +131,22 @@ const SignIn = () => {
 
           {/* Footer text */}
           <div className="absolute bottom-4 left-0 right-0 flex justify-between px-6 text-white/80 text-xs">
-            <span>Privacy Policy</span>
-            <span>Terms of Use</span>
+            <a
+              href="https://www.yuvanext.com/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              Privacy Policy
+            </a>
+            <a
+              href="https://www.yuvanext.com/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              Terms of Use
+            </a>
           </div>
         </div>
       </div>

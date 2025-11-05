@@ -24,7 +24,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationDropdown } from "@/components/NotificationDropdown";
-// import logo from "@/assets/logo-2.png";
 import logo from "@/assets/YuvaNext.svg";
 import logoName from "@/assets/YuvaNext_name.svg";
 
@@ -49,7 +48,6 @@ const Navbar = () => {
       }
 
       try {
-        // First, get the user's profile and role
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("id, role")
@@ -61,14 +59,11 @@ const Navbar = () => {
           return;
         }
 
-        if (!profileData) {
-          return;
-        }
+        if (!profileData) return;
 
         setUserRole(profileData.role);
         setProfileId(profileData.id);
 
-        // Then, fetch the avatar based on role
         if (profileData.role === "student") {
           const { data: studentData, error: studentError } = await supabase
             .from("student_profiles")
@@ -110,9 +105,7 @@ const Navbar = () => {
     { name: "Units", path: "/units" },
   ];
 
-  // Filter navigation items based on user role
   const navItems = userRole === "unit" ? [] : allNavItems;
-
   const isActive = (path: string) => location.pathname === path;
 
   const handleSignOut = async () => {
@@ -121,7 +114,6 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   };
 
-  // Handle profile navigation based on user role
   const handleProfileClick = () => {
     if (userRole === "unit") {
       navigate("/unit-profile");
@@ -136,24 +128,23 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   };
 
+  // ✅ Dynamic dashboard link based on role
+  const dashboardLink = userRole === "unit" ? "/unit-dashboard" : "/dashboard";
+
   return (
     <>
       <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70 shadow-sm">
-        {/* <div className="container h-16 px-4 sm:px-6 md:px-8 lg:px-20 flex items-center justify-between"> */}
         <div className="container h-16 px-4 sm:px-6 md:px-8 lg:px-20 flex items-center relative justify-between">
           {/* Logo */}
-          {/* Mobile: Menu Left, Logo Center, Bell Right */}
-          <div className="flex w-full  items-center ">
+          <div className="flex w-full items-center ">
             <div className="lg:hidden p-3 items-center justify-between">
-              {/* Mobile Menu Toggle */}
               <Button
                 variant="ghost"
                 size="icon"
                 className="lg:hidden h-9 w-9"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
-                <button className="flex items-center justify-between  rounded-full pl-2 sm:pl-3 pr-1 gap-1 sm:gap-2 py-1.5 shadow-sm w-fit">
-                  {/* Three Bars */}
+                <button className="flex items-center justify-between rounded-full pl-2 sm:pl-3 pr-1 gap-1 sm:gap-2 py-1.5 shadow-sm w-fit">
                   <div className="flex flex-col justify-center space-y-[3px] m-1.5">
                     <div className="h-[3px] w-3 bg-gray-500 rounded-full self-start"></div>
                     <div className="h-[3px] w-[26px] bg-gray-500 rounded-full mx-auto"></div>
@@ -163,7 +154,8 @@ const Navbar = () => {
               </Button>
             </div>
 
-            <a href="/dashboard">
+            {/* ✅ Updated link based on userRole */}
+            <a href={dashboardLink}>
               {/* Mobile Logo */}
               <img
                 src={logoName}
@@ -202,27 +194,6 @@ const Navbar = () => {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-2 sm:space-x-4 ml-auto lg:ml-0">
-            {/* Search Bar - Desktop */}
-            {/* <div className="relative hidden lg:block">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search"
-                className="pl-10 w-48 xl:w-64 bg-white border border-gray-300 rounded-full"
-              />
-            </div> */}
-
-            {/* Search Icon - Mobile */}
-            {/* <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden h-9 w-9"
-              onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-            >
-              <Search className="h-5 w-5 text-black" />
-            </Button> */}
-
-            {/* Notifications */}
             <NotificationDropdown />
 
             {/* User Avatar with Dropdown - Desktop */}
@@ -230,14 +201,12 @@ const Navbar = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center justify-between bg-[var(--indigo-50,#F0F5FF)] rounded-full pl-2 sm:pl-3 pr-1 gap-1 sm:gap-2 py-1.5 shadow-sm w-fit">
-                    {/* Three Bars */}
                     <div className="flex flex-col justify-center space-y-[3px] m-1.5">
                       <div className="h-[3px] w-3 bg-gray-500 rounded-full self-start"></div>
                       <div className="h-[3px] w-[26px] bg-gray-500 rounded-full mx-auto"></div>
                       <div className="h-[3px] w-3 bg-gray-500 rounded-full self-end"></div>
                     </div>
 
-                    {/* Avatar */}
                     <Avatar className="h-10 w-10 border-1 border-white shadow-md">
                       <AvatarImage
                         src={avatarUrl || undefined}
@@ -315,7 +284,7 @@ const Navbar = () => {
         )}
       </nav>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div
@@ -324,7 +293,7 @@ const Navbar = () => {
           />
           <div className="fixed left-0 top-16 bottom-0 w-72 bg-white shadow-xl overflow-y-auto">
             <div className="flex flex-col h-full">
-              {/* User Profile Section */}
+              {/* User Section */}
               <div className="p-6 border-b">
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-12 w-12 border-2 border-gray-200">
@@ -347,7 +316,6 @@ const Navbar = () => {
                 </div>
               </div>
 
-              {/* Navigation Links */}
               {navItems.length > 0 && (
                 <div className="py-2 border-b">
                   {navItems.map((item) => (
@@ -366,62 +334,17 @@ const Navbar = () => {
                 </div>
               )}
 
-              {/* Menu Items */}
               <div className="flex-1 py-2">
                 <button
                   onClick={handleProfileClick}
-                  className="w-full text-left px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center"
+                  className="w-full text-left px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
                 >
                   <User className="mr-3 h-5 w-5 text-gray-400" />
                   My Profile
                 </button>
                 <button
-                  onClick={() => {
-                    navigate("");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center"
-                >
-                  <FileText className="mr-3 h-5 w-5 text-gray-400" />
-                  My Tasks
-                </button>
-                <button
-                  onClick={() => {
-                    navigate("");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center"
-                >
-                  <MessageSquare className="mr-3 h-5 w-5 text-gray-400" />
-                  Feedbacks
-                </button>
-                <button
-                  onClick={() => {
-                    navigate("");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center"
-                >
-                  <HelpCircle className="mr-3 h-5 w-5 text-gray-400" />
-                  Help
-                </button>
-                <button
-                  onClick={() => {
-                    navigate("");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center"
-                >
-                  <Settings className="mr-3 h-5 w-5 text-gray-400" />
-                  Settings
-                </button>
-              </div>
-
-              {/* Sign Out Button */}
-              <div className="p-4 border-t">
-                <button
                   onClick={handleSignOut}
-                  className="w-full px-6 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center"
+                  className="w-full text-left px-6 py-3 text-sm font-medium text-red-600 hover:bg-red-50 flex items-center justify-center"
                 >
                   <LogOut className="mr-2 h-5 w-5" />
                   Sign Out
