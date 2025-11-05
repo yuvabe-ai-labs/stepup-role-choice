@@ -482,17 +482,23 @@ const UnitDashboard = () => {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full sm:w-[200px] justify-between rounded-full"
+                    className="w-full sm:w-[200px] justify-between items-center rounded-full"
                   >
+                    {/* Left side text */}
                     <span className="truncate">{getFilterDisplayText()}</span>
-                    {filterStatuses.length > 0 && (
-                      <Badge
-                        variant="secondary"
-                        className="ml-2 rounded-full px-2 py-0.5"
-                      >
-                        {filterStatuses.length}
-                      </Badge>
-                    )}
+
+                    {/* Right side icons */}
+                    <div className="flex items-center gap-1">
+                      {filterStatuses.length > 0 && (
+                        <Badge
+                          variant="secondary"
+                          className="rounded-full px-2 py-0.5"
+                        >
+                          {filterStatuses.length}
+                        </Badge>
+                      )}
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    </div>
                   </Button>
                 </DropdownMenuTrigger>
 
