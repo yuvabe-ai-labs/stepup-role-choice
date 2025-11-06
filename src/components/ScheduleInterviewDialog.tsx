@@ -12,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { sendStatusMail } from "@/utils/sendStatusMail";
 
 interface ScheduleInterviewDialogProps {
   open: boolean;
@@ -118,38 +117,42 @@ export default function ScheduleInterviewDialog({
         `${formData.date}T${formData.time}:00Z`
       ).toISOString();
 
-      console.log("📩 Interview Scheduled Details:", {
+      // ✅ Log all submission details before sending
+      console.log("📩 Interview Submission Details:", {
         applicationId,
         candidateName,
         guestEmails,
         scheduledDate,
         title: formData.title,
         description: formData.description,
+        durationMinutes: 60,
         senderEmail,
       });
 
-      // ✅ Send mail via common helper
-      const mailResponse = await sendStatusMail({
-        applicationId,
-        candidateName,
-        candidateEmail: guestEmails,
-        title: formData.title,
-        description: `${formData.description}\nInterview Scheduled on ${scheduledDate}`,
-        senderEmail,
-        status: "Interview Scheduled",
+      const { error } = await supabase.functions.invoke("schedule-interview", {
+        body: {
+          applicationId,
+          candidateName,
+          candidateEmail: guestEmails,
+          scheduledDate,
+          title: formData.title,
+          description: formData.description,
+          durationMinutes: 60,
+          senderEmail,
+        },
       });
 
-      if (!mailResponse.success) throw new Error(mailResponse.error);
+      if (error) throw error;
 
       toast({
         title: "Interview Scheduled",
-        description: `Notification has been sent to ${candidateName}`,
+        description: `Zoom Meet link has been sent to ${candidateName}`,
       });
 
       onOpenChange(false);
       onSuccess?.();
 
-      // Reset form
+      // Reset fields
       setFormData({
         title: "",
         description: "",
@@ -186,7 +189,7 @@ export default function ScheduleInterviewDialog({
           {/* ✅ Sender Email (view only) */}
           {senderEmail && (
             <div className="space-y-1">
-              <Label className="text-sm text-gray-700">Unit Email</Label>
+              <Label className="text-sm text-gray-700">Host Email</Label>
               <Input
                 value={senderEmail}
                 disabled
@@ -305,6 +308,30 @@ export default function ScheduleInterviewDialog({
             </div>
           </div>
 
+          {/* Meeting Type */}
+          <div className="space-y-3">
+            <Label className="text-sm text-gray-700">Meeting Link</Label>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData({ ...formData, meetingType: "google" })
+                }
+                className={`w-full flex items-center gap-3 p-3 rounded-lg ${
+                  formData.meetingType === "google"
+                }`}
+              >
+                <div className="w-6 h-6 bg-[#2196F3] rounded flex items-center justify-center">
+                  {/* <Video className="w-4 h-4 text-white" /> */}
+                  <Video className="w-4 h-4 text-white fill-current" />
+                </div>
+                <span className="text-sm text-gray-500 font-medium">
+                  Add Zoom Meet video conferencing
+                </span>
+              </button>
+            </div>
+          </div>
+
           {/* Save Button */}
           <div className="flex justify-end pt-2">
             <Button
@@ -312,7 +339,7 @@ export default function ScheduleInterviewDialog({
               disabled={isLoading}
               className="bg-[#2196F3] rounded-full text-white px-8 h-11"
             >
-              {isLoading ? "Scheduling..." : "Schedule"}
+              {isLoading ? "Scheduling..." : "Save"}
             </Button>
           </div>
         </div>
