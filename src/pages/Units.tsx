@@ -385,69 +385,117 @@ const Units = () => {
                   return (
                     <Card
                       key={unit.id}
-                      className="overflow-hidden border-gray-200 rounded-3xl hover:shadow-lg transition-all"
+                      className="relative overflow-hidden rounded-[20px] border border-[#C94100] bg-white shadow-sm transition-all duration-300 hover:shadow-md w-[256px] h-[300px] p-1.5"
                     >
-                      {/* Card Header with Gradient */}
-                      <div
-                        className={`${gradient} rounded-3xl h-48 m-1 relative flex flex-col items-center justify-center text-white`}
-                      >
-                        {unit.avatar_url ? (
+                      {/* Banner */}
+                      <div className="relative w-full h-[100px] rounded-t-[18px] overflow-visible">
+                        <img
+                          src={
+                            unit.banner_url || "/assets/banner-placeholder.jpg"
+                          }
+                          alt=""
+                          className="h-full w-full object-cover rounded-[18px]"
+                        />
+                        {/* Avatar */}
+                        <div className="absolute bottom-0 left-5 translate-y-1/6 w-[56px] h-[56px] flex items-center justify-center z-20 rounded-full">
                           <img
-                            src={unit.banner_url}
-                            alt={unit.unit_name}
-                            className="w-full h-full object-cover rounded-3xl"
+                            src={unit.avatar_url}
+                            alt={`${unit.unit_name} logo`}
+                            className="w-[54px] h-[54px] object-cover rounded-full "
                           />
-                        ) : (
-                          <div className="text-white text-center">
-                            <h3 className="text-2xl font-bold">
-                              {unit.unit_name.toUpperCase()}
-                            </h3>
-                          </div>
-                        )}
-                        <Badge className="absolute top-3 left-3 bg-white/60 text-foreground hover:bg-white/60">
-                          {formatDistanceToNow(new Date(unit.created_at), {
-                            addSuffix: true,
-                          })}
-                        </Badge>
+                        </div>
                       </div>
 
-                      {/* Card Content with Logo */}
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 rounded-full overflow-hidden border flex items-center justify-center bg-black">
-                              {unit.avatar_url ? (
-                                <img
-                                  src={unit.avatar_url}
-                                  alt={`${unit.unit_name} logo`}
-                                  className="w-full h-full object-cover" // key change
-                                />
-                              ) : (
-                                <span className="text-xs text-white font-bold">
-                                  {unit.unit_name[0]?.toUpperCase()}
-                                </span>
-                              )}
-                            </div>
-                            <div>
-                              <p className="text-sm font-semibold line-clamp-1">
-                                {unit.unit_name}
-                              </p>
-                            </div>
-                          </div>
+                      {/* Content (overlap look via negative margin on container below banner) */}
+                      <div className="-mt-[28px] bg-white rounded-[18px] pt-[40px] pb-[20px] px-[16px] z-10 relative">
+                        <h3 className="text-[20px] font-semibold text-black leading-tight text-left">
+                          {unit.unit_name}
+                        </h3>
+                        <p className="text-[14px] text-black mt-1 line-clamp-3 text-left">
+                          {unit.description}
+                        </p>
+                        <div className="flex justify-center mt-3">
                           <Button
-                            size="sm"
-                            className="bg-gradient-to-br from-[#C94100] to-[#FFB592] hover:bg-orange-600 text-white rounded-3xl px-3"
+                            variant="link"
+                            className="text-[#0B5FFF] font-medium p-0"
                             onClick={(e) => {
                               e.stopPropagation();
                               navigate(`/units/${unit.id}`);
                             }}
                           >
-                            View
+                            View Openings
                           </Button>
                         </div>
-                      </CardContent>
+                      </div>
                     </Card>
                   );
+
+                  // return (
+                  //   <Card
+                  //     key={unit.id}
+                  //     className="overflow-hidden border-gray-200 rounded-3xl hover:shadow-lg transition-all"
+                  //   >
+                  //     {/* Card Header with Gradient */}
+                  //     <div
+                  //       className={`${gradient} rounded-3xl h-48 m-1 relative flex flex-col items-center justify-center text-white`}
+                  //     >
+                  //       {unit.avatar_url ? (
+                  //         <img
+                  //           src={unit.banner_url}
+                  //           alt={unit.unit_name}
+                  //           className="w-full h-full object-cover rounded-3xl"
+                  //         />
+                  //       ) : (
+                  //         <div className="text-white text-center">
+                  //           <h3 className="text-2xl font-bold">
+                  //             {unit.unit_name.toUpperCase()}
+                  //           </h3>
+                  //         </div>
+                  //       )}
+                  //       <Badge className="absolute top-3 left-3 bg-white/60 text-foreground hover:bg-white/60">
+                  //         {formatDistanceToNow(new Date(unit.created_at), {
+                  //           addSuffix: true,
+                  //         })}
+                  //       </Badge>
+                  //     </div>
+
+                  //     {/* Card Content with Logo */}
+                  //     {/* <CardContent className="p-4">
+                  //       <div className="flex items-center justify-between">
+                  //         <div className="flex items-center space-x-3">
+                  //           <div className="w-10 h-10 rounded-full overflow-hidden border flex items-center justify-center bg-black">
+                  //             {unit.avatar_url ? (
+                  //               <img
+                  //                 src={unit.avatar_url}
+                  //                 alt={`${unit.unit_name} logo`}
+                  //                 className="w-full h-full object-cover" // key change
+                  //               />
+                  //             ) : (
+                  //               <span className="text-xs text-white font-bold">
+                  //                 {unit.unit_name[0]?.toUpperCase()}
+                  //               </span>
+                  //             )}
+                  //           </div>
+                  //           <div>
+                  //             <p className="text-sm font-semibold line-clamp-1">
+                  //               {unit.unit_name}
+                  //             </p>
+                  //           </div>
+                  //         </div>
+                  //         <Button
+                  //           size="sm"
+                  //           className="bg-gradient-to-br from-[#C94100] to-[#FFB592] hover:bg-orange-600 text-white rounded-3xl px-3"
+                  //           onClick={(e) => {
+                  //             e.stopPropagation();
+                  //             navigate(`/units/${unit.id}`);
+                  //           }}
+                  //         >
+                  //           View
+                  //         </Button>
+                  //       </div>
+                  //     </CardContent> */}
+                  //   </Card>
+                  // );
                 })}
               </div>
             )}
