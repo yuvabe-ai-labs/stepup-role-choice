@@ -622,8 +622,21 @@ const Chatbot = () => {
         }
 
         if (lastBotMessage.toLowerCase().includes("profile type")) {
-          roleSpecificData.profile_type = userResponse.trim();
-          console.log("Storing profile type:", userResponse);
+          const formattedType = userResponse.trim().toLowerCase();
+
+          if (formattedType === "student") {
+            roleSpecificData.profile_type = "Student";
+          } else if (formattedType === "fresher") {
+            roleSpecificData.profile_type = "Fresher";
+          } else if (formattedType === "working") {
+            roleSpecificData.profile_type = "Working";
+          } else if (formattedType === "graduate") {
+            roleSpecificData.profile_type = "Graduate";
+          } else {
+            console.warn("Invalid profile type entered:", userResponse);
+          }
+
+          console.log("Storing profile type:", roleSpecificData.profile_type);
         }
 
         if (
