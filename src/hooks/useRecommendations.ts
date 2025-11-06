@@ -21,7 +21,7 @@ export const useInternshipRecommendations = (
 ): InternshipWithScore[] => {
   return useMemo(() => {
     if (!userSkills || userSkills.length === 0) {
-      return internships.slice(0, 5).map((i) => ({
+      return internships.slice(0, 10).map((i) => ({
         ...i,
         matchScore: 0,
         matchPercentage: 0,
@@ -72,25 +72,16 @@ export const useInternshipRecommendations = (
       };
     });
 
-    // return scored
-    //   .sort((a, b) => {
-    //     if (b.matchScore !== a.matchScore) {
-    //       return b.matchScore - a.matchScore;
-    //     }
-    //     return b.matchPercentage - a.matchPercentage;
-    //   })
-    //   .slice(0, 6);
+    // Sort by match score and percentage, showing best matches first
+    const sorted = scored.sort((a, b) => {
+      if (b.matchScore !== a.matchScore) {
+        return b.matchScore - a.matchScore;
+      }
+      return b.matchPercentage - a.matchPercentage;
+    });
 
-    // Filter out internships with zero matchScore
-    const filtered = scored.filter((i) => i.matchScore > 0);
-
-    // Sort the filtered internships and take top 6
-    return filtered
-      .sort((a, b) => {
-        if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
-        return b.matchPercentage - a.matchPercentage;
-      })
-      .slice(0, 6);
+    // Return top 6 internships (including those with no matches if that's all we have)
+    return sorted.slice(0, 6);
   }, [internships, userSkills]);
 };
 
@@ -100,7 +91,7 @@ export const useCourseRecommendations = (
 ): CourseWithScore[] => {
   return useMemo(() => {
     if (!userSkills || userSkills.length === 0) {
-      return courses.slice(0, 5).map((c) => ({
+      return courses.slice(0, 6).map((c) => ({
         ...c,
         matchScore: 0,
       }));
@@ -125,10 +116,7 @@ export const useCourseRecommendations = (
       };
     });
 
-    // Filter out courses with no match
-    const filtered = scored.filter((c) => c.matchScore > 0);
-
-    // Sort by matchScore descending
-    return filtered.sort((a, b) => b.matchScore - a.matchScore).slice(0, 6);
+    // Sort by matchScore descending and return top 6
+    return scored.sort((a, b) => b.matchScore - a.matchScore).slice(0, 6);
   }, [courses, userSkills]);
 };
