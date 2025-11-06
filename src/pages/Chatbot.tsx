@@ -1046,7 +1046,8 @@ const Chatbot = () => {
       }
       if (
         lastBotMessage.includes("what your unit focuses on") ||
-        lbm.includes("unit focuse on")
+        lastBotMessage.includes("unit focuses on") ||
+        lastBotMessage.includes("unit focus on")
       ) {
         return [
           "Technology & IT",
@@ -1170,7 +1171,6 @@ const Chatbot = () => {
           "Courses",
           "Volunteering",
           "Workshops",
-          "Job Opportunities",
           "Mentorship Programs",
         ];
       }
