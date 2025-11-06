@@ -3,13 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import signupIllustration from "@/assets/signup-illustration.png";
+import signupIllustrate from "@/assets/signinillustion.png";
+import signinLogo from "@/assets/signinLogo.svg";
 import { Eye, EyeOff, Check, X } from "lucide-react";
 
 const passwordRules = [
   { test: (p: string) => /[a-z]/.test(p), label: "one lowercase character" },
   { test: (p: string) => /[A-Z]/.test(p), label: "one uppercase character" },
   { test: (p: string) => /\d/.test(p), label: "one number" },
-  { test: (p: string) => /[!@#$%^&*(),.?":{}|<>]/.test(p), label: "one special character" },
+  {
+    test: (p: string) => /[!@#$%^&*(),.?":{}|<>]/.test(p),
+    label: "one special character",
+  },
   { test: (p: string) => p.length >= 8, label: "8 character minimum" },
 ];
 
@@ -26,8 +31,10 @@ const ResetPassword = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const validatePassword = (password: string) => passwordRules.every((rule) => rule.test(password));
-  const passwordsMatch = newPassword === confirmPassword && confirmPassword !== "";
+  const validatePassword = (password: string) =>
+    passwordRules.every((rule) => rule.test(password));
+  const passwordsMatch =
+    newPassword === confirmPassword && confirmPassword !== "";
 
   useEffect(() => {
     // Check if there's a recovery token in the URL hash
@@ -61,7 +68,9 @@ const ResetPassword = () => {
     }
 
     try {
-      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
 
       if (updateError) {
         if (updateError.message.includes("same")) {
@@ -115,9 +124,34 @@ const ResetPassword = () => {
   return (
     <div className="min-h-screen bg-white flex">
       {/* Left Side Illustration */}
-      <div className="flex-1 hidden lg:flex items-center justify-center bg-gray-50">
-        <div className="max-w-lg">
-          <img src={signupIllustration} alt="Reset Password Illustration" className="w-full h-auto" />
+      <div className="hidden lg:flex w-[41%] h-screen relative p-4">
+        <div className="w-full h-full rounded-3xl overflow-hidden relative">
+          <img
+            src={signupIllustrate}
+            alt="Signin Illustration"
+            className="w-full h-full object-cover"
+          />
+
+          {/* Center content */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-6 px-8">
+            <img src={signinLogo} alt="Sign in Logo" className="w-28 h-auto" />
+            <p className="text-white text-base font-medium max-w-xl leading-relaxed">
+              At YuvaNext, we focus on helping young adults take their next step
+              through internships, courses, and real-world opportunities.
+            </p>
+          </div>
+
+          {/* Footer text */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-between px-6 text-white/80 text-xs">
+            <a
+              href="https://www.yuvanext.com/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              Privacy Policy
+            </a>
+          </div>
         </div>
       </div>
 
@@ -125,25 +159,34 @@ const ResetPassword = () => {
       <div className="flex-1 flex items-center justify-center bg-white px-6">
         <div className="w-full max-w-[474px]">
           <div
-            className="bg-white rounded-[15px] px-[87px] py-12 w-full"
-            style={{ boxShadow: "0px 2px 25px rgba(0, 0, 0, 0.15)" }}
+            className="bg-white rounded-[15px] px-12 py-10 w-full"
+            // style={{ boxShadow: "0px 2px 25px rgba(0, 0, 0, 0.15)" }}
           >
             {/* Header */}
             <div className="text-center mb-8">
-              <h1 className="text-[20px] font-medium leading-[35px] mb-2" style={{ color: "#1F2A37" }}>
+              <h1
+                className="text-[22px] font-semibold leading-[35px] mb-2"
+                style={{ color: "#1F2A37" }}
+              >
                 Reset Password
               </h1>
-              <p className="text-[12px] leading-[15px]" style={{ color: "#9CA3AF" }}>
-                Enter your new password below
+              <p
+                className="text-[13px] leading-[18px]"
+                style={{ color: "#9CA3AF" }}
+              >
+                Enter your new password below to regain access
               </p>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+              <div className="mb-5 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
                 <X className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
                 <p
                   className="text-[11px] text-red-600"
-                  style={{ fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily:
+                      "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
+                  }}
                 >
                   {error}
                 </p>
@@ -154,10 +197,14 @@ const ResetPassword = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* New Password */}
               <div>
-                <label htmlFor="newPassword" className="block text-[12px] mb-2" style={{ color: "#4B5563" }}>
+                <label
+                  htmlFor="newPassword"
+                  className="block text-[13px] mb-2"
+                  style={{ color: "#4B5563" }}
+                >
                   New Password
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center">
+                <div className="border border-[#D1D5DB] rounded-lg h-9 px-4 flex items-center">
                   <input
                     id="newPassword"
                     type={showNewPassword ? "text" : "password"}
@@ -167,7 +214,7 @@ const ResetPassword = () => {
                       setNewPassword(e.target.value);
                       setError("");
                     }}
-                    className="w-full text-[12px] outline-none bg-transparent placeholder-[#9CA3AF]"
+                    className="w-full text-[13px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     required
                   />
                   <button
@@ -175,17 +222,21 @@ const ResetPassword = () => {
                     onClick={() => setShowNewPassword(!showNewPassword)}
                     className="ml-2 text-gray-400 hover:text-gray-600"
                   >
-                    {showNewPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                    {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
 
               {/* Confirm Password */}
               <div>
-                <label htmlFor="confirmPassword" className="block text-[12px] mb-2" style={{ color: "#4B5563" }}>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-[13px] mb-2"
+                  style={{ color: "#4B5563" }}
+                >
                   Confirm Password
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center">
+                <div className="border border-[#D1D5DB] rounded-lg h-9 px-4 flex items-center">
                   <input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
@@ -195,7 +246,7 @@ const ResetPassword = () => {
                       setConfirmPassword(e.target.value);
                       setError("");
                     }}
-                    className="w-full text-[12px] outline-none bg-transparent placeholder-[#9CA3AF]"
+                    className="w-full text-[13px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     required
                   />
                   <button
@@ -203,35 +254,53 @@ const ResetPassword = () => {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="ml-2 text-gray-400 hover:text-gray-600"
                   >
-                    {showConfirmPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                    {showConfirmPassword ? (
+                      <EyeOff size={16} />
+                    ) : (
+                      <Eye size={16} />
+                    )}
                   </button>
                 </div>
               </div>
 
-              {/* Password Requirements */}
-              <div className="space-y-1">
+              {/* Password Requirements (2-column grid) */}
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 mt-2">
                 {passwordRules.map((rule, idx) => {
                   const passed = rule.test(newPassword);
                   return (
                     <div key={idx} className="flex items-center gap-2">
                       <div
-                        className={`w-3 h-3 rounded-full flex items-center justify-center ${passed ? "bg-green-500" : "bg-gray-300"}`}
+                        className={`w-3 h-3 rounded-full flex items-center justify-center ${
+                          passed ? "bg-green-500" : "bg-gray-300"
+                        }`}
                       >
                         {passed && <Check size={8} className="text-white" />}
                       </div>
-                      <p className="text-[10px]" style={{ color: passed ? "#10B981" : "#9CA3AF" }}>
+                      <p
+                        className="text-[11px]"
+                        style={{ color: passed ? "#10B981" : "#9CA3AF" }}
+                      >
                         {rule.label}
                       </p>
                     </div>
                   );
                 })}
+
+                {/* Password Match */}
                 <div className="flex items-center gap-2">
                   <div
-                    className={`w-3 h-3 rounded-full flex items-center justify-center ${passwordsMatch ? "bg-green-500" : "bg-gray-300"}`}
+                    className={`w-3 h-3 rounded-full flex items-center justify-center ${
+                      passwordsMatch ? "bg-green-500" : "bg-gray-300"
+                    }`}
                   >
-                    {passwordsMatch && <Check size={8} className="text-white" />}
+                    {passwordsMatch && (
+                      <Check size={8} className="text-white" />
+                    )}
                   </div>
-                  <p className="text-[10px]" style={{ color: passwordsMatch ? "#10B981" : "#9CA3AF" }}>
+                  <p
+                    className="text-[11px]"
+                    style={{ color: passwordsMatch ? "#10B981" : "#9CA3AF" }}
+                  >
                     Passwords match
                   </p>
                 </div>
@@ -240,8 +309,10 @@ const ResetPassword = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading || !validatePassword(newPassword) || !passwordsMatch}
-                className="w-full h-[30px] rounded-lg flex items-center justify-center text-[12px] font-medium text-white hover:opacity-90 disabled:opacity-50"
+                disabled={
+                  loading || !validatePassword(newPassword) || !passwordsMatch
+                }
+                className="w-full h-[38px] rounded-lg flex items-center justify-center text-[13px] font-medium text-white hover:opacity-90 disabled:opacity-50 transition-all"
                 style={{ backgroundColor: "#76A9FA" }}
               >
                 {loading ? "Updating..." : "Reset Password"}
@@ -251,7 +322,7 @@ const ResetPassword = () => {
               <button
                 type="button"
                 onClick={() => navigate("/auth/student/signin")}
-                className="w-full h-[30px] rounded-lg flex items-center justify-center text-[12px] font-medium border border-[#D1D5DB] hover:bg-gray-50 transition-colors"
+                className="w-full h-[38px] rounded-lg flex items-center justify-center text-[13px] font-medium border border-[#D1D5DB] hover:bg-gray-50 transition-all"
                 style={{ color: "#76A9FA" }}
               >
                 Back to Sign In

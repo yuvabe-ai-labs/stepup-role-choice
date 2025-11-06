@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { sendStatusMail } from "@/utils/sendStatusMail";
 
 interface ScheduleInterviewDialogProps {
   open: boolean;
@@ -117,42 +118,38 @@ export default function ScheduleInterviewDialog({
         `${formData.date}T${formData.time}:00Z`
       ).toISOString();
 
-      // ✅ Log all submission details before sending
-      console.log("📩 Interview Submission Details:", {
+      console.log("📩 Interview Scheduled Details:", {
         applicationId,
         candidateName,
         guestEmails,
         scheduledDate,
         title: formData.title,
         description: formData.description,
-        durationMinutes: 60,
         senderEmail,
       });
 
-      const { error } = await supabase.functions.invoke("schedule-interview", {
-        body: {
-          applicationId,
-          candidateName,
-          candidateEmail: guestEmails,
-          scheduledDate,
-          title: formData.title,
-          description: formData.description,
-          durationMinutes: 60,
-          senderEmail,
-        },
+      // ✅ Send mail via common helper
+      const mailResponse = await sendStatusMail({
+        applicationId,
+        candidateName,
+        candidateEmail: guestEmails,
+        title: formData.title,
+        description: `${formData.description}\nInterview Scheduled on ${scheduledDate}`,
+        senderEmail,
+        status: "Interview Scheduled",
       });
 
-      if (error) throw error;
+      if (!mailResponse.success) throw new Error(mailResponse.error);
 
       toast({
         title: "Interview Scheduled",
-        description: `Zoom Meet link has been sent to ${candidateName}`,
+        description: `Notification has been sent to ${candidateName}`,
       });
 
       onOpenChange(false);
       onSuccess?.();
 
-      // Reset fields
+      // Reset form
       setFormData({
         title: "",
         description: "",

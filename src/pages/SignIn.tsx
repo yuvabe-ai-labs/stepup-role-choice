@@ -107,9 +107,9 @@ const SignIn = () => {
 
   return (
     <div className="min-h-screen bg-white flex">
-      {/* Left Side */}
-      <div className="hidden lg:flex flex-1 h-screen bg-gray-50 relative p-4">
-        {/* Rounded image container */}
+      {/* Left Side - Illustration */}
+      {/* <div className="hidden lg:flex w-2/5 h-screen bg-gray-50 relative p-4"> */}
+      <div className="hidden lg:flex w-[41%] h-screen relative p-4">
         <div className="w-full h-full rounded-3xl overflow-hidden relative">
           <img
             src={signupIllustrate}
@@ -119,10 +119,7 @@ const SignIn = () => {
 
           {/* Center content */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-6 px-8">
-            {/* Logo */}
             <img src={signinLogo} alt="Sign in Logo" className="w-28 h-auto" />
-
-            {/* Paragraph */}
             <p className="text-white text-base font-medium max-w-xl leading-relaxed">
               At YuvaNext, we focus on helping young adults take their next step
               through internships, courses, and real-world opportunities.
@@ -139,14 +136,6 @@ const SignIn = () => {
             >
               Privacy Policy
             </a>
-            <a
-              href="https://www.yuvanext.com/privacy-policy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
-            >
-              Terms of Use
-            </a>
           </div>
         </div>
       </div>
@@ -155,13 +144,13 @@ const SignIn = () => {
       <div className="flex-1 flex items-center justify-center bg-white px-4 sm:px-6">
         <div className="w-full max-w-[474px]">
           <div
-            className="bg-white rounded-[15px] px-6 sm:px-12 md:px-[87px] py-8 sm:py-12 w-full"
-            style={{ boxShadow: "0px 2px 25px rgba(0, 0, 0, 0.15)" }}
+            className="bg-white rounded-[15px] px-6 sm:px-12 md:px-[40px] py-8 sm:py-12 w-full"
+            // style={{ boxShadow: "0px 2px 25px rgba(0, 0, 0, 0.15)" }}
           >
             {/* Header */}
             <div className="text-center mb-8">
               <h1
-                className="text-[20px] font-medium leading-[35px] mb-2"
+                className="text-[24px] font-bold leading-[35px] mb-2"
                 style={{
                   color: "#1F2A37",
                   fontFamily:
@@ -171,7 +160,7 @@ const SignIn = () => {
                 Sign in to your account
               </h1>
               <p
-                className="text-[12px] leading-[15px]"
+                className="text-[14px] leading-[15px]"
                 style={{
                   color: "#9CA3AF",
                   fontFamily:
@@ -256,19 +245,19 @@ const SignIn = () => {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-[12px] mb-2"
+                  className="block text-[14px] mb-2"
                   style={{ color: "#4B5563" }}
                 >
                   Email Address *
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center">
+                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 py-4 flex items-center">
                   <input
                     id="email"
                     type="email"
                     placeholder="Enter email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full text-[12px] outline-none bg-transparent placeholder-[#9CA3AF]"
+                    className="w-full text-[13px] outline-none bg-transparent placeholder-[#D1D5DB]"
                     required
                     disabled={loading}
                   />
@@ -279,19 +268,19 @@ const SignIn = () => {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-[12px] mb-2"
+                  className="block text-[14px] mb-2"
                   style={{ color: "#4B5563" }}
                 >
                   Password *
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center gap-2">
+                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 py-4 flex items-center gap-2">
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full text-[12px] outline-none bg-transparent placeholder-[#9CA3AF]"
+                    className="w-full text-[13px] outline-none bg-transparent placeholder-[#D1D5DB]"
                     required
                     disabled={loading}
                   />
@@ -319,7 +308,7 @@ const SignIn = () => {
                   />
                   <label
                     htmlFor="keepLoggedIn"
-                    className="text-[12px] cursor-pointer"
+                    className="text-[13px] cursor-pointer"
                     style={{ color: "#4B5563" }}
                   >
                     Keep me logged in
@@ -327,7 +316,7 @@ const SignIn = () => {
                 </div>
                 <Link
                   to="/forgot-password"
-                  className="text-[12px] hover:underline"
+                  className="text-[13px] hover:underline"
                   style={{ color: "#3F83F8" }}
                 >
                   Forgot Password?
@@ -338,7 +327,7 @@ const SignIn = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-[30px] rounded-lg flex items-center justify-center text-[12px] font-medium text-white hover:opacity-90 disabled:opacity-50"
+                className="w-full h-[35px] rounded-lg flex items-center justify-center text-[14px] font-medium text-white hover:opacity-90 disabled:opacity-50"
                 style={{ backgroundColor: "#76A9FA" }}
               >
                 {loading ? "Signing in..." : "Sign In"}
@@ -347,7 +336,7 @@ const SignIn = () => {
 
             {/* Footer */}
             <div className="text-center mt-6">
-              <span className="text-[12px]" style={{ color: "#9CA3AF" }}>
+              <span className="text-[13px]" style={{ color: "#9CA3AF" }}>
                 Don't have an account?{" "}
                 <Link
                   to={`/auth/${role}/signup`}

@@ -7,6 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle } from "lucide-react";
 import signupIllustration from "@/assets/signup-illustration.png";
+import signupIllustrate from "@/assets/signinillustion.png";
+import signinLogo from "@/assets/signinLogo.svg";
 import { Eye, EyeOff } from "lucide-react";
 
 const SignUp = () => {
@@ -110,13 +112,34 @@ const SignUp = () => {
   return (
     <div className="min-h-screen bg-white flex">
       {/* Left Side - Illustration */}
-      <div className="flex-1 hidden lg:flex items-center justify-center bg-gray-50">
-        <div className="max-w-lg">
+      <div className="hidden lg:flex w-[41%] h-screen relative p-4">
+        <div className="w-full h-full rounded-3xl overflow-hidden relative">
           <img
-            src={signupIllustration}
-            alt="Signup Illustration"
-            className="w-full h-auto"
+            src={signupIllustrate}
+            alt="Signin Illustration"
+            className="w-full h-full object-cover"
           />
+
+          {/* Center content */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-6 px-8">
+            <img src={signinLogo} alt="Sign in Logo" className="w-28 h-auto" />
+            <p className="text-white text-base font-medium max-w-xl leading-relaxed">
+              At YuvaNext, we focus on helping young adults take their next step
+              through internships, courses, and real-world opportunities.
+            </p>
+          </div>
+
+          {/* Footer text */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-between px-6 text-white/80 text-xs">
+            <a
+              href="https://www.yuvanext.com/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              Privacy Policy
+            </a>
+          </div>
         </div>
       </div>
 
@@ -125,13 +148,14 @@ const SignUp = () => {
         <div className="w-full max-w-[474px]">
           {/* Card Container */}
           <div
-            className="bg-white rounded-[15px] px-6 sm:px-12 md:px-[87px] py-8 sm:py-12 w-full"
-            style={{ boxShadow: "0px 2px 25px rgba(0, 0, 0, 0.15)" }}
+            className="bg-white rounded-[15px] px-6 sm:px-12 md:px-[40px] py-8 sm:py-12 w-full"
+            // style={{ boxShadow: "0px 2px 25px rgba(0, 0, 0, 0.15)" }}
           >
+            {" "}
             {/* Header */}
             <div className="text-center mb-8">
               <h1
-                className="text-[20px] font-medium leading-[35px] mb-2"
+                className="text-[24px] font-bold leading-[35px] mb-2"
                 style={{
                   color: "#1F2A37",
                   fontFamily:
@@ -141,7 +165,7 @@ const SignUp = () => {
                 Create your account
               </h1>
               <p
-                className="text-[12px] leading-[15px]"
+                className="text-[14px] leading-[15px]"
                 style={{
                   color: "#9CA3AF",
                   fontFamily:
@@ -151,7 +175,6 @@ const SignUp = () => {
                 Please enter your details below
               </p>
             </div>
-
             {/* OAuth Buttons */}
             {/* <div className="flex gap-3 mb-6">
               <button
@@ -205,7 +228,6 @@ const SignUp = () => {
                 </span>
               </button>
             </div> */}
-
             {/* Divider */}
             {/* <div className="flex items-center mb-6">
               <div className="flex-1 h-px bg-[#D1D5DB]"></div>
@@ -220,14 +242,13 @@ const SignUp = () => {
               </span>
               <div className="flex-1 h-px bg-[#D1D5DB]"></div>
             </div> */}
-
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Full Name */}
               <div>
                 <label
                   htmlFor="fullName"
-                  className="block text-[12px] leading-[11px] mb-2"
+                  className="block text-[14px] leading-[11px] mb-2"
                   style={{
                     color: "#4B5563",
                     fontFamily:
@@ -236,14 +257,14 @@ const SignUp = () => {
                 >
                   Full Name *
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center">
+                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 py-4 flex items-center">
                   <input
                     id="fullName"
                     type="text"
                     placeholder="Enter name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full text-[12px] leading-[11px] outline-none bg-transparent placeholder-[#9CA3AF]"
+                    className="w-full text-[13px] leading-[11px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     style={{
                       fontFamily:
                         "'Neue Haas Grotesk Text Pro', system-ui, -apple-system, sans-serif",
@@ -257,7 +278,7 @@ const SignUp = () => {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-[12px] leading-[11px] mb-2"
+                  className="block text-[14px] leading-[11px] mb-2"
                   style={{
                     color: "#4B5563",
                     fontFamily:
@@ -266,14 +287,14 @@ const SignUp = () => {
                 >
                   Email Address *
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center">
+                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 py-4 flex items-center">
                   <input
                     id="email"
                     type="email"
                     placeholder="Enter email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full text-[12px] leading-[11px] outline-none bg-transparent placeholder-[#9CA3AF]"
+                    className="w-full text-[13px] leading-[11px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     style={{
                       fontFamily:
                         "'Lato', system-ui, -apple-system, sans-serif",
@@ -292,14 +313,14 @@ const SignUp = () => {
                 >
                   Password *
                 </label>
-                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 flex items-center gap-2">
+                <div className="border border-[#D1D5DB] rounded-lg h-8 px-4 py-4 flex items-center gap-2">
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full text-[12px] outline-none bg-transparent placeholder-[#9CA3AF]"
+                    className="w-full text-[13px] outline-none bg-transparent placeholder-[#9CA3AF]"
                     required
                   />
                   <button
@@ -313,7 +334,7 @@ const SignUp = () => {
 
                 {/* Password strength checklist (2 columns) */}
                 {password && (
-                  <ul className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px]">
+                  <ul className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[12px]">
                     {passwordRules.map((rule, index) => {
                       const passed = rule.test(password);
                       return (
@@ -340,7 +361,7 @@ const SignUp = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-[30px] rounded-lg flex items-center justify-center text-[12px] font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
+                className="w-full h-[35px] rounded-lg flex items-center justify-center text-[14px] font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
                 style={{
                   backgroundColor: "#76A9FA",
                   fontFamily:
@@ -350,11 +371,10 @@ const SignUp = () => {
                 {loading ? "Creating account..." : "Sign up"}
               </button>
             </form>
-
             {/* Sign In Link */}
             <div className="text-center mt-6">
               <span
-                className="text-[12px] leading-4"
+                className="text-[13px] leading-4"
                 style={{
                   color: "#9CA3AF",
                   fontFamily:
@@ -364,7 +384,7 @@ const SignUp = () => {
                 Already have an account?{" "}
                 <Link
                   to={`/auth/${role}/signin`}
-                  className="text-[12px] leading-4 font-medium hover:underline"
+                  className="text-[14px] leading-4 font-medium hover:underline"
                   style={{
                     color: "#3F83F8",
                     fontFamily:
