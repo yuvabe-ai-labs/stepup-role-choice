@@ -2,14 +2,41 @@ import { Link } from "react-router-dom";
 import signupIllustration from "@/assets/signup-illustration.png";
 import emailSentIcon from "@/assets/email-sent-icon.png";
 import { ArrowLeft } from "lucide-react";
+import signupIllustrate from "@/assets/signinillustion.png";
+import signinLogo from "@/assets/signinLogo.svg";
 
 const CheckEmail = () => {
   return (
     <div className="min-h-screen bg-white flex">
       {/* Left Side - Illustration */}
-      <div className="flex-1 hidden lg:flex items-center justify-center bg-gray-50">
-        <div className="max-w-lg">
-          <img src={signupIllustration} alt="Check Email Illustration" className="w-full h-auto" />
+      <div className="hidden lg:flex w-[41%] h-screen relative p-4">
+        <div className="w-full h-full rounded-3xl overflow-hidden relative">
+          <img
+            src={signupIllustrate}
+            alt="Signin Illustration"
+            className="w-full h-full object-cover"
+          />
+
+          {/* Center content */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-6 px-8">
+            <img src={signinLogo} alt="Sign in Logo" className="w-28 h-auto" />
+            <p className="text-white text-base font-medium max-w-xl leading-relaxed">
+              At YuvaNext, we focus on helping young adults take their next step
+              through internships, courses, and real-world opportunities.
+            </p>
+          </div>
+
+          {/* Footer text */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-between px-6 text-white/80 text-xs">
+            <a
+              href="https://www.yuvanext.com/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              Privacy Policy
+            </a>
+          </div>
         </div>
       </div>
 
@@ -22,7 +49,11 @@ const CheckEmail = () => {
           >
             {/* Email Icon */}
             <div className="flex justify-center mb-8">
-              <img src={emailSentIcon} alt="Email sent" className="w-[120px] h-[120px]" />
+              <img
+                src={emailSentIcon}
+                alt="Email sent"
+                className="w-[120px] h-[120px]"
+              />
             </div>
 
             {/* Header */}
@@ -31,7 +62,8 @@ const CheckEmail = () => {
                 className="text-[20px] font-medium leading-[35px] mb-3"
                 style={{
                   color: "#1F2A37",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
+                  fontFamily:
+                    "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
                 }}
               >
                 Check your email
@@ -40,7 +72,8 @@ const CheckEmail = () => {
                 className="text-[12px] leading-[18px]"
                 style={{
                   color: "#9CA3AF",
-                  fontFamily: "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
+                  fontFamily:
+                    "'Neue Haas Grotesk Text Pro', system-ui, sans-serif",
                 }}
               >
                 We have sent a password reset link to your email

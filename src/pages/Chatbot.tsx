@@ -737,6 +737,7 @@ const Chatbot = () => {
         if (
           lastBotMessage.toLowerCase().includes("what your unit focuses on") ||
           lastBotMessage.toLowerCase().includes("focus areas") ||
+          lastBotMessage.toLowerCase().includes("your unit focus on") ||
           lastBotMessage.toLowerCase().includes("areas of focus")
         ) {
           roleSpecificData.focus_areas = stringToArray(userResponse);
@@ -1045,7 +1046,7 @@ const Chatbot = () => {
       }
       if (
         lastBotMessage.includes("what your unit focuses on") ||
-        lbm.includes("what your unit focuses on")
+        lbm.includes("unit focuse on")
       ) {
         return [
           "Technology & IT",
