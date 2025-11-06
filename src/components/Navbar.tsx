@@ -109,10 +109,18 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
-    setMobileMenuOpen(false);
-  };
+  await signOut();
+
+  if (userRole === "unit") {
+    navigate("/auth/unit/signin");
+  } else {
+    navigate("/auth/student/signin");
+  }
+
+  setMobileMenuOpen(false);
+};
+
+
 
   const handleProfileClick = () => {
     if (userRole === "unit") {
