@@ -484,7 +484,7 @@ const CandidateProfile = () => {
                           </div>
                         </SelectItem>
 
-                        <SelectItem value="applied">
+                        <SelectItem value="rejected">
                           <div className="flex items-center gap-1.5 px-3 py-1">
                             <Ban className="w-4 h-4" />
                             Not Shortlisted
