@@ -9,6 +9,12 @@ import { useToast } from "@/components/ui/use-toast";
 import { Send, Sparkles } from "lucide-react";
 import chatbotAvatar from "@/assets/chatbot.png";
 import logo from "@/assets/logo-3.png";
+import bag from "@/assets/bag.svg";
+import book from "@/assets/book.svg";
+import paper from "@/assets/paper.svg";
+import mathingIntershipSvg from "@/assets/MathingIntership.svg";
+import aurovilleUnitSvg from "@/assets/AurovilleUnit.svg";
+import SkillCoursesSvg from "@/assets/SkillCourses.svg";
 import ChatBG from "@/assets/chatBG.png";
 import { useIntern } from "@/hooks/useInternships";
 import {
@@ -1492,215 +1498,104 @@ const Chatbot = () => {
     const isUnit = userProfile?.role === "unit";
 
     return (
-      <div
-        className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-muted flex flex-col items-center justify-center p-6 bg-cover bg-center"
-        style={{ backgroundImage: `url(${ChatBG})` }}
-      >
-        {" "}
-        <div className="text-center max-w-2xl mx-auto space-y-8">
-          <div className="flex justify-center">
-            <a href="/">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-[#FFF6EF] py-10 px-4">
+        {/* Logo */}
+        <img src={logo} alt="logo" className="w-20 mb-6" />
+
+        {/* Title */}
+        <h1 className="text-2xl font-bold text-[#333] mb-2">You're All Set!</h1>
+        <p className="text-sm text-gray-500 mb-12">
+          Here's your personalized profile summary:
+        </p>
+
+        {/* Cards */}
+        {!isUnit && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Card 1 */}
+            <div className="flex flex-col items-center text-center bg-white shadow-lg border border-[#C94100] rounded-[15px] p-6 w-[266px] h-[287px]">
+              <div className="w-12 h-12 flex items-center justify-center bg-[#FFF4CE] rounded-lg">
+                <img src={bag} alt="" className="w-full mt-auto" />
+              </div>
+
+              <h3 className="font-semibold font-primary mt-3">
+                5 Matching Internships
+              </h3>
+              <p className="text-sm text-gray-500 mb-3">
+                Found in business domain
+              </p>
+
               <img
-                src={logo}
-                alt="Company Logo"
-                className="h-24 w-auto cursor-pointer"
+                src={mathingIntershipSvg}
+                alt=""
+                className="w-94 mt-[10px]"
               />
-            </a>
-          </div>
-
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-foreground">
-              You're All Set!
-            </h1>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              {isUnit
-                ? "Here's your unit Dashboard:"
-                : "Here's your personalized Internship Dashboard:"}
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            {/* <div className="flex items-center justify-center space-x-2">
-              <span className="text-2xl">👋</span>
-              <h2 className="text-xl font-semibold text-foreground">
-                {isUnit
-                  ? `Hello ${userProfile.full_name || "Unit"}!`
-                  : `Hello ${userProfile.full_name?.split(" ")[0] || "there"}!`}
-              </h2>
-            </div> */}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-              {isUnit ? (
-                <>
-                  {/* Potential Candidates Card */}
-                  <Card className="p-6 text-center space-y-3">
-                    <div className="w-12 h-12 mx-auto bg-blue-100 rounded-lg flex items-center justify-center">
-                      <span className="text-2xl">👥</span>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        {candidateCount !== null ? candidateCount : "…"}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Potential Candidates
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Matching your requirements
-                      </div>
-                    </div>
-                  </Card>
-
-                  {/* Skill Matches Card */}
-                  <Card className="p-6 text-center space-y-3">
-                    <div className="w-12 h-12 mx-auto bg-green-100 rounded-lg flex items-center justify-center">
-                      <span className="text-2xl">🎯</span>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        {skillMatches !== null ? skillMatches : "…"}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Skill Matches
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Perfect for your unit
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-6 text-center space-y-3">
-                    <div className="w-12 h-12 mx-auto bg-purple-100 rounded-lg flex items-center justify-center">
-                      <span className="text-2xl">📋</span>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">
-                        Get Ready to Post JD
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Find Your Team
-                      </div>
-                    </div>
-                  </Card>
-                </>
-              ) : (
-                <>
-                  <Card className="p-6 text-center space-y-3 rounded-3xl">
-                    <div className="w-12 h-12 mx-auto bg-red-100 rounded-lg flex items-center justify-center">
-                      <span className="text-2xl">📅</span>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        {recommendedInternships.length}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Matching Internships
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Found in business domain
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-6 text-center space-y-3 rounded-3xl">
-                    <div className="w-12 h-12 mx-auto bg-teal-100 rounded-lg flex items-center justify-center">
-                      <span className="text-2xl">🏢</span>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        {new Set(totalUnits).size}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Units</div>
-                      <div className="text-xs text-muted-foreground">
-                        Relevant to your skills
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="p-6 text-center space-y-3 rounded-3xl">
-                    <div className="w-12 h-12 mx-auto bg-purple-100 rounded-lg flex items-center justify-center">
-                      <span className="text-2xl">🎯</span>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-foreground">
-                        {recommendedCourses.length}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Skill Courses
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        To boost your profile
-                      </div>
-                    </div>
-                  </Card>
-                </>
-              )}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-              <Button
-                size="lg"
-                disabled={isLoading}
-                onClick={async () => {
-                  setIsLoading(true);
+            {/* Card 2 */}
+            <div className="flex flex-col items-center text-center bg-white shadow-lg border border-[#C94100] rounded-[15px] p-6 w-[266px] h-[287px]">
+              <div className="w-12 h-12 flex items-center justify-center bg-[#FFE8E2] rounded-lg">
+                <img src={book} alt="" className="w-full mt-auto" />
+              </div>
 
-                  try {
-                    console.log(
-                      "Updating onboarding completion for user:",
-                      user?.id
-                    );
-                    const { data: updateData, error } = await supabase
-                      .from("profiles")
-                      .update({ onboarding_completed: true })
-                      .eq("user_id", user?.id)
-                      .select();
+              <h3 className="font-semibold mt-3">12 Auroville Units</h3>
+              <p className="text-sm text-gray-500 mb-3">
+                Relevant to your skills
+              </p>
 
-                    if (error) {
-                      console.error("Error updating onboarding status:", error);
-                      toast({
-                        title: "Update Error",
-                        description:
-                          "Failed to update onboarding status: " +
-                          error.message,
-                        variant: "destructive",
-                      });
-                    } else {
-                      console.log(
-                        "Successfully updated onboarding status:",
-                        updateData
-                      );
-                      toast({
-                        title: "Profile Complete!",
-                        description:
-                          "Your onboarding has been completed successfully.",
-                        variant: "default",
-                      });
-                      const dashboardPath = isUnit
-                        ? "/unit-dashboard"
-                        : "/dashboard";
-                      navigate(dashboardPath, { replace: true });
-                    }
-                  } catch (error: any) {
-                    console.error("Error updating onboarding status:", error);
-                    toast({
-                      title: "Update Error",
-                      description: "Failed to update onboarding status",
-                      variant: "destructive",
-                    });
-                  } finally {
-                    setIsLoading(false);
-                  }
-                }}
-                className="bg-gradient-to-br from-[#07636C] to-[#0694A2] hover:opacity-90 text-white px-8 py-3 rounded-full font-medium transition-opacity"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                {isLoading
-                  ? "Setting up..."
-                  : isUnit
-                  ? "Explore Dashboard"
-                  : "Explore My Dashboard"}
-              </Button>
+              <img src={aurovilleUnitSvg} alt="" className="w-94 mt-3" />
+            </div>
+
+            {/* Card 3 */}
+            <div className="flex flex-col items-center text-center bg-white shadow-lg border border-[#C94100] rounded-[15px] p-6 w-[266px] h-[287px]">
+              <div className="w-12 h-12 flex items-center justify-center bg-[#FFF4CE] rounded-lg">
+                <img src={paper} alt="" className="w-full mt-auto" />
+              </div>
+
+              <h3 className="font-semibold mt-3">3 Skill Courses</h3>
+              <p className="text-sm text-gray-500 mb-3">
+                To boost your profile
+              </p>
+
+              <img src={SkillCoursesSvg} alt="" className="w-94 mt-3" />
             </div>
           </div>
+        )}
+
+        {/* Buttons */}
+        <div className="flex gap-3 mt-10 justify-center">
+          {/* Dashboard Button */}
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="
+      flex items-center justify-center
+      px-4 py-2       
+      rounded-[18px]
+      text-white font-medium
+      bg-gradient-to-r from-[#C94100] to-[#FFB592]
+      text-sm        
+      min-w-[140px]    
+    "
+          >
+            Explore my Dashboard
+          </button>
+
+          {/* Update Button */}
+          {!isUnit && (
+            <button
+              onClick={() => navigate("/profile")}
+              className="
+      flex items-center justify-center
+      px-4 py-2        
+      rounded-[18px]
+      border border-[#C94100]
+      text-[#C94100] font-medium
+      text-sm          
+      min-w-[120px]    
+    "
+            >
+              Update Profile
+            </button>
+          )}
         </div>
       </div>
     );
