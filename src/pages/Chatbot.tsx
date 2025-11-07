@@ -887,7 +887,7 @@ const Chatbot = () => {
           "Educational Institution",
           "Corporate / Company",
           "Government / Public Sector",
-          "Other",
+          "Add Skills",
         ];
       }
       if (lastBotMessage.includes("language")) {
@@ -909,7 +909,7 @@ const Chatbot = () => {
           "Business & Management",
           "Community & Social Impact",
           "Education & Training",
-          "Other",
+          "Add Skills",
         ];
       }
       if (
@@ -1041,10 +1041,10 @@ const Chatbot = () => {
 
       // 🌟 If YES → school-going students
       if (lastBotMessage.includes("Which class or grade")) {
-        return ["9th", "10th", "11th", "12th", "Other"];
+        return ["9th", "10th", "11th", "12th", "Add Skills"];
       }
       if (lastBotMessage.includes("soft skills") || lastBotMessage.includes("describe you best")) {
-        return ["Teamwork", "Creativity", "Communication", "Problem-solving", "Curiosity", "Adaptability", "Other"];
+        return ["Teamwork", "Creativity", "Communication", "Problem-solving", "Curiosity", "Adaptability", "Add Skills"];
       }
       if (lastBotMessage.includes("interested in learning") || lastBotMessage.includes("exploring right now")) {
         return []; // open-ended input
