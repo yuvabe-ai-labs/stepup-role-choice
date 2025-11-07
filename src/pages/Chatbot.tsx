@@ -41,7 +41,6 @@ const Chatbot = () => {
   const [showChat, setShowChat] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [showProfessionalTransition, setShowProfessionalTransition] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -154,34 +153,6 @@ const Chatbot = () => {
   const totalUnits = [];
   recommendedInternships.map((internship) => totalUnits.push(internship.created_by));
 
-  const continueToProfessional = () => {
-    setShowProfessionalTransition(false);
-    setShowChat(true);
-    setIsTyping(true);
-
-    // Add the professional transition message to chat history
-    const transitionMessage: Message = {
-      id: Date.now().toString(),
-      content: "Thanks! Now let's know you professionally. Help me with all your professional details here",
-      role: "assistant",
-      timestamp: new Date(),
-    };
-
-    setTimeout(() => {
-      setMessages((prev) => [...prev, transitionMessage]);
-
-      // Ask the first professional question
-      const professionalQuestion: Message = {
-        id: (Date.now() + 1).toString(),
-        content: "To know the best opportunities, which area of interest excites you the most?",
-        role: "assistant",
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, professionalQuestion]);
-      setIsTyping(false);
-    }, 1000);
-  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -358,15 +329,6 @@ const Chatbot = () => {
       }
 
       if (data?.success && data?.response) {
-        // Check if this is the professional transition
-        if (data.response.includes("Now let's know you professionally")) {
-          setTimeout(() => {
-            setShowProfessionalTransition(true);
-            setIsTyping(false);
-          }, 1500);
-          return;
-        }
-
         // Check if conversation is complete
         if (
           data.response.includes("Perfect! You're all set!") ||
@@ -1241,61 +1203,6 @@ const Chatbot = () => {
     );
   }
 
-  if (showProfessionalTransition) {
-    const isUnit = userProfile?.role === "unit";
-
-    return (
-      <div
-        className="relative min-h-screen flex flex-col items-center justify-center p-6 bg-cover bg-center"
-        style={{ backgroundImage: `url(${ChatBG})` }}
-      >
-        <div className="text-center max-w-md mx-auto space-y-8">
-          <div className="flex justify-center">
-            <a href="/">
-              <img src={logo} alt="Company Logo" className="h-24 w-auto cursor-pointer" />
-            </a>
-          </div>
-
-          <div className="space-y-4">
-            <h1 className="text-2xl font-bold text-foreground">
-              {isUnit ? "Welcome to YuvaNext Unit Portal" : "Welcome to YuvaNext Internships"}
-            </h1>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              {isUnit
-                ? "Let's have a quick chat to set up your unit profile! Our AI assistant will help you connect with the best candidates for your opportunities."
-                : "Let's have a quick chat to personalize your internship journey! Our AI assistant will help you discover opportunities that match your passions."}
-            </p>
-          </div>
-
-          <div className="relative">
-            <div className="w-32 h-32 mx-auto mb-4 relative">
-              <img src={chatbotAvatar} alt="AI Assistant" className="w-full h-full rounded-full object-cover" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-xl font-semibold text-foreground">
-                Thanks {userProfile.full_name?.split(" ")[0] || "there"}!{" "}
-                {isUnit ? "Now let's know your unit professionally" : "Now let's know you professionally"}
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                {isUnit
-                  ? "Help me with all your unit's professional details here"
-                  : "Help me with all your professional details here"}
-              </p>
-            </div>
-          </div>
-
-          <Button
-            onClick={continueToProfessional}
-            size="lg"
-            className="bg-gradient-to-br from-[#07636C] to-[#0694A2] hover:opacity-90 text-white px-8 py-3 rounded-full font-medium transition-opacity"
-          >
-            <Sparkles className="w-4 h-4 mr-2" />
-            Get Started
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   if (isCompleted) {
     const isUnit = userProfile?.role === "unit";
