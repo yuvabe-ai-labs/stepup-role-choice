@@ -20,6 +20,9 @@ export const useInternshipRecommendations = (
   userSkills: string[]
 ): InternshipWithScore[] => {
   return useMemo(() => {
+    if (!internships || internships.length === 0) return [];
+
+    // Case: no user skills → return first 10 internships (e.g. recent)
     if (!userSkills || userSkills.length === 0) {
       return internships.slice(0, 10).map((i) => ({
         ...i,
@@ -28,7 +31,7 @@ export const useInternshipRecommendations = (
       }));
     }
 
-    // Remove duplicates and normalize user skills
+    // Normalize and deduplicate user skills
     const normalizedUserSkills = Array.from(
       new Set(userSkills.map((s) => s.toLowerCase().trim()))
     );
@@ -55,7 +58,7 @@ export const useInternshipRecommendations = (
         .filter((s): s is string => typeof s === "string")
         .map((s) => s.toLowerCase().trim());
 
-      // Count exact matches only
+      // Count exact matches
       const matchCount = normalizedUserSkills.filter((userSkill) =>
         normalizedRequired.includes(userSkill)
       ).length;
@@ -72,16 +75,17 @@ export const useInternshipRecommendations = (
       };
     });
 
-    // Sort by match score and percentage, showing best matches first
+    // Sort by best matches first
     const sorted = scored.sort((a, b) => {
-      if (b.matchScore !== a.matchScore) {
-        return b.matchScore - a.matchScore;
-      }
+      if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
       return b.matchPercentage - a.matchPercentage;
     });
 
-    // Return top 6 internships (including those with no matches if that's all we have)
-    return sorted.slice(0, 6);
+    // Filter only matching internships
+    const filtered = sorted.filter((i) => i.matchScore > 0);
+
+    // Return all matches; if none, fallback to 6 general internships
+    return filtered.length > 0 ? filtered : sorted.slice(0, 6);
   }, [internships, userSkills]);
 };
 
@@ -90,6 +94,9 @@ export const useCourseRecommendations = (
   userSkills: string[]
 ): CourseWithScore[] => {
   return useMemo(() => {
+    if (!courses || courses.length === 0) return [];
+
+    // Case: no skills → return first 6 courses (recent/default)
     if (!userSkills || userSkills.length === 0) {
       return courses.slice(0, 6).map((c) => ({
         ...c,
@@ -105,7 +112,7 @@ export const useCourseRecommendations = (
       const category = course.category?.toLowerCase() || "";
       const title = course.title?.toLowerCase() || "";
 
-      // Partial match: user skill appears in title or category
+      // Partial match: skill appears in title or category
       const matchCount = normalizedUserSkills.filter(
         (userSkill) => category.includes(userSkill) || title.includes(userSkill)
       ).length;
@@ -116,7 +123,10 @@ export const useCourseRecommendations = (
       };
     });
 
-    // Sort by matchScore descending and return top 6
-    return scored.sort((a, b) => b.matchScore - a.matchScore).slice(0, 6);
+    const sorted = scored.sort((a, b) => b.matchScore - a.matchScore);
+    const filtered = sorted.filter((c) => c.matchScore > 0);
+
+    // Return all matches; if none, fallback to 6 general courses
+    return filtered.length > 0 ? filtered : sorted.slice(0, 6);
   }, [courses, userSkills]);
 };
