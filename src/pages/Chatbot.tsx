@@ -153,7 +153,6 @@ const Chatbot = () => {
   const totalUnits = [];
   recommendedInternships.map((internship) => totalUnits.push(internship.created_by));
 
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -951,7 +950,7 @@ const Chatbot = () => {
           "Add Skills",
         ];
       }
-      if (lastBotMessage.includes("Creative & Design")) {
+      if (lastBotMessage.includes("Creative & Design") || lastBotMessage.includes("Creative & Design?")) {
         return [
           "Graphic Design",
           "Video Editing",
@@ -1202,7 +1201,6 @@ const Chatbot = () => {
       </div>
     );
   }
-
 
   if (isCompleted) {
     const isUnit = userProfile?.role === "unit";
