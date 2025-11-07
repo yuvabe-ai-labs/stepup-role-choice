@@ -44,8 +44,6 @@ const Chatbot = () => {
   const [showChat, setShowChat] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [showProfessionalTransition, setShowProfessionalTransition] =
-    useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -60,6 +58,20 @@ const Chatbot = () => {
   const [customInputContext, setCustomInputContext] = useState<string>("");
   const [candidateCount, setCandidateCount] = useState<number | null>(null);
   const [skillMatches, setSkillMatches] = useState<number | null>(null);
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // 👇 Auto-focus input whenever messages or quick options update
+  useEffect(() => {
+    if (!isTyping && !isLoading) {
+      inputRef.current?.focus();
+    }
+  }, [messages, isTyping, isLoading]);
+
+  // 👇 Also scroll to bottom (optional, if not already implemented)
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   useEffect(() => {
     const fetchCandidateData = async () => {
@@ -175,36 +187,6 @@ const Chatbot = () => {
     totalUnits.push(internship.created_by)
   );
 
-  const continueToProfessional = () => {
-    setShowProfessionalTransition(false);
-    setShowChat(true);
-    setIsTyping(true);
-
-    // Add the professional transition message to chat history
-    // const transitionMessage: Message = {
-    //   id: Date.now().toString(),
-    //   content:
-    //     "Thanks! Now let's know you professionally. Help me with all your professional details here",
-    //   role: "assistant",
-    //   timestamp: new Date(),
-    // };
-
-    // setTimeout(() => {
-    //   setMessages((prev) => [...prev, transitionMessage]);
-
-    //   // Ask the first professional question
-    //   const professionalQuestion: Message = {
-    //     id: (Date.now() + 1).toString(),
-    //     content: "To know the best opportunities, What is you Profile Type",
-    //     role: "assistant",
-    //     timestamp: new Date(),
-    //   };
-
-    //   setMessages((prev) => [...prev, professionalQuestion]);
-    //   setIsTyping(false);
-    // }, 1000);
-  };
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -227,7 +209,7 @@ const Chatbot = () => {
 
       const initialMessage: Message = {
         id: "1",
-        content: `Hey, ${name}! 👋 Let's get to know you better.`,
+        content: `Hey 👋, ${name}! Let's get to know you better.`,
         role: "assistant",
         timestamp: new Date(),
       };
@@ -387,56 +369,6 @@ const Chatbot = () => {
       }
 
       if (data?.success && data?.response) {
-        console.log("Chatbot response:", data.response);
-
-        const isUnit = userProfile?.role === "unit";
-
-        // Check if this is the professional transition
-        if (data.response.includes("Now let's know you professionally")) {
-          // Add the bot message first
-          setTimeout(() => {
-            const botMessage: Message = {
-              id: (Date.now() + 1).toString(),
-              content: data.response,
-              role: "assistant",
-              timestamp: new Date(),
-            };
-            setMessages((prev) => [...prev, botMessage]);
-
-            // Then show the transition screen
-            setTimeout(() => {
-              setShowProfessionalTransition(true);
-              setIsTyping(false);
-            }, 1000);
-          }, 1500);
-          return;
-        }
-
-        if (
-          isUnit &&
-          (lastBotMessage.toLowerCase().includes("city") ||
-            lastBotMessage.toLowerCase().includes("location") ||
-            lastBotMessage.toLowerCase().includes("where is your unit"))
-        ) {
-          // Add the bot message first
-          setTimeout(() => {
-            const botMessage: Message = {
-              id: (Date.now() + 1).toString(),
-              content: data.response,
-              role: "assistant",
-              timestamp: new Date(),
-            };
-            setMessages((prev) => [...prev, botMessage]);
-
-            // Then show professional transition
-            setTimeout(() => {
-              setShowProfessionalTransition(true);
-              setIsTyping(false);
-            }, 1000);
-          }, 1500);
-          return;
-        }
-
         // Check if conversation is complete
         if (
           data.response.includes("Perfect! You're all set!") ||
@@ -933,8 +865,6 @@ const Chatbot = () => {
       "Community & Social Impact",
       "Education & Training",
       "Technology & Digital",
-      "soft skills",
-      "what specific skills",
     ];
 
     return multiSelectQuestions.some((q) => lastBotMessage.includes(q))
@@ -1044,7 +974,6 @@ const Chatbot = () => {
 
   const getQuickOptions = (lastBotMessage: string) => {
     const isUnit = userProfile?.role === "unit";
-    const lbm = lastBotMessage.toLowerCase();
 
     if (isUnit) {
       if (lastBotMessage.includes("type of unit")) {
@@ -1054,7 +983,7 @@ const Chatbot = () => {
           "Educational Institution",
           "Corporate / Company",
           "Government / Public Sector",
-          "Other",
+          "Add Skills",
         ];
       }
       if (lastBotMessage.includes("language")) {
@@ -1076,13 +1005,17 @@ const Chatbot = () => {
           "Business & Management",
           "Community & Social Impact",
           "Education & Training",
-          "Other",
+          "Add Skills",
         ];
       }
       if (
-        lbm.includes("what specific skills are you looking for") ||
-        lbm.includes("what specific skills") ||
-        lbm.includes("specific skills are you looking for")
+        lastBotMessage
+          .toLowerCase()
+          .includes("what specific skills are you looking for") ||
+        lastBotMessage.toLowerCase().includes("what specific skills") ||
+        lastBotMessage
+          .toLowerCase()
+          .includes("specific skills are you looking for")
       ) {
         return [
           "Web Development",
@@ -1117,7 +1050,10 @@ const Chatbot = () => {
           "Add Skills",
         ];
       }
-      if (lastBotMessage.includes("Creative & Design")) {
+      if (
+        lastBotMessage.includes("Creative & Design") ||
+        lastBotMessage.includes("Creative & Design?")
+      ) {
         return [
           "Graphic Design",
           "Video Editing",
@@ -1214,7 +1150,7 @@ const Chatbot = () => {
 
       // 🌟 If YES → school-going students
       if (lastBotMessage.includes("Which class or grade")) {
-        return ["9th", "10th", "11th", "12th", "Other"];
+        return ["9th", "10th", "11th", "12th", "Add Skills"];
       }
       if (
         lastBotMessage.includes("soft skills") ||
@@ -1227,7 +1163,7 @@ const Chatbot = () => {
           "Problem-solving",
           "Curiosity",
           "Adaptability",
-          "Other",
+          "Add Skills",
         ];
       }
       if (
@@ -1439,74 +1375,6 @@ const Chatbot = () => {
     );
   }
 
-  if (showProfessionalTransition) {
-    const isUnit = userProfile?.role === "unit";
-
-    return (
-      <div
-        className="relative min-h-screen flex flex-col items-center justify-center p-6 bg-cover bg-center"
-        style={{ backgroundImage: `url(${ChatBG})` }}
-      >
-        <div className="text-center max-w-md mx-auto space-y-8">
-          <div className="flex justify-center">
-            <a href="/">
-              <img
-                src={logo}
-                alt="Company Logo"
-                className="h-24 w-auto cursor-pointer"
-              />
-            </a>
-          </div>
-
-          <div className="space-y-4">
-            <h1 className="text-2xl font-bold text-foreground">
-              {isUnit
-                ? "Welcome to YuvaNext Unit Portal"
-                : "Welcome to YuvaNext Internships"}
-            </h1>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              {isUnit
-                ? "Let's have a quick chat to set up your unit profile! Our AI assistant will help you connect with the best candidates for your opportunities."
-                : "Let's have a quick chat to personalize your internship journey! Our AI assistant will help you discover opportunities that match your passions."}
-            </p>
-          </div>
-
-          <div className="relative">
-            <div className="w-32 h-32 mx-auto mb-4 relative">
-              <img
-                src={chatbotAvatar}
-                alt="AI Assistant"
-                className="w-full h-full rounded-full object-cover"
-              />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-xl font-semibold text-foreground">
-                Thanks {userProfile.full_name?.split(" ")[0] || "there"}!{" "}
-                {isUnit
-                  ? "Now let's know your unit professionally"
-                  : "Now let's know you professionally"}
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                {isUnit
-                  ? "Help me with all your unit's professional details here"
-                  : "Help me with all your professional details here"}
-              </p>
-            </div>
-          </div>
-
-          <Button
-            onClick={continueToProfessional}
-            size="lg"
-            className="bg-gradient-to-br from-[#07636C] to-[#0694A2] hover:opacity-90 text-white px-8 py-3 rounded-full font-medium transition-opacity"
-          >
-            <Sparkles className="w-4 h-4 mr-2" />
-            Get Started
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   if (isCompleted) {
     const isUnit = userProfile?.role === "unit";
 
@@ -1654,19 +1522,7 @@ const Chatbot = () => {
         >
           <div className="flex-1"></div>
 
-          {/* Chatbot Avatar - shown once above first message */}
-          {messages.length > 0 && (
-            <div className="flex justify-start mb-4 sticky top-0  z-10 bg-transparent">
-              <div className="w-16 h-16 rounded-full overflow-hidden">
-                <img
-                  src={chatbotAvatar}
-                  alt="AI Assistant"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-          )}
-
+          {/* 💬 Chat Messages */}
           <div className="space-y-4">
             {messages.map((message) => (
               <div
@@ -1682,6 +1538,18 @@ const Chatbot = () => {
                       : ""
                   }`}
                 >
+                  {/* 🧠 Chatbot Avatar on left for assistant messages */}
+                  {message.role === "assistant" && (
+                    <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                      <img
+                        src={chatbotAvatar}
+                        alt="AI Assistant"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
+                  {/* 💬 Message Bubble */}
                   <Card
                     className={`p-3 rounded-3xl border ${
                       message.role === "user"
@@ -1697,8 +1565,8 @@ const Chatbot = () => {
               </div>
             ))}
 
-            {/* Quick Options */}
-            {quickOptions && messages.length > 0 && !isLoading && (
+            {/* ⚡ Quick Options */}
+            {quickOptions && messages.length > 0 && !isTyping && !isLoading && (
               <div className="flex justify-start">
                 <div className="max-w-[80%]">
                   {renderQuickOptions(quickOptions)}
@@ -1706,9 +1574,16 @@ const Chatbot = () => {
               </div>
             )}
 
-            {/* Typing Indicator */}
+            {/* ⌛ Typing Indicator */}
             {isTyping && (
-              <div className="flex justify-start">
+              <div className="flex justify-start items-center space-x-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                  <img
+                    src={chatbotAvatar}
+                    alt="AI Assistant"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <div className="px-4 py-2 border border-blue-500 text-blue-600 rounded-full inline-block">
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
@@ -1730,9 +1605,11 @@ const Chatbot = () => {
         </div>
 
         {/* Input Area */}
+        {/* Input Area */}
         <div className="mt-4">
           <div className="flex space-x-2">
             <Input
+              ref={inputRef} // ✅ attach the ref
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder={
@@ -1745,10 +1622,13 @@ const Chatbot = () => {
               className="flex-1 rounded-full border border-gray-300"
             />
             <Button
-              onClick={() => sendMessage()}
+              onClick={() => {
+                sendMessage();
+                inputRef.current?.focus(); // ✅ focus again after sending
+              }}
               disabled={!inputValue.trim() || isLoading}
               size="sm"
-              className="px-6 py-5 rounded-full flex items-center space-x-4"
+              className="px-4 rounded-full flex items-center space-x-2"
             >
               Send
             </Button>
