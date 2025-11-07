@@ -37,7 +37,7 @@ const Dashboard = () => {
   const [currentInternshipIndex, setCurrentInternshipIndex] = useState(0);
   const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
 
-  const [userSkills, setUserSkills] = useState<string[]>([]);
+  // const [userSkills, setUserSkills] = useState<string[]>([]);
   const [activityView, setActivityView] = useState<"saved" | "applied">(
     "saved"
   );
@@ -63,12 +63,16 @@ const Dashboard = () => {
   const { appliedInternships, loading: appliedLoading } =
     useAppliedInternships();
 
-  // Fetch user skills for recommendations
+  // --- Add new loading state ---
+  const [userSkills, setUserSkills] = useState<string[]>([]);
+  const [skillsLoading, setSkillsLoading] = useState(true);
+
   useEffect(() => {
     const fetchUserSkills = async () => {
       if (!user) return;
 
       try {
+        setSkillsLoading(true);
         const { data: profile } = await supabase
           .from("profiles")
           .select("id")
@@ -87,13 +91,11 @@ const Dashboard = () => {
 
             if (typeof studentProfile.skills === "string") {
               try {
-                // Try to parse JSON
                 const parsed = JSON.parse(studentProfile.skills);
                 skills = Array.isArray(parsed)
                   ? parsed
                   : studentProfile.skills.split(",").map((s) => s.trim());
               } catch {
-                // If invalid JSON, fallback to comma-separated
                 skills = studentProfile.skills.split(",").map((s) => s.trim());
               }
             } else if (Array.isArray(studentProfile.skills)) {
@@ -101,15 +103,68 @@ const Dashboard = () => {
             }
 
             setUserSkills(skills);
+          } else {
+            setUserSkills([]); // Explicitly empty if no skills
           }
         }
       } catch (error) {
         console.error("Error fetching user skills:", error);
+        setUserSkills([]);
+      } finally {
+        setSkillsLoading(false);
       }
     };
 
     fetchUserSkills();
   }, [user]);
+
+  // // Fetch user skills for recommendations
+  // useEffect(() => {
+  //   const fetchUserSkills = async () => {
+  //     if (!user) return;
+
+  //     try {
+  //       const { data: profile } = await supabase
+  //         .from("profiles")
+  //         .select("id")
+  //         .eq("user_id", user.id)
+  //         .maybeSingle();
+
+  //       if (profile) {
+  //         const { data: studentProfile } = await supabase
+  //           .from("student_profiles")
+  //           .select("skills")
+  //           .eq("profile_id", profile.id)
+  //           .maybeSingle();
+
+  //         if (studentProfile?.skills) {
+  //           let skills: any[] = [];
+
+  //           if (typeof studentProfile.skills === "string") {
+  //             try {
+  //               // Try to parse JSON
+  //               const parsed = JSON.parse(studentProfile.skills);
+  //               skills = Array.isArray(parsed)
+  //                 ? parsed
+  //                 : studentProfile.skills.split(",").map((s) => s.trim());
+  //             } catch {
+  //               // If invalid JSON, fallback to comma-separated
+  //               skills = studentProfile.skills.split(",").map((s) => s.trim());
+  //             }
+  //           } else if (Array.isArray(studentProfile.skills)) {
+  //             skills = studentProfile.skills;
+  //           }
+
+  //           setUserSkills(skills);
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching user skills:", error);
+  //     }
+  //   };
+
+  //   fetchUserSkills();
+  // }, [user]);
 
   // Use recommendation hooks
   const recommendedInternships = useInternshipRecommendations(
@@ -231,7 +286,7 @@ const Dashboard = () => {
                   </Button>
                 </div>
 
-                {internshipsLoading ? (
+                {skillsLoading || internshipsLoading ? (
                   <div className="flex justify-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
@@ -380,7 +435,7 @@ const Dashboard = () => {
                   </Button>
                 </div>
 
-                {coursesLoading ? (
+                {skillsLoading || coursesLoading ? (
                   <div className="flex justify-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
