@@ -252,7 +252,7 @@ const InternshipDetail = () => {
                   {/* Avatar */}
                   <div
                     className={`${
-                      unit.avatar_url
+                      unit?.avatar_url
                         ? "bg-transparent border border-gray-200"
                         : "bg-gradient-to-br from-teal-400 to-teal-600"
                     } w-[4rem] h-[4rem] rounded-full flex items-center justify-center flex-shrink-0`}
@@ -308,7 +308,7 @@ const InternshipDetail = () => {
                 <div className="flex gap-7 flex-1">
                   <div
                     className={`${
-                      unit.avatar_url
+                      unit?.avatar_url
                         ? "bg-transparent border border-gray-200"
                         : "bg-gradient-to-br from-teal-400 to-teal-600"
                     } w-[6.25rem] h-[6.25rem] rounded-full  flex items-center justify-center flex-shrink-0`}
@@ -396,7 +396,7 @@ const InternshipDetail = () => {
           </Card>
           {/* About the Internship */}
           <div className="lg:hidden border-b border-gray-200 pb-7">
-            {unit.description && (
+            {unit?.description && (
               <section>
                 <h2 className="text-xl font-medium my-4">About the company</h2>
                 <div className="flex flex-wrap gap-2">
@@ -545,7 +545,7 @@ const InternshipDetail = () => {
               <div className="flex gap-6 flex-1">
                 <div
                   className={`${
-                    unit.avatar_url
+                    unit?.avatar_url
                       ? "bg-transparent border border-gray-200"
                       : "bg-gradient-to-br from-teal-400 to-teal-600"
                   } w-[6.25rem] h-[6.25rem] rounded-full  flex items-center justify-center flex-shrink-0`}
@@ -566,7 +566,7 @@ const InternshipDetail = () => {
                 </div>
 
                 <div className="flex-1">
-                  {unit.contact_email && (
+                  {unit?.contact_email && (
                     <div>
                       <h2 className="text-2xl font-bold">{unit.unit_name}</h2>
                       <p className="font-[500] text-gray-500">
@@ -575,7 +575,7 @@ const InternshipDetail = () => {
                     </div>
                   )}
 
-                  {unit.address && (
+                  {unit?.address && (
                     <div className="flex items-center gap-1 text-sm text-muted-foreground mb-4">
                       <MapPin className="w-4 h-4" />
                       <span>{unit.address}</span>
@@ -605,7 +605,7 @@ const InternshipDetail = () => {
           </Card>
 
           {/* About Company */}
-          {unit.description && (
+          {unit?.description && (
             <section>
               <h2 className="text-xl font-medium my-4">About the company</h2>
               <div className="flex flex-wrap gap-2">

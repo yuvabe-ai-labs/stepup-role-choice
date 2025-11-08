@@ -109,18 +109,16 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const handleSignOut = async () => {
-  await signOut();
+    await signOut();
 
-  if (userRole === "unit") {
-    navigate("/auth/unit/signin");
-  } else {
-    navigate("/auth/student/signin");
-  }
+    if (userRole === "unit") {
+      navigate("/auth/unit/signin");
+    } else {
+      navigate("/auth/student/signin");
+    }
 
-  setMobileMenuOpen(false);
-};
-
-
+    setMobileMenuOpen(false);
+  };
 
   const handleProfileClick = () => {
     if (userRole === "unit") {
@@ -152,13 +150,13 @@ const Navbar = () => {
                 className="lg:hidden h-9 w-9"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
-                <button className="flex items-center justify-between rounded-full pl-2 sm:pl-3 pr-1 gap-1 sm:gap-2 py-1.5 shadow-sm w-fit">
+                <div className="flex items-center justify-between rounded-full pl-2 sm:pl-3 pr-1 gap-1 sm:gap-2 py-1.5 shadow-sm w-fit">
                   <div className="flex flex-col justify-center space-y-[3px] m-1.5">
                     <div className="h-[3px] w-3 bg-gray-500 rounded-full self-start"></div>
                     <div className="h-[3px] w-[26px] bg-gray-500 rounded-full mx-auto"></div>
                     <div className="h-[3px] w-3 bg-gray-500 rounded-full self-end"></div>
                   </div>
-                </button>
+                </div>
               </Button>
             </div>
 
