@@ -260,7 +260,7 @@ const Dashboard = () => {
                                         initial
                                       )}
                                     </div>
-                                    <Badge className="text-xs bg-transparent text-gray-600">
+                                    <Badge className="text-xs bg-transparent hover:bg-transparent text-gray-600">
                                       {timeText}
                                     </Badge>
                                   </div>
