@@ -6,7 +6,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  MapPin,
   Loader2,
   BookmarkCheck,
 } from "lucide-react";
@@ -37,7 +36,6 @@ const Dashboard = () => {
   const [currentInternshipIndex, setCurrentInternshipIndex] = useState(0);
   const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
 
-  const [userSkills, setUserSkills] = useState<string[]>([]);
   const [activityView, setActivityView] = useState<"saved" | "applied">(
     "saved"
   );
@@ -63,12 +61,16 @@ const Dashboard = () => {
   const { appliedInternships, loading: appliedLoading } =
     useAppliedInternships();
 
-  // Fetch user skills for recommendations
+  // --- Add new loading state ---
+  const [userSkills, setUserSkills] = useState<string[]>([]);
+  const [skillsLoading, setSkillsLoading] = useState(true);
+
   useEffect(() => {
     const fetchUserSkills = async () => {
       if (!user) return;
 
       try {
+        setSkillsLoading(true);
         const { data: profile } = await supabase
           .from("profiles")
           .select("id")
@@ -101,10 +103,15 @@ const Dashboard = () => {
             }
 
             setUserSkills(skills);
+          } else {
+            setUserSkills([]); // Explicitly empty if no skills
           }
         }
       } catch (error) {
         console.error("Error fetching user skills:", error);
+        setUserSkills([]);
+      } finally {
+        setSkillsLoading(false);
       }
     };
 
@@ -118,29 +125,6 @@ const Dashboard = () => {
   );
 
   const recommendedCourses = useCourseRecommendations(courses, userSkills);
-
-  const heroCards = [
-    {
-      id: "1",
-      title: "Business Conference Annual Summit",
-      type: "The Company",
-      speaker: "Speaker by Abdali Anwole",
-      color: "bg-gradient-to-r from-blue-100 to-blue-200",
-    },
-    {
-      id: "2",
-      title: "Online Course",
-      subtitle: "The Learning Academy",
-      type: "Educational",
-      color: "bg-gradient-to-r from-green-100 to-teal-100",
-    },
-    {
-      id: "3",
-      title: "TAKE YOUR BUSINESS TO NEXT LEVEL",
-      type: "Business Growth",
-      color: "bg-gradient-to-r from-purple-100 to-purple-200",
-    },
-  ];
 
   const nextInternship = () => {
     setCurrentInternshipIndex((prev) =>
@@ -183,40 +167,6 @@ const Dashboard = () => {
             className="lg:col-span-3 space-y-2.5 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2"
             style={{ scrollbarWidth: "thin" }}
           >
-            {/* Hero Section */}
-            {/* <div className="flex overflow-x-auto gap-4  sm:grid-col-1 sm:grid-cols-2 md:grid-cols-3 [&::-webkit-scrollbar]:w-0">
-              {heroCards.map((card) => (
-                <Card
-                  key={card.id}
-                  className={` ${card.color} border-0 shadow-sm rounded-3xl w-[100vw] min-w-[92vw] snap-center md:w-auto md:min-w-0 lg:flex-1 `}
-                >
-                  <CardContent className="p-6">
-                    <div className="min-h-[120px] flex flex-col justify-center">
-                      <h3 className="font-bold text-sm mb-2">{card.title}</h3>
-                      {card.subtitle && (
-                        <p className="text-xs text-muted-foreground mb-1">
-                          {card.subtitle}
-                        </p>
-                      )}
-                      {card.speaker && (
-                        <p className="text-xs text-muted-foreground">
-                          {card.speaker}
-                        </p>
-                      )}
-                      {card.type && (
-                        <Badge
-                          variant="secondary"
-                          className="w-fit text-xs mt-2"
-                        >
-                          {card.type}
-                        </Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div> */}
-
             {/* Recommended Internships */}
             <section>
               <Card className="p-6 bg-white shadow-sm md:border md:border-gray-200 rounded-3xl ">
@@ -231,7 +181,7 @@ const Dashboard = () => {
                   </Button>
                 </div>
 
-                {internshipsLoading ? (
+                {skillsLoading || internshipsLoading ? (
                   <div className="flex justify-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
@@ -254,6 +204,7 @@ const Dashboard = () => {
 
                       <div className="flex-1 flex overflow-x-auto gap-2.5 snap-x snap-mandatory sm:grid sm:grid-cols-2 md:grid-cols-3 [&::-webkit-scrollbar]:w-0 px-1">
                         {recommendedInternships
+                          .slice(0, 6)
                           .slice(
                             currentInternshipIndex,
                             currentInternshipIndex + 3
@@ -309,7 +260,7 @@ const Dashboard = () => {
                                         initial
                                       )}
                                     </div>
-                                    <Badge className="text-xs bg-transparent text-gray-600">
+                                    <Badge className="text-xs bg-transparent hover:bg-transparent text-gray-600">
                                       {timeText}
                                     </Badge>
                                   </div>
@@ -328,12 +279,6 @@ const Dashboard = () => {
                                       {internship.duration || "Not specified"}
                                     </span>
                                   </div>
-                                  {/* <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                                    <MapPin className="w-3 h-3" />
-                                    <span>
-                                      {internship.location || "Remote"}
-                                    </span>
-                                  </div> */}
                                 </CardContent>
                               </Card>
                             );
@@ -354,16 +299,6 @@ const Dashboard = () => {
               </Card>
             </section>
 
-            {/* Advertisement placeholder */}
-            {/* <Card className="bg-gradient-to-r from-blue-100 to-blue-200 border-0">
-              <CardContent className="p-8 text-center">
-                <h3 className="text-lg font-bold mb-2">Advertisement Space</h3>
-                <p className="text-sm text-muted-foreground">
-                  Featured content and promotions
-                </p>
-              </CardContent>
-            </Card> */}
-
             {/* Certified Courses */}
             <section>
               <Card className="p-6 bg-white shadow-sm md:border-gray-200 rounded-3xl">
@@ -380,7 +315,7 @@ const Dashboard = () => {
                   </Button>
                 </div>
 
-                {coursesLoading ? (
+                {skillsLoading || coursesLoading ? (
                   <div className="flex justify-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
@@ -469,26 +404,7 @@ const Dashboard = () => {
                                         {course.duration || "8 weeks"}
                                       </span>
                                     </div>
-                                    {/* {course.difficulty_level && (
-                                      <Badge
-                                        className={`${getDifficultyColor(
-                                          course.difficulty_level
-                                        )} text-white`}
-                                      >
-                                        {course.difficulty_level}
-                                      </Badge>
-                                    )} */}
                                   </div>
-
-                                  {/* <p className="text-xs text-muted-foreground">
-                                    {course.provider || "Online Course"}
-                                  </p> */}
-
-                                  {/* Description */}
-                                  {/* <p className="text-sm text-muted-foreground line-clamp-3">
-                                    {course.description ||
-                                      "Build your skills with this comprehensive course..."}
-                                  </p> */}
 
                                   {/* Know More Button */}
                                   <button className="border-none flex gap-1 items-center p-0 m-0 text-sm text-primary hover:bg-transparent hover:text-primary">

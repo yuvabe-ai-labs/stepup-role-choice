@@ -24,6 +24,8 @@ import type { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { PayIcon } from "@/components/ui/custom-icons";
+import { useUnits } from "@/hooks/useUnits";
 
 type Internship = Tables<"internships">;
 
@@ -68,6 +70,7 @@ const RecommendedInternships = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { units } = useUnits();
   const [allInternships, setAllInternships] = useState<InternshipWithUnit[]>(
     []
   );
@@ -225,6 +228,12 @@ const RecommendedInternships = () => {
 
   const selectedInternshipData =
     internships.find((int) => int.id === selectedInternship) || internships[0];
+
+  const selectedMatchingUnit = selectedInternshipData
+    ? units.find(
+        (unit) => unit.profile_id === selectedInternshipData.created_by
+      )
+    : undefined;
 
   const handleSaveInternship = async () => {
     if (!selectedInternship || isSaving) return;
@@ -425,100 +434,109 @@ const RecommendedInternships = () => {
                   </p>
                 </div>
               ) : (
-                internships.map((internship) => (
-                  <>
-                    {/* Only for mobile screen xsm */}
-                    <Card
-                      key={internship.id}
-                      className="block md:hidden cursor-pointer transition-all duration-150 shadow-sm border border-orange-600 hover:shadow-md"
-                      onClick={() => navigate(`/internships/${internship.id}`)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage
-                              src={internship.unit_avatar || undefined}
-                              alt={internship.unit_name || "Unit"}
-                            />
-                            <AvatarFallback className="bg-black text-white text-xs font-bold">
-                              {(
-                                internship.unit_name || internship.company_name
-                              )?.charAt(0) || "C"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <Badge className="bg-blue-500 hover:bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
-                            Saved{" "}
-                            {internship.posted_date
-                              ? formatDistanceToNow(
-                                  new Date(internship.posted_date),
-                                  {
-                                    addSuffix: true,
-                                  }
-                                )
-                              : "recently"}
-                          </Badge>
-                        </div>
-                        <h3 className="font-semibold text-gray-900 text-sm mb-2 leading-tight">
-                          {internship.title}
-                        </h3>
-                        <p className="text-xs text-gray-600 mb-3 leading-relaxed line-clamp-2">
-                          {internship.description}
-                        </p>
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Clock className="w-3 h-3 mr-1" />
-                          {internship.duration}
-                        </div>
-                      </CardContent>
-                    </Card>
+                internships.map((internship) => {
+                  const matchingUnit = units.find(
+                    (unit) => unit.profile_id === internship.created_by
+                  );
+                  return (
+                    <>
+                      {/* Only for mobile screen xsm */}
+                      <Card
+                        key={internship.id}
+                        className="block md:hidden cursor-pointer transition-all duration-150 shadow-sm border border-orange-600 hover:shadow-md"
+                        onClick={() =>
+                          navigate(`/internships/${internship.id}`)
+                        }
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage
+                                src={internship.unit_avatar || undefined}
+                                alt={internship.unit_name || "Unit"}
+                              />
+                              <AvatarFallback className="bg-black text-white text-xs font-bold">
+                                {(
+                                  internship.unit_name ||
+                                  internship.company_name
+                                )?.charAt(0) || "C"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <Badge className="bg-blue-500 hover:bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                              Saved{" "}
+                              {internship.posted_date
+                                ? formatDistanceToNow(
+                                    new Date(internship.posted_date),
+                                    {
+                                      addSuffix: true,
+                                    }
+                                  )
+                                : "recently"}
+                            </Badge>
+                          </div>
+                          <h3 className="font-semibold text-gray-900 text-sm mb-2 leading-tight">
+                            {internship.title}
+                          </h3>
+                          <p className="text-xs text-gray-600 mb-3 leading-relaxed line-clamp-2">
+                            {internship.description}
+                          </p>
+                          <div className="flex items-center text-xs text-gray-500">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {internship.duration}
+                          </div>
+                        </CardContent>
+                      </Card>
 
-                    <Card
-                      key={internship.id}
-                      className={`hidden md:block cursor-pointer transition-all duration-150 shadow-sm border md:border-gray-100 rounded-none hover:shadow-md ${
-                        selectedInternship === internship.id
-                          ? "ring-1 ring-blue-500 shadow-md border-blue-200"
-                          : "hover:border-gray-300"
-                      }`}
-                      onClick={() => setSelectedInternship(internship.id)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage
-                              src={internship.unit_avatar || undefined}
-                              alt={internship.unit_name || "Unit"}
-                            />
-                            <AvatarFallback className="bg-black text-white text-xs font-bold">
-                              {(
-                                internship.unit_name || internship.company_name
-                              )?.charAt(0) || "C"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <Badge className="bg-blue-500 hover:bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
-                            Saved{" "}
-                            {internship.posted_date
-                              ? formatDistanceToNow(
-                                  new Date(internship.posted_date),
-                                  {
-                                    addSuffix: true,
-                                  }
-                                )
-                              : "recently"}
-                          </Badge>
-                        </div>
-                        <h3 className="font-semibold text-gray-900 text-sm mb-2 leading-tight">
-                          {internship.title}
-                        </h3>
-                        <p className="text-xs text-gray-600 mb-3 leading-relaxed line-clamp-2">
-                          {internship.description}
-                        </p>
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Clock className="w-3 h-3 mr-1" />
-                          {internship.duration}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </>
-                ))
+                      <Card
+                        key={internship.id}
+                        className={`hidden md:block cursor-pointer transition-all duration-150 shadow-sm border md:border-gray-100 rounded-none hover:shadow-md ${
+                          selectedInternship === internship.id
+                            ? "ring-1 ring-blue-500 shadow-md border-blue-200"
+                            : "hover:border-gray-300"
+                        }`}
+                        onClick={() => setSelectedInternship(internship.id)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage
+                                src={matchingUnit.avatar_url || undefined}
+                                alt={internship.unit_name || "Unit"}
+                              />
+                              <AvatarFallback className="bg-black text-white text-xs font-bold">
+                                {(
+                                  internship.unit_name ||
+                                  internship.company_name
+                                )?.charAt(0) || "C"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <Badge className="bg-blue-500 hover:bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                              Saved{" "}
+                              {internship.posted_date
+                                ? formatDistanceToNow(
+                                    new Date(internship.posted_date),
+                                    {
+                                      addSuffix: true,
+                                    }
+                                  )
+                                : "recently"}
+                            </Badge>
+                          </div>
+                          <h3 className="font-semibold text-gray-900 text-sm mb-2 leading-tight">
+                            {internship.title}
+                          </h3>
+                          <p className="text-xs text-gray-600 mb-3 leading-relaxed line-clamp-2">
+                            {internship.description}
+                          </p>
+                          <div className="flex items-center text-xs text-gray-500">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {internship.duration}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  );
+                })
               )}
             </div>
           </div>
@@ -563,11 +581,11 @@ const RecommendedInternships = () => {
               <div className="p-4 sm:p-6 lg:p-8">
                 {/* Header */}
                 <div className="flex flex-col lg:flex-row justify-between items-start mb-6 sm:mb-8 gap-4">
-                  <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-5 w-full lg:w-auto">
+                  <div className="flex flex-col sm:flex-row flex-1 items-start space-y-4 sm:space-y-0 sm:space-x-5 w-full lg:w-auto">
                     <Avatar className="w-12 h-12 sm:w-16 sm:h-16 shadow-sm flex-shrink-0">
                       <AvatarImage
-                        src={selectedInternshipData.unit_avatar || undefined}
-                        alt={selectedInternshipData.unit_name || "Unit"}
+                        src={selectedMatchingUnit?.avatar_url || undefined}
+                        alt={selectedMatchingUnit?.unit_name || "Unit"}
                       />
                       <AvatarFallback className="bg-teal-600 text-white text-lg sm:text-2xl font-bold">
                         {(
@@ -577,15 +595,60 @@ const RecommendedInternships = () => {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
-                        {selectedInternshipData.title}
-                      </h1>
-                      <p className="text-base sm:text-lg text-gray-700 mb-3 font-medium">
-                        {selectedInternshipData.company_name?.replace(
-                          /\n/g,
-                          ""
-                        )}
-                      </p>
+                      <div className="grid grid-cols-2">
+                        <div>
+                          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+                            {selectedInternshipData.title}
+                          </h1>
+                          <p className="text-base sm:text-lg text-gray-700 mb-3 font-medium">
+                            {selectedInternshipData.company_name?.replace(
+                              /\n/g,
+                              ""
+                            )}
+                          </p>
+                        </div>
+
+                        <div className="flex justify-end">
+                          <Button
+                            size="sm"
+                            disabled={isSaving}
+                            className={`flex items-center p-0 ${
+                              savedInternshipsSet.has(selectedInternship)
+                                ? "text-gray-400 bg-white"
+                                : "text-gray-600 bg-white"
+                            }`}
+                            onClick={handleSaveInternship}
+                          >
+                            <Bookmark
+                              className={`w-4 h-4 ${
+                                savedInternshipsSet.has(selectedInternship)
+                                  ? "fill-current"
+                                  : ""
+                              }`}
+                            />
+                            <span>
+                              {savedInternshipsSet.has(selectedInternship)
+                                ? "Saved"
+                                : "Save"}
+                            </span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="flex items-center p-0 ml-4 text-gray-700 bg-white"
+                            onClick={() => setShowShareDialog(true)}
+                          >
+                            <Share2 className="w-4 h-4" />
+                            <span>Share</span>
+                          </Button>
+                          <Button
+                            className="bg-orange-500 hover:bg-orange-600 rounded-full text-white px-6 ml-4"
+                            disabled={hasApplied || isCheckingStatus}
+                            onClick={() => setShowApplicationDialog(true)}
+                          >
+                            {hasApplied ? "Applied" : "Apply Now"}
+                          </Button>
+                        </div>
+                      </div>
                       <div className="flex flex-wrap items-center gap-3 sm:gap-5 text-xs sm:text-sm text-gray-600">
                         <div className="flex items-center">
                           <MapPin className="w-4 h-4 mr-1.5 text-gray-500" />
@@ -596,51 +659,13 @@ const RecommendedInternships = () => {
                           {selectedInternshipData.duration}
                         </div>
                         <div className="flex items-center">
-                          <DollarSign className="w-4 h-4 mr-1.5 text-gray-500" />
-                          {selectedInternshipData.payment}
+                          <PayIcon className="w-4 h-4 mr-1.5 text-gray-500" />
+                          {selectedInternshipData.payment
+                            ? selectedInternshipData.payment
+                            : "Unpaid"}
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2 sm:gap-3 w-full lg:w-auto">
-                    <Button
-                      size="sm"
-                      disabled={isSaving}
-                      className={`flex items-center space-x-1.5 px-4 py-2 ${
-                        savedInternshipsSet.has(selectedInternship)
-                          ? "text-gray-400 bg-white"
-                          : "text-gray-600 bg-white"
-                      }`}
-                      onClick={handleSaveInternship}
-                    >
-                      <Bookmark
-                        className={`w-4 h-4 ${
-                          savedInternshipsSet.has(selectedInternship)
-                            ? "fill-current"
-                            : ""
-                        }`}
-                      />
-                      <span>
-                        {savedInternshipsSet.has(selectedInternship)
-                          ? "Saved"
-                          : "Save"}
-                      </span>
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="flex items-center space-x-1.5 px-4 py-2 text-gray-700 bg-white hover:bg-gray-50"
-                      onClick={() => setShowShareDialog(true)}
-                    >
-                      <Share2 className="w-4 h-4" />
-                      <span>Share</span>
-                    </Button>
-                    <Button
-                      className="bg-orange-500 hover:bg-orange-600 rounded-full text-white px-6"
-                      disabled={hasApplied || isCheckingStatus}
-                      onClick={() => setShowApplicationDialog(true)}
-                    >
-                      {hasApplied ? "Applied" : "Apply Now"}
-                    </Button>
                   </div>
                 </div>
 
