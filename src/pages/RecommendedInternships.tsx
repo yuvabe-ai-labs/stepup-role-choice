@@ -440,10 +440,10 @@ const RecommendedInternships = () => {
                   );
                   return (
                     <>
-                      {/* Only for mobile screen xsm */}
+                      {/* Only for mobile screen md */}
                       <Card
                         key={internship.id}
-                        className="block md:hidden cursor-pointer transition-all duration-150 shadow-sm border border-orange-600 hover:shadow-md"
+                        className="block lg:hidden cursor-pointer transition-all duration-150 shadow-sm border border-orange-600 hover:shadow-md"
                         onClick={() =>
                           navigate(`/internships/${internship.id}`)
                         }
@@ -452,7 +452,7 @@ const RecommendedInternships = () => {
                           <div className="flex justify-between items-start mb-3">
                             <Avatar className="w-8 h-8">
                               <AvatarImage
-                                src={internship.unit_avatar || undefined}
+                                src={matchingUnit.avatar_url || undefined}
                                 alt={internship.unit_name || "Unit"}
                               />
                               <AvatarFallback className="bg-black text-white text-xs font-bold">
@@ -748,18 +748,35 @@ const RecommendedInternships = () => {
                     <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
                       Skills Required
                     </h2>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="space-y-3">
                       {skills.map((skill, index) => (
-                        <Badge
-                          key={index}
-                          variant="secondary"
-                          className="bg-gray-100 text-gray-700 px-3 py-1"
-                        >
-                          {skill}
-                        </Badge>
+                        <div key={index} className="flex items-start space-x-3">
+                          <div className="w-5 h-5 bg-green-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Check className="w-3 h-3" />
+                          </div>
+                          <p className="text-gray-700 leading-relaxed">
+                            {skill}
+                          </p>
+                        </div>
                       ))}
                     </div>
                   </div>
+                  // <div className="mb-6 sm:mb-8">
+                  //   <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
+                  //     Skills Required
+                  //   </h2>
+                  //   {/* <div className="flex flex-wrap gap-2">
+                  //     {skills.map((skill, index) => (
+                  //       <Badge
+                  //         key={index}
+                  //         variant="secondary"
+                  //         className="bg-gray-100 text-gray-700 px-3 py-1"
+                  //       >
+                  //         {skill}
+                  //       </Badge>
+                  //     ))}
+                  //   </div> */}
+                  // </div>
                 )}
 
                 {/* Additional Information */}
