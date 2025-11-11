@@ -13,6 +13,7 @@ import {
   Check,
   Share2,
   ChevronLeft,
+  IndianRupee,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useApplicationStatus } from "@/hooks/useApplicationStatus";
@@ -649,7 +650,7 @@ const RecommendedInternships = () => {
                           </Button>
                         </div>
                       </div>
-                      <div className="flex flex-wrap items-center gap-3 sm:gap-5 text-xs sm:text-sm text-gray-600">
+                      <div className="flex flex-wrap items-center gap-3 sm:gap-5 text-xs sm:text-sm text-gray-500">
                         <div className="flex items-center">
                           <MapPin className="w-4 h-4 mr-1.5 text-gray-500" />
                           {selectedInternshipData.location}
@@ -659,7 +660,7 @@ const RecommendedInternships = () => {
                           {selectedInternshipData.duration}
                         </div>
                         <div className="flex items-center">
-                          <PayIcon className="w-4 h-4 mr-1.5 text-gray-500" />
+                          <IndianRupee className="w-4 h-4 mr-1.5 text-gray-500" />
                           {selectedInternshipData.is_paid ? (
                             <span>
                               Paid - {selectedInternshipData?.payment}
@@ -668,6 +669,24 @@ const RecommendedInternships = () => {
                             <span>Unpaid</span>
                           )}
                         </div>
+
+                        <div className="flex items-cente">
+                          {selectedInternshipData.job_type === "full_time"
+                            ? "Full Time"
+                            : selectedInternshipData.job_type === "part_time"
+                            ? "Part Time"
+                            : selectedInternshipData.job_type === "both"
+                            ? "Full Time & Part Time"
+                            : "Not specified"}
+                        </div>
+
+                        {/* Minimum Age */}
+                        {selectedInternshipData.min_age_required && (
+                          <div className="flex items-center">
+                            Minimum Age:{" "}
+                            {selectedInternshipData.min_age_required}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

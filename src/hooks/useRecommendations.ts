@@ -5,6 +5,7 @@ type Internship = Tables<"internships">;
 type Course = Tables<"courses">;
 
 interface InternshipWithScore extends Internship {
+  job_type: any;
   matchScore: number;
   matchPercentage: number;
   unit_avatar?: string | null;
