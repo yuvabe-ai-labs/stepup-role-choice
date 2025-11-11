@@ -660,9 +660,13 @@ const RecommendedInternships = () => {
                         </div>
                         <div className="flex items-center">
                           <PayIcon className="w-4 h-4 mr-1.5 text-gray-500" />
-                          {selectedInternshipData.payment
-                            ? selectedInternshipData.payment
-                            : "Unpaid"}
+                          {selectedInternshipData.is_paid ? (
+                            <span>
+                              Paid - {selectedInternshipData?.payment}
+                            </span>
+                          ) : (
+                            <span>Unpaid</span>
+                          )}
                         </div>
                       </div>
                     </div>
