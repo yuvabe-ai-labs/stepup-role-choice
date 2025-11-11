@@ -22,6 +22,7 @@ import { useApplicationStatus } from "@/hooks/useApplicationStatus";
 import { useIsSaved } from "@/hooks/useSavedInternships";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
+import { PayIcon } from "@/components/ui/custom-icons";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -347,10 +348,15 @@ const InternshipDetail = () => {
                           <span>{internship.duration}</span>
                         </div>
                       )}
-                      {internship.is_paid && (
+                      {internship?.is_paid ? (
                         <div className="flex items-center gap-1 text-muted-foreground">
-                          <DollarSign className="w-4 h-4" />
-                          <span>Paid</span>
+                          <PayIcon className="w-4 h-4" />
+                          <span>Paid - {internship?.payment}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <PayIcon className="w-4 h-4" />
+                          <span>Unpaid</span>
                         </div>
                       )}
                     </div>
