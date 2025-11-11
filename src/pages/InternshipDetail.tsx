@@ -12,6 +12,7 @@ import {
   Share2,
   CircleCheckBig,
   ChevronLeft,
+  IndianRupee,
 } from "lucide-react";
 import { ShareDialog } from "@/components/ShareDialog";
 import Navbar from "@/components/Navbar";
@@ -348,15 +349,33 @@ const InternshipDetail = () => {
                           <span>{internship.duration}</span>
                         </div>
                       )}
+
                       {internship?.is_paid ? (
                         <div className="flex items-center gap-1 text-muted-foreground">
-                          <PayIcon className="w-4 h-4" />
+                          <IndianRupee className="w-4 h-4" />
                           <span>Paid - {internship?.payment}</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1 text-muted-foreground">
-                          <PayIcon className="w-4 h-4" />
+                          <IndianRupee className="w-4 h-4" />
                           <span>Unpaid</span>
+                        </div>
+                      )}
+
+                      <div className="flex items-center text-muted-foreground">
+                        {internship.job_type === "full_time"
+                          ? "Full Time"
+                          : internship.job_type === "part_time"
+                          ? "Part Time"
+                          : internship.job_type === "both"
+                          ? "Full Time & Part Time"
+                          : "Not specified"}
+                      </div>
+
+                      {/* Minimum Age */}
+                      {internship.min_age_required && (
+                        <div className="flex items-center text-muted-foreground">
+                          Minimum Age: {internship.min_age_required}
                         </div>
                       )}
                     </div>

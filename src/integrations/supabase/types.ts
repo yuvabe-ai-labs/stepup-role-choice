@@ -174,6 +174,8 @@ export type Database = {
       };
       internships: {
         Row: {
+          min_age_required: any;
+          job_type: string;
           application_deadline: string | null;
           application_url: string | null;
           benefits: Json | null;
