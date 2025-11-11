@@ -357,7 +357,7 @@ const UnitView = () => {
                               {/* View Button */}
                               <Button
                                 variant="gradient"
-                                className="rounded-full bg-clip-text text-transparent border border-orange-600 visible w-full bg-transparent md:invisible mt-4"
+                                className="rounded-full bg-clip-text text-transparent border border-orange-600 visible w-full bg-transparent md:hidden mt-4"
                                 onClick={() =>
                                   navigate(`/internships/${internship.id}`)
                                 }
