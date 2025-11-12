@@ -408,7 +408,7 @@ const RecommendedInternships = () => {
                 Array.from({ length: 3 }).map((_, index) => (
                   <Card
                     key={index}
-                    className="cursor-pointer shadow-sm border border-gray-200"
+                    className="cursor-pointer shadow-sm border border-gray-200 mb-2.5"
                   >
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-3">
@@ -444,7 +444,7 @@ const RecommendedInternships = () => {
                       {/* Only for mobile screen md */}
                       <Card
                         key={internship.id}
-                        className="block lg:hidden cursor-pointer transition-all duration-150 shadow-sm border border-orange-600 hover:shadow-md"
+                        className="block mb-2.5 lg:hidden cursor-pointer transition-all duration-150 shadow-sm border border-orange-600 hover:shadow-md"
                         onClick={() =>
                           navigate(`/internships/${internship.id}`)
                         }
@@ -464,7 +464,7 @@ const RecommendedInternships = () => {
                               </AvatarFallback>
                             </Avatar>
                             <Badge className="bg-blue-500 hover:bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
-                              Posted{" "}
+                              Saved{" "}
                               {internship.posted_date
                                 ? formatDistanceToNow(
                                     new Date(internship.posted_date),
@@ -490,7 +490,7 @@ const RecommendedInternships = () => {
 
                       <Card
                         key={internship.id}
-                        className={`hidden md:block cursor-pointer transition-all duration-150 shadow-sm border md:border-gray-100 rounded-none hover:shadow-md ${
+                        className={`hidden lg:block cursor-pointer transition-all duration-150 shadow-sm border lg:border-gray-100 rounded-none hover:shadow-md ${
                           selectedInternship === internship.id
                             ? "ring-1 ring-blue-500 shadow-md border-blue-200"
                             : "hover:border-gray-300"
@@ -512,7 +512,7 @@ const RecommendedInternships = () => {
                               </AvatarFallback>
                             </Avatar>
                             <Badge className="bg-blue-500 hover:bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
-                              Posted{" "}
+                              Saved{" "}
                               {internship.posted_date
                                 ? formatDistanceToNow(
                                     new Date(internship.posted_date),
@@ -663,7 +663,9 @@ const RecommendedInternships = () => {
                           <IndianRupee className="w-4 h-4 mr-1.5 text-gray-500" />
                           {selectedInternshipData.is_paid ? (
                             <span>
-                              Paid - {selectedInternshipData?.payment}
+                              Paid{" "}
+                              {selectedInternshipData?.payment &&
+                                `- ${selectedInternshipData?.payment}`}
                             </span>
                           ) : (
                             <span>Unpaid</span>

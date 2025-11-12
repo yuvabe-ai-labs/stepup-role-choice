@@ -59,9 +59,10 @@ export const useInternshipRecommendations = (
         .filter((s): s is string => typeof s === "string")
         .map((s) => s.toLowerCase().trim());
 
-      // Count exact matches
       const matchCount = normalizedUserSkills.filter((userSkill) =>
-        normalizedRequired.includes(userSkill)
+        normalizedRequired.some(
+          (req) => req.includes(userSkill) || userSkill.includes(req)
+        )
       ).length;
 
       const matchPercentage =
