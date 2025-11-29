@@ -21,7 +21,8 @@ interface AuthContextType {
   signIn: (
     email: string,
     password: string,
-    rememberMe?: boolean
+    rememberMe?: boolean,
+    expectedRole?: string
   ) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
@@ -237,7 +238,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (
     email: string,
     password: string,
-    rememberMe: boolean = false
+    rememberMe: boolean = false,
+    expectedRole?: string
   ) => {
     try {
       console.log("[useAuth] Signing in with rememberMe:", rememberMe);
@@ -279,10 +281,60 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
+      // Role validation - check if expectedRole is provided
+      if (expectedRole) {
+        console.log("[useAuth] Validating role:", expectedRole);
+
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user) {
+          // Fetch the user's profile to check their role
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("user_id", user.id)
+            .single();
+
+          if (profileError) {
+            console.error("[useAuth] Error fetching profile:", profileError);
+            // Sign out on profile fetch error
+            await supabase.auth.signOut();
+            return {
+              error: {
+                message: "Unable to verify account role. Please try again.",
+              },
+            };
+          }
+
+          // Check if the profile role matches the expected role
+          if (profile.role !== expectedRole) {
+            console.log(
+              "[useAuth] Role mismatch. Expected:",
+              expectedRole,
+              "Got:",
+              profile.role
+            );
+            // Sign out the user
+            await supabase.auth.signOut();
+            return {
+              error: {
+                message: `This sign-in page is for ${expectedRole}s only. Please use the correct sign-in page for your account type.`,
+              },
+            };
+          }
+
+          console.log("[useAuth] Role validation passed");
+        }
+      }
+
       console.log("[useAuth] Sign in successful");
       return { error: null };
     } catch (error: any) {
       console.error("[useAuth] Sign in failed:", error);
+      // Sign out on any error during role validation
+      await supabase.auth.signOut();
       return { error };
     }
   };

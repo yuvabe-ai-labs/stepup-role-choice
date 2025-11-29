@@ -10,6 +10,8 @@ import signupIllustration from "@/assets/signup-illustration.png";
 import signupIllustrate from "@/assets/signinillustion.png";
 import signinLogo from "@/assets/signinLogo.svg";
 import { Eye, EyeOff } from "lucide-react";
+import { Arrow } from "@/components/ui/custom-icons";
+import unitIllustration from "@/assets/unit_illstration.png";
 
 const SignUp = () => {
   const { role } = useParams<{ role: string }>();
@@ -21,6 +23,10 @@ const SignUp = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const illustrationText =
+    role === "unit"
+      ? "AI-driven analysis identifies the candidate whose skills, experience, and behavioral traits most closely align with the role’s requirements."
+      : "At YuvaNext, we focus on helping young adults take their next step through internships, courses, and real-world opportunities.";
 
   // Password validation rules
   const passwordRules = [
@@ -122,14 +128,28 @@ const SignUp = () => {
 
           {/* Center content */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-6 px-8">
-            <img src={signinLogo} alt="Sign in Logo" className="w-28 h-auto" />
+            {/* Logo */}
+            <img src={signinLogo} alt="Sign in Logo" className="w-32 h-auto" />
+
+            {role === "unit" && (
+              <div className="relative flex items-center justify-center p-6">
+                <Arrow className="absolute w-[650px] h-[650px] text-white opacity-95 bottom-10" />
+
+                <img
+                  src={unitIllustration}
+                  alt="Unit Illustration"
+                  className="relative z-10 w-[450px] h-[450px] object-contain"
+                />
+              </div>
+            )}
+
+            {/* Text */}
             <p className="text-white text-base font-medium max-w-xl leading-relaxed">
-              At YuvaNext, we focus on helping young adults take their next step
-              through internships, courses, and real-world opportunities.
+              {illustrationText}
             </p>
           </div>
 
-          {/* Footer text */}
+          {/* Footer */}
           <div className="absolute bottom-4 left-0 right-0 flex justify-between px-6 text-white/80 text-xs">
             <a
               href="https://www.yuvanext.com/privacy-policy"
