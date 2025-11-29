@@ -4,7 +4,7 @@ name: Deploy React App to S3 + CloudFront (Yuvanext)
 on:
   push:
     branches:
-      - production
+      - main
 
 jobs:
   deploy:
@@ -27,6 +27,9 @@ jobs:
 
       # 4️⃣ Build React app
       - name: Build React app
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         run: npm run build
 
       # 5️⃣ Upload /dist folder to S3
