@@ -956,7 +956,7 @@ const CandidateProfile = () => {
         candidateEmail={data.profile.email}
         applicationId={data.application.id}
         onSuccess={refetch}
-        candidateProfileId={""}
+        candidateProfileId={data.profile.id}
       />
     </div>
   );
