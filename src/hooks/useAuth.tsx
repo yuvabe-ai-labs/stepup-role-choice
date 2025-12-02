@@ -160,7 +160,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
           }
         } else {
-          console.log("Profile already exists:", existingProfile);
+          console.log("Profile already exists");
         }
       } catch (error) {
         console.error("Profile operation failed:", error);

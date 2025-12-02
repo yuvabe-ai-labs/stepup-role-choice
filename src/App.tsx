@@ -2,7 +2,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +35,7 @@ import RecommendedInternships from "./pages/RecommendedInternships";
 import ForgotPassword from "./pages/ForgotPassword";
 import CheckEmail from "./pages/CheckEmail";
 import ResetPassword from "./pages/ResetPassword";
+import CandidateTasks from "./pages/CandidateTasks";
 
 const queryClient = new QueryClient();
 
@@ -80,7 +88,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
             }
             // Redirect from chatbot to appropriate dashboard after onboarding
             else if (location.pathname === "/chatbot") {
-              const targetDashboard = role === "unit" ? "/unit-dashboard" : "/dashboard";
+              const targetDashboard =
+                role === "unit" ? "/unit-dashboard" : "/dashboard";
               navigate(targetDashboard, { replace: true });
             }
           }
@@ -244,6 +253,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AllApplications />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/candidate-tasks"
+              element={
+                <ProtectedRoute>
+                  <CandidateTasks />
                 </ProtectedRoute>
               }
             />
