@@ -36,6 +36,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import CheckEmail from "./pages/CheckEmail";
 import ResetPassword from "./pages/ResetPassword";
 import CandidateTasks from "./pages/CandidateTasks";
+import MyTasks from "./pages/MyTasks";
 
 const queryClient = new QueryClient();
 
@@ -127,7 +128,6 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/auth/callback" element={<AuthCallback />} />
-
             {/* Chatbot Route */}
             <Route
               path="/chatbot"
@@ -137,7 +137,6 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-
             <Route path="/" element={<Landing />} />
             <Route path="/auth/:role/signin" element={<SignIn />} />
             <Route path="/auth/:role/signup" element={<SignUp />} />
@@ -269,6 +268,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <InternshipApplicants />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-tasks/:applicationId"
+              element={
+                <ProtectedRoute>
+                  <MyTasks />
                 </ProtectedRoute>
               }
             />

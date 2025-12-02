@@ -1,3 +1,5 @@
+export type OfferDecision = "pending" | "accepted" | "rejected";
+
 export type ApplicationStatus =
   | "applied"
   | "shortlisted"
@@ -5,40 +7,38 @@ export type ApplicationStatus =
   | "interviewed"
   | "hired";
 
-export type OfferDecision = "pending" | "accepted" | "rejected";
-
-export interface Application {
+export interface Offer {
   id: string;
+  application_id: string;
   status: ApplicationStatus;
   offer_decision: OfferDecision;
   applied_date: string;
   cover_letter: string;
-  internship: Internship;
+  internship: OfferInternship;
 }
 
-export interface Internship {
+export interface OfferInternship {
   id: string;
   title: string;
   description: string;
   duration: string;
   created_by: string;
-  company_name: string;
-  company_profile: CompanyProfile;
+  company_profile: OfferCompanyProfile;
 }
 
-export interface CompanyProfile {
+export interface OfferCompanyProfile {
   id: string;
   full_name: string;
   email: string;
-  unit: Unit;
+  unit: OfferUnit;
 }
 
-export interface Unit {
+export interface OfferUnit {
   unit_name: string;
   avatar_url: string;
 }
 
-export interface MyApplicationsResponse {
-  data: Application[];
+export interface MyOffersResponse {
+  data: Offer[];
   error: any;
 }

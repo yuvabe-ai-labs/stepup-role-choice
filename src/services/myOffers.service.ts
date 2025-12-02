@@ -1,14 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
-import type {
-  Application,
-  MyApplicationsResponse,
-} from "@/types/myApplications.types";
+import type { Offer, MyOffersResponse } from "@/types/myOffers.types";
 
-export const getMyApplications = async (
+export const getMyOffers = async (
   userId: string
-): Promise<MyApplicationsResponse> => {
+): Promise<MyOffersResponse> => {
   try {
-    // STEP 1 — Get student profile ID
+    // STEP 1 – Get student profile ID
     const { data: profile, error: profileErr } = await supabase
       .from("profiles")
       .select("id")
@@ -21,7 +18,7 @@ export const getMyApplications = async (
 
     const studentProfileId = profile.id;
 
-    // STEP 2 — Fetch hired applications with relations
+    // STEP 2 – Fetch ALL hired applications (pending, accepted, rejected)
     const { data, error } = await supabase
       .from("applications")
       .select(
@@ -29,7 +26,6 @@ export const getMyApplications = async (
         id,
         status,
         offer_decision,
-
         applied_date,
         cover_letter,
 
@@ -59,14 +55,15 @@ export const getMyApplications = async (
       .order("applied_date", { ascending: false });
 
     if (error) {
-      console.error("Error fetching applications:", error);
+      console.error("Error fetching offers:", error);
       return { data: [], error };
     }
 
-    const formatted: Application[] =
+    const formatted: Offer[] =
       data?.map((item: any) => {
         return {
           id: item.id,
+          application_id: item.id,
           status: item.status,
           offer_decision: item.offer_decision,
           applied_date: item.applied_date,
@@ -77,6 +74,7 @@ export const getMyApplications = async (
             title: item.internship?.title ?? "",
             description: item.internship?.description ?? "",
             duration: item.internship?.duration ?? "",
+            starts_on: "",
             created_by: item.internship?.created_by ?? "",
             company_name: item.internship?.company_name ?? "",
 
@@ -101,7 +99,29 @@ export const getMyApplications = async (
       error: null,
     };
   } catch (err: any) {
-    console.error("Unhandled error fetching applications:", err);
+    console.error("Unhandled error fetching offers:", err);
     return { data: [], error: err.message || err };
+  }
+};
+
+export const updateOfferDecision = async (
+  applicationId: string,
+  decision: "accepted" | "rejected"
+): Promise<{ success: boolean; error?: any }> => {
+  try {
+    const { error } = await supabase
+      .from("applications")
+      .update({ offer_decision: decision })
+      .eq("id", applicationId);
+
+    if (error) {
+      console.error("Error updating offer decision:", error);
+      return { success: false, error };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Unhandled error updating offer:", err);
+    return { success: false, error: err.message || err };
   }
 };

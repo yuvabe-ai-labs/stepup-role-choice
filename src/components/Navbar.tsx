@@ -1,7 +1,7 @@
 import {
   Search,
   Menu,
-  User,
+  CircleUserRound,
   FileText,
   MessageSquare,
   HelpCircle,
@@ -26,6 +26,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { NotificationDropdown } from "@/components/NotificationDropdown";
 import logo from "@/assets/YuvaNext.svg";
 import logoName from "@/assets/YuvaNext_name.svg";
+import { Disc } from "@/components/ui/custom-icons";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -229,15 +230,15 @@ const Navbar = () => {
                     onClick={handleProfileClick}
                     className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
                   >
-                    <User className="mr-2 h-4 w-4" />
+                    <CircleUserRound className="mr-2 h-4 w-4" />
                     <span>My Profile</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => navigate("")}
+                    onClick={() => navigate("/candidate-tasks")}
                     className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
                   >
-                    <FileText className="mr-2 h-4 w-4" />
-                    <span>My Tasks</span>
+                    <Disc className="mr-2 h-4 w-4" />
+                    <span>Applications</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => navigate("")}
@@ -345,7 +346,7 @@ const Navbar = () => {
                   onClick={handleProfileClick}
                   className="w-full text-left px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
                 >
-                  <User className="mr-3 h-5 w-5 text-gray-400" />
+                  <CircleUserRound className="mr-3 h-5 w-5 text-gray-400" />
                   My Profile
                 </button>
                 <button
