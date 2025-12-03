@@ -1,5 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import {
   format,
   startOfMonth,
@@ -9,6 +8,7 @@ import {
   isSameDay,
   startOfWeek,
   endOfWeek,
+  startOfDay,
 } from "date-fns";
 import type { StudentTask } from "@/types/studentTasks.types";
 
@@ -17,6 +17,8 @@ interface TaskCalendarProps {
   currentDate: Date;
   onDateChange: (date: Date) => void;
   viewMode: "month" | "week";
+  onTaskClick: (task: StudentTask) => void;
+  onAddTaskClick: () => void;
 }
 
 export default function TaskCalendar({
@@ -24,6 +26,8 @@ export default function TaskCalendar({
   currentDate,
   onDateChange,
   viewMode,
+  onTaskClick,
+  onAddTaskClick,
 }: TaskCalendarProps) {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -56,83 +60,188 @@ export default function TaskCalendar({
   const getTasksForDay = (day: Date) => {
     return tasks.filter((task) => {
       if (!task.start_date || !task.end_date) return false;
-      const taskStart = new Date(task.start_date);
-      const taskEnd = new Date(task.end_date);
-      return day >= taskStart && day <= taskEnd;
+
+      const taskStart = startOfDay(new Date(task.start_date));
+      const taskEnd = startOfDay(new Date(task.end_date));
+      const dayToCheck = startOfDay(day);
+
+      return (
+        dayToCheck.getTime() >= taskStart.getTime() &&
+        dayToCheck.getTime() <= taskEnd.getTime()
+      );
     });
   };
 
-  const renderTaskBar = (task: StudentTask, day: Date) => {
-    const taskStart = new Date(task.start_date!);
-    const taskEnd = new Date(task.end_date!);
-    const isStartDay = isSameDay(day, taskStart);
+  // Convert time string to percentage of day (0-100)
+  const timeToPercentage = (time: string | null): number => {
+    if (!time) return 0;
+    try {
+      const [hours, minutes] = time.split(":").map(Number);
+      const totalMinutes = hours * 60 + minutes;
+      return (totalMinutes / 1440) * 100; // 1440 minutes in a day
+    } catch {
+      return 0;
+    }
+  };
 
-    if (!isStartDay) return null;
+  // Removed formatTime function since time won't be shown
 
+  const renderTaskBar = (
+    task: StudentTask,
+    day: Date,
+    dayTasks: StudentTask[]
+  ) => {
+    if (!task.start_date || !task.end_date) return null;
+
+    const taskStart = startOfDay(new Date(task.start_date));
+    const taskEnd = startOfDay(new Date(task.end_date));
+    const currentDay = startOfDay(day);
+
+    const isStartDay = currentDay.getTime() === taskStart.getTime();
+    const isEndDay = currentDay.getTime() === taskEnd.getTime();
+    const isMiddleDay =
+      currentDay.getTime() > taskStart.getTime() &&
+      currentDay.getTime() < taskEnd.getTime();
+
+    if (!isStartDay && !isMiddleDay && !isEndDay) return null;
+
+    const taskIndex = dayTasks.findIndex((t) => t.id === task.id);
+
+    // Calculate positioning based on time (kept for layout)
+    let leftOffset = 0;
+    let rightOffset = 0;
+    let borderRadius = "";
+
+    if (isStartDay && isEndDay) {
+      leftOffset = timeToPercentage(task.start_time);
+      rightOffset = 100 - timeToPercentage(task.end_time);
+      borderRadius = "rounded-full";
+    } else if (isStartDay) {
+      leftOffset = timeToPercentage(task.start_time);
+      rightOffset = 0;
+      borderRadius = "rounded-l-full";
+    } else if (isEndDay) {
+      leftOffset = 0;
+      rightOffset = 100 - timeToPercentage(task.end_time);
+      borderRadius = "rounded-r-full";
+    } else {
+      leftOffset = 0;
+      rightOffset = 0;
+    }
+
+    // No time display text here
+    // Tooltip only shows task title now
     return (
       <div
         key={task.id}
-        className="text-xs text-white px-2 py-1 rounded-full truncate mb-1"
-        style={{ backgroundColor: task.color || "#3B82F6" }}
+        className="relative w-full"
+        style={{
+          marginTop: taskIndex > 0 ? "4px" : "0",
+        }}
       >
-        {task.title}
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onTaskClick(task);
+          }}
+          className={`text-xs text-white py-2 cursor-pointer hover:opacity-90 transition-opacity ${borderRadius} min-h-[28px] flex items-center -mx-px absolute`}
+          style={{
+            backgroundColor: task.color || "#3B82F6",
+            left: `${leftOffset}%`,
+            right: `${rightOffset}%`,
+            paddingLeft: isStartDay ? "12px" : "4px",
+            paddingRight: isEndDay ? "12px" : "4px",
+          }}
+          title={task.title}
+        >
+          {isStartDay ? (
+            <span className="truncate font-medium">{task.title}</span>
+          ) : (
+            <span>&nbsp;</span>
+          )}
+        </div>
       </div>
     );
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-md p-6">
+    <div className="">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between p-6 border-gray-200">
+        <div className="flex items-center gap-4 mx-auto w-[200px] justify-center">
+          <button
+            onClick={handlePrevMonth}
+            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <ChevronLeft size={20} className="text-gray-700" />
+          </button>
+
+          <h2 className="text-lg font-semibold text-gray-800 text-center">
+            {format(currentDate, "MMMM")}
+          </h2>
+
+          <button
+            onClick={handleNextMonth}
+            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <ChevronRight size={20} className="text-gray-700" />
+          </button>
+        </div>
+
+        {/* Add Task button aligned right */}
         <button
-          onClick={handlePrevMonth}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          onClick={onAddTaskClick}
+          className="flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white text-sm font-medium rounded-full hover:bg-teal-700 transition-colors shadow-sm"
         >
-          <ChevronLeft size={20} />
-        </button>
-        <h2 className="text-xl font-semibold">
-          {format(currentDate, "MMMM yyyy")}
-        </h2>
-        <button
-          onClick={handleNextMonth}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <ChevronRight size={20} />
+          <Plus size={18} />
+          Add Task
         </button>
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-2">
-        {/* Week Day Headers */}
-        {weekDays.map((day) => (
-          <div
-            key={day}
-            className="text-center text-sm font-medium text-gray-600 py-2"
-          >
-            {day}
-          </div>
-        ))}
-
-        {/* Calendar Days */}
-        {days.map((day, index) => {
-          const dayTasks = getTasksForDay(day);
-          const isCurrentMonth = isSameMonth(day, currentDate);
-          const isToday = isSameDay(day, new Date());
-
-          return (
+      <div className="p-4">
+        <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-3xl overflow-hidden border border-gray-200">
+          {/* Week Day Headers */}
+          {weekDays.map((day) => (
             <div
-              key={index}
-              className={`min-h-[100px] border border-gray-200 rounded-lg p-2 ${
-                !isCurrentMonth ? "bg-gray-50 text-gray-400" : "bg-white"
-              } ${isToday ? "ring-2 ring-blue-500" : ""}`}
+              key={day}
+              className="bg-gray-200 text-center text-md font-semibold text-gray-600 py-8"
             >
-              <div className="text-sm font-medium mb-1">{format(day, "d")}</div>
-              <div className="space-y-1">
-                {dayTasks.map((task) => renderTaskBar(task, day))}
-              </div>
+              {day}
             </div>
-          );
-        })}
+          ))}
+
+          {/* Calendar Days */}
+          {days.map((day, index) => {
+            const dayTasks = getTasksForDay(day);
+            const isCurrentMonth = isSameMonth(day, currentDate);
+            const isToday = isSameDay(day, new Date());
+
+            return (
+              <div
+                key={index}
+                className={`min-h-[100px] pt-2 pb-2 ${
+                  !isCurrentMonth ? "bg-gray-50" : "bg-white"
+                } relative`}
+              >
+                <div
+                  className={`w-full flex items-center justify-center text-gray-300 font-semibold text-md mb-1`}
+                >
+                  {isToday ? (
+                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full text-xs flex items-center justify-center mx-auto font-semibold text-md">
+                      {format(day, "d")}
+                    </div>
+                  ) : (
+                    format(day, "d")
+                  )}
+                </div>
+                <div className="relative" style={{ minHeight: "60px" }}>
+                  {dayTasks.map((task) => renderTaskBar(task, day, dayTasks))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

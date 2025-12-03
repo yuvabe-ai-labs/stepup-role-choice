@@ -1,12 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "react-big-calendar/lib/css/react-big-calendar.css";
-
-body {
-  background: #f5f6f9;
-  font-family: sans-serif;
-}
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.

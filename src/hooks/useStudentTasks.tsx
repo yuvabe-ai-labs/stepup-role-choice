@@ -2,8 +2,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getStudentTasks,
   createStudentTask,
-  //   updateStudentTask,
   deleteStudentTask,
+  updateStudentTask,
 } from "@/services/studentTasks.service";
 import type {
   CreateTaskInput,
@@ -41,23 +41,6 @@ export const useCreateStudentTask = () => {
   });
 };
 
-// export const useUpdateStudentTask = () => {
-//   const queryClient = useQueryClient();
-
-//   return useMutation({
-//     mutationFn: ({
-//       taskId,
-//       updates,
-//     }: {
-//       taskId: string;
-//       updates: UpdateTaskInput;
-//     }) => updateStudentTask(taskId, updates),
-//     onSuccess: () => {
-//       queryClient.invalidateQueries({ queryKey: ["studentTasks"] });
-//     },
-//   });
-// };
-
 export const useDeleteStudentTask = () => {
   const queryClient = useQueryClient();
 
@@ -65,6 +48,25 @@ export const useDeleteStudentTask = () => {
     mutationFn: (taskId: string) => deleteStudentTask(taskId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["studentTasks"] });
+    },
+  });
+};
+
+export const useUpdateStudentTask = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      taskId,
+      updates,
+    }: {
+      taskId: string;
+      updates: UpdateTaskInput;
+    }) => updateStudentTask(taskId, updates),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["studentTasks"],
+      });
     },
   });
 };

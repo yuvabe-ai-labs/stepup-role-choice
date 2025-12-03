@@ -32,19 +32,36 @@ export const getStudentTasks = async (
 };
 
 export const createStudentTask = async (
-  studentId: string,
+  userId: string,
   taskData: CreateTaskInput
 ): Promise<{ success: boolean; data?: StudentTask; error?: any }> => {
   try {
+    // 1️⃣ Fetch profile.id based on auth.user.id
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("user_id", userId)
+      .single();
+
+    if (profileError || !profile) {
+      console.error("Profile not found for user:", userId, profileError);
+      return { success: false, error: profileError || "Profile not found" };
+    }
+
+    const profileId = profile.id;
+
+    // 2️⃣ Insert student task using profiles.id
     const { data, error } = await supabase
       .from("student_tasks")
       .insert({
-        student_id: studentId,
+        student_id: profileId,
         application_id: taskData.application_id,
         title: taskData.title,
         description: taskData.description,
         start_date: taskData.start_date,
+        start_time: taskData.start_time, // ✅ NOW SAVING TIME
         end_date: taskData.end_date,
+        end_time: taskData.end_time, // ✅ NOW SAVING TIME
         color: taskData.color || "#3B82F6",
         submission_link: taskData.submission_link,
         status: "pending",
@@ -64,32 +81,32 @@ export const createStudentTask = async (
   }
 };
 
-// export const updateStudentTask = async (
-//   taskId: string,
-//   updates: UpdateTaskInput
-// ): Promise<{ success: boolean; data?: StudentTask; error?: any }> => {
-//   try {
-//     const { data, error } = await supabase
-//       .from("student_tasks")
-//       .update({
-//         ...updates,
-//         updated_at: new Date().toISOString(),
-//       })
-//       .eq("id", taskId)
-//       .select()
-//       .single();
+export const updateStudentTask = async (
+  taskId: string,
+  updates: UpdateTaskInput
+): Promise<{ success: boolean; data?: StudentTask; error?: any }> => {
+  try {
+    const { data, error } = await supabase
+      .from("student_tasks")
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", taskId)
+      .select()
+      .single();
 
-//     if (error) {
-//       console.error("Error updating student task:", error);
-//       return { success: false, error };
-//     }
+    if (error) {
+      console.error("Error updating student task:", error);
+      return { success: false, error };
+    }
 
-//     return { success: true, data: data as StudentTask };
-//   } catch (err: any) {
-//     console.error("Unhandled error updating student task:", err);
-//     return { success: false, error: err.message || err };
-//   }
-// };
+    return { success: true, data: data as StudentTask };
+  } catch (err: any) {
+    console.error("Unhandled error updating student task:", err);
+    return { success: false, error: err.message || err };
+  }
+};
 
 export const deleteStudentTask = async (
   taskId: string

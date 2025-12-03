@@ -1,22 +1,22 @@
-export type TaskStatus = "pending" | "in_progress" | "completed" | "reviewed";
+export type TaskStatus = "pending" | "accepted" | "redo" | "submitted";
 
 export interface StudentTask {
   id: string;
   application_id: string;
   student_id: string;
   title: string;
-  description: string | null;
-  start_date: string | null;
-  start_time: string | null;
-  end_date: string | null;
-  end_time: string | null;
+  description: string;
+  start_date: string;
+  start_time: string;
+  end_date: string;
+  end_time: string;
   color: string;
-  submission_link: string | null;
+  submission_link: string;
   status: TaskStatus;
-  submitted_at: string | null;
-  reviewed_by: string | null;
-  review_remarks: string | null;
-  reviewed_at: string | null;
+  submitted_at: string;
+  reviewed_by: string;
+  review_remarks: string;
+  reviewed_at: string;
   created_at: string;
   updated_at: string;
 }
@@ -37,9 +37,7 @@ export interface UpdateTaskInput {
   title?: string;
   description?: string;
   start_date?: string;
-  start_time?: string;
   end_date?: string;
-  end_time?: string;
   color?: string;
   submission_link?: string;
   status?: TaskStatus;
