@@ -487,6 +487,469 @@ const UnitDashboard = () => {
               </TabsTrigger>
             </TabsList>
           </div>
+          {/* Applications Tab */}
+          <TabsContent
+            value="applications"
+            className="px-0 sm:px-4 lg:px-10 py-2"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h2 className="flex items-center gap-2 text-xl sm:text-2xl font-semibold">
+                All Applications
+              </h2>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-[200px] justify-between items-center rounded-full"
+                  >
+                    {/* Left side text */}
+                    <span className="truncate">{getFilterDisplayText()}</span>
+
+                    {/* Right side icons */}
+                    <div className="flex items-center gap-1">
+                      {filterStatuses.length > 0 && (
+                        <Badge
+                          variant="secondary"
+                          className="rounded-full px-2 py-0.5"
+                        >
+                          {filterStatuses.length}
+                        </Badge>
+                      )}
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  align="end"
+                  className="w-[220px] rounded-2xl p-2 shadow-md"
+                >
+                  {[
+                    { value: "applied", label: "Applied" },
+                    { value: "shortlisted", label: "Shortlisted" },
+                    { value: "interviewed", label: "Interviewed" },
+                    { value: "rejected", label: "Rejected" },
+                    { value: "hired", label: "Hired" },
+                  ].map((status) => (
+                    <DropdownMenuItem
+                      key={status.value}
+                      onSelect={(e) => e.preventDefault()}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors"
+                      onClick={() => toggleStatusFilter(status.value)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={filterStatuses.includes(status.value)}
+                        readOnly
+                        className="h-4 w-4 rounded border-gray-300 accent-blue-600"
+                      />
+                      <span>{status.label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="border border-border/50">
+                    <CardContent className="p-4 sm:p-6">
+                      <Skeleton className="w-16 h-16 sm:w-20 sm:h-20 rounded-full mx-auto mb-4" />
+                      <Skeleton className="h-5 w-32 mx-auto mb-2" />
+                      <Skeleton className="h-4 w-24 mx-auto mb-3" />
+                      <Skeleton className="h-3 w-full mb-4" />
+                      <Skeleton className="h-8 w-full" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : filteredApplications.length === 0 ? (
+              <div className="text-center py-12">
+                <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <h3 className="text-lg font-medium mb-2">
+                  {filterStatuses.length === 0
+                    ? "No Applications Yet"
+                    : "No Applications Found"}
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  {filterStatuses.length === 0
+                    ? "Applications for your internships will appear here."
+                    : "No applications found with the selected filters."}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {filteredApplications.slice(0, 9).map((application) => {
+                    const skills = safeParse(
+                      application.studentProfile?.skills,
+                      []
+                    );
+                    const displaySkills = skills
+                      .slice(0, 3)
+                      .map((s: any) =>
+                        typeof s === "string" ? s : s.name || s
+                      );
+
+                    return (
+                      <Card
+                        key={application.id}
+                        className="border border-border/50 hover:shadow-lg transition-shadow rounded-3xl"
+                      >
+                        <CardContent className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-5">
+                          <div className="flex items-center gap-3 sm:gap-5">
+                            <div className="relative flex-shrink-0">
+                              <Avatar className="w-16 h-16 sm:w-20 sm:h-20 ring-4 ring-green-500">
+                                <AvatarImage
+                                  src={
+                                    application.studentProfile?.avatar_url ||
+                                    undefined
+                                  }
+                                  alt={application.profile.full_name}
+                                />
+                                <AvatarFallback className="text-base sm:text-lg font-semibold">
+                                  {application.profile.full_name
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
+                                </AvatarFallback>
+                              </Avatar>
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-base sm:text-lg mb-1 text-gray-900 truncate">
+                                {application.profile.full_name}
+                              </h3>
+                              <p className="text-xs sm:text-sm text-muted-foreground mb-2 truncate">
+                                {application.internship.title}
+                              </p>
+                              <Badge
+                                className={`${getStatusColor(
+                                  application.status
+                                )} text-xs sm:text-sm px-2 sm:px-3 py-1`}
+                              >
+                                {getStatusLabel(application.status)}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          <p className="text-sm sm:text-base text-gray-700 leading-relaxed line-clamp-3">
+                            {typeof application.studentProfile?.bio === "string"
+                              ? application.studentProfile.bio
+                              : Array.isArray(application.studentProfile?.bio)
+                              ? application.studentProfile.bio.join(" ")
+                              : "Passionate about creating user-centered digital experiences."}
+                          </p>
+
+                          <div className="flex gap-2 sm:gap-3 overflow-hidden">
+                            {skills.length > 3 ? (
+                              <>
+                                {skills
+                                  .slice(0, 3)
+                                  .map((skill: string, index: number) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-[10px] sm:text-[11px] text-gray-600 bg-muted/40 rounded-full px-2 sm:px-3 py-1 sm:py-1.5 whitespace-nowrap flex-shrink-0"
+                                    >
+                                      {skill}
+                                    </Badge>
+                                  ))}
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] sm:text-[11px] text-gray-600 bg-muted/40 rounded-full px-2 sm:px-3 py-1 sm:py-1.5 whitespace-nowrap flex-shrink-0"
+                                >
+                                  +{skills.length - 3}
+                                </Badge>
+                              </>
+                            ) : (
+                              skills.map((skill: string, index: number) => (
+                                <Badge
+                                  key={index}
+                                  variant="outline"
+                                  className="text-[10px] sm:text-[11px] text-gray-600 bg-muted/40 rounded-full px-2 sm:px-3 py-1 sm:py-1.5 whitespace-nowrap flex-shrink-0"
+                                >
+                                  {skill}
+                                </Badge>
+                              ))
+                            )}
+                          </div>
+                          <div className="border-t border-border/40"></div>
+
+                          <Button
+                            variant="outline"
+                            size="lg"
+                            className="w-full border-2 border-teal-500 text-teal-600 hover:bg-teal-50 text-sm py-3 rounded-full"
+                            onClick={() =>
+                              navigate(`/candidate/${application.id}`)
+                            }
+                          >
+                            View Profile
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+
+                {filteredApplications.length > 0 && (
+                  <div className="flex justify-center mt-6 sm:mt-8">
+                    <Button
+                      variant="outline"
+                      className="px-6 sm:px-8"
+                      onClick={() => navigate("/all-applications")}
+                    >
+                      View All
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </TabsContent>
+
+          {/* Job Descriptions Tab */}
+          <TabsContent
+            value="job-descriptions"
+            className="px-0 sm:px-4 lg:px-10 py-2"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h2 className="text-xl sm:text-2xl font-semibold">
+                Job Descriptions
+              </h2>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <Select value={jobFilter} onValueChange={setJobFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px] rounded-full text-gray-400">
+                    <SelectValue placeholder="Select Filter" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl">
+                    <SelectItem value="all">Select Filter</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  className="bg-teal-600 hover:bg-teal-700 rounded-full w-full sm:w-auto"
+                  onClick={() => setShowCreateDialog(true)}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create New JD
+                </Button>
+              </div>
+            </div>
+
+            {internshipsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i}>
+                    <CardContent className="p-4 sm:p-6">
+                      <Skeleton className="h-6 w-32 mb-4" />
+                      <Skeleton className="h-4 w-24 mb-2" />
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-10 w-full mt-4" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : internships.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <h3 className="text-lg font-medium mb-2">
+                  No Job Descriptions
+                </h3>
+                <p className="text-muted-foreground text-sm px-4">
+                  Create your first job posting to start receiving applications.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {internships
+                    .filter((internship) => {
+                      if (jobFilter === "all") return true;
+                      if (jobFilter === "active")
+                        return internship.status === "active";
+                      if (jobFilter === "closed")
+                        return internship.status !== "active";
+                      return true;
+                    })
+                    .slice(0, 6)
+                    .map((internship) => {
+                      const applicationCount = applications.filter(
+                        (app) => app.internship_id === internship.id
+                      ).length;
+
+                      return (
+                        <Card
+                          key={internship.id}
+                          className="relative rounded-3xl border border-black-50"
+                        >
+                          <CardContent className="p-4 sm:p-6">
+                            <div className="flex items-start justify-between mb-4 sm:mb-6 gap-2">
+                              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                                <h3 className="font-semibold text-base sm:text-lg leading-tight truncate">
+                                  {internship.title}
+                                </h3>
+                                <Badge
+                                  className={`${
+                                    internship.status === "active"
+                                      ? "bg-green-500 text-white hover:bg-green-500"
+                                      : "bg-red-500 text-white hover:bg-red-500"
+                                  } text-xs px-2 sm:px-3 py-1 whitespace-nowrap flex-shrink-0`}
+                                >
+                                  {internship.status === "active"
+                                    ? "Active"
+                                    : "Closed"}
+                                </Badge>
+                              </div>
+
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0 flex-shrink-0"
+                                  >
+                                    <EllipsisIcon className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="w-48"
+                                >
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      setSelectedInternship(internship)
+                                    }
+                                  >
+                                    <Eye className="w-4 h-4 mr-2" />
+                                    View Details
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleAddComments(internship.id)
+                                    }
+                                  >
+                                    <Pencil className="w-4 h-4 mr-2" />
+                                    Edit JD
+                                  </DropdownMenuItem>
+                                  {/* <DropdownMenuItem
+                                    onClick={() =>
+                                      handleToggleStatus(internship)
+                                    }
+                                  >
+                                    {internship.status === "active" ? (
+                                      <span className="flex items-center text-red-500">
+                                        <Ban className="w-4 h-4 mr-2" />
+                                        Close JD
+                                      </span>
+                                    ) : (
+                                      <span className="flex items-center text-green-500">
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        Activate JD
+                                      </span>
+                                    )}
+                                  </DropdownMenuItem> */}
+                                  {internship.status !== "active" && (
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleToggleStatus(internship)
+                                      }
+                                    >
+                                      <span className="flex items-center text-green-500">
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        Activate JD
+                                      </span>
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleDeleteClick(internship)
+                                    }
+                                    className="text-red-600 focus:text-red-600"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Delete JD
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+
+                            <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+                              <div className="flex justify-between text-xs sm:text-sm">
+                                <span className="text-muted-foreground">
+                                  Applications:
+                                </span>
+                                <span className="font-medium">
+                                  {applicationCount} Applied
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-xs sm:text-sm">
+                                <span className="text-muted-foreground">
+                                  Duration:
+                                </span>
+                                <span className="font-medium">
+                                  {internship.duration || "Not specified"}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-xs sm:text-sm">
+                                <span className="text-muted-foreground">
+                                  Created on:
+                                </span>
+                                <span className="font-medium">
+                                  {new Date(
+                                    internship.created_at
+                                  ).toLocaleDateString("en-US", {
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                  })}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-xs sm:text-sm">
+                                <span className="text-muted-foreground">
+                                  Deadline:
+                                </span>
+                                <span className="font-medium">
+                                  {new Date(
+                                    internship.application_deadline
+                                  ).toLocaleDateString("en-US", {
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                  })}
+                                </span>
+                              </div>
+                            </div>
+
+                            <Button
+                              variant="outline"
+                              className="w-full rounded-full text-sm"
+                              onClick={() =>
+                                navigate(
+                                  `/internship-applicants/${internship.id}`
+                                )
+                              }
+                            >
+                              View Applicants
+                              <ArrowRight className="w-4 h-4 ml-2" />
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                </div>
+
+                {internships.length > 6 && (
+                  <div className="flex justify-center mt-6 sm:mt-8">
+                    <Button variant="link" className="text-primary font-medium">
+                      View More
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </TabsContent>
 
           {/* Candidates Management Tab */}
           <TabsContent
@@ -620,6 +1083,198 @@ const UnitDashboard = () => {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          {/* Reports Tab */}
+          <TabsContent value="reports" className="px-0 sm:px-4 lg:px-10 py-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h2 className="text-xl sm:text-2xl font-semibold">
+                Reports for this Month
+              </h2>
+            </div>
+
+            <Card className="rounded-2xl">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                  <h3 className="text-base sm:text-2xl font-semibold">
+                    Weekly Applications
+                  </h3>
+                  <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-2 rounded-full bg-cyan-300"></div>
+                      <span className="text-gray-600">Previous Week</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-2 rounded-full bg-teal-600"></div>
+                      <span className="text-gray-600">This Week</span>
+                    </div>
+                  </div>
+                </div>
+
+                {reportsLoading ? (
+                  <div className="h-[300px] sm:h-[400px] w-full">
+                    {/* Grid lines skeleton */}
+                    <div className="h-full w-full relative">
+                      {/* Horizontal grid lines */}
+                      {[...Array(5)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="absolute w-full border-t border-gray-200"
+                          style={{ top: `${(i + 1) * 20}%` }}
+                        />
+                      ))}
+
+                      {/* Bar chart skeleton */}
+                      <div className="absolute bottom-0 left-0 right-0 h-[85%] flex items-end justify-around px-8">
+                        {/* 7 days of the week */}
+                        {[20, 10, 5, 45, 8, 15, 12].map((height, i) => (
+                          <div
+                            key={i}
+                            className="flex flex-col items-center gap-2 flex-1"
+                          >
+                            {/* Bar */}
+                            <Skeleton
+                              className="w-8 sm:w-10 rounded-t-2xl"
+                              style={{ height: `${height}%` }}
+                            />
+                            {/* Day label */}
+                            <Skeleton className="h-3 w-8" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <ChartContainer
+                    config={{
+                      previousWeek: {
+                        label: "Previous Week",
+                        color: "hsl(187, 71%, 66%)",
+                      },
+                      thisWeek: {
+                        label: "This Week",
+                        color: "hsl(173, 58%, 39%)",
+                      },
+                    }}
+                    className="h-[300px] sm:h-[400px] w-full"
+                  >
+                    <ResponsiveContainer width="100%" height={400}>
+                      <BarChart
+                        data={weeklyData}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid
+                          vertical={false}
+                          strokeDasharray="0"
+                          stroke="#DDDDDF"
+                        />
+                        <XAxis
+                          dataKey="day"
+                          className="text-xs"
+                          tick={{ fill: "hsl(var(--muted-foreground))" }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+
+                        <YAxis
+                          className="text-xs"
+                          tick={{ fill: "hsl(var(--muted-foreground))" }}
+                          allowDecimals={false}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+
+                        <ChartTooltip
+                          content={<ChartTooltipContent />}
+                          cursor={false}
+                        />
+                        <Bar
+                          dataKey="previousWeek"
+                          fill="rgba(127, 229, 255, 0.8)"
+                          radius={[20, 20, 0, 0]}
+                          barSize={40}
+                          stackId="overlay"
+                          label={false}
+                        />
+
+                        {/* Foreground (This Week) */}
+                        <Bar
+                          dataKey="thisWeek"
+                          fill="rgba(0, 128, 128, 0.9)"
+                          radius={[20, 20, 0, 0]}
+                          barSize={30}
+                          stackId="overlay"
+                          label={false}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Quick Stats Overview */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
+              <Card>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm font-medium text-gray-600">
+                        Total Applications
+                      </p>
+                      {reportsLoading ? (
+                        <Skeleton className="h-6 sm:h-8 w-12 sm:w-16 my-1" />
+                      ) : (
+                        <p className="text-xl sm:text-2xl font-bold">
+                          {reportStats.totalApplications}
+                        </p>
+                      )}
+                    </div>
+                    <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm font-medium text-gray-600">
+                        Hired Candidates
+                      </p>
+                      {reportsLoading ? (
+                        <Skeleton className="h-6 sm:h-8 w-12 sm:w-16 my-1" />
+                      ) : (
+                        <p className="text-xl sm:text-2xl font-bold">
+                          {reportStats.hiredCandidates}
+                        </p>
+                      )}
+                    </div>
+                    <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm font-medium text-gray-600">
+                        Active Internships
+                      </p>
+                      {reportsLoading ? (
+                        <Skeleton className="h-6 sm:h-8 w-12 sm:w-16 my-1" />
+                      ) : (
+                        <p className="text-xl sm:text-2xl font-bold">
+                          {reportStats.activeInternships}
+                        </p>
+                      )}
+                    </div>
+                    <Briefcase className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
