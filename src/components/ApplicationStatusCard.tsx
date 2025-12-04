@@ -1,16 +1,16 @@
-import { Check } from "lucide-react";
+import { Check, CircleX } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-
-const STATUS_FLOW = ["applied", "shortlisted", "interviewed", "hired"];
 
 export default function ApplicationStatusCard({ application }) {
   const date = application.applied_date;
   const formatted = formatDistanceToNow(new Date(date), { addSuffix: true });
 
-  const MAIN_FLOW = STATUS_FLOW.slice(0, 4);
+  const MAIN_FLOW = ["applied", "shortlisted", "interviewed", "hired"];
   const currentStepIndex = MAIN_FLOW.indexOf(application.status);
 
   const isRejected = application.status === "rejected";
+  const isSelected = application.status === "selected";
+
   const statusColor = isRejected ? "bg-red-500" : "bg-blue-500";
   const statusTextColor = isRejected ? "text-red-500" : "text-blue-500";
   const statusAccent = isRejected
@@ -57,13 +57,23 @@ export default function ApplicationStatusCard({ application }) {
           let circleBg = "bg-white border boder-gray-400 text-gray-400";
           let labelClass = "text-gray-400";
 
-          if (isRejected && index === currentStepIndex) {
+          // Rejected behaviour for final step only
+          if (isRejected && index === MAIN_FLOW.length - 1) {
             circleBg = "bg-red-500 text-white";
             labelClass = "text-red-700 font-semibold";
-          } else if (isCompleted) {
+          }
+          // Selected should behave like hired (blue)
+          else if (isSelected && index === MAIN_FLOW.length - 1) {
             circleBg = "bg-blue-500 text-white";
             labelClass = "text-gray-700 font-semibold";
           }
+          // Normal flow (no change)
+          else if (isCompleted && !isRejected) {
+            circleBg = "bg-blue-500 text-white";
+            labelClass = "text-gray-700 font-semibold";
+          }
+
+          const isLastStep = index === MAIN_FLOW.length - 1;
 
           return (
             <div
@@ -76,7 +86,9 @@ export default function ApplicationStatusCard({ application }) {
                   // This class moves the line segment back by half its width,
                   // placing its start point at the previous circle's center.
                   className={`absolute top-[9px] left-[-50%] w-full h-[3px] z-0 
-                  ${isLineCompleted ? statusColor : "bg-gray-300"}`}
+                  ${
+                    isLineCompleted && !isRejected ? statusColor : "bg-gray-300"
+                  }`}
                 ></div>
               )}
 
@@ -85,29 +97,24 @@ export default function ApplicationStatusCard({ application }) {
                 className={`w-5 h-5 rounded-full flex items-center justify-center z-10 
                   ${circleBg}`}
               >
-                {/* Show a check mark for completed or current steps */}
-                {isCompleted && <Check size={18} />}
+                {/* ICON LOGIC UPDATED */}
+                {isRejected && isLastStep ? (
+                  <CircleX size={18} />
+                ) : isCompleted ? (
+                  <Check size={18} />
+                ) : null}
               </div>
 
               {/* Label */}
               <p
                 className={`text-sm mt-2 text-center capitalize ${labelClass}`}
               >
-                {step}
+                {isRejected && isLastStep ? "rejected" : step}
               </p>
             </div>
           );
         })}
       </div>
-
-      {/* Display Rejected status outside the main flow if applicable (omitted for brevity) */}
-      {isRejected && (
-        <div className="mt-4 text-center">
-          <p className={`text-base ${statusAccent}`}>
-            Application Status: **{application.status.toUpperCase()}**
-          </p>
-        </div>
-      )}
     </div>
   );
 }
