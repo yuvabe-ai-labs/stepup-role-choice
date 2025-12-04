@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { X, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateStudentTask } from "@/hooks/useStudentTasks";
 import type { StudentTask } from "@/types/studentTasks.types";
+import { viewTaskSchema, type ViewTaskFormData } from "@/lib/taskSchemas";
 import { toast } from "sonner";
 
 interface ViewTaskModalProps {
@@ -24,25 +27,43 @@ export default function ViewTaskModal({
   onClose,
   task,
 }: ViewTaskModalProps) {
-  const [remarks, setRemarks] = useState(task.review_remarks || "");
-  const [isUpdating, setIsUpdating] = useState(false);
-
   const updateTaskMutation = useUpdateStudentTask();
 
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<ViewTaskFormData>({
+    resolver: zodResolver(viewTaskSchema),
+    defaultValues: {
+      remarks: task.review_remarks || "",
+    },
+  });
+
+  const remarks = watch("remarks");
+
+  // Reset form when task changes
+  useEffect(() => {
+    reset({
+      remarks: task.review_remarks || "",
+    });
+  }, [task, reset]);
+
   // Send (Redo) - Update remarks and set status to redo
-  const handleSend = async () => {
-    if (!remarks.trim()) {
+  const handleSend = async (data: ViewTaskFormData) => {
+    if (!data.remarks?.trim()) {
       toast.error("Please add remarks before sending");
       return;
     }
 
-    setIsUpdating(true);
     try {
       const result = await updateTaskMutation.mutateAsync({
         taskId: task.id,
         updates: {
           status: "redo",
-          review_remarks: remarks.trim(),
+          review_remarks: data.remarks.trim(),
         },
       });
 
@@ -55,22 +76,19 @@ export default function ViewTaskModal({
     } catch (error) {
       console.error("Error updating task:", error);
       toast.error("An error occurred while updating the task");
-    } finally {
-      setIsUpdating(false);
     }
   };
 
   // Close Task (Accept) - Set status to accepted
-  const handleCloseTask = async () => {
-    setIsUpdating(true);
+  const handleCloseTask = async (data: ViewTaskFormData) => {
     try {
       const updateData: any = {
         status: "accepted",
       };
 
       // If there are remarks, save them too
-      if (remarks.trim() && remarks !== task.review_remarks) {
-        updateData.review_remarks = remarks.trim();
+      if (data.remarks?.trim() && data.remarks !== task.review_remarks) {
+        updateData.review_remarks = data.remarks.trim();
       }
 
       const result = await updateTaskMutation.mutateAsync({
@@ -87,8 +105,6 @@ export default function ViewTaskModal({
     } catch (error) {
       console.error("Error accepting task:", error);
       toast.error("An error occurred while accepting the task");
-    } finally {
-      setIsUpdating(false);
     }
   };
 
@@ -156,10 +172,14 @@ export default function ViewTaskModal({
 
             {task.submission_link ? (
               <a
-                href={task.submission_link}
+                href={
+                  task.submission_link.startsWith("http")
+                    ? task.submission_link
+                    : `https://${task.submission_link}`
+                }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block px-3 py-2 text-sm text-blue-600 hover:text-blue-700 border border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors truncate"
+                className="block px-3 py-2 text-sm text-blue-600 underline hover:text-blue-700 border border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors break-all"
               >
                 {task.submission_link}
               </a>
@@ -174,8 +194,7 @@ export default function ViewTaskModal({
           <div className="space-y-1.5">
             <label className="text-sm text-gray-600 font-medium">Remarks</label>
             <Textarea
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
+              {...register("remarks")}
               placeholder="Describe the task"
               rows={4}
               className="resize-none text-sm"
@@ -186,20 +205,20 @@ export default function ViewTaskModal({
           <div className="flex justify-end gap-3 pt-2">
             <Button
               type="button"
-              onClick={handleSend}
-              disabled={isUpdating || !remarks.trim()}
+              onClick={handleSubmit(handleSend)}
+              disabled={isSubmitting || !remarks?.trim()}
               className="bg-indigo-600 hover:bg-indigo-700 rounded-full px-6"
             >
-              {isUpdating ? "Sending..." : "Send"}
+              {isSubmitting ? "Sending..." : "Send"}
             </Button>
             <Button
               type="button"
               variant="outline"
-              onClick={handleCloseTask}
-              disabled={isUpdating}
+              onClick={handleSubmit(handleCloseTask)}
+              disabled={isSubmitting}
               className="rounded-full px-6"
             >
-              {isUpdating ? "Processing..." : "Close Task"}
+              {isSubmitting ? "Processing..." : "Close Task"}
             </Button>
           </div>
         </div>

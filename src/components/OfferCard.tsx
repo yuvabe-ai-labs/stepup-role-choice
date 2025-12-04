@@ -5,11 +5,14 @@ import {
   XCircle,
   AlertCircle,
   ListTodo,
+  ArrowRight,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import type { Offer } from "@/types/myOffers.types";
 import { useUpdateOfferDecision } from "@/hooks/useMyOffers";
+import { useStudentTasks } from "@/hooks/useStudentTasks";
+import { calculateOverallTaskProgress } from "@/utils/taskProgress";
 import { useState } from "react";
 
 interface OfferCardProps {
@@ -20,6 +23,10 @@ export default function OfferCard({ offer }: OfferCardProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const updateDecision = useUpdateOfferDecision();
   const navigate = useNavigate();
+
+  const { data: tasksData } = useStudentTasks(offer.application_id);
+  const tasks = tasksData?.data || [];
+  const taskProgress = calculateOverallTaskProgress(tasks);
 
   const formattedAppliedDate = offer.applied_date
     ? format(new Date(offer.applied_date), "MMM dd, yyyy")
@@ -46,6 +53,24 @@ export default function OfferCard({ offer }: OfferCardProps) {
     navigate(`/my-tasks/${offer.application_id}`);
   };
 
+  // Get internship start and end dates
+  const getInternshipDates = () => {
+    if (tasks.length === 0) return { startDate: null, endDate: null };
+
+    const dates = tasks
+      .filter((task) => task.start_date && task.end_date)
+      .flatMap((task) => [new Date(task.start_date), new Date(task.end_date)]);
+
+    if (dates.length === 0) return { startDate: null, endDate: null };
+
+    const startDate = new Date(Math.min(...dates.map((d) => d.getTime())));
+    const endDate = new Date(Math.max(...dates.map((d) => d.getTime())));
+
+    return { startDate, endDate };
+  };
+
+  const { startDate, endDate } = getInternshipDates();
+
   return (
     <div className="w-full bg-white border border-gray-300 shadow rounded-3xl px-7 py-6 mb-4 hover:shadow-md transition-shadow">
       {/* Header */}
@@ -68,28 +93,63 @@ export default function OfferCard({ offer }: OfferCardProps) {
         {isAccepted && (
           <button
             onClick={handleViewTasks}
-            className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-full hover:bg-teal-700 transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 border-[1.5px] border-orange-500 text-orange-600 text-sm font-medium rounded-full hover:bg-orange-50 transition-colors"
           >
-            <ListTodo size={18} />
             View Tasks
+            <ArrowRight size={16} />
           </button>
         )}
       </div>
 
-      {/* Details */}
-      <div className="space-y-3 mb-5">
-        <div className="flex items-center gap-2 text-gray-700">
-          <Clock size={18} className="text-gray-500" />
-          <span className="text-sm">
-            <span className="font-medium">Duration:</span>{" "}
-            {offer.internship.duration}
-          </span>
-        </div>
+      {/* Progress Bar - Only for Accepted Offers */}
+      {isAccepted && (
+        <div className="mb-5">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-base font-semibold text-gray-800">
+              Projects Progress
+            </h3>
+            <span className="text-base font-semibold text-gray-800">
+              {taskProgress}%
+            </span>
+          </div>
 
-        <div className="text-sm text-gray-600 leading-relaxed mt-3">
-          <p className="line-clamp-2">{offer.internship.description}</p>
+          {/* Progress Bar */}
+          <div className="w-full h-6 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${taskProgress}%` }}
+            />
+          </div>
+
+          {/* Dates */}
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-sm text-gray-500">
+              Started:{" "}
+              {startDate ? format(startDate, "dd/MM/yyyy") : "Not started"}
+            </span>
+            <span className="text-sm text-gray-500">
+              Ends: {endDate ? format(endDate, "dd/MM/yyyy") : "No end date"}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Details */}
+      {!isAccepted && (
+        <div className="space-y-3 mb-5">
+          <div className="flex items-center gap-2 text-gray-700">
+            <Clock size={18} className="text-gray-500" />
+            <span className="text-sm">
+              <span className="font-medium">Duration:</span>{" "}
+              {offer.internship.duration}
+            </span>
+          </div>
+
+          <div className="text-sm text-gray-600 leading-relaxed mt-3">
+            <p className="line-clamp-2">{offer.internship.description}</p>
+          </div>
+        </div>
+      )}
 
       {/* Action Buttons */}
       {isPending && (
@@ -113,12 +173,10 @@ export default function OfferCard({ offer }: OfferCardProps) {
       )}
 
       {/* Status Message */}
-      {!isPending && (
+      {!isPending && !isAccepted && (
         <div className="mt-4 text-center py-3 bg-gray-50 rounded-lg">
           <p className="text-sm text-gray-600">
-            {offer.offer_decision === "accepted"
-              ? "You have accepted this internship offer"
-              : "You have declined this internship offer"}
+            You have declined this internship offer
           </p>
         </div>
       )}

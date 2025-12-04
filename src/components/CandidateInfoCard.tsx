@@ -2,6 +2,8 @@ import { Mail, Phone } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCandidateProfile } from "@/hooks/useCandidateProfile";
+import { useStudentTasks } from "@/hooks/useStudentTasks";
+import { calculateOverallTaskProgress } from "@/utils/taskProgress";
 
 interface CandidateInfoCardProps {
   applicationId: string | undefined;
@@ -11,6 +13,10 @@ export default function CandidateInfoCard({
   applicationId,
 }: CandidateInfoCardProps) {
   const { data, loading, error } = useCandidateProfile(applicationId || "");
+  const { data: tasksData } = useStudentTasks(applicationId);
+
+  const tasks = tasksData?.data || [];
+  const taskProgress = calculateOverallTaskProgress(tasks);
 
   if (loading) {
     return (
@@ -47,6 +53,11 @@ export default function CandidateInfoCard({
       .toUpperCase()
       .slice(0, 2);
   };
+
+  // Calculate stroke dash for progress circle
+  const radius = 28;
+  const circumference = 2 * Math.PI * radius;
+  const progressOffset = circumference * (1 - taskProgress / 100);
 
   return (
     <Card className="w-full p-10 bg-white shadow-sm border border-gray-200 rounded-3xl">
@@ -88,31 +99,43 @@ export default function CandidateInfoCard({
           </div>
         </div>
 
-        {/* Optional: Progress Circle (like in your image) */}
-        <div className="relative w-16 h-16">
-          <svg className="transform -rotate-90 w-16 h-16">
-            <circle
-              cx="32"
-              cy="32"
-              r="28"
-              stroke="#e5e7eb"
-              strokeWidth="6"
-              fill="none"
-            />
-            <circle
-              cx="32"
-              cy="32"
-              r="28"
-              stroke="#10b981"
-              strokeWidth="6"
-              fill="none"
-              strokeDasharray={`${2 * Math.PI * 28}`}
-              strokeDashoffset={`${2 * Math.PI * 28 * (1 - 0.72)}`}
-              strokeLinecap="round"
-            />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-sm font-semibold text-gray-900">72%</span>
+        {/* Task Progress Circle */}
+        <div className="flex flex-col items-center gap-1">
+          <div className="relative w-28 h-28">
+            {" "}
+            <svg className="transform rotate-90 w-28 h-28">
+              <circle
+                cx="56"
+                cy="56"
+                r="48"
+                stroke="#E6E8EC"
+                strokeWidth="10"
+                fill="none"
+              />
+
+              <circle
+                cx="56"
+                cy="56"
+                r="48"
+                stroke="#00C271"
+                strokeWidth="10"
+                fill="none"
+                strokeDasharray={2 * Math.PI * 48}
+                strokeDashoffset={2 * Math.PI * 48 * (1 - taskProgress / 100)}
+                strokeLinecap="round"
+                className="transition-all duration-700 ease-out"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center leading-tight">
+              <span className="text-base font-semibold text-gray-500">
+                {" "}
+                {taskProgress}%
+              </span>
+              <span className="text-[9px] font-medium text-gray-500 mt-0.5">
+                {" "}
+                Projects Progress
+              </span>
+            </div>
           </div>
         </div>
       </div>

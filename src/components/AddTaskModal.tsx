@@ -1,6 +1,14 @@
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateStudentTask } from "@/hooks/useStudentTasks";
+import {
+  addTaskSchema,
+  type AddTaskFormData,
+  TASK_COLORS,
+} from "@/lib/taskSchemas";
+import { toast } from "sonner";
 
 interface AddTaskModalProps {
   isOpen: boolean;
@@ -9,92 +17,72 @@ interface AddTaskModalProps {
   studentId: string;
 }
 
-const COLORS = [
-  "#F97316", // Orange
-  "#10B981", // Green (Emerald)
-  "#0EA5E9", // Cyan/Teal
-  "#8B5CF6", // Purple
-  "#EC4899", // Pink
-  "#EF4444", // Red
-  "#F59E0B", // Amber/Yellow
-];
-
 export default function AddTaskModal({
   isOpen,
   onClose,
   applicationId,
   studentId,
 }: AddTaskModalProps) {
-  const [title, setTitle] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [selectedColor, setSelectedColor] = useState(COLORS[0]);
-  const [note, setNote] = useState("");
-  const [submissionLink, setSubmissionLink] = useState("");
-
   const createTask = useCreateStudentTask();
 
-  const handleSave = async () => {
-    if (!title.trim()) {
-      alert("Please enter a task name");
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<AddTaskFormData>({
+    resolver: zodResolver(addTaskSchema),
+    defaultValues: {
+      title: "",
+      startDate: "",
+      startTime: "",
+      endDate: "",
+      endTime: "",
+      color: TASK_COLORS[0],
+      note: "",
+      submissionLink: "",
+    },
+  });
 
-    if (!startDate || !endDate) {
-      alert("Please select start and due dates");
-      return;
-    }
+  const selectedColor = watch("color");
 
-    // Validate that end date is not before start date
-    if (new Date(endDate) < new Date(startDate)) {
-      alert("Due date cannot be before start date");
-      return;
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      reset();
     }
+  }, [isOpen, reset]);
 
+  const onSubmit = async (data: AddTaskFormData) => {
     try {
       await createTask.mutateAsync({
         studentId,
         taskData: {
           application_id: applicationId,
-          title: title.trim(),
-          description: note.trim() || undefined,
-          start_date: startDate,
-          start_time: startTime || undefined,
-          end_date: endDate,
-          end_time: endTime || undefined,
-          color: selectedColor,
-          submission_link: submissionLink.trim() || undefined,
+          title: data.title,
+          description: data.note || undefined,
+          start_date: data.startDate,
+          start_time: data.startTime || undefined,
+          end_date: data.endDate,
+          end_time: data.endTime || undefined,
+          color: data.color,
+          submission_link: data.submissionLink || undefined,
         },
       });
 
-      // Reset form
-      setTitle("");
-      setStartDate("");
-      setStartTime("");
-      setEndDate("");
-      setEndTime("");
-      setSelectedColor(COLORS[0]);
-      setNote("");
-      setSubmissionLink("");
+      toast.success("Task created successfully");
+      reset();
       onClose();
     } catch (error) {
       console.error("Error creating task:", error);
-      alert("Failed to create task. Please try again.");
+      toast.error("Failed to create task. Please try again.");
     }
   };
 
   const handleClose = () => {
-    // Reset form on close
-    setTitle("");
-    setStartDate("");
-    setStartTime("");
-    setEndDate("");
-    setEndTime("");
-    setSelectedColor(COLORS[0]);
-    setNote("");
-    setSubmissionLink("");
+    reset();
     onClose();
   };
 
@@ -116,142 +104,160 @@ export default function AddTaskModal({
             </button>
           </div>
 
-          {/* Task Name */}
-          <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Task Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter task name"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-            />
-          </div>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {/* Task Name */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Task Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                {...register("title")}
+                placeholder="Enter task name"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              />
+              {errors.title && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.title.message}
+                </p>
+              )}
+            </div>
 
-          {/* Start Date and Time */}
-          <div className="grid grid-cols-2 gap-4 mb-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Start date <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Time
-              </label>
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          {/* Due Date and Time */}
-          <div className="grid grid-cols-2 gap-4 mb-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Due date <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                min={startDate}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Time
-              </label>
-              <input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          {/* Color Picker */}
-          <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Color <span className="text-red-500">*</span>
-            </label>
-            <div className="flex gap-3 flex-wrap">
-              {COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setSelectedColor(color)}
-                  className={`w-10 h-10 rounded-full transition-all ${
-                    selectedColor === color
-                      ? "ring-2 ring-offset-2 ring-gray-400 scale-110"
-                      : "hover:scale-105"
-                  }`}
-                  style={{ backgroundColor: color }}
-                  aria-label={`Select color ${color}`}
+            {/* Start Date and Time */}
+            <div className="grid grid-cols-2 gap-4 mb-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Start date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  {...register("startDate")}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 />
-              ))}
+                {errors.startDate && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.startDate.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Time
+                </label>
+                <input
+                  type="time"
+                  {...register("startTime")}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Note */}
-          <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Note
-            </label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Please describe the task"
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
-            />
-          </div>
+            {/* Due Date and Time */}
+            <div className="grid grid-cols-2 gap-4 mb-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Due date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  {...register("endDate")}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+                {errors.endDate && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.endDate.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Time
+                </label>
+                <input
+                  type="time"
+                  {...register("endTime")}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+              </div>
+            </div>
 
-          {/* Submission Link */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Submission link
-            </label>
-            <input
-              type="url"
-              value={submissionLink}
-              onChange={(e) => setSubmissionLink(e.target.value)}
-              placeholder="https://www.url.com/"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-            />
-          </div>
+            {/* Color Picker */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Color <span className="text-red-500">*</span>
+              </label>
+              <div className="flex gap-3 flex-wrap">
+                {TASK_COLORS.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => setValue("color", color)}
+                    className={`w-10 h-10 rounded-full transition-all ${
+                      selectedColor === color
+                        ? "ring-2 ring-offset-2 ring-gray-400 scale-110"
+                        : "hover:scale-105"
+                    }`}
+                    style={{ backgroundColor: color }}
+                    aria-label={`Select color ${color}`}
+                  />
+                ))}
+              </div>
+              {errors.color && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.color.message}
+                </p>
+              )}
+            </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="flex-1 py-3 border border-gray-300 text-gray-700 font-medium rounded-full hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={createTask.isPending}
-              className="flex-1 py-3 bg-teal-600 text-white font-medium rounded-full hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {createTask.isPending ? "Saving..." : "Save"}
-            </button>
-          </div>
+            {/* Note */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Note
+              </label>
+              <textarea
+                {...register("note")}
+                placeholder="Please describe the task"
+                rows={4}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+              />
+            </div>
+
+            {/* Submission Link */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Submission link
+              </label>
+              <input
+                type="url"
+                {...register("submissionLink")}
+                placeholder="https://www.url.com/"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              />
+              {errors.submissionLink && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.submissionLink.message}
+                </p>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="flex-1 py-3 border border-gray-300 text-gray-700 font-medium rounded-full hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 py-3 bg-teal-600 text-white font-medium rounded-full hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

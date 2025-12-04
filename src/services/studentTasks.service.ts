@@ -59,9 +59,9 @@ export const createStudentTask = async (
         title: taskData.title,
         description: taskData.description,
         start_date: taskData.start_date,
-        start_time: taskData.start_time, // ✅ NOW SAVING TIME
+        start_time: taskData.start_time,
         end_date: taskData.end_date,
-        end_time: taskData.end_time, // ✅ NOW SAVING TIME
+        end_time: taskData.end_time,
         color: taskData.color || "#3B82F6",
         submission_link: taskData.submission_link,
         status: "pending",
@@ -86,7 +86,6 @@ export const updateStudentTask = async (
   updates: UpdateTaskInput
 ): Promise<{ success: boolean; data?: StudentTask; error?: any }> => {
   try {
-    // If status is being updated to accepted or redo, set reviewed_at
     const updateData: any = {
       ...updates,
       updated_at: new Date().toISOString(),

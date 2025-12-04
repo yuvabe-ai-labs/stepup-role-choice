@@ -9,6 +9,7 @@ import TaskCalendar from "@/components/TaskCalendar";
 import AddTaskModal from "@/components/AddTaskModal";
 import UpdateTaskModal from "@/components/UpdateTaskModal";
 import type { StudentTask } from "@/types/studentTasks.types";
+import { Badge } from "@/components/ui/badge";
 
 export default function MyTasks() {
   const { applicationId } = useParams<{ applicationId: string }>();
@@ -34,16 +35,30 @@ export default function MyTasks() {
     setSelectedTask(null);
   };
 
-  const handleSendReply = () => {
-    if (!replyText.trim() || !selectedTask) return;
-    // TODO: Implement reply functionality
-    console.log(
-      "Sending reply for task:",
-      selectedTask.id,
-      "Message:",
-      replyText
-    );
-    setReplyText("");
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "accepted":
+        return "bg-green-500";
+      case "redo":
+        return "bg-orange-500";
+      case "submitted":
+        return "bg-blue-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "accepted":
+        return "Accepted";
+      case "redo":
+        return "Needs Redo";
+      case "submitted":
+        return "Submitted";
+      default:
+        return "Pending";
+    }
   };
 
   if (!applicationId) {
@@ -83,7 +98,6 @@ export default function MyTasks() {
           </div>
 
           {/* Remarks Sidebar */}
-          {/* <div className="w-full md:w-80 bg-white p-6 shadow-inner flex flex-col overflow-hidden"> */}
           <div className="w-full md:w-80 bg-white p-6 shadow-inner flex flex-col overflow-hidden border-l-4 border-gray-300">
             <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex-shrink-0">
               Remarks
@@ -109,9 +123,21 @@ export default function MyTasks() {
                         style={{ backgroundColor: task.color }}
                       />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 text-sm mb-1">
-                          {task.title}
-                        </h3>
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="font-semibold text-gray-900 text-sm mb-1">
+                            {task.title}
+                          </h3>
+
+                          <Badge
+                            variant="secondary"
+                            className={`${getStatusColor(
+                              task.status
+                            )} text-white text-[10px] px-2 py-0.5`}
+                          >
+                            {getStatusLabel(task.status)}
+                          </Badge>
+                        </div>
+
                         {task.end_date && (
                           <p className="text-xs text-gray-500 flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full border-2 border-orange-400"></span>
@@ -127,44 +153,16 @@ export default function MyTasks() {
                       </p>
                     )}
 
-                    {/* Reply Input */}
-                    <div className="relative mt-3 pl-7">
-                      <input
-                        type="text"
-                        placeholder="Reply"
-                        value={selectedTask?.id === task.id ? replyText : ""}
-                        onChange={(e) => {
-                          setSelectedTask(task);
-                          setReplyText(e.target.value);
-                        }}
-                        onKeyPress={(e) => {
-                          if (
-                            e.key === "Enter" &&
-                            selectedTask?.id === task.id
-                          ) {
-                            handleSendReply();
-                          }
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedTask(task);
-                        }}
-                        className="w-full px-4 py-2 pr-10 text-xs border border-gray-200 rounded-full focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-                      />
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedTask(task);
-                          handleSendReply();
-                        }}
-                        disabled={
-                          selectedTask?.id !== task.id || !replyText.trim()
-                        }
-                        className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-blue-400"
-                      >
-                        <Send size={12} className="text-white" />
-                      </button>
-                    </div>
+                    {task.review_remarks && (
+                      <div className="pl-7 mb-3">
+                        <p className="text-[11px] font-medium text-gray-700 mb-1">
+                          Remarks
+                        </p>
+                        <p className="text-xs text-gray-600 leading-relaxed">
+                          {task.review_remarks}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

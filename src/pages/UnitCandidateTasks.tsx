@@ -120,45 +120,51 @@ export default function UnitCandidateTasks() {
                     onClick={() => handleTaskClick(task)}
                     className="bg-white border border-gray-200 rounded-2xl p-4 cursor-pointer transition-all hover:shadow-md"
                   >
-                    {/* Keep your existing inner content */}
+                    {/* Header */}
                     <div className="flex items-start gap-3 mb-2">
                       <div
-                        className="w-4 h-4 rounded-full mt-1 flex-shrink-0"
+                        className="w-4 h-1 rounded-full mt-1.5 flex-shrink-0"
                         style={{ backgroundColor: task.color }}
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-semibold text-gray-900 text-sm">
+                          <h3 className="font-semibold text-gray-900 text-sm mb-1">
                             {task.title}
                           </h3>
+
                           <Badge
                             variant="secondary"
                             className={`${getStatusColor(
                               task.status
-                            )} text-white text-xs px-2 py-0.5`}
+                            )} text-white text-[10px] px-2 py-0.5`}
                           >
                             {getStatusLabel(task.status)}
                           </Badge>
                         </div>
+
                         {task.end_date && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            Due:{" "}
-                            {format(new Date(task.end_date), "MMM d, yyyy")}
-                            {task.end_time && ` at ${task.end_time}`}
+                          <p className="text-xs text-gray-500 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full border-2 border-orange-400"></span>
+                            Due on {format(new Date(task.end_date), "do MMMM")}
                           </p>
                         )}
                       </div>
                     </div>
 
+                    {/* Description */}
                     {task.description && (
-                      <p className="text-xs text-gray-600 line-clamp-2 pl-7">
+                      <p className="text-xs text-gray-600 mb-3 leading-relaxed pl-7">
                         {task.description}
                       </p>
                     )}
 
+                    {/* Submission Link indicator */}
                     {task.submission_link && (
-                      <div className="mt-2 pl-7">
-                        <Badge variant="outline" className="text-xs">
+                      <div className="pl-7">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] px-2 py-0.5"
+                        >
                           Submission Available
                         </Badge>
                       </div>
