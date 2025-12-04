@@ -19,6 +19,7 @@ interface TaskCalendarProps {
   viewMode: "month" | "week";
   onTaskClick: (task: StudentTask) => void;
   onAddTaskClick: () => void;
+  hideAddButton?: boolean;
 }
 
 export default function TaskCalendar({
@@ -28,6 +29,7 @@ export default function TaskCalendar({
   viewMode,
   onTaskClick,
   onAddTaskClick,
+  hideAddButton = false,
 }: TaskCalendarProps) {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -84,8 +86,6 @@ export default function TaskCalendar({
     }
   };
 
-  // Removed formatTime function since time won't be shown
-
   const renderTaskBar = (
     task: StudentTask,
     day: Date,
@@ -129,7 +129,6 @@ export default function TaskCalendar({
       rightOffset = 0;
     }
 
-    // No time display text here
     // Tooltip only shows task title now
     return (
       <div
@@ -189,13 +188,15 @@ export default function TaskCalendar({
         </div>
 
         {/* Add Task button aligned right */}
-        <button
-          onClick={onAddTaskClick}
-          className="flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white text-sm font-medium rounded-full hover:bg-teal-700 transition-colors shadow-sm"
-        >
-          <Plus size={18} />
-          Add Task
-        </button>
+        {!hideAddButton && (
+          <button
+            onClick={onAddTaskClick}
+            className="flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white text-sm font-medium rounded-full hover:bg-teal-700 transition-colors shadow-sm"
+          >
+            <Plus size={18} />
+            Add Task
+          </button>
+        )}
       </div>
 
       {/* Calendar Grid */}

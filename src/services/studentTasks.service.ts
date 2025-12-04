@@ -86,12 +86,19 @@ export const updateStudentTask = async (
   updates: UpdateTaskInput
 ): Promise<{ success: boolean; data?: StudentTask; error?: any }> => {
   try {
+    // If status is being updated to accepted or redo, set reviewed_at
+    const updateData: any = {
+      ...updates,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (updates.status === "accepted" || updates.status === "redo") {
+      updateData.reviewed_at = new Date().toISOString();
+    }
+
     const { data, error } = await supabase
       .from("student_tasks")
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq("id", taskId)
       .select()
       .single();

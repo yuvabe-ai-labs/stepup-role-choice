@@ -37,10 +37,15 @@ export interface UpdateTaskInput {
   title?: string;
   description?: string;
   start_date?: string;
+  start_time?: string;
   end_date?: string;
+  end_time?: string;
   color?: string;
   submission_link?: string;
   status?: TaskStatus;
+  review_remarks?: string;
+  reviewed_by?: string;
+  reviewed_at?: string;
 }
 
 export interface StudentTasksResponse {

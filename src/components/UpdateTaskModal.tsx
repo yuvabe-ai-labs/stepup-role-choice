@@ -1,6 +1,9 @@
-import { X } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useUpdateStudentTask } from "@/hooks/useStudentTasks";
+import {
+  useUpdateStudentTask,
+  useDeleteStudentTask,
+} from "@/hooks/useStudentTasks";
 import type { StudentTask } from "@/types/studentTasks.types";
 
 interface UpdateTaskModalProps {
@@ -29,8 +32,10 @@ export default function UpdateTaskModal({
   const [selectedColor, setSelectedColor] = useState(task.color || COLORS[0]);
   const [note, setNote] = useState("");
   const [submissionLink, setSubmissionLink] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const updateTask = useUpdateStudentTask();
+  const deleteTask = useDeleteStudentTask();
 
   // Pre-fill existing task values when modal opens
   useEffect(() => {
@@ -73,6 +78,16 @@ export default function UpdateTaskModal({
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      await deleteTask.mutateAsync(task.id);
+      onClose();
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      alert("Failed to delete task. Please try again.");
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -81,9 +96,18 @@ export default function UpdateTaskModal({
         <div className="p-6 sm:p-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800">
-              Work on {task.title}
-            </h2>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                title="Delete task"
+              >
+                <Trash2 size={20} />
+              </button>
+              <h2 className="text-2xl font-semibold text-gray-800">
+                {task.title}
+              </h2>
+            </div>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -91,6 +115,31 @@ export default function UpdateTaskModal({
               <X size={24} />
             </button>
           </div>
+
+          {/* Delete Confirmation */}
+          {showDeleteConfirm && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <p className="text-sm text-red-800 mb-3">
+                Are you sure you want to delete this task? This action cannot be
+                undone.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDelete}
+                  disabled={deleteTask.isPending}
+                  className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {deleteTask.isPending ? "Deleting..." : "Yes, Delete"}
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Start / Due Date */}
           <div className="grid grid-cols-2 gap-4 mb-5">

@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useStudentTasks } from "@/hooks/useStudentTasks";
 import TaskCalendar from "@/components/TaskCalendar";
 import AddTaskModal from "@/components/AddTaskModal";
+import UpdateTaskModal from "@/components/UpdateTaskModal";
 import type { StudentTask } from "@/types/studentTasks.types";
 
 export default function MyTasks() {
@@ -19,12 +20,18 @@ export default function MyTasks() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<StudentTask | null>(null);
   const [replyText, setReplyText] = useState("");
-
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const { data: tasksResponse, isLoading } = useStudentTasks(applicationId);
   const tasks = tasksResponse?.data || [];
 
   const handleTaskClick = (task: StudentTask) => {
     setSelectedTask(task);
+    setIsUpdateModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsUpdateModalOpen(false);
+    setSelectedTask(null);
   };
 
   const handleSendReply = () => {
@@ -56,7 +63,7 @@ export default function MyTasks() {
 
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] min-h-[calc(100vh-80px)] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] min-h-[calc(100vh-80px)] gap-20">
           {/* Calendar Section */}
           <div className="">
             {isLoading ? (
@@ -173,6 +180,14 @@ export default function MyTasks() {
           onClose={() => setIsAddModalOpen(false)}
           applicationId={applicationId}
           studentId={user.id}
+        />
+      )}
+
+      {selectedTask && (
+        <UpdateTaskModal
+          isOpen={isUpdateModalOpen}
+          onClose={handleCloseModal}
+          task={selectedTask}
         />
       )}
     </div>

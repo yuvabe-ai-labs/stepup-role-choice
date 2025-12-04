@@ -37,6 +37,7 @@ import CheckEmail from "./pages/CheckEmail";
 import ResetPassword from "./pages/ResetPassword";
 import CandidateTasks from "./pages/CandidateTasks";
 import MyTasks from "./pages/MyTasks";
+import UnitCandidateTasks from "./pages/UnitCandidateTasks";
 
 const queryClient = new QueryClient();
 
@@ -276,6 +277,15 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <MyTasks />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/unit/candidate-tasks/:applicationId"
+              element={
+                <ProtectedRoute>
+                  <UnitCandidateTasks />
                 </ProtectedRoute>
               }
             />
