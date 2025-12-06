@@ -7,7 +7,6 @@ import { useStudentTasks } from "@/hooks/useStudentTasks";
 import TaskCalendar from "@/components/TaskCalendar";
 import ViewTaskModal from "@/components/ViewTaskModal";
 import type { StudentTask } from "@/types/studentTasks.types";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import CandidateInfoCard from "@/components/CandidateInfoCard";
 
@@ -80,7 +79,17 @@ export default function UnitCandidateTasks() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] min-h-[calc(100vh-300px)] gap-20">
           {/* LEFT SIDE */}
           <div className="flex flex-col gap-6">
-            <div className="mt-4">
+            {/* Back Button - EXACT LIKE REFERENCE */}
+            <button
+              className="mt-6 mb-2 flex items-center gap-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg px-3 py-1.5 bg-white w-fit"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm">Back</span>
+            </button>
+
+            {/* Candidate Card */}
+            <div>
               <CandidateInfoCard applicationId={applicationId} />
             </div>
 
