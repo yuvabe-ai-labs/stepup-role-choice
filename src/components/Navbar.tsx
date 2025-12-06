@@ -233,13 +233,16 @@ const Navbar = () => {
                     <CircleUserRound className="mr-2 h-4 w-4" />
                     <span>My Profile</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => navigate("/candidate-tasks")}
-                    className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
-                  >
-                    <Disc className="mr-2 h-4 w-4" />
-                    <span>Applications</span>
-                  </DropdownMenuItem>
+                  {userRole === "student" && (
+                    <DropdownMenuItem
+                      onClick={() => navigate("/candidate-tasks")}
+                      className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
+                    >
+                      <Disc className="mr-2 h-4 w-4" />
+                      <span>Applications</span>
+                    </DropdownMenuItem>
+                  )}
+
                   <DropdownMenuItem
                     onClick={() => navigate("")}
                     className="cursor-pointer hover:!text-blue-500 hover:bg-transparent focus:bg-transparent transition-colors [&_svg]:hover:!text-blue-500"
