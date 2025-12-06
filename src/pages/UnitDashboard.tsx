@@ -53,6 +53,8 @@ import { useInternships } from "@/hooks/useInternships";
 import { useUnitApplications } from "@/hooks/useUnitApplications";
 import { useUnitReports } from "@/hooks/useUnitReports";
 import { useHiredApplicants } from "@/hooks/useHiredApplicants";
+import { useStudentTasks } from "@/hooks/useStudentTasks";
+import { calculateOverallTaskProgress } from "@/utils/taskProgress";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowRight,
@@ -71,6 +73,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 
 const safeParse = (data: any, fallback: any) => {
   if (!data) return fallback;
@@ -79,6 +82,66 @@ const safeParse = (data: any, fallback: any) => {
   } catch {
     return fallback;
   }
+};
+
+// Component to display task progress for each candidate
+const CandidateTaskProgress = ({
+  applicationId,
+}: {
+  applicationId: string;
+}) => {
+  const { data: tasksData } = useStudentTasks(applicationId);
+  const tasks = tasksData?.data || [];
+  const taskProgress = calculateOverallTaskProgress(tasks);
+
+  // Get internship start and end dates
+  const getInternshipDates = () => {
+    if (tasks.length === 0) return { startDate: null, endDate: null };
+
+    const dates = tasks
+      .filter((task) => task.start_date && task.end_date)
+      .flatMap((task) => [new Date(task.start_date), new Date(task.end_date)]);
+
+    if (dates.length === 0) return { startDate: null, endDate: null };
+
+    const startDate = new Date(Math.min(...dates.map((d) => d.getTime())));
+    const endDate = new Date(Math.max(...dates.map((d) => d.getTime())));
+
+    return { startDate, endDate };
+  };
+
+  const { startDate, endDate } = getInternshipDates();
+
+  return (
+    <div className="space-y-2">
+      <div className="flex justify-between items-center">
+        <span className="text-sm font-medium text-gray-700">
+          Project Progress
+        </span>
+        <span className="text-sm font-semibold text-gray-800">
+          {taskProgress}%
+        </span>
+      </div>
+
+      {/* Progress Bar (thicker h-4) */}
+      <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all duration-500 ease-out"
+          style={{ width: `${taskProgress}%` }}
+        />
+      </div>
+
+      {/* Dates */}
+      <div className="flex justify-between items-center text-xs text-gray-500">
+        <span>
+          Started: {startDate ? format(startDate, "dd/MM/yyyy") : "Not started"}
+        </span>
+        <span>
+          Ends: {endDate ? format(endDate, "dd/MM/yyyy") : "No end date"}
+        </span>
+      </div>
+    </div>
+  );
 };
 
 const UnitDashboard = () => {
@@ -958,7 +1021,8 @@ const UnitDashboard = () => {
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <h2 className="text-xl sm:text-2xl font-semibold">
-                Hired Candidates ({filteredHiredCandidates.length})
+                Hired Candidates
+                {/* ({filteredHiredCandidates.length}) */}
               </h2>
               <div className="relative w-full sm:w-auto">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -1064,6 +1128,11 @@ const UnitDashboard = () => {
                           </span>
                         </div>
                       </div>
+
+                      {/* Task Progress */}
+                      <CandidateTaskProgress
+                        applicationId={candidate.application_id}
+                      />
 
                       {/* Action */}
                       <div className="flex justify-end pt-2">
