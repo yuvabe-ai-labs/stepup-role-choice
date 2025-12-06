@@ -550,6 +550,7 @@ const UnitDashboard = () => {
               </TabsTrigger>
             </TabsList>
           </div>
+
           {/* Applications Tab */}
           <TabsContent
             value="applications"
